@@ -1,14 +1,7 @@
 package io.github.organism;
 
-import static java.lang.Math.sqrt;
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class GridWindow {
 
@@ -20,15 +13,15 @@ public class GridWindow {
     Float hex_spacing;
 
     Float center_x;
-    Float centr_y;
-
-
+    Float center_y;
 
     GridWindow(GameBoard gb, Integer dim) {
         game_board = gb;
         dimension = dim;
-        hex_side_len = 7.0F; // starting default
-        hex_spacing = 12F; // starting default
+        hex_side_len = 13.0F; // starting default
+        hex_spacing = 25F; // starting default
+        center_x = game_board.main.VIRTUAL_WIDTH / 2f;
+        center_y = game_board.main.VIRTUAL_HEIGHT / game_board.GRID_WINDOW_HEIGHT;
     }
 
     public void render(){
@@ -46,14 +39,9 @@ public class GridWindow {
     }
 
     private void draw_hex(Hexel h){
-
-        Color c  = new Color(h.resources.floatValue(), 1f, 1f - h.resources.floatValue(), .01f);
-        if (game_board.test_organism.assimilated_hexes.contains_hex(h)){
-            c = Color.RED;
-        }
-
+        Color c  = new Color(0f, 0.6f, 0f, 1f);
         game_board.shape_renderer.setColor(c);
-        game_board.shape_renderer.circle(h.x * hex_spacing + 200, h.y * hex_spacing + 200, hex_side_len);
+        game_board.shape_renderer.circle(h.x * hex_spacing + center_x, h.y * hex_spacing + center_y, (float) (hex_side_len * Math.pow(h.resources.floatValue(), 0.25f)));
     }
 
     public void dispose() {

@@ -1,4 +1,4 @@
 package io.github.organism;
 
-public class Beads {
+public class TopTextPanel {
 }

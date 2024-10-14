@@ -8,18 +8,15 @@ public class Organism {
 
     HexSet assimilated_hexes;
     HexSet adjacent_hexes;
-
     GameBoard game_board;
 
-    HashMap<Integer, HashMap<Integer, HashMap<Integer, Double>>> assimilation_by_hex;
+    String name = "player1";
 
     double energy_store;
     public final double ASSIMILATION_THRESHOLD = 0.37d;
-    public final double HALF_LIFE = 1d; // How many full cycles it takes to deplete half of the energy
-    public final double CYCLE_TIME = 10d; // The number of seconds per cycle
-    public final double ACTIONS_PER_CYCLE = 100d; // The number of discreet actions every cycle
 
-    public final double TIME_PER_ACTION = CYCLE_TIME / ACTIONS_PER_CYCLE;
+    // percent of total energy transferred per action (transfers faster when more full);
+    public final double ENERGY_PER_ACTION = .05d;
 
     public final double MIN_DELTA = 10e-5f;
 
@@ -30,21 +27,21 @@ public class Organism {
         adjacent_hexes = new HexSet();
     }
 
-    public void extract(int n) {
+    public void extract() {
         /*
         Collect Energy from all assimilated hexes
         */
 
         for (Hexel h : assimilated_hexes.dump_hex_list()) {
 
-            double delta = h.resources - (h.resources * Math.pow(0.5f, (n * TIME_PER_ACTION) / HALF_LIFE));
-            double assimilation = assimilation_by_hex.get(h.i).get(h.j).get(h.k);
-
+            double delta = h.resources * ENERGY_PER_ACTION;
+            double assimilation = h.assimilation_by_player.get(this.name);
             delta *= assimilation;
 
             if (delta <= MIN_DELTA){
                 delta = 0;
             }
+
             h.resources -= delta;
             energy_store += delta;
         }
@@ -67,11 +64,14 @@ public class Organism {
         - sort hexes by resources
         - top hex becomes assimilated, starting with assimilation = ASSIMILATION_THRESHOLD
          */
-
     }
 
     public void assimilate_hex(int i, int j, int k){
         Hexel target_hex = game_board.grid.hex_grid.get(i).get(j).get(k);
+        if (!target_hex.assimilation_by_player.containsKey(this.name)){
+            target_hex.assimilation_by_player.put(this.name, ASSIMILATION_THRESHOLD);
+        }
+
         assimilated_hexes.add_hex(target_hex);
         if (adjacent_hexes.contains_hex(target_hex)) {
             adjacent_hexes.remove_hex(target_hex);

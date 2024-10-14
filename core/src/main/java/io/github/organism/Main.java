@@ -2,9 +2,7 @@ package io.github.organism;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -13,9 +11,13 @@ public class Main extends ApplicationAdapter {
     GameBoard game_board;
     OrthographicCamera camera;
     FitViewport viewport;
+    GameInputProcessor input_processor;
+    GameTimers game_timers;
 
-    private final int VIRTUAL_WIDTH = 1080/2;  // Virtual resolution width (aspect ratio: 16:9)
-    private final int VIRTUAL_HEIGHT = 1920/2; // Virtual resolution height
+    double action_time = 0.2d;
+
+    public final int VIRTUAL_WIDTH = 1080/2;  // Virtual resolution width (aspect ratio: 16:9)
+    public final int VIRTUAL_HEIGHT = 1920/2; // Virtual resolution height
 
     @Override
     public void create() {
@@ -24,36 +26,47 @@ public class Main extends ApplicationAdapter {
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
 
         game_board = new GameBoard(this);  // Pass the viewport to GameBoard (to be adjusted there)
+        game_timers = new GameTimers();
 
-        // Set up the input processor with viewport transformation for input coordinates
-        Gdx.input.setInputProcessor(new InputAdapter() {
-            @Override
-            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                Vector2 touchPos = new Vector2(screenX, screenY);
-                viewport.unproject(touchPos);  // Convert screen coordinates to game world coordinates
-
-                // Handle input using the transformed coordinates
-                System.out.println(game_board.input_panel.check_buttons(touchPos.x, touchPos.y));
-                return true;
-            }
-        });
+        input_processor = new GameInputProcessor(game_board);
+        Gdx.input.setInputProcessor(input_processor);
     }
 
     @Override
     public void render() {
         // Clear the screen and render the game board
-        ScreenUtils.clear(0, 0, 0, 1);  // Clear with black color
+        ScreenUtils.clear(game_board.background_color);  // Clear with black color
         input();
         logic();
         draw();
     }
 
     private void input() {
-        // Add any additional input processing here if needed
+        // handle holding down a button vs simple clicking
+        if (input_processor.touched_button && !input_processor.holding_button){
+            input_processor.time_held += Gdx.graphics.getDeltaTime();
+        }
+        if (input_processor.touched_button && input_processor.time_held > input_processor.HOLD_DELAY){
+            input_processor.holding_button = true;
+        }
     }
 
     private void logic() {
-        // Add any game logic updates here
+        // Update the clock
+        game_timers.add_time_delta(Gdx.graphics.getDeltaTime());
+
+        if (game_timers.action_clock > action_time){
+            game_timers.action_clock -= action_time;
+            if (input_processor.holding_button) {
+                input_processor.action_ready = true;
+            }
+        }
+
+        // This will be true if the button is being held down or it was just fast clicked
+        if (input_processor.action_ready) {
+            game_board.apply_action(input_processor.button_val, input_processor.actions_staged);
+            input_processor.action_ready = false;
+        }
     }
 
     private void draw() {
