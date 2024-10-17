@@ -11,15 +11,22 @@ public class Hexel implements Comparable<Hexel>{
     Float x, y;
     Double resources;
 
-    HashMap<String, Double> assimilation_by_player = new HashMap<>();
+    HashMap<String, Double> assimilation_by_player = new HashMap<String, Double>();
+
+    Double unassimilated = 1d;
 
     public String toString() {
         return String.format(Locale.US, "%d %d %d\t%f\t%f", i, j, k, x, y);
     }
 
+    public void update_assimilation(String player_name, double delta){
+        assimilation_by_player.merge(player_name, delta, Double::sum);
+        unassimilated -= delta;
+    }
+
     @Override
     public int compareTo(Hexel h) {
-        return resources.compareTo(h.resources);
+        return unassimilated.compareTo(h.unassimilated);
     }
 }
 

@@ -7,18 +7,36 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.Disposable;
 
+import java.util.HashMap;
+
 public class GameBoard implements Disposable {
 
-    // element heights
+    // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.5f;
     final float ENERGY_BAR_HEIGHT = 4.25f;
     final float ACTION_HISTORY_HEIGHT = 3f;
     final float GAMEPLAY_BUTTONS_HEIGHT = 6.5f;
 
-    final float TOP_TEXT_HEIGHT = .5f;
+    final float PLAY_PAUSE_HEIGHT = .5f;
 
     Color background_color = Color.BLACK;
     Color foreground_color = Color.CYAN;
+
+    Color resource_color = new Color(0f, 0.6f, 0f, 1);
+
+    // Gameplay parameters
+
+    public final double ASSIMILATION_THRESHOLD = 0.37d;
+
+    // percent of total energy transferred per action (transfers faster when more full);
+    public final double ENERGY_PER_ACTION = .5d;
+
+    public final double MIN_DELTA = 10e-5f;
+
+    public final double HEX_MAX_ENERGY = 1;
+
+    // Gameplay
+    HashMap<String, Organism> players = new HashMap<>();
 
     Color [] colors = {Color.RED, Color.BLUE, Color.GREEN};
     GridWindow grid_window;
@@ -27,9 +45,6 @@ public class GameBoard implements Disposable {
     GameplayButtons input_panel;
     EnergyBar energy_bar;
     ActionHistoryBar action_history_bar;
-    FitViewport viewport;     // Now passed from Main
-    OrthographicCamera camera; // Camera reference (if needed for further use)
-
     ShapeRenderer shape_renderer;
 
     Main main;
@@ -48,9 +63,12 @@ public class GameBoard implements Disposable {
 
         // starting state
         player_organism = new Organism(this);
-        player_organism.assimilate_hex(0, -1, 1);
-        player_organism.assimilate_hex(1, -2, 1);
-        player_organism.assimilate_hex(1, -1, 0);
+        players.put("player1", player_organism);
+        player_organism.create_assimilated_hex(-2, 2, 0);
+        player_organism.create_assimilated_hex(-1, -1, 2);
+        player_organism.create_assimilated_hex(2, 0, -2);
+        player_organism.create_assimilated_hex(-1, 0, 1);
+        player_organism.expand();
     }
 
     public void render() {

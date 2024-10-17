@@ -26,22 +26,32 @@ public class GridWindow {
 
     public void render(){
 
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (int i : game_board.grid.hex_grid.keySet()){
-            for (int j : game_board.grid.hex_grid.get(i).keySet()){
-                for (int k : game_board.grid.hex_grid.get(i).get(j).keySet()){
+
+        for (int i : game_board.grid.hex_grid.keySet()) {
+            for (int j : game_board.grid.hex_grid.get(i).keySet()) {
+                for (int k : game_board.grid.hex_grid.get(i).get(j).keySet()) {
                     Hexel h = game_board.grid.hex_grid.get(i).get(j).get(k);
                     draw_hex(h);
                 }
             }
         }
-        game_board.shape_renderer.end();
     }
 
     private void draw_hex(Hexel h){
-        Color c  = new Color(0f, 0.6f, 0f, 1f);
-        game_board.shape_renderer.setColor(c);
+        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.shape_renderer.setColor(game_board.resource_color);
         game_board.shape_renderer.circle(h.x * hex_spacing + center_x, h.y * hex_spacing + center_y, (float) (hex_side_len * Math.pow(h.resources.floatValue(), 0.25f)));
+        game_board.shape_renderer.end();
+
+        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        for (String p : h.assimilation_by_player.keySet()){
+            float assimilation = h.assimilation_by_player.get(p).floatValue();
+            Color player_color = game_board.players.get(p).color;
+            game_board.shape_renderer.setColor(player_color);
+            game_board.shape_renderer.circle(h.x * hex_spacing + center_x, h.y * hex_spacing + center_y, (float) (hex_side_len * Math.pow(assimilation, 0.25f)));
+
+        }
+        game_board.shape_renderer.end();
     }
 
     public void dispose() {
