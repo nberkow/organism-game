@@ -1,10 +1,8 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.util.HashMap;
@@ -12,10 +10,11 @@ import java.util.HashMap;
 public class GameBoard implements Disposable {
 
     // Visualization Settings
-    final float GRID_WINDOW_HEIGHT = 1.5f;
-    final float ENERGY_BAR_HEIGHT = 4.25f;
-    final float ACTION_HISTORY_HEIGHT = 3f;
-    final float GAMEPLAY_BUTTONS_HEIGHT = 6.5f;
+    final float GRID_WINDOW_HEIGHT = 1.7f;
+    final float ACTION_HISTORY_HEIGHT = 5.5f;
+    final float ENERGY_BAR_HEIGHT = 8.25f;
+
+    final float GAMEPLAY_BUTTONS_HEIGHT = 14f;
 
     final float PLAY_PAUSE_HEIGHT = .5f;
 
@@ -26,7 +25,7 @@ public class GameBoard implements Disposable {
 
     // Gameplay parameters
 
-    public final double ASSIMILATION_THRESHOLD = 0.37d;
+    public final double ASSIMILATION_THRESHOLD = 0.63d;
 
     // percent of total energy transferred per action (transfers faster when more full);
     public final double ENERGY_PER_ACTION = .5d;
@@ -40,11 +39,11 @@ public class GameBoard implements Disposable {
 
     Color [] colors = {Color.RED, Color.BLUE, Color.GREEN};
     GridWindow grid_window;
-    UniversalHexGrid grid;
+    UniversalHexGrid universal_grid;
     Organism player_organism;
     GameplayButtons input_panel;
     EnergyBar energy_bar;
-    ActionHistoryBar action_history_bar;
+    ActionQueueBar action_history_bar;
     ShapeRenderer shape_renderer;
 
     Main main;
@@ -55,20 +54,16 @@ public class GameBoard implements Disposable {
         shape_renderer = new ShapeRenderer();
 
         // Initialize other game objects here
-        grid = new UniversalHexGrid(5);
+        universal_grid = new UniversalHexGrid(this, 5);
         grid_window = new GridWindow(this, 2);
         input_panel = new GameplayButtons(this);
-        action_history_bar = new ActionHistoryBar(this);
-        energy_bar = new EnergyBar(this);
+        action_history_bar = new ActionQueueBar(this, main.VIRTUAL_WIDTH / 2f);
+        energy_bar = new EnergyBar(this, main.VIRTUAL_WIDTH / 2f);
 
         // starting state
         player_organism = new Organism(this);
         players.put("player1", player_organism);
         player_organism.create_assimilated_hex(-2, 2, 0);
-        player_organism.create_assimilated_hex(-1, -1, 2);
-        player_organism.create_assimilated_hex(2, 0, -2);
-        player_organism.create_assimilated_hex(-1, 0, 1);
-        player_organism.expand();
     }
 
     public void render() {
@@ -93,6 +88,13 @@ public class GameBoard implements Disposable {
         action_history_bar.add_action(button_val);
         if (button_val == 0){
             player_organism.extract();
+        } else {
+        if (button_val == 1){
+            player_organism.expand();
+        } else {
+        if (button_val == 2) {
+            player_organism.explore();
+        }}
         }
     }
 }

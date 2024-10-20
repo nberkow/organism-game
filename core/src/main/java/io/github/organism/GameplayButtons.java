@@ -17,7 +17,7 @@ public class GameplayButtons {
     float center_x;
     float center_y;
 
-    float radius = 30f;
+    float radius = 13f;
 
     private class StepButton {
         float x;

@@ -20,7 +20,7 @@ public class Lwjgl3Launcher {
         configuration.setTitle("organism");
 
         // Set windowed mode with flipped dimensions (width, height)
-        configuration.setWindowedMode(540, 960); // Flipped dimensions
+        configuration.setWindowedMode(960, 540);
 
         configuration.setResizable(true);
 

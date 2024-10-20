@@ -16,8 +16,8 @@ public class Main extends ApplicationAdapter {
 
     double action_time = 0.2d;
 
-    public final int VIRTUAL_WIDTH = 1080/2;  // Virtual resolution width (aspect ratio: 16:9)
-    public final int VIRTUAL_HEIGHT = 1920/2; // Virtual resolution height
+    public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
+    public final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
 
     @Override
     public void create() {

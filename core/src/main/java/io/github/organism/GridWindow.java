@@ -25,15 +25,8 @@ public class GridWindow {
     }
 
     public void render(){
-
-
-        for (int i : game_board.grid.hex_grid.keySet()) {
-            for (int j : game_board.grid.hex_grid.get(i).keySet()) {
-                for (int k : game_board.grid.hex_grid.get(i).get(j).keySet()) {
-                    Hexel h = game_board.grid.hex_grid.get(i).get(j).get(k);
-                    draw_hex(h);
-                }
-            }
+        for (Hexel h : game_board.universal_grid.map_grid) {
+            draw_hex(h);
         }
     }
 
