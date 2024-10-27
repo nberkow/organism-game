@@ -2,18 +2,11 @@ package io.github.organism;
 
 import static java.lang.Math.min;
 import static java.lang.Math.max;
-import static java.lang.Math.sqrt;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-
 
 public class UniversalHexGrid {
     HexSet map_grid;
-
-    ArrayList<Float> gradient_means;
-
     GameBoard game_board;
 
     int grid_radius;
@@ -22,7 +15,6 @@ public class UniversalHexGrid {
         game_board = gb;
         map_grid = new HexSet();
         grid_radius = r;
-        Random rng = new Random(10);
 
         int min_j;
         int max_j;
@@ -35,31 +27,13 @@ public class UniversalHexGrid {
                     int k = -i - j;
 
                     Hexel h = new Hexel(game_board, i, j, k);
-                    h.resources = rng.nextDouble(); //
+                    h.resources = game_board.gradient_set.get_gradient_score(h);
                     map_grid.add_hex(h);
 
                 }
             }
         }
     }
-
-    /* public HexSet get_adjacent_layer(HexSet hex_set){
-
-        HexSet adjacent_hexes = new HexSet();
-
-        for (Hexel h : hex_set){
-            HexSet surrounding = get_surrounding_hexes(h);
-            for (Hexel a : surrounding){
-                if (!hex_set.contains_hex(a)){
-                    if (!adjacent_hexes.contains_hex(h)){
-                        adjacent_hexes.add_hex(h);
-                    }
-                }
-            }
-        }
-
-        return adjacent_hexes;
-    } */
 
     public ArrayList<Hexel> get_surrounding_hexes(Hexel h){
 

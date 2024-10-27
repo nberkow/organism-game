@@ -1,16 +1,7 @@
 package io.github.organism;
-
-import com.badlogic.gdx.utils.Null;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Spliterator;
-import java.util.function.Consumer;
 
 public class HexSet implements Iterable<Hexel> {
     HashMap<Integer, HashMap<Integer, HashMap<Integer, Hexel>>> hex_grid;

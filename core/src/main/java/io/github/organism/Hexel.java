@@ -13,10 +13,10 @@ public class Hexel {
     Integer i, j, k;
 
     Float x, y;
-    Double resources;
+    double resources;
 
     GameBoard game_board;
-    HashMap<String, Double> assimilation_by_player = new HashMap<String, Double>();
+    HashMap<String, Double> assimilation_by_player = new HashMap<>();
 
     public Hexel(GameBoard gb){
         game_board = gb;
@@ -34,7 +34,6 @@ public class Hexel {
         x = (float) (sqrt(3f) * ( k/2F + i));
         y = (3F/2F * k);
     }
-
 
     public String toString() {
         return String.format(Locale.US, "%d %d %d\t%f\t%f", i, j, k, x, y);

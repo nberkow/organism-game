@@ -12,9 +12,15 @@ public class Main extends ApplicationAdapter {
     OrthographicCamera camera;
     FitViewport viewport;
     GameInputProcessor input_processor;
-    GameTimers game_timers;
+    double action_time = 1d;
 
-    double action_time = 0.2d;
+    double queue_time = action_time / 40;
+    boolean execute_actions = false;
+
+    boolean queue_bot_actions = false;
+
+    double action_clock = 0d;
+    double queue_clock = 0d;
 
     public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
     public final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
@@ -25,8 +31,7 @@ public class Main extends ApplicationAdapter {
         camera = new OrthographicCamera();
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
 
-        game_board = new GameBoard(this);  // Pass the viewport to GameBoard (to be adjusted there)
-        game_timers = new GameTimers();
+        game_board = new GameBoard(this, new GameConfig());
 
         input_processor = new GameInputProcessor(game_board);
         Gdx.input.setInputProcessor(input_processor);
@@ -42,30 +47,38 @@ public class Main extends ApplicationAdapter {
     }
 
     private void input() {
-        // handle holding down a button vs simple clicking
-        if (input_processor.touched_button && !input_processor.holding_button){
-            input_processor.time_held += Gdx.graphics.getDeltaTime();
+        action_clock += Gdx.graphics.getDeltaTime();
+        execute_actions = false;
+        if (action_clock > action_time){
+            execute_actions = true;
+            action_clock = action_clock % action_time;
         }
-        if (input_processor.touched_button && input_processor.time_held > input_processor.HOLD_DELAY){
-            input_processor.holding_button = true;
+
+        queue_clock += Gdx.graphics.getDeltaTime();
+        queue_bot_actions = false;
+        if (queue_clock > queue_time){
+            queue_bot_actions = true;
+            queue_clock = queue_clock % queue_time;
         }
+
+        // handle input
+        input_processor.update_timers(Gdx.graphics.getDeltaTime());
+        input_processor.update_queues_with_input();
+
+
     }
 
     private void logic() {
-        // Update the clock
-        game_timers.add_time_delta(Gdx.graphics.getDeltaTime());
 
-        if (game_timers.action_clock > action_time){
-            game_timers.action_clock -= action_time;
-            if (input_processor.holding_button) {
-                input_processor.action_ready = true;
-            }
+        //if (queue_bot_actions) {
+        for (String b : game_board.bot_player_names){
+            game_board.players.get(b).generate_and_queue();
         }
+        //}
 
-        // This will be true if the button is being held down or it was just fast clicked
-        if (input_processor.action_ready) {
-            game_board.apply_action(input_processor.button_val, input_processor.actions_staged);
-            input_processor.action_ready = false;
+        // dequeue an action from each player's queue and execute it
+        if (execute_actions) {
+            dequeue_and_execute();
         }
     }
 
@@ -85,5 +98,16 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         // Handle disposing of game resources
         game_board.dispose();
+    }
+
+    private void dequeue_and_execute(){
+
+        for (String p : game_board.all_player_names){
+            Player player = game_board.players.get(p);
+            Organism organism = player.get_organism();
+            Integer move = player.get_move();
+            organism.make_move(move);
+        }
+
     }
 }
