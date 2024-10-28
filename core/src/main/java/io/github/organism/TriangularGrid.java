@@ -3,84 +3,72 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class HexSet implements Iterable<Hexel> {
-    HashMap<Integer, HashMap<Integer, HashMap<Integer, Hexel>>> hex_grid;
+public class TriangularGrid implements Iterable<GridPosition> {
+    HashMap<Integer, HashMap<Integer, HashMap<Integer, GridPosition>>> grid;
 
     int size = 0;
+    GameBoard game_board;
 
-    HexSet() {
-        hex_grid = new HashMap<>();
+    TriangularGrid(GameBoard gb) {
+        game_board = gb;
+        grid = new HashMap<>();
     }
 
-    public void add_hex(Hexel h) {
-        if (!hex_grid.containsKey(h.i)) {
-            hex_grid.put(h.i, new HashMap<>());
+    public void add_pos(GridPosition p) {
+        if (!grid.containsKey(p.i)) {
+            grid.put(p.i, new HashMap<>());
         }
 
-        if (!hex_grid.get(h.i).containsKey(h.j)) {
-            hex_grid.get(h.i).put(h.j, new HashMap<>());
+        if (!grid.get(p.i).containsKey(p.j)) {
+            grid.get(p.i).put(p.j, new HashMap<>());
         }
 
-        hex_grid.get(h.i).get(h.j).put(h.k, h);
+        grid.get(p.i).get(p.j).put(p.k, p);
         size += 1;
     }
 
-    public Hexel get_hex(int i, int j, int k) {
+    public GridPosition get_pos(int i, int j, int k) {
 
-        if (this.contains_hex_at(i, j, k)) {
-            return hex_grid.get(i).get(j).get(k);
+        if (this.contains_position(i, j, k)) {
+            return grid.get(i).get(j).get(k);
         }
         return null;
     }
 
-    public LinkedList<Hexel> dump_hex_list() {
-
-        LinkedList<Hexel> hex_list = new LinkedList<>();
-
-        for (int i : hex_grid.keySet()) {
-            for (int j : hex_grid.get(i).keySet()) {
-                for (int k : hex_grid.get(i).get(j).keySet()) {
-                    hex_list.add(hex_grid.get(i).get(j).get(k));
-                }
-            }
-        }
-        return hex_list;
-    }
-
-    public void remove_hex(Hexel h) {
-        hex_grid.get(h.i).get(h.j).remove(h.k);
+    public void remove_hex(GridPosition p) {
+        grid.get(p.i).get(p.j).remove(p.k);
         size -= 1;
     }
 
-    public boolean contains_hex_at(int i, int j, int k) {
+    public boolean contains_position(int i, int j, int k) {
 
         /*
         Check if a hex exists at the coordinates and is not null
          */
 
-        if (!hex_grid.containsKey(i)) {
+        if (!grid.containsKey(i)) {
             return false;
         }
 
-        if (!hex_grid.get(i).containsKey(j)) {
+        if (!grid.get(i).containsKey(j)) {
             return false;
         }
 
-        if (!hex_grid.get(i).get(j).containsKey(k)) {
+        if (!grid.get(i).get(j).containsKey(k)) {
             return false;
         }
 
-        return hex_grid.get(i).get(j).get(k) != null;
+        return grid.get(i).get(j).get(k) != null;
     }
 
-    public boolean contains_hex(Hexel h) {
-        return contains_hex_at(h.i, h.j, h.k);
+    public boolean contains_hex(GridPosition p) {
+        return contains_position(p.i, p.j, p.k);
     }
 
     @Override
-    public Iterator<Hexel> iterator() {
-        return new Iterator<Hexel>() {
-            private final Iterator<Integer> iIterator = hex_grid.keySet().iterator();
+    public Iterator<GridPosition> iterator() {
+        return new Iterator<GridPosition>() {
+            private final Iterator<Integer> iIterator = grid.keySet().iterator();
             private Iterator<Integer> jIterator = null;
             private Iterator<Integer> kIterator = null;
 
@@ -96,7 +84,7 @@ public class HexSet implements Iterable<Hexel> {
                         return false;
                     }
                     currentI = iIterator.next();
-                    jIterator = hex_grid.get(currentI).keySet().iterator();
+                    jIterator = grid.get(currentI).keySet().iterator();
                 }
 
                 // If we're here, kIterator might need to be re-initialized
@@ -107,17 +95,17 @@ public class HexSet implements Iterable<Hexel> {
                             return false;
                         }
                         currentI = iIterator.next();
-                        jIterator = hex_grid.get(currentI).keySet().iterator();
+                        jIterator = grid.get(currentI).keySet().iterator();
                     }
                     currentJ = jIterator.next();
-                    kIterator = hex_grid.get(currentI).get(currentJ).keySet().iterator();
+                    kIterator = grid.get(currentI).get(currentJ).keySet().iterator();
                 }
 
                 return kIterator.hasNext(); // Ensure kIterator has more elements.
             }
 
             @Override
-            public Hexel next() {
+            public GridPosition next() {
                 // Ensure `hasNext` is true before moving forward
                 if (!hasNext()) {
                     throw new java.util.NoSuchElementException();
@@ -125,7 +113,7 @@ public class HexSet implements Iterable<Hexel> {
 
                 // Now safely fetch the next element from the kIterator
                 Integer currentK = kIterator.next();
-                return hex_grid.get(currentI).get(currentJ).get(currentK);
+                return grid.get(currentI).get(currentJ).get(currentK);
             }
         };
     }

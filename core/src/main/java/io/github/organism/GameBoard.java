@@ -1,5 +1,8 @@
 package io.github.organism;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -32,7 +35,6 @@ public class GameBoard implements Disposable {
     // Game colors
     Color background_color = Color.BLACK;
     Color foreground_color = Color.CYAN;
-    Color resource_color = new Color(0f, 0.5f, 0f, 0.5f);
 
     Color [] colors = {Color.RED, Color.BLUE, Color.GREEN};
 
@@ -40,18 +42,14 @@ public class GameBoard implements Disposable {
 
     // Gameplay parameters
 
-    public final double ASSIMILATION_THRESHOLD = 0.37d;
-    // percent of total energy transferred per action (transfers faster when more full);
-    public final double ENERGY_PER_ACTION = 0.5d;
-    public final double MAX_ENERGY = 6d;
-
-    public final double MIN_DELTA = 10e-9f;
-    public final int HEX_MAX_ENERGY = 2;
-
     // Gameplay
     HashMap<String, Player> players = new HashMap<>();
+
+    Color [] player_colors = {Color.RED, Color.BLUE, Color.GREEN, Color.CORAL, Color.BROWN, Color.CHARTREUSE};
+
+    Color [] resource_colors = {Color.NAVY, Color.MAROON, Color.OLIVE};
     GridWindow grid_window;
-    UniversalHexGrid universal_grid;
+    UniverseMap universe_map;
     GameplayButtons input_panel;
 
     ArrayList<PlayerSummaryDisplay> player_summary_displays;
@@ -69,7 +67,11 @@ public class GameBoard implements Disposable {
 
     GameConfig config;
 
-    int radius = 12;
+    float hex_side_len;
+    float center_x;
+    float center_y;
+
+    int radius = 4;
     Random rng;
     Main main;
 
@@ -78,6 +80,9 @@ public class GameBoard implements Disposable {
         this.config = cfg;
 
         shape_renderer = new ShapeRenderer();
+        hex_side_len = 110.0f/radius; // starting default
+        center_x = main.VIRTUAL_WIDTH / 2f;
+        center_y = this.main.VIRTUAL_HEIGHT / GRID_WINDOW_HEIGHT;
 
         rng = new Random();
         rng.setSeed(seed);
@@ -89,7 +94,7 @@ public class GameBoard implements Disposable {
 
         // Initialize other game objects here
         gradient_set = new GradientSet(this, radius, 3);
-        universal_grid = new UniversalHexGrid(this, radius);
+        universe_map = new UniverseMap(this, radius);
         grid_window = new GridWindow(this, 2);
         input_panel = new GameplayButtons(this, config.human_players);
         human_player_energy_bars = new HashMap<>();
@@ -108,37 +113,37 @@ public class GameBoard implements Disposable {
 
     }
 
-    private void assign_starting_hexes(ArrayList<int[]> startingCoords) {
-
+    private void assign_starting_hexes(ArrayList<int[]> starting_coords) {
         int i = 0;
         for (String player_name : players.keySet()) {
             Organism organism = players.get(player_name).get_organism();
-            int [] coords = startingCoords.get(i);
-            organism.create_assimilated_hex(coords[0], coords[1], coords[2]);
+            int [] coords = starting_coords.get(i);
+            organism.claim_hex(coords[0], coords[1], coords[2]);
             i ++;
         }
     }
 
+
     public ArrayList<int[]> randomize_starting_coords(){
 
         // randomly select a valid hex
-        int r = (int) Math.floor(radius * rng.nextFloat() + radius / 2d);
+        int r = radius / 2;
         int a = rng.nextInt(r * 2 + 1) - r;
-        int min_b = Math.max(-r, -r-a);
-        int max_b = Math.min(r, r-a);
-        int b = rng.nextInt(max_b * 2 + 1) + min_b;
+        int min_b = max(-r - a, -r);
+        int max_b = min(r - a, r);
+        int b = rng.nextInt(max_b - min_b) + min_b;
         int c = -a - b;
 
         ArrayList<int []> starting_coords = new ArrayList<>();
 
-        starting_coords.add(new int[] {a, b, c});
-        starting_coords.add(new int[] {b, c, a});
-        starting_coords.add(new int[] {c, a, b});
+        starting_coords.add(new int[] {a * 2, b * 2, c * 2});
+        starting_coords.add(new int[] {b * 2, c * 2, a * 2});
+        starting_coords.add(new int[] {c * 2, a * 2, b * 2});
 
         if (config.human_players + config.bot_players == 6){
-            starting_coords.add(new int[] {c, b, a});
-            starting_coords.add(new int[] {b, a, c});
-            starting_coords.add(new int[] {a, c, b});
+            starting_coords.add(new int[] {-a * 2, -b * 2, -c * 2});
+            starting_coords.add(new int[] {-b * 2, -c * 2, -a * 2});
+            starting_coords.add(new int[] {-c * 2, -a * 2, -b * 2});
         }
 
         return starting_coords;
@@ -154,6 +159,7 @@ public class GameBoard implements Disposable {
                 organism,
                 false
             );
+            organism.color = player_colors[p];
             organism.player = player;
             players.put(name, player);
             human_player_energy_bars.put(name, new EnergyBar(this, name, main.VIRTUAL_WIDTH / 2f));
@@ -175,6 +181,7 @@ public class GameBoard implements Disposable {
                 organism,
                 m
             );
+            organism.color = player_colors[b + config.human_players];
             organism.player = player;
             players.put(name, player);
             bot_player_names.add(name);

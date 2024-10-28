@@ -29,30 +29,9 @@ public class EnergyBar {
 
     public void render(){
 
-        float left_start = MARGIN + center_x / 2;
-
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        game_board.shape_renderer.setColor(game_board.foreground_color);
-        game_board.shape_renderer.rect(left_start, y_height, x_width - (MARGIN * 2), BAR_HEIGHT);
-
-        game_board.shape_renderer.setColor(game_board.background_color);
-        game_board.shape_renderer.rect(
-            left_start + BORDER_WIDTH,
-            y_height + BORDER_WIDTH,
-            x_width - ((MARGIN + BORDER_WIDTH) * 2),
-            BAR_HEIGHT - BORDER_WIDTH * 2);
-
-        game_board.shape_renderer.setColor(game_board.foreground_color);
-
-        double energy_store = game_board.players.get(player_name).get_organism().energy_store;
-        game_board.shape_renderer.rect(
-            left_start + BORDER_WIDTH + GAP_WIDTH,
-            y_height + BORDER_WIDTH + GAP_WIDTH,
-            (float) ( (x_width - ((MARGIN + BORDER_WIDTH + GAP_WIDTH) * 2)) * (energy_store / game_board.MAX_ENERGY)),
-            BAR_HEIGHT - (BORDER_WIDTH + GAP_WIDTH) * 2);
-
-        game_board.shape_renderer.end();
+        /*
+        discrete bars
+         */
 
     }
 }

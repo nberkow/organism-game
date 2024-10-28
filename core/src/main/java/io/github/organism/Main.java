@@ -106,7 +106,7 @@ public class Main extends ApplicationAdapter {
             Player player = game_board.players.get(p);
             Organism organism = player.get_organism();
             Integer move = player.get_move();
-            organism.make_move(move);
+            //organism.make_move(move);
         }
 
     }

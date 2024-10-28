@@ -51,7 +51,7 @@ public class PlayerSummaryDisplay {
         game_board.shape_renderer.setColor(game_board.foreground_color);
         game_board.shape_renderer.rect(
             x, y + ENERGY_BAR_Y,
-            (float) (energy_bar_width * player.get_organism().energy_store / game_board.MAX_ENERGY),
+            (float) (energy_bar_width),
             ENERGY_BAR_HEIGHT);
         game_board.shape_renderer.end();
     }

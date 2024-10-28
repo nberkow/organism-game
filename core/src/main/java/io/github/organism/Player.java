@@ -3,8 +3,6 @@ package io.github.organism;
 
 import java.util.LinkedList;
 
-;
-
 public interface Player {
 
     public void queue_move(Integer move);

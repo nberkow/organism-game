@@ -29,16 +29,10 @@ public class GradientSet {
         }
     }
 
-    public double get_gradient_score(Hexel h) {
+    public double get_gradient_score(MapVertex h) {
         double score = 0d;
 
-        for (int [] c : centers){
-            double dist = Math.pow(
-                Math.pow(c[0] - h.i, 2) +
-                Math.pow(c[1] - h.j, 2) +
-                Math.pow(c[2] - h.k, 2), 0.5);
-            score += game_board.HEX_MAX_ENERGY * Math.pow(decay, dist);
-        }
+
 
         return score;
     }
