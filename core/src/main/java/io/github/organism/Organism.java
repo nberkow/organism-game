@@ -44,8 +44,8 @@ public class Organism {
     }
 
     public void claim_hex(int i, int j, int k){
-        //MapHex h = (MapHex) game_board.universe_map.universe_grid.get_pos(i, j, k).content;
-        //claim_hex(h);
+        MapHex h = (MapHex) game_board.universe_map.hex_grid.get_pos(i, j, k).content;
+        claim_hex(h);
     }
 
     public void claim_vertex(MapVertex v){

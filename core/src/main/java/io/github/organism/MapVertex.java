@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
 
@@ -32,18 +33,22 @@ public class MapVertex implements MapElement{
      */
     @Override
     public void render() {
+
+        pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
         float x = (float) ((pos.j * Math.pow(3f, 0.5f) / 2f) - (pos.k * Math.pow(3f, 0.5f) / 2f));
         float y = pos.i - pos.j/2f - pos.k/2f;
 
-        int r = 2;
-
         Color c = Color.DARK_GRAY;
+        if (player != null){
+            c = player.get_organism().color;
+        }
 
         pos.grid.game_board.shape_renderer.setColor(c);
         pos.grid.game_board.shape_renderer.circle(
             x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
             y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
-            3);
+            1);
+        pos.grid.game_board.shape_renderer.end();
     }
 
 }

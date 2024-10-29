@@ -13,12 +13,17 @@ public class UniverseMap {
     int grid_radius;
 
     final int [][] VERTEX_POS = {
-        { 0, 0, 1},
-        { 0, 1, 0},
         { 1, 0, 0},
-        { 0, 0,-1},
-        { 0,-1, 0},
-        {-1, 0, 0}
+        { 0, 0, -1},
+        { 0, 1, 0},
+        { -1, 0, 0},
+        { 0, 0, 1},
+        { 0, -1, 0},
+
+
+
+
+
     };
 
     public UniverseMap(GameBoard gb, int r) {

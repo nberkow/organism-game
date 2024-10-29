@@ -3,7 +3,6 @@ package io.github.organism;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -47,7 +45,10 @@ public class GameBoard implements Disposable {
 
     Color [] player_colors = {Color.RED, Color.BLUE, Color.GREEN, Color.CORAL, Color.BROWN, Color.CHARTREUSE};
 
-    Color [] resource_colors = {Color.NAVY, Color.MAROON, Color.OLIVE};
+    Color [] resource_colors = {
+        new Color(0f, 0f, 0.2f, 0f),
+        new Color(0f, 0.2f, 0f, 0f),
+        new Color(0.2f, 0f, 0.2f, 0f)};
     GridWindow grid_window;
     UniverseMap universe_map;
     GameplayButtons input_panel;
@@ -61,9 +62,11 @@ public class GameBoard implements Disposable {
     ArrayList<String> all_player_names;
     ShapeRenderer shape_renderer;
 
+    ResourceDistributor resource_distributor;
+
     SpriteBatch batch;
 
-    GradientSet gradient_set;
+    ResourceDistributor gradient_set;
 
     GameConfig config;
 
@@ -93,8 +96,9 @@ public class GameBoard implements Disposable {
         font.getData().setScale(1f);
 
         // Initialize other game objects here
-        gradient_set = new GradientSet(this, radius, 3);
+        gradient_set = new ResourceDistributor(this);
         universe_map = new UniverseMap(this, radius);
+        resource_distributor = new ResourceDistributor(this);
         grid_window = new GridWindow(this, 2);
         input_panel = new GameplayButtons(this, config.human_players);
         human_player_energy_bars = new HashMap<>();
@@ -105,12 +109,18 @@ public class GameBoard implements Disposable {
         all_player_names = new ArrayList<>();
 
         // Setup the players based on the config
+        distribute_resources();
         create_human_players();
         create_bot_players();
         create_player_summary_displays();
         ArrayList<int[]> starting_coords = randomize_starting_coords();
         assign_starting_hexes(starting_coords);
 
+    }
+
+    private void distribute_resources() {
+        resource_distributor.create_centers(1);
+        resource_distributor.create_symmetrical_patches(10);
     }
 
     private void assign_starting_hexes(ArrayList<int[]> starting_coords) {
