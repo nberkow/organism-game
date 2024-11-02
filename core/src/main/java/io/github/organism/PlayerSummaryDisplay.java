@@ -41,6 +41,7 @@ public class PlayerSummaryDisplay {
 
         Gdx.gl.glEnable(GL20.GL_BLEND);   // Ensure blending is enabled
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);  // Set blend function
+        game_board.font.getData().setScale(1f);
 
         game_board.batch.begin();
         game_board.font.draw(game_board.batch, player.get_player_name(), x, NAME_HEIGHT + y);

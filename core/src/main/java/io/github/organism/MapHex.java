@@ -2,7 +2,6 @@ package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 
 public class MapHex implements MapElement {
 
@@ -26,6 +25,15 @@ public class MapHex implements MapElement {
         total_resources = 0;
     }
 
+    public void add_resource(int res, int amount) {
+        for (int i=0; i<amount; i++) {
+            if (total_resources < 3) {
+                resources[total_resources] = res;
+                total_resources++;
+            }
+        }
+    }
+
     @Override
     public char get_type() {
         return type;
@@ -38,11 +46,8 @@ public class MapHex implements MapElement {
 
     @Override
     public void render() {
-
         render_resources();
         render_players();
-
-
     }
 
     public void render_players() {
@@ -88,8 +93,7 @@ public class MapHex implements MapElement {
             float x = (float) ((j_f * Math.pow(3f, 0.5f) / 2f) - (k_f * Math.pow(3f, 0.5f) / 2f));
             float y = i_f - j_f/2f - k_f/2f;
 
-            Color c = pos.grid.game_board.resource_colors[resources[r]];
-
+            Color c = pos.grid.game_board.resource_colors_dark[resources[r]];
 
             pos.grid.game_board.shape_renderer.setColor(c);
             pos.grid.game_board.shape_renderer.circle(

@@ -5,33 +5,82 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class EnergyBar {
 
-    final float MARGIN = 45f;
-    final float BORDER_WIDTH = 4f;
 
+    final int MAX_ENERGY = 30;
+    final float BORDER_WIDTH = 2f;
+
+    final float TICK_SPACING = 1f;
     final float GAP_WIDTH = 2f;
-    final float BAR_HEIGHT = 20;
-
-    String player_name;
-
-    float center_x;
 
     GameBoard game_board;
+    Player player;
+
+    PlayerHud hud;
+
+    float x;
+    float y;
+
     float y_height;
     float x_width;
-    public EnergyBar(GameBoard gb, String n, float c_x){
+
+    float small_bar_x;
+    float small_bar_y;
+    float small_bar_width;
+    float small_bar_height;
+
+    public EnergyBar(GameBoard gb, PlayerHud ph, Player p, float width, float height){
         game_board = gb;
-        player_name = n;
-        center_x = c_x;
-        y_height =  game_board.main.VIRTUAL_HEIGHT / game_board.ENERGY_BAR_HEIGHT;
-        x_width = game_board.main.VIRTUAL_WIDTH / 2f;
+        player = p;
+        hud = ph;
+        y_height =  height;
+        x_width = width;
+
+        y = hud.ENERGYBAR_Y;
+        x = hud.x;
+        if (hud.parity == -1){
+            x = hud.x - (x_width - hud.HUD_WIDTH);
+        }
+
+        small_bar_x = width + GAP_WIDTH + BORDER_WIDTH;
+        small_bar_y = height + GAP_WIDTH + BORDER_WIDTH;
+        small_bar_width = (width - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2) + TICK_SPACING) / MAX_ENERGY - TICK_SPACING;
+        small_bar_height = height - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2);
+
     }
 
 
     public void render(){
+        game_board.font.getData().setScale(4f);
 
-        /*
-        discrete bars
-         */
+        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.shape_renderer.setColor(game_board.foreground_color);
+        game_board.shape_renderer.rect(
+            x,
+            y,
+            x_width,
+            y_height);
+        game_board.shape_renderer.setColor(game_board.background_color);
+        game_board.shape_renderer.rect(
+            x + GAP_WIDTH,
+            y + GAP_WIDTH,
+            x_width - (GAP_WIDTH * 2),
+            y_height - (GAP_WIDTH * 2));
 
+
+        float first_x = x + GAP_WIDTH * 2;
+        if (hud.parity == -1){
+            first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
+        }
+
+        game_board.shape_renderer.setColor(game_board.foreground_color);
+        for (int i=0; i<player.get_organism().energy; i++) {
+            game_board.shape_renderer.rect(
+                first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),
+                y + GAP_WIDTH * 2,
+                small_bar_width,
+                y_height - (GAP_WIDTH * 4));
+        }
+
+        game_board.shape_renderer.end();
     }
 }

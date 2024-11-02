@@ -70,6 +70,11 @@ public class Main extends ApplicationAdapter {
 
     private void logic() {
 
+        for (Player p : game_board.players.values()) {
+            p.get_organism().update_resources();
+            p.get_organism().update_income();
+        }
+
         //if (queue_bot_actions) {
         for (String b : game_board.bot_player_names){
             game_board.players.get(b).generate_and_queue();

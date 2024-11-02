@@ -68,10 +68,11 @@ public class GameInputProcessor implements InputProcessor {
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
         game_board.main.viewport.unproject(touchPos);
-        GameplayButtons.StepButton button_data = game_board.input_panel.check_buttons(touchPos.x, touchPos.y);
+        GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null){
-            String player_name = game_board.human_player_names.get(button_data.player);
+
+            String player_name = game_board.human_player_names.get(button_data.player - 1);
             PlayerGameInputData input_data = player_input_data.get(player_name);
             if (input_data.time_not_held > MIN_BETWEEN_PRESS_TIME) {
                 if (!input_data.holding_button) {
@@ -92,10 +93,10 @@ public class GameInputProcessor implements InputProcessor {
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
         game_board.main.viewport.unproject(touchPos);
-        GameplayButtons.StepButton button_data = game_board.input_panel.check_buttons(touchPos.x, touchPos.y);
+        GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null) {
-            String player_name = game_board.human_player_names.get(button_data.player);
+            String player_name = game_board.human_player_names.get(button_data.player - 1);
             PlayerGameInputData input_data = player_input_data.get(player_name);
             if (input_data.touched_button){
                 input_data.time_held = 0d;

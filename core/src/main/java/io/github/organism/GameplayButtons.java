@@ -12,13 +12,6 @@ public class GameplayButtons {
     A temp class for input handling.
      */
 
-    GameBoard game_board;
-    ArrayList<StepButton> buttons;
-    float [] center_x;
-    float center_y;
-
-    float radius = 13f;
-
     public class StepButton {
         float x;
         float y;
@@ -38,30 +31,32 @@ public class GameplayButtons {
         }
     }
 
-    public GameplayButtons(GameBoard gb, int players) {
+    GameBoard game_board;
+    PlayerHud hud;
+    ArrayList<StepButton> buttons;
+    float center_x;
+    float center_y;
+
+    float radius = 13f;
+    public GameplayButtons(GameBoard gb, PlayerHud ph) {
 
         game_board = gb;
+        hud = ph;
         buttons = new ArrayList<>();
 
-        center_x = new float [] {game_board.main.VIRTUAL_WIDTH / 2f};
-
-        if (players == 2){
-            center_x = new float [] {
-                game_board.main.VIRTUAL_WIDTH / 3f,
-                game_board.main.VIRTUAL_WIDTH  * 2/ 3f,
-            };
+        center_x = hud.x + hud.BUTTON_SIDE_DIST;
+        if (hud.parity == -1){
+            center_x = hud.x + hud.HUD_WIDTH - hud.BUTTON_SIDE_DIST;
         }
 
-        center_y = game_board.main.VIRTUAL_HEIGHT / game_board.GAMEPLAY_BUTTONS_HEIGHT;
+        center_y = radius * 2f;
 
-        for (int j=0; j<players; j++) {
-            for (int i = 0; i <= 2; i++) {
-                StepButton b = new StepButton(
-                    center_x[j] + (i - 1) * radius * 2.7f,
-                    center_y,
-                    radius, game_board.colors[i], i, j);
-                buttons.add(b);
-            }
+        for (int i = 0; i <= 2; i++) {
+            StepButton b = new StepButton(
+                center_x + (i - 1) * radius * 2.7f * hud.parity,
+                center_y,
+                radius, game_board.colors[i], i, 1);
+            buttons.add(b);
         }
     }
 

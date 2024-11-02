@@ -83,9 +83,6 @@ public class ResourceDistributor {
         };
     }
 
-
-
-
     public int choose_resource_type(GridPosition hex_pos){
 
         float [] distances = get_center_distances(hex_pos);

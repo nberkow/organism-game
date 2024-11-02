@@ -15,20 +15,15 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class GameBoard implements Disposable {
- public final double EXPAND_SUBSET = 3d;
+
+
     // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.7f;
-    final float ACTION_HISTORY_HEIGHT = 5.5f;
-    final float ENERGY_BAR_HEIGHT = 8.25f;
-    final float GAMEPLAY_BUTTONS_HEIGHT = 14f;
     final int MAX_QUEUED_ACTIONS = 20;
-
     final float PLAYER_SUMMARY_X = 30;
-    final float PLAYER_SUMMARY_Y = 27;
-
+    final float PLAYER_SUMMARY_Y = 400;
     final float PLAYER_SUMMARY_HEIGHT = 40;
-
-    public long seed = 12;
+    public long seed;
 
     // Game colors
     Color background_color = Color.BLACK;
@@ -39,30 +34,32 @@ public class GameBoard implements Disposable {
     BitmapFont font;
 
     // Gameplay parameters
+    public static final int DEFAULT_STARTING_ENERGY = 6;
 
     // Gameplay
     HashMap<String, Player> players = new HashMap<>();
 
     Color [] player_colors = {Color.RED, Color.BLUE, Color.GREEN, Color.CORAL, Color.BROWN, Color.CHARTREUSE};
 
-    Color [] resource_colors = {
-        new Color(0f, 0f, 0.2f, 0f),
+    Color [] resource_colors_dark = {
+        new Color(0f, 0f, 0.3f, 0f),
         new Color(0f, 0.2f, 0f, 0f),
         new Color(0.2f, 0f, 0.2f, 0f)};
+    Color [] resource_colors_bright = {
+        new Color(0f, 0f, 0.7f, 0f),
+        new Color(0f, 0.7f, 0f, 0f),
+        new Color(0.7f, 0f, 0.2f, 0f)};
     GridWindow grid_window;
     UniverseMap universe_map;
-    GameplayButtons input_panel;
-
     ArrayList<PlayerSummaryDisplay> player_summary_displays;
-    HashMap<String, EnergyBar> human_player_energy_bars;
-    HashMap<String, ActionQueueBar> human_player_action_queue_bars;
-
     ArrayList<String> human_player_names;
     ArrayList<String> bot_player_names;
     ArrayList<String> all_player_names;
     ShapeRenderer shape_renderer;
 
     ResourceDistributor resource_distributor;
+    PlayerHud player1_hud;
+    PlayerHud player2_hud;
 
     SpriteBatch batch;
 
@@ -81,6 +78,7 @@ public class GameBoard implements Disposable {
     public GameBoard(Main main, GameConfig cfg) {
         this.main = main;
         this.config = cfg;
+        seed = config.seed;
 
         shape_renderer = new ShapeRenderer();
         hex_side_len = 110.0f/radius; // starting default
@@ -93,16 +91,13 @@ public class GameBoard implements Disposable {
         batch = new SpriteBatch();
         font = new BitmapFont();
         font.setColor(foreground_color);
-        font.getData().setScale(1f);
 
         // Initialize other game objects here
         gradient_set = new ResourceDistributor(this);
         universe_map = new UniverseMap(this, radius);
         resource_distributor = new ResourceDistributor(this);
         grid_window = new GridWindow(this, 2);
-        input_panel = new GameplayButtons(this, config.human_players);
-        human_player_energy_bars = new HashMap<>();
-        human_player_action_queue_bars = new HashMap<>();
+
         player_summary_displays = new ArrayList<>();
         human_player_names = new ArrayList<>();
         bot_player_names = new ArrayList<>();
@@ -115,12 +110,15 @@ public class GameBoard implements Disposable {
         create_player_summary_displays();
         ArrayList<int[]> starting_coords = randomize_starting_coords();
         assign_starting_hexes(starting_coords);
-
+        player1_hud = new PlayerHud(this, players.get(human_player_names.get(0)), false);
+        player2_hud = new PlayerHud(this, players.get(human_player_names.get(0)),  true);
     }
 
     private void distribute_resources() {
         resource_distributor.create_centers(1);
-        resource_distributor.create_symmetrical_patches(10);
+        for (int i=0; i<config.resource_centers;i++) {
+            resource_distributor.create_symmetrical_patches(10);
+        }
     }
 
     private void assign_starting_hexes(ArrayList<int[]> starting_coords) {
@@ -129,6 +127,8 @@ public class GameBoard implements Disposable {
             Organism organism = players.get(player_name).get_organism();
             int [] coords = starting_coords.get(i);
             organism.claim_hex(coords[0], coords[1], coords[2]);
+            MapHex hex = (MapHex) universe_map.hex_grid.get_pos(coords[0], coords[1], coords[2]).content;
+            hex.add_resource(i%3, 3);
             i ++;
         }
     }
@@ -172,8 +172,7 @@ public class GameBoard implements Disposable {
             organism.color = player_colors[p];
             organism.player = player;
             players.put(name, player);
-            human_player_energy_bars.put(name, new EnergyBar(this, name, main.VIRTUAL_WIDTH / 2f));
-            human_player_action_queue_bars.put(name, new ActionQueueBar(this, name, main.VIRTUAL_WIDTH / 2f));
+
             human_player_names.add(name);
             all_player_names.add(name);
         }
@@ -217,13 +216,8 @@ public class GameBoard implements Disposable {
         shape_renderer.setProjectionMatrix(this.main.viewport.getCamera().combined);
         grid_window.render();
 
-        input_panel.render();
-        for (String a : human_player_action_queue_bars.keySet()){
-            human_player_action_queue_bars.get(a).render();
-        }
-        for (String e : human_player_energy_bars.keySet()){
-            human_player_energy_bars.get(e).render();
-        }
+        player1_hud.render();
+        player2_hud.render();
 
         for (PlayerSummaryDisplay p : player_summary_displays) {
             p.render();
