@@ -2,15 +2,13 @@ package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Organism {
-    final int ENERGY_TO_CLAIM_NEUTRAL_VERTEX = 1;
-    final int ENERGY_TO_CLAIM_OPPENENT_VERTEX = 1;
-    final int ENERGY_TO_BREAK_HEX = 3;
     public int income;
     TriangularGrid territory_hex;
     TriangularGrid territory_vertex;
@@ -67,106 +65,44 @@ public class Organism {
          */
 
 
-        energy = 5;
-        Set<MapHex> candidate_hex_set = new HashSet<>();
-        Set<MapVertex>  = new HashSet<>();
+        energy = 6;
+        // claim the best neighboring hexes
+        int budget = (int) Math.ceil(energy / 2d);
+        ArrayList<MapHex> neighboring_hexes = territory_hex.get_external_hex_layer(player);
+        ArrayList<ExpandSortWrapper> hex_by_value = new ArrayList<>();
+        for (MapHex neighbor : neighboring_hexes) {
 
-        for (GridPosition pos : territory_hex){
-            MapHex territory_hex = (MapHex) pos.content;
-            for (int v=0;v<6;v+=2){
-                for (MapHex target_hex : territory_hex.vertex_list[v].adjacent_hexes){
-                    if (target_hex != territory_hex){
-                        candidate_hex_set.add(target_hex);
-                    }
-                }
-                for (MapVertex target_vertex : territory_hex.vertex_list[v].adjacent_vertices){
-                    if (target_vertex.player != player){
-                        candidate_vertex_set.add(target_vertex);
-                    }
-                }
+            ExpandSortWrapper w = new ExpandSortWrapper(neighbor, player);
+            w.compute_value();
+            w.compute_cost();
+            hex_by_value.add(w);
+        }
+        hex_by_value.sort(Collections.reverseOrder());
+
+        for (ExpandSortWrapper w : hex_by_value){
+            if (w.energy_cost <= budget) {
+                claim_hex((MapHex) w.map_element);
+                energy -= w.energy_cost;
+                budget -= w.energy_cost;
             }
         }
 
-
-        ArrayList<ExpandSortWrapper> candidate_hex_list = new ArrayList<>();
-        for (MapHex h : candidate_hex_set){
-            ExpandSortWrapper w = new ExpandSortWrapper(h, player);
-            w.compute_expand_value();
-            candidate_hex_list.add(w);
+        // use remaining energy budget to claim vertexes in best unclaimed hexes
+        ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_layer(player);
+        ArrayList<ExpandSortWrapper> vertex_by_value = new ArrayList<>();
+        for (MapVertex neighbor : neighboring_vertexes) {
+            ExpandSortWrapper w = new ExpandSortWrapper(neighbor, player);
+            w.compute_value();
+            w.compute_cost();
+            System.out.println(w.energy_cost);
+            vertex_by_value.add(w);
         }
-
-        candidate_hex_list.sort(Collections.reverseOrder());
-        int budget = energy / 2;
-        int cost_to_capture;
-        ArrayList<ExpandSortWrapper> over_budget = new ArrayList<>();
-        ArrayList<ExpandSortWrapper> zero_resource = new ArrayList<>();
-
-
-        for (ExpandSortWrapper w : candidate_hex_list){
-            System.out.println(w);
-            if (w.resource_value == 0){
-                zero_resource.add(w);
-            } else {
-                cost_to_capture = 0;
-                if (w.hex.player != null && w.hex.player != player){
-                    cost_to_capture += ENERGY_TO_BREAK_HEX;
-                }
-                for (MapVertex v : w.hex.vertex_list){
-                    if (v != null) {
-                        cost_to_capture += ENERGY_TO_CLAIM_NEUTRAL_VERTEX;
-                        if (v.player != null && v.player != player) {
-                            cost_to_capture += ENERGY_TO_CLAIM_OPPENENT_VERTEX;
-                        }
-                    }
-                }
-                if (cost_to_capture <= budget) {
-                    claim_hex(w.hex);
-                    budget -= cost_to_capture;
-                    energy -= cost_to_capture;
-                }
-                else {
-                    over_budget.add(w);
-                }
-            }
-
-            if (budget > 0) {
-                for (ExpandSortWrapper ovb : over_budget) {
-                    int hex_cost = 0;
-                    if (ovb.hex.player != null && ovb.hex.player != player) {
-                        hex_cost = ENERGY_TO_BREAK_HEX;
-                    }
-                    for (MapVertex v : ovb.hex.vertex_list){
-                        int cost = ENERGY_TO_CLAIM_NEUTRAL_VERTEX + hex_cost;
-                        if (v.player != null && v.player != player) {
-                            cost += ENERGY_TO_CLAIM_OPPENENT_VERTEX;
-                        }
-                        if (cost <= budget) {
-                            claim_vertex(v);
-                            budget -= cost;
-                            energy -= cost;
-                        }
-                    }
-                }
-            }
-
-            if (budget > 0) {
-                for (ExpandSortWrapper z : zero_resource) {
-                    int hex_cost = 0;
-                    if (z.hex.player != null && z.hex.player != player) {
-                        hex_cost = ENERGY_TO_BREAK_HEX;
-                    }
-                    for (MapVertex v : z.hex.vertex_list){
-                        int cost = ENERGY_TO_CLAIM_NEUTRAL_VERTEX + hex_cost;
-                        if (v.player != null && v.player != player) {
-                            cost += ENERGY_TO_CLAIM_OPPENENT_VERTEX;
-                        }
-                        if (cost <= budget) {
-                            claim_vertex(v);
-                            budget -= cost;
-                            energy -= cost;
-                        }
-                    }
-                }
+        vertex_by_value.sort(Collections.reverseOrder());
+        for (ExpandSortWrapper w : vertex_by_value){
+            if (w.energy_cost <= budget) {
+                claim_vertex((MapVertex) w.map_element);
+                energy -= w.energy_cost;
+                budget -= w.energy_cost;
             }
         }
     }
@@ -193,10 +129,18 @@ public class Organism {
 
 
     public void claim_hex(MapHex h){
+
+        // remove previous player and add self
+        if (h.player != null) {
+            h.player.get_organism().territory_hex.remove_pos(h.pos);
+        }
         territory_hex.add_pos(h.pos);
         h.player = player;
+
         for (MapVertex v : h.vertex_list){
-            claim_vertex(v);
+            if (v.player != player) {
+                claim_vertex(v);
+            }
         }
     }
 
@@ -207,31 +151,25 @@ public class Organism {
 
     public void claim_vertex(MapVertex v){
 
-         if (v.player != null){
+        if (v.player != null){
             v.player.get_organism().territory_vertex.remove_pos(v.pos);
         }
         v.player = player;
         territory_vertex.add_pos(v.pos);
 
-        boolean claim_hex;
+        // check if claiming this vertex completed a hex
+        boolean completes_hex;
         for (MapHex hex : v.adjacent_hexes){
-            claim_hex = true;
+            completes_hex = true;
             for (MapVertex x : hex.vertex_list){
-                if (x.player != player){
-                    claim_hex = false;
+                if (x.player != player) {
+                    completes_hex = false;
+                    break;
                 }
             }
 
-            // break hex
-            if (hex.player != null) {
-                hex.player.get_organism().territory_hex.remove_pos(hex.pos);
-                hex.player = null;
-            }
-            if (claim_hex) {
-                hex.player = player;
-                if (!territory_hex.contains_hex(hex.pos)) {
-                    territory_hex.add_pos(hex.pos);
-                }
+            if (completes_hex) {
+                claim_hex(hex);
             }
         }
     }
@@ -242,7 +180,6 @@ public class Organism {
                 expand();
             }
         }
-
     }
 }
 

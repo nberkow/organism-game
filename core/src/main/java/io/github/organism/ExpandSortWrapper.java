@@ -3,42 +3,106 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+
+
 public class ExpandSortWrapper implements Comparable<ExpandSortWrapper> {
-    MapHex hex;
+
+    final int ENERGY_TO_CLAIM_NEUTRAL_VERTEX = 1;
+    final int ENERGY_TO_CLAIM_OPPONENT_VERTEX = 1;
+    final int ENERGY_TO_BREAK_HEX = 3;
+    MapElement map_element;
     Player current_player;
     Integer resource_value;
 
+    Integer energy_cost;
 
-
-    public ExpandSortWrapper(MapHex h, Player p){
-        hex = h;
+    public ExpandSortWrapper(MapElement m, Player p){
+        map_element = m;
         current_player = p;
         resource_value = 0;
+        energy_cost = 0;
     }
-    public void compute_expand_value() {
+    public void compute_hex_value() {
+        MapHex hex = (MapHex) map_element;
+        resource_value = 0;
+
         int [] resource_priority = current_player.get_organism().get_resource_priority();
         for (int i=0; i<3; i++){
             resource_value += resource_priority[hex.resources[i]];
         }
     }
 
-    public ArrayList<MapVertex> get_target_vertices(){
-        ArrayList<MapVertex> target_vertices = new ArrayList<>();
-        for (MapVertex v : hex.vertex_list){
+    public void compute_hex_cost() {
+        energy_cost = 0;
+        MapHex hex = (MapHex) map_element;
+
+        if (hex.player != null) {
+            energy_cost += ENERGY_TO_BREAK_HEX;
+        }
+        for (MapVertex v : hex.vertex_list) {
             if (v.player != current_player) {
-                target_vertices.add(v);
+                energy_cost += ENERGY_TO_CLAIM_NEUTRAL_VERTEX;
+                if (v.player != null) {
+                    energy_cost += ENERGY_TO_CLAIM_OPPONENT_VERTEX;
+                }
             }
         }
-        return target_vertices;
+    }
+
+    public void compute_vertex_value() {
+        MapVertex vertex = (MapVertex) map_element;
+        resource_value = 0;
+
+        int [] resource_priority = current_player.get_organism().get_resource_priority();
+
+        for (MapHex hex : vertex.adjacent_hexes) {
+            for (int i = 0; i < 3; i++) {
+                int val = resource_priority[hex.resources[i]];
+                if (val > resource_value) {
+                    resource_value = val;
+                }
+            }
+        }
+    }
+
+    public void compute_vertex_cost() {
+        energy_cost = 0;
+        MapVertex vertex = (MapVertex) map_element;
+
+        energy_cost += ENERGY_TO_CLAIM_NEUTRAL_VERTEX;
+        if (vertex.player != null) {
+            energy_cost += ENERGY_TO_CLAIM_OPPONENT_VERTEX;
+        }
+
+        for (MapHex hex : vertex.adjacent_hexes) {
+            if (hex.player != null) {
+                energy_cost += ENERGY_TO_BREAK_HEX;
+            }
+        }
+    }
+
+
+    public void compute_value() {
+        if (map_element instanceof MapHex) {
+            compute_hex_value();
+        }
+        if (map_element instanceof MapVertex) {
+            compute_vertex_value();
+        }
+    }
+
+    public void compute_cost() {
+        if (map_element instanceof MapHex) {
+            compute_hex_cost();
+        }
+        if (map_element instanceof MapVertex) {
+            compute_vertex_cost();
+        }
     }
 
     @Override
     public int compareTo(ExpandSortWrapper other_wrapper) {
-
-        compute_expand_value();
-        other_wrapper.compute_expand_value();
         return resource_value.compareTo(other_wrapper.resource_value);
-
     }
 
 

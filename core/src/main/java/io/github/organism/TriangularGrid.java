@@ -1,7 +1,9 @@
 package io.github.organism;
 import static java.lang.System.exit;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -70,6 +72,42 @@ public class TriangularGrid implements Iterable<GridPosition> {
 
     public boolean contains_hex(GridPosition p) {
         return contains_position(p.i, p.j, p.k);
+    }
+
+    public ArrayList<MapVertex> get_external_vertex_layer(Player player){
+        HashSet<MapVertex> unique_vertices = new HashSet<>();
+
+        for (GridPosition pos : this) {
+            if (!(pos.content instanceof MapVertex)){
+                throw new RuntimeException("get_external_vertex_layer() can only be used on vertex grids");
+            }
+            MapVertex vertex = (MapVertex) pos.content;
+            for (MapVertex neighbor : vertex.adjacent_vertices){
+                if (neighbor.player != player){
+                    unique_vertices.add(neighbor);
+                }
+            }
+        }
+        return new ArrayList<>(unique_vertices);
+    }
+
+    public ArrayList<MapHex> get_external_hex_layer(Player player){
+        HashSet<MapHex> unique_hexes = new HashSet<>();
+
+        for (GridPosition pos : this) {
+            if (!(pos.content instanceof MapHex)){
+                throw new RuntimeException("get_external_hex_layer() can only be used on hex grids");
+            }
+            MapHex hex = (MapHex) pos.content;
+            for (MapVertex vertex : hex.vertex_list){
+                for (MapHex neighbor : vertex.adjacent_hexes){
+                    if (neighbor.player != player){
+                        unique_hexes.add(neighbor);
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(unique_hexes);
     }
 
     @Override
