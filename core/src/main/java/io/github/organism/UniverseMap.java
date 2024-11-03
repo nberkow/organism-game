@@ -3,6 +3,8 @@ package io.github.organism;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import java.util.ArrayList;
+
 public class UniverseMap {
 
     TriangularGrid hex_grid;
@@ -33,23 +35,23 @@ public class UniverseMap {
 
         int min_j;
         int max_j;
-        for (int layer=0; layer<=grid_radius; layer++){
 
-            for (int i=-layer; i<=layer; i++){
-                min_j = max(-layer - i, -layer);
-                max_j = min(layer - i, layer);
-                for (int j=min_j; j<=max_j; j++) {
-                    int k = -i - j;
+        int layer = grid_radius;
+        for (int i=-layer; i<=layer; i++){
+            min_j = max(-layer - i, -layer);
+            max_j = min(layer - i, layer);
+            for (int j=min_j; j<=max_j; j++) {
+                int k = -i -j;
 
-                    GridPosition hex_pos = new GridPosition(i, j, k, hex_grid);
-                    hex_grid.add_pos(hex_pos);
-                    MapHex hex = new MapHex(hex_pos);
-                    hex_pos.content = hex;
-                    add_vertices(hex_pos, hex);
+                GridPosition hex_pos = new GridPosition(i, j, k, hex_grid);
+                hex_grid.add_pos(hex_pos);
+                MapHex hex = new MapHex(hex_pos);
+                hex_pos.content = hex;
+                add_vertices(hex_pos, hex);
 
-                }
             }
         }
+
     }
 
     private void add_vertices(GridPosition hex_pos, MapHex hex){
@@ -67,6 +69,7 @@ public class UniverseMap {
                 vertex_pos = vertex_grid.get_pos(a, b, c);
                 vertex = (MapVertex) vertex_pos.content;
             }
+
             else {
                 vertex_pos = new GridPosition(a, b, c, vertex_grid);
                 vertex = new MapVertex(vertex_pos);
@@ -76,6 +79,20 @@ public class UniverseMap {
 
             hex.vertex_list[n] = vertex;
             vertex.adjacent_hexes.add(hex);
+        }
+
+        // connect the vertices explicitly
+        for (int v=0; v<6; v++){
+            MapVertex center = hex.vertex_list[v];
+            MapVertex left = hex.vertex_list[(v+5) % 6];
+            MapVertex right = hex.vertex_list[(v+1) % 6];
+
+            center.adjacent_vertices.add(left);
+            center.adjacent_vertices.add(right);
+
+            left.adjacent_vertices.add(center);
+            right.adjacent_vertices.add(center);
+
         }
     }
 }

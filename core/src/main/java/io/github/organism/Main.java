@@ -70,16 +70,19 @@ public class Main extends ApplicationAdapter {
 
     private void logic() {
 
-        for (Player p : game_board.players.values()) {
+        //FIXME for (Player p : game_board.players.values()) {
+        for (String s : game_board.human_player_names){
+            Player p = game_board.players.get(s);
             p.get_organism().update_resources();
             p.get_organism().update_income();
         }
 
-        //if (queue_bot_actions) {
-        for (String b : game_board.bot_player_names){
-            game_board.players.get(b).generate_and_queue();
-        }
-        //}
+        /*
+        if (queue_bot_actions) {
+            for (String b : game_board.bot_player_names){
+                game_board.players.get(b).generate_and_queue();
+            }
+        }*/
 
         // dequeue an action from each player's queue and execute it
         if (execute_actions) {
@@ -111,7 +114,7 @@ public class Main extends ApplicationAdapter {
             Player player = game_board.players.get(p);
             Organism organism = player.get_organism();
             Integer move = player.get_move();
-            //organism.make_move(move);
+            organism.make_move(move);
         }
 
     }

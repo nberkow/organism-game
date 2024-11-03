@@ -1,4 +1,6 @@
 package io.github.organism;
+import static java.lang.System.exit;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,6 +17,11 @@ public class TriangularGrid implements Iterable<GridPosition> {
     }
 
     public void add_pos(GridPosition p) {
+
+        if (grid.containsKey(p.i) && grid.get(p.i).containsKey(p.j) &&  grid.get(p.i).get(p.j).containsKey(p.k)){
+            throw new RuntimeException("grid location " + p.i + " " + p.j + " " + p.k + " is not vacant!");
+        }
+
         if (!grid.containsKey(p.i)) {
             grid.put(p.i, new HashMap<>());
         }
@@ -35,7 +42,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
         return null;
     }
 
-    public void remove_hex(GridPosition p) {
+    public void remove_pos(GridPosition p) {
         grid.get(p.i).get(p.j).remove(p.k);
         size -= 1;
     }

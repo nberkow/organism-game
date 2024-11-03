@@ -62,7 +62,7 @@ public class ResourceBars {
             }
 
             game_board.shape_renderer.setColor(game_board.resource_colors_bright[res]);
-            int val = player.get_organism().resources[res];
+            int val = Math.min(6, player.get_organism().resources[res]);
 
             for (int s=0; s<val; s++){
                 space_n = s;

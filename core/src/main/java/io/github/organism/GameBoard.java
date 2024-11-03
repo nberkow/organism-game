@@ -111,7 +111,7 @@ public class GameBoard implements Disposable {
         ArrayList<int[]> starting_coords = randomize_starting_coords();
         assign_starting_hexes(starting_coords);
         player1_hud = new PlayerHud(this, players.get(human_player_names.get(0)), false);
-        player2_hud = new PlayerHud(this, players.get(human_player_names.get(0)),  true);
+        //player2_hud = new PlayerHud(this, players.get(human_player_names.get(0)),  true);
     }
 
     private void distribute_resources() {
@@ -132,7 +132,6 @@ public class GameBoard implements Disposable {
             i ++;
         }
     }
-
 
     public ArrayList<int[]> randomize_starting_coords(){
 
@@ -184,7 +183,7 @@ public class GameBoard implements Disposable {
             HMM m = new HMM(this);
             m.init(.5);
             Organism organism = new Organism(this);
-            HMM_Bot player = new HMM_Bot(
+            BotPlayer player = new BotPlayer(
                 this,
                 name,
                 organism,
@@ -217,7 +216,7 @@ public class GameBoard implements Disposable {
         grid_window.render();
 
         player1_hud.render();
-        player2_hud.render();
+        //player2_hud.render();
 
         for (PlayerSummaryDisplay p : player_summary_displays) {
             p.render();

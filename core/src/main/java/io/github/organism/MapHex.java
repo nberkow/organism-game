@@ -3,7 +3,7 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-public class MapHex implements MapElement {
+public class MapHex implements MapElement{
 
     final float RESOURCE_JITTER = 0.4f;
 
@@ -11,7 +11,7 @@ public class MapHex implements MapElement {
     GridPosition pos;
     MapVertex [] vertex_list;
 
-    int [] resources;
+    Integer [] resources;
     int total_resources;;
 
     public Player player;
@@ -21,7 +21,10 @@ public class MapHex implements MapElement {
     public MapHex(GridPosition p){
         pos = p;
         vertex_list = new MapVertex [] {null, null, null, null, null, null};
-        resources = new int[3];
+        resources = new Integer[3];
+        for (int i=0; i<3; i++) {
+            resources[i] = 0;
+        }
         total_resources = 0;
     }
 
@@ -110,7 +113,7 @@ public class MapHex implements MapElement {
         total_resources += 1;
     }
 
-    public int [] get_resources() {
+    public Integer [] get_resources() {
         return resources;
     }
 

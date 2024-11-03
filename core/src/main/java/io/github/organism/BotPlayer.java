@@ -2,7 +2,7 @@ package io.github.organism;
 
 import java.util.LinkedList;
 
-public class HMM_Bot implements Player{
+public class BotPlayer implements Player{
 
     public LinkedList<Integer> move_queue;
     public ActionHistory move_history;
@@ -10,11 +10,12 @@ public class HMM_Bot implements Player{
     public GameBoard game_board;
 
     public String player_name;
+
     public HMM model;
 
     public Organism organism;
 
-    public HMM_Bot(GameBoard gb, String name, Organism org, HMM m){
+    public BotPlayer(GameBoard gb, String name, Organism org, HMM m){
 
         game_board = gb;
         model = m;
@@ -36,7 +37,7 @@ public class HMM_Bot implements Player{
         if (!move_queue.isEmpty()) {
             return move_queue.remove();
         }
-        return compute_move();
+        return on_empty_queue();
     }
 
     public Integer on_empty_queue() {

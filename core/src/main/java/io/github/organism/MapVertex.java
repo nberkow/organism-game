@@ -4,18 +4,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MapVertex implements MapElement{
-
-    GridPosition pos;
-    ArrayList<MapHex> adjacent_hexes;
+    public GridPosition pos;
+    public HashSet<MapHex> adjacent_hexes;
+    public Set<MapVertex> adjacent_vertices;
 
     public Player player;
     public final char type = 'V';
 
     public MapVertex(GridPosition p) {
         pos = p;
-        adjacent_hexes = new ArrayList<>();
+        adjacent_hexes = new HashSet<>();
+        adjacent_vertices = new HashSet<>();
     }
 
     @Override
@@ -49,6 +52,16 @@ public class MapVertex implements MapElement{
             y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
             1);
         pos.grid.game_board.shape_renderer.end();
+    }
+
+    public ArrayList<MapHex> get_opponent_hexes(Player player) {
+        ArrayList<MapHex> opponent_hexes = new ArrayList<>();
+        for (MapHex hex : adjacent_hexes){
+            if (hex.player != null && hex.player != player){
+                opponent_hexes.add(hex);
+            }
+        }
+        return opponent_hexes;
     }
 
 }

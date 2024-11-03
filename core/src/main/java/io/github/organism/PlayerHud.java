@@ -54,6 +54,7 @@ public class PlayerHud {
     public void render(){
 
         /* debug rect
+
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         game_board.shape_renderer.setColor(Color.LIGHT_GRAY);
         game_board.shape_renderer.rect(
@@ -63,7 +64,6 @@ public class PlayerHud {
             HUD_HEIGHT);
         game_board.shape_renderer.end();
         */
-
 
         energy_bar.render();
         game_buttons.render();
