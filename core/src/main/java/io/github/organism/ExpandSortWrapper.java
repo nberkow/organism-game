@@ -56,10 +56,12 @@ public class ExpandSortWrapper implements Comparable<ExpandSortWrapper> {
         int [] resource_priority = current_player.get_organism().get_resource_priority();
 
         for (MapHex hex : vertex.adjacent_hexes) {
-            for (int i = 0; i < 3; i++) {
-                int val = resource_priority[hex.resources[i]];
-                if (val > resource_value) {
-                    resource_value = val;
+            if (hex.player != current_player) {
+                for (int i = 0; i < 3; i++) {
+                    int val = resource_priority[hex.resources[i]];
+                    if (val > resource_value) {
+                        resource_value = val; // consider only the best hex
+                    }
                 }
             }
         }

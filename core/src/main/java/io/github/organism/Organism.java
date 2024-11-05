@@ -64,8 +64,6 @@ public class Organism {
         - sort the unused vertexes by value and claim as many as possible
          */
 
-
-        energy = 6;
         // claim the best neighboring hexes
         int budget = (int) Math.ceil(energy / 2d);
         ArrayList<MapHex> neighboring_hexes = territory_hex.get_external_hex_layer(player);
@@ -94,7 +92,6 @@ public class Organism {
             ExpandSortWrapper w = new ExpandSortWrapper(neighbor, player);
             w.compute_value();
             w.compute_cost();
-            System.out.println(w.energy_cost);
             vertex_by_value.add(w);
         }
         vertex_by_value.sort(Collections.reverseOrder());
@@ -105,6 +102,68 @@ public class Organism {
                 budget -= w.energy_cost;
             }
         }
+    }
+
+    public void explore () {
+        /*
+        - find adjacent vertices
+        - sort by total resources available in 3 adjacent hexes
+        - claim the best
+        - re-sort and repeat until out of energy
+         */
+
+        energy = 5;
+        int budget = (int) Math.ceil(energy / 2d);
+
+        ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_layer(player);
+        ArrayList<ExploreSortWrapper> vertex_by_value = new ArrayList<>();
+
+        for (MapVertex neighbor : neighboring_vertexes) {
+            ExploreSortWrapper w = new ExploreSortWrapper(neighbor, player);
+            System.out.println("vertex " + w.vertex.pos.i + " " + w.vertex.pos.j + " " + w.vertex.pos.i);
+
+            for (MapHex hex : w.vertex.adjacent_hexes) {
+                System.out.println("adjacent hex");
+                for (int r=0; r<hex.total_resources; r++) {
+                    System.out.println(r + ": " + hex.resources[r]);
+                }
+            }
+            w.compute_value();
+            System.out.println("total: " + w.resource_value);
+
+            w.compute_cost();
+            vertex_by_value.add(w);
+        }
+
+        boolean made_update = true;
+
+        ExploreSortWrapper w;
+        while (budget > 0 && made_update && !vertex_by_value.isEmpty()){
+
+            made_update = false;
+
+            vertex_by_value.sort(Collections.reverseOrder());
+            w = vertex_by_value.remove(0);
+            while (w.energy_cost > budget && !vertex_by_value.isEmpty()){
+                w = vertex_by_value.remove(0);
+            }
+
+            if (w.energy_cost <= budget){
+                claim_vertex(w.vertex);
+                budget -= w.energy_cost;
+                energy -= w.energy_cost;
+                made_update = true;
+            }
+            for (MapVertex n : w.vertex.adjacent_vertices) {
+                if (n.player != player){
+                    ExploreSortWrapper nw = new ExploreSortWrapper(n, player);
+                    nw.compute_cost();
+                    nw.compute_value();
+                    vertex_by_value.add(nw);
+                }
+            }
+        }
+
     }
 
     public int [] get_resource_priority(){
@@ -122,10 +181,7 @@ public class Organism {
         return priority_by_resource_type;
     }
 
-    public void explore () {
 
-
-    }
 
 
     public void claim_hex(MapHex h){
@@ -178,6 +234,9 @@ public class Organism {
         if (move != null){
             if (move == 1) {
                 expand();
+            }
+            if (move == 2) {
+                explore();
             }
         }
     }
