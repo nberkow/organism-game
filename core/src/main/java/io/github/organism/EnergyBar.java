@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 public class EnergyBar {
 
 
-    final int MAX_ENERGY = 30;
+    final int MAX_ENERGY = 100;
     final float BORDER_WIDTH = 2f;
 
     final float TICK_SPACING = 1f;

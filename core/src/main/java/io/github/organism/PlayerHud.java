@@ -65,6 +65,9 @@ public class PlayerHud {
         game_board.shape_renderer.end();
         */
 
+        player.get_organism().update_resources();
+        player.get_organism().update_income();
+
         energy_bar.render();
         game_buttons.render();
         resource_bars.render();

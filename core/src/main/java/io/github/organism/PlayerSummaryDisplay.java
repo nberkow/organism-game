@@ -52,7 +52,7 @@ public class PlayerSummaryDisplay {
         game_board.shape_renderer.setColor(game_board.foreground_color);
         game_board.shape_renderer.rect(
             x, y + ENERGY_BAR_Y,
-            (float) (energy_bar_width),
+            (float) (energy_bar_width * (player.get_organism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
         game_board.shape_renderer.end();
     }

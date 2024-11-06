@@ -1,24 +1,23 @@
 package io.github.organism;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-public class Main extends ApplicationAdapter {
+public class OrganismGame extends Game {
 
     GameBoard game_board;
+
+    GameScreen game_screen;
     OrthographicCamera camera;
     FitViewport viewport;
     GameInputProcessor input_processor;
     double action_time = 1d;
-
     double queue_time = action_time / 40;
     boolean execute_actions = false;
-
     boolean queue_bot_actions = false;
-
     double action_clock = 0d;
     double queue_clock = 0d;
 
@@ -30,17 +29,20 @@ public class Main extends ApplicationAdapter {
         // Initialize the camera and viewport for the virtual game world dimensions
         camera = new OrthographicCamera();
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
-
         game_board = new GameBoard(this, new GameConfig());
-
         input_processor = new GameInputProcessor(game_board);
         Gdx.input.setInputProcessor(input_processor);
+
+        game_screen = new GameScreen(this);
+        setScreen(game_screen);
     }
 
     @Override
     public void render() {
         // Clear the screen and render the game board
-        ScreenUtils.clear(game_board.background_color);  // Clear with black color
+
+        ScreenUtils.clear(game_board.background_color);
+        super.render();
         input();
         logic();
         draw();
@@ -70,19 +72,16 @@ public class Main extends ApplicationAdapter {
 
     private void logic() {
 
-        //FIXME for (Player p : game_board.players.values()) {
-        for (String s : game_board.human_player_names){
-            Player p = game_board.players.get(s);
+        for (Player p : game_board.players.values()) {
             p.get_organism().update_resources();
             p.get_organism().update_income();
         }
 
-        /*
         if (queue_bot_actions) {
             for (String b : game_board.bot_player_names){
                 game_board.players.get(b).generate_and_queue();
             }
-        }*/
+        }
 
         // dequeue an action from each player's queue and execute it
         if (execute_actions) {

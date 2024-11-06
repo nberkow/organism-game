@@ -64,6 +64,13 @@ public class ResourceBars {
             game_board.shape_renderer.setColor(game_board.resource_colors_bright[res]);
             int val = Math.min(6, player.get_organism().resources[res]);
 
+            game_board.shape_renderer.circle(
+                x + inset + (RADIUS * 2),
+                y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
+                RADIUS / 2
+            );
+
+
             for (int s=0; s<val; s++){
                 space_n = s;
                 if (hud.parity == -1){

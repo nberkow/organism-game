@@ -34,26 +34,22 @@ public class Organism {
     }
 
     public void update_resources(){
-        resources = new Integer []   {0, 0, 0};
+        resources = new Integer [] {0, 0, 0};
 
         for (GridPosition pos : territory_hex){
             MapHex h = (MapHex) pos.content;
-            for (int i = 0; i < h.resources.length; i++) {
+            for (int i = 0; i < h.total_resources; i++) {
                 if (h.resources[i] != null){
                     resources[h.resources[i]]++;
                 }
             }
         }
-        for (int i = 0; i < resources.length; i++) {
-            if (resources[i] == 0){
-                resources[i] = 1;
-            }
-        }
     }
+
     public void update_income(){
         income = 1;
         for (int r=0; r<3; r++){
-            income *= Math.min(resources[r], 6);
+            income *= Math.min(Math.max(resources[r], 1), 6);
         }
     }
 
@@ -108,7 +104,7 @@ public class Organism {
             }
             r++;
         }
-
+        energy += income;
     }
 
 
@@ -287,8 +283,9 @@ public class Organism {
             if (move == 2) {
                 explore();
             }
-
         }
+        update_resources();
+        update_income();
     }
 }
 

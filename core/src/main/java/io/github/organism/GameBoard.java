@@ -73,9 +73,9 @@ public class GameBoard implements Disposable {
 
     int radius = 4;
     Random rng;
-    Main main;
+    OrganismGame main;
 
-    public GameBoard(Main main, GameConfig cfg) {
+    public GameBoard(OrganismGame main, GameConfig cfg) {
         this.main = main;
         this.config = cfg;
         seed = config.seed;
