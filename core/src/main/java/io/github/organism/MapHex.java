@@ -56,6 +56,7 @@ public class MapHex implements MapElement{
     public void render_players() {
 
         Color c;
+        pos.grid.game_board.shape_renderer.end();
         pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
 
         for (int v=0; v<6; v++){
@@ -87,8 +88,9 @@ public class MapHex implements MapElement{
 
         int n=0;
         pos.grid.game_board.shape_renderer.end();
-        pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+
         for (int r=0; r<total_resources; r++){
+            pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
             float i_f = pos.i + j[n];
             float j_f = pos.j + j[(n + 1) % 3];
             float k_f = pos.k + j[(n + 2) % 3];
@@ -96,16 +98,27 @@ public class MapHex implements MapElement{
             float x = (float) ((j_f * Math.pow(3f, 0.5f) / 2f) - (k_f * Math.pow(3f, 0.5f) / 2f));
             float y = i_f - j_f/2f - k_f/2f;
 
-            Color c = pos.grid.game_board.resource_colors_dark[resources[r]];
+            Color c1 = pos.grid.game_board.resource_colors_dark[resources[r]];
+            Color c2 = pos.grid.game_board.resource_colors_bright[resources[r]];
 
-            pos.grid.game_board.shape_renderer.setColor(c);
+            pos.grid.game_board.shape_renderer.setColor(c1);
             pos.grid.game_board.shape_renderer.circle(
                 x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
                 y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
                 RESOURCE_RADIUS * pos.grid.game_board.hex_side_len);
+
+            pos.grid.game_board.shape_renderer.end();
+            pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+            pos.grid.game_board.shape_renderer.setColor(c2);
+            pos.grid.game_board.shape_renderer.circle(
+                x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
+                y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
+                RESOURCE_RADIUS * pos.grid.game_board.hex_side_len);
+
+            pos.grid.game_board.shape_renderer.end();
             n++;
         }
-        pos.grid.game_board.shape_renderer.end();
+
     }
 
     public void add_resource(int resource_type) {

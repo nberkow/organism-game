@@ -1,10 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
-import java.util.HashMap;
-
 public class PlayerHud {
 
     final float BUTTON_SIDE_DIST = 50;
@@ -39,7 +34,7 @@ public class PlayerHud {
 
         if (player2) {
             parity = -1;
-            side = game_board.main.VIRTUAL_WIDTH - HUD_WIDTH;
+            side = game_board.game.VIRTUAL_WIDTH - HUD_WIDTH;
         }
         x = side + SIDE_BUFFER * parity;
         y = HUD_Y + SIDE_BUFFER;

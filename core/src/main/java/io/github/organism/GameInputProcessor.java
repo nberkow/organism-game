@@ -19,7 +19,7 @@ public class GameInputProcessor implements InputProcessor {
     public GameInputProcessor(GameBoard gb){
         game_board = gb;
 
-        held_button_base_freq = game_board.main.action_time / 2;
+        held_button_base_freq = .2;
         player_input_data = new HashMap<>();
         for (String player_name : game_board.human_player_names){
             player_input_data.put(player_name, new PlayerGameInputData());
@@ -67,7 +67,7 @@ public class GameInputProcessor implements InputProcessor {
 
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
-        game_board.main.viewport.unproject(touchPos);
+        game_board.game.viewport.unproject(touchPos);
         GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null){
@@ -92,7 +92,7 @@ public class GameInputProcessor implements InputProcessor {
 
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
-        game_board.main.viewport.unproject(touchPos);
+        game_board.game.viewport.unproject(touchPos);
         GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null) {

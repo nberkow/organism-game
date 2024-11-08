@@ -39,16 +39,32 @@ public class GameBoard implements Disposable {
     // Gameplay
     HashMap<String, Player> players = new HashMap<>();
 
-    Color [] player_colors = {Color.RED, Color.BLUE, Color.GREEN, Color.CORAL, Color.BROWN, Color.CHARTREUSE};
+    Color [] player_colors = {
+        new Color(0xB91372FF),
+        new Color(0xD497A7FF),
+        new Color(0x6EEB83FF),
+        new Color(0xE4FF1AFF),
+        new Color(0xE8AA14FF),
+        new Color(0xFF5714FF)
+    };
 
-    Color [] resource_colors_dark = {
+    Color [] player_light_colors = {
+        new Color(0xB9137255),
+        new Color(0xD497A755),
+        new Color(0x6EEB8355),
+        new Color(0xE4FF1A55),
+        new Color(0xE8AA1455),
+        new Color(0xFF571455)
+    };
+
+        Color [] resource_colors_dark = {
         new Color(0f, 0f, 0.3f, 0f),
         new Color(0f, 0.2f, 0f, 0f),
         new Color(0.2f, 0f, 0.2f, 0f)};
     Color [] resource_colors_bright = {
-        new Color(0f, 0f, 0.7f, 0f),
-        new Color(0f, 0.7f, 0f, 0f),
-        new Color(0.7f, 0f, 0.2f, 0f)};
+        new Color(0f, 0f, 0.5f, 0f),
+        new Color(0f, 0.4f, 0f, 0f),
+        new Color(0.4f, 0f, 0.2f, 0f)};
     GridWindow grid_window;
     UniverseMap universe_map;
     ArrayList<PlayerSummaryDisplay> player_summary_displays;
@@ -71,24 +87,26 @@ public class GameBoard implements Disposable {
     float center_x;
     float center_y;
 
-    int radius = 4;
+    int radius;
     Random rng;
-    OrganismGame main;
+    OrganismGame game;
 
-    public GameBoard(OrganismGame main, GameConfig cfg) {
-        this.main = main;
+    public GameBoard(OrganismGame game, GameConfig cfg) {
+        this.game = game;
         this.config = cfg;
+        this.batch = game.batch;
         seed = config.seed;
+        radius = config.radius;
 
-        shape_renderer = new ShapeRenderer();
-        hex_side_len = 110.0f/radius; // starting default
-        center_x = main.VIRTUAL_WIDTH / 2f;
-        center_y = this.main.VIRTUAL_HEIGHT / GRID_WINDOW_HEIGHT;
+        shape_renderer = game.shape_renderer;
+        hex_side_len = config.map_view_size_param/radius; // starting default
+        center_x = this.game.VIRTUAL_WIDTH / 2f;
+        center_y = this.game.VIRTUAL_HEIGHT / GRID_WINDOW_HEIGHT;
 
         rng = new Random();
         rng.setSeed(seed);
 
-        batch = new SpriteBatch();
+
         font = new BitmapFont();
         font.setColor(foreground_color);
 
@@ -110,8 +128,13 @@ public class GameBoard implements Disposable {
         create_player_summary_displays();
         ArrayList<int[]> starting_coords = randomize_starting_coords();
         assign_starting_hexes(starting_coords);
-        player1_hud = new PlayerHud(this, players.get(human_player_names.get(0)), false);
-        //player2_hud = new PlayerHud(this, players.get(human_player_names.get(0)),  true);
+        if (!human_player_names.isEmpty()) {
+            player1_hud = new PlayerHud(this, players.get(human_player_names.get(0)), false);
+        }
+        if (human_player_names.size() > 1) {
+            player2_hud = new PlayerHud(this, players.get(human_player_names.get(1)),  true);
+        }
+
     }
 
     private void distribute_resources() {
@@ -137,7 +160,7 @@ public class GameBoard implements Disposable {
 
         // randomly select a valid hex
         int r = radius / 2;
-        int a = rng.nextInt(r * 2 + 1) - r;
+        int a = rng.nextInt(r + 1) - r/2;
         int min_b = max(-r - a, -r);
         int max_b = min(r - a, r);
         int b = rng.nextInt(max_b - min_b) + min_b;
@@ -211,12 +234,17 @@ public class GameBoard implements Disposable {
 
     public void render() {
         ScreenUtils.clear(background_color);
-        batch.setProjectionMatrix(this.main.viewport.getCamera().combined);
-        shape_renderer.setProjectionMatrix(this.main.viewport.getCamera().combined);
+        batch.setProjectionMatrix(this.game.viewport.getCamera().combined);
+        shape_renderer.setProjectionMatrix(this.game.viewport.getCamera().combined);
         grid_window.render();
 
-        player1_hud.render();
-        //player2_hud.render();
+        if (player1_hud != null) {
+            player1_hud.render();
+        }
+
+        if (player2_hud != null) {
+            player2_hud.render();
+        }
 
         for (PlayerSummaryDisplay p : player_summary_displays) {
             p.render();
