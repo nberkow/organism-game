@@ -19,6 +19,9 @@ public class GameBoard implements Disposable {
 
     // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.7f;
+    public boolean show_data;
+
+    float grid_window_y;
     final int MAX_QUEUED_ACTIONS = 20;
     final float PLAYER_SUMMARY_X = 30;
     final float PLAYER_SUMMARY_Y = 400;
@@ -97,15 +100,16 @@ public class GameBoard implements Disposable {
         this.batch = game.batch;
         seed = config.seed;
         radius = config.radius;
+        grid_window_y = GRID_WINDOW_HEIGHT;
+        show_data = true;
 
         shape_renderer = game.shape_renderer;
         hex_side_len = config.map_view_size_param/radius; // starting default
         center_x = this.game.VIRTUAL_WIDTH / 2f;
-        center_y = this.game.VIRTUAL_HEIGHT / GRID_WINDOW_HEIGHT;
+        center_y = this.game.VIRTUAL_HEIGHT / grid_window_y;
 
         rng = new Random();
         rng.setSeed(seed);
-
 
         font = new BitmapFont();
         font.setColor(foreground_color);
@@ -134,7 +138,6 @@ public class GameBoard implements Disposable {
         if (human_player_names.size() > 1) {
             player2_hud = new PlayerHud(this, players.get(human_player_names.get(1)),  true);
         }
-
     }
 
     private void distribute_resources() {
@@ -246,8 +249,10 @@ public class GameBoard implements Disposable {
             player2_hud.render();
         }
 
-        for (PlayerSummaryDisplay p : player_summary_displays) {
-            p.render();
+        if (show_data) {
+            for (PlayerSummaryDisplay p : player_summary_displays) {
+                p.render();
+            }
         }
     }
 
@@ -256,31 +261,5 @@ public class GameBoard implements Disposable {
         // Dispose of resources properly
         if (shape_renderer != null) shape_renderer.dispose();
         // Clean up any other resources like textures or sounds here
-    }
-
-    public void enqueue_action(String player_name, int button_val) {
-        // run one of the three actions depending on the button val
-        Player player = players.get(player_name);
-        player.queue_move(button_val);
-    }
-
-    public void run_actions_from_queue(){
-        for (String name : players.keySet()){
-            Player player = players.get(name);
-
-            Organism player_organism = player.get_organism();
-            Integer queue_val = player.get_move();
-
-            if (queue_val == 0){
-                player_organism.extract();
-            } else {
-            if (queue_val == 1){
-                player_organism.expand();
-            } else {
-            if (queue_val == 2) {
-                player_organism.explore();
-            }}}
-
-        }
     }
 }

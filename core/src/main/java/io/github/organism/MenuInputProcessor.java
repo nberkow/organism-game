@@ -103,4 +103,7 @@ public class MenuInputProcessor implements InputProcessor {
     public boolean scrolled(float amountX, float amountY) {
         return false;
     }
+
+    public void update_timers(float deltaTime) {
+    }
 }

@@ -7,15 +7,21 @@ public class GameScreen implements Screen {
 
     OrganismGame game;
     GameBoard game_board;
+    GameInputProcessor input_processor;
 
+    GameConfig cfg;
     GameOrchestrator orchestrator;
     public GameScreen(OrganismGame g){
         game = g;
-        game_board = g.game_board;
+        cfg = new GameConfig();
+        game_board = new GameBoard(game, cfg);
         orchestrator = new GameOrchestrator(game_board);
+        input_processor = new GameInputProcessor(this);
     }
 
     private void input() {
+        input_processor.update_timers(Gdx.graphics.getDeltaTime());
+        input_processor.update_queues_with_input();
         orchestrator.update_timers_and_flags();
     }
 

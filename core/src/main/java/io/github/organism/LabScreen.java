@@ -3,6 +3,9 @@ package io.github.organism;
 import com.badlogic.gdx.Screen;
 
 public class LabScreen implements Screen {
+    public LabScreen(OrganismGame organismGame) {
+    }
+
     /**
      *
      */

@@ -9,15 +9,14 @@ public class GameInputProcessor implements InputProcessor {
     GameBoard game_board;
     final double BUTTON_HOLD_ACTIVATION_TIME = .2d;
     final double MIN_BETWEEN_PRESS_TIME = .1d;
-
+    GameScreen screen;
     double held_button_base_freq;
-
-    int max_denom = 8;
 
     HashMap<String, PlayerGameInputData> player_input_data;
 
-    public GameInputProcessor(GameBoard gb){
-        game_board = gb;
+    public GameInputProcessor(GameScreen screen){
+        this.screen = screen;
+        game_board = screen.game_board;
 
         held_button_base_freq = .2;
         player_input_data = new HashMap<>();

@@ -15,7 +15,6 @@ public class OrganismGame extends Game {
     MenuScreen menu_screen;
     LabScreen lab_screen;
     SpriteBatch batch;
-    ResourceDistributor resource_distributor;
     GameBoard game_board;
     OrthographicCamera camera;
     FitViewport viewport;
@@ -31,9 +30,11 @@ public class OrganismGame extends Game {
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
         batch = new SpriteBatch();
         shape_renderer = new ShapeRenderer();
-        game_board = new GameBoard(this, new GameConfig());
+
+        menu_screen = new MenuScreen(this);
         game_screen = new GameScreen(this);
-        input_processor = new GameInputProcessor(game_board);
+        lab_screen = new LabScreen(this);
+
         Gdx.input.setInputProcessor(input_processor);
         this.setScreen(game_screen);
 
@@ -43,22 +44,6 @@ public class OrganismGame extends Game {
     public void render() {
         // Clear the screen and render the game board
         super.render();
-        input();
-    }
-
-    private void input() {
-        // handle input
-        input_processor.update_timers(Gdx.graphics.getDeltaTime());
-        input_processor.update_queues_with_input();
-
-    }
-
-    private void logic() {
-
-    }
-
-    private void draw() {
-        // Ensure the camera is updated before drawing
     }
 
     @Override

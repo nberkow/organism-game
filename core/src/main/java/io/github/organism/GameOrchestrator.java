@@ -30,6 +30,7 @@ public class GameOrchestrator {
             queue_bot_actions = true;
             queue_clock = queue_clock % queue_time;
         }
+
     }
 
     public void update_players() {
@@ -47,6 +48,32 @@ public class GameOrchestrator {
         // dequeue an action from each player's queue and execute it
         if (execute_actions) {
             dequeue_and_execute();
+        }
+    }
+
+    public void enqueue_action(String player_name, int button_val) {
+        // run one of the three actions depending on the button val
+        Player player = game_board.players.get(player_name);
+        player.queue_move(button_val);
+    }
+
+    public void run_actions_from_queue(){
+        for (String name : game_board.players.keySet()){
+            Player player = game_board.players.get(name);
+
+            Organism player_organism = player.get_organism();
+            Integer queue_val = player.get_move();
+
+            if (queue_val == 0){
+                player_organism.extract();
+            } else {
+                if (queue_val == 1){
+                    player_organism.expand();
+                } else {
+                    if (queue_val == 2) {
+                        player_organism.explore();
+                    }}}
+
         }
     }
 
