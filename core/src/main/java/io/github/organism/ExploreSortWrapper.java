@@ -18,53 +18,67 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
     }
 
 
-    public void compute_vertex_value() {
-        resource_value = 0;
+    public int compute_vertex_value(MapVertex vertex) {
+        int value = 0;
         int [] resource_priority = current_player.get_organism().get_resource_priority();
 
-        int vertexes_already_claimed;
+        // A vertex is valued by the resources of its most unclaimed hex
+        int best_unclaimed_count = 0;
+        int total_unclaimed_count = 0;
+        int best_hex_val = 0;
+        int total_val = 0;
         for (MapHex hex : vertex.adjacent_hexes) {
-            vertexes_already_claimed = 0;
+
+            // count the number of unclaimed vertexes
+            int vertexes_unclaimed = 6;
             for (MapVertex v : hex.vertex_list){
                 if (v.player == current_player){
-                    vertexes_already_claimed += 1;
+                    vertexes_unclaimed -= 1;
                 }
             }
-            //System.out.println("adjacent hex " + h + " tot: " + hex.total_resources);
+            total_unclaimed_count += vertexes_unclaimed;
 
-            // ignore value of hexes that already have 2 owned vertices
-            if (vertexes_already_claimed <= 3) {
-                for (int i = 0; i < hex.total_resources; i++) {
-                    int val = resource_priority[hex.resources[i]];
-                    resource_value += val * (6 - vertexes_already_claimed); // consider all adjacent hexes
+            // calculate the score to break ties
+            int hex_val = 0;
+            for (int i=0; i<hex.total_resources; i++){
+                hex_val += resource_priority[hex.resources[i]];
+            }
+            total_val += hex_val;
+
+            if (vertexes_unclaimed == best_unclaimed_count) {
+                if (hex_val > best_hex_val) {
+                    best_hex_val = hex_val;
                 }
             }
-            else {
-                resource_value = -1;
+
+            if (vertexes_unclaimed > best_unclaimed_count) {
+                best_unclaimed_count = vertexes_unclaimed;
+                best_hex_val = hex_val;
             }
         }
+        return 2 * (best_unclaimed_count) * (best_hex_val + 1) + (total_unclaimed_count);
     }
 
-    public void compute_vertex_cost() {
-        energy_cost += ENERGY_TO_CLAIM_NEUTRAL_VERTEX;
+    public int compute_vertex_cost(MapVertex vertex) {
+        int cost = ENERGY_TO_CLAIM_NEUTRAL_VERTEX;
         if (vertex.player != null) {
-            energy_cost += ENERGY_TO_CLAIM_OPPONENT_VERTEX;
+            cost += ENERGY_TO_CLAIM_OPPONENT_VERTEX;
         }
 
         for (MapHex hex : vertex.adjacent_hexes) {
             if (hex.player != null) {
-                energy_cost += ENERGY_TO_BREAK_HEX;
+                cost += ENERGY_TO_BREAK_HEX;
             }
         }
+        return cost;
     }
 
-
-    public void compute_value() {
-        compute_vertex_value();
+    public int compute_value(MapVertex vertex) {
+        return compute_vertex_value(vertex);
     }
 
-    public void compute_cost() {
-        compute_vertex_cost();
+    public int compute_cost(MapVertex vertex) {
+        return compute_vertex_cost(vertex);
     }
 
     @Override

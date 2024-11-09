@@ -169,27 +169,49 @@ public class Organism {
 
         int budget = (int) Math.ceil(energy / 2d);
 
-        ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_layer(player);
-        ArrayList<ExploreSortWrapper> vertex_by_value = new ArrayList<>();
+        ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_laye 
 
+        // need to sort first
+        //FIXME - figure out order of operations
+        // best value, then lowest cost, unique net direction
+        ArrayList<Integer> key_list = new ArrayList<>();
         for (MapVertex neighbor : neighboring_vertexes) {
             ExploreSortWrapper w = new ExploreSortWrapper(neighbor, player);
-            w.compute_value();
-            w.compute_cost();
-            vertex_by_value.add(w);
+            w.resource_value = w.compute_value(w.vertex);
+            w.energy_cost = w.compute_cost(w.vertex);
+            if (!vertex_by_value.containsKey(w.resource_value)){
+                vertex_by_value.put(w.resource_value, new ArrayList<>());
+                key_list.add(w.resource_value);
+            }
+            vertex_by_value.get(w.resource_value).add(w);
         }
 
-        boolean made_update = true;
+        if (!vertex_by_value.isEmpty()){
+            vertex_by_value.sort(Collections.reverseOrder());
+            ExploreSortWrapper w = vertex_by_value.get(0);
+            int target_val = w.resource_value;
+            int i = 1;
+            while (w.resource_value == target_val && i < vertex_by_value.size()) {
+                w = vertex_by_value.get(i);
+                i++;
+            }
+        }
+
 
         ExploreSortWrapper w;
+        boolean made_update = true;
+
         while (budget > 0 && made_update && !vertex_by_value.isEmpty()){
 
             made_update = false;
 
-            vertex_by_value.sort(Collections.reverseOrder());
-            w = vertex_by_value.remove(0);
-            while (w.energy_cost > budget && !vertex_by_value.isEmpty()){
-                w = vertex_by_value.remove(0);
+            int i = 0;
+            w = vertex_by_value.get(i);
+
+            // skip vertexes that are out of budget
+            while (w.energy_cost > budget && i < vertex_by_value.size()){
+                w = vertex_by_value.get(i);
+                i++;
             }
 
             if (w.energy_cost <= budget){
@@ -197,17 +219,18 @@ public class Organism {
                 budget -= w.energy_cost;
                 energy -= w.energy_cost;
                 made_update = true;
+                vertex_by_value.remove(i);
             }
+
             for (MapVertex n : w.vertex.adjacent_vertices) {
                 if (n.player != player){
                     ExploreSortWrapper nw = new ExploreSortWrapper(n, player);
-                    nw.compute_cost();
-                    nw.compute_value();
+                    nw.compute_cost(nw.vertex);
+                    nw.compute_value(nw.vertex);
                     vertex_by_value.add(nw);
                 }
             }
         }
-
     }
 
     public int [] get_resource_priority(){
@@ -219,7 +242,7 @@ public class Organism {
 
         int [] priority_by_resource_type = new int[3];
         for (int i=0; i<3; i++){
-            priority_by_resource_type[i] = (6 - Math.min(6, resources[(i+1)%3])) * (6 - Math.min(6, resources[(i+2)%3]));
+            priority_by_resource_type[i] = Math.max(0, 6 - resources[i]) * Math.min(6, resources[(i+1)%3] + 1) * Math.min(6, resources[(i+2)%3] + 1);
         }
         return priority_by_resource_type;
     }
