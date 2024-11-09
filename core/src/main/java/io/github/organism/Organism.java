@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Organism {
@@ -130,6 +131,7 @@ public class Organism {
         }
         hex_by_value.sort(Collections.reverseOrder());
 
+
         for (ExpandSortWrapper w : hex_by_value){
             if (w.energy_cost <= budget) {
                 claim_hex((MapHex) w.map_element);
@@ -212,13 +214,12 @@ public class Organism {
 
         /*
         For each resource type find the income gain based on the other two.
-
         return the result as an array indexed by resource type
          */
 
         int [] priority_by_resource_type = new int[3];
         for (int i=0; i<3; i++){
-            priority_by_resource_type[i] = Math.min(6, resources[(i+1)%3]) * Math.min(6, resources[(i+2)%3]);
+            priority_by_resource_type[i] = (6 - Math.min(6, resources[(i+1)%3])) * (6 - Math.min(6, resources[(i+2)%3]));
         }
         return priority_by_resource_type;
     }

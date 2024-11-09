@@ -41,7 +41,7 @@ public class GameOrchestrator {
 
         if (queue_bot_actions) {
             for (String b : game_board.bot_player_names){
-                game_board.players.get(b).generate_and_queue();
+                //game_board.players.get(b).generate_and_queue();
             }
         }
 
@@ -55,26 +55,6 @@ public class GameOrchestrator {
         // run one of the three actions depending on the button val
         Player player = game_board.players.get(player_name);
         player.queue_move(button_val);
-    }
-
-    public void run_actions_from_queue(){
-        for (String name : game_board.players.keySet()){
-            Player player = game_board.players.get(name);
-
-            Organism player_organism = player.get_organism();
-            Integer queue_val = player.get_move();
-
-            if (queue_val == 0){
-                player_organism.extract();
-            } else {
-                if (queue_val == 1){
-                    player_organism.expand();
-                } else {
-                    if (queue_val == 2) {
-                        player_organism.explore();
-                    }}}
-
-        }
     }
 
     private void dequeue_and_execute(){

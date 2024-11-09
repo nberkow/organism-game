@@ -16,17 +16,18 @@ public class GameScreen implements Screen {
         cfg = new GameConfig();
         game_board = new GameBoard(game, cfg);
         orchestrator = new GameOrchestrator(game_board);
-        input_processor = new GameInputProcessor(this);
     }
 
     private void input() {
         input_processor.update_timers(Gdx.graphics.getDeltaTime());
         input_processor.update_queues_with_input();
+        orchestrator.update_players();
         orchestrator.update_timers_and_flags();
     }
 
     private void logic() {
-        orchestrator.update_players();
+
+
     }
 
     private void draw() {

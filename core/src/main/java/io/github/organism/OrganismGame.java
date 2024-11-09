@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class OrganismGame extends Game {
-
     ShapeRenderer shape_renderer;
     GameScreen game_screen;
     MenuScreen menu_screen;
@@ -19,7 +18,6 @@ public class OrganismGame extends Game {
     OrthographicCamera camera;
     FitViewport viewport;
     GameInputProcessor input_processor;
-
     public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
     public final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
 
@@ -35,7 +33,10 @@ public class OrganismGame extends Game {
         game_screen = new GameScreen(this);
         lab_screen = new LabScreen(this);
 
+        input_processor = new GameInputProcessor(game_screen);
+        game_screen.input_processor = input_processor;
         Gdx.input.setInputProcessor(input_processor);
+
         this.setScreen(game_screen);
 
     }

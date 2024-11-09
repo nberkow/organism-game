@@ -65,6 +65,7 @@ public class GameInputProcessor implements InputProcessor {
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
 
         // Convert screen coordinates to game world coordinates
+
         Vector2 touchPos = new Vector2(screenX, screenY);
         game_board.game.viewport.unproject(touchPos);
         GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
@@ -73,6 +74,7 @@ public class GameInputProcessor implements InputProcessor {
 
             String player_name = game_board.human_player_names.get(button_data.player - 1);
             PlayerGameInputData input_data = player_input_data.get(player_name);
+
             if (input_data.time_not_held > MIN_BETWEEN_PRESS_TIME) {
                 if (!input_data.holding_button) {
                     input_data.button_val = button_data.value;
@@ -136,9 +138,7 @@ public class GameInputProcessor implements InputProcessor {
                     input_data.holding_button = true;
                 }
             }
-
             input_data.time_not_held += time_delta;
-
         }
     }
 
