@@ -1,16 +1,10 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.ui.List;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class Organism {
     public int income;
@@ -162,76 +156,78 @@ public class Organism {
     public void explore () {
         /*
         - find adjacent vertices
-        - sort by total resources available in 3 adjacent hexes
-        - claim the best
-        - re-sort and repeat until out of energy
+        - compute value based on surrounding hexes
+        - prioritize
+        -- high value hexes
+        -- unexplored hexes
          */
 
+        // spend up to half the player's energy per turn
         int budget = (int) Math.ceil(energy / 2d);
+        System.out.println(budget);
 
-        ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_laye 
+        // get all neighboring vertexes
+        ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_layer(player);
+        if (neighboring_vertexes.isEmpty()) return;
 
-        // need to sort first
-        //FIXME - figure out order of operations
-        // best value, then lowest cost, unique net direction
-        ArrayList<Integer> key_list = new ArrayList<>();
-        for (MapVertex neighbor : neighboring_vertexes) {
-            ExploreSortWrapper w = new ExploreSortWrapper(neighbor, player);
-            w.resource_value = w.compute_value(w.vertex);
+        // Wrap the vertexes and compute their cost and value. Ignore anything out of budget
+        ArrayList<ExploreSortWrapper> explore_vertex_priority = new ArrayList<>();
+        for (MapVertex v : neighboring_vertexes){
+
+            ExploreSortWrapper w = new ExploreSortWrapper(v, player);
             w.energy_cost = w.compute_cost(w.vertex);
-            if (!vertex_by_value.containsKey(w.resource_value)){
-                vertex_by_value.put(w.resource_value, new ArrayList<>());
-                key_list.add(w.resource_value);
-            }
-            vertex_by_value.get(w.resource_value).add(w);
-        }
-
-        if (!vertex_by_value.isEmpty()){
-            vertex_by_value.sort(Collections.reverseOrder());
-            ExploreSortWrapper w = vertex_by_value.get(0);
-            int target_val = w.resource_value;
-            int i = 1;
-            while (w.resource_value == target_val && i < vertex_by_value.size()) {
-                w = vertex_by_value.get(i);
-                i++;
+            System.out.println(w.energy_cost);
+            if (w.energy_cost <= budget) {
+                w.compute_and_store_vertex_properties(w.vertex);
+                explore_vertex_priority.add(w);
             }
         }
 
+        boolean vertex_claimed = true; // starts true
+        ArrayList<ExploreSortWrapper> to_remove;
+        System.out.println(vertex_claimed + " " + explore_vertex_priority.size() + " " + budget);
+        while (vertex_claimed && !explore_vertex_priority.isEmpty() && budget > 0) {
+            vertex_claimed = false;
 
-        ExploreSortWrapper w;
-        boolean made_update = true;
-
-        while (budget > 0 && made_update && !vertex_by_value.isEmpty()){
-
-            made_update = false;
-
-            int i = 0;
-            w = vertex_by_value.get(i);
-
-            // skip vertexes that are out of budget
-            while (w.energy_cost > budget && i < vertex_by_value.size()){
-                w = vertex_by_value.get(i);
-                i++;
-            }
-
-            if (w.energy_cost <= budget){
-                claim_vertex(w.vertex);
-                budget -= w.energy_cost;
-                energy -= w.energy_cost;
-                made_update = true;
-                vertex_by_value.remove(i);
-            }
-
-            for (MapVertex n : w.vertex.adjacent_vertices) {
-                if (n.player != player){
-                    ExploreSortWrapper nw = new ExploreSortWrapper(n, player);
-                    nw.compute_cost(nw.vertex);
-                    nw.compute_value(nw.vertex);
-                    vertex_by_value.add(nw);
+            // filter over-budget
+            to_remove = new ArrayList<>();
+            for (int i = 0; i<explore_vertex_priority.size(); i++){
+                if (explore_vertex_priority.get(i).energy_cost > budget) {
+                    to_remove.add(explore_vertex_priority.get(i));
                 }
             }
+
+
+            explore_vertex_priority.sort(Collections.reverseOrder());
+
+            // dequeue and claim
+            int to_try = Math.min(explore_vertex_priority.size(), 2);
+            for (int i=0; i<to_try; i++) {
+                ExploreSortWrapper w = explore_vertex_priority.remove(0);
+                if (w.energy_cost <= budget) {
+                    claim_vertex(w.vertex);
+                    vertex_claimed = true;
+                    budget -= w.energy_cost;
+                    energy -= w.energy_cost;
+                    to_remove.add(w);
+                    for (MapVertex n : w.vertex.adjacent_vertices) {
+                        if (n.player != player) {
+                            ExploreSortWrapper x = new ExploreSortWrapper(n, player);
+                            x.energy_cost = x.compute_cost(n);
+                            x.compute_and_store_vertex_properties(n);
+                            explore_vertex_priority.add(x);
+                        }
+                    }
+                }
+            }
+
+
+            explore_vertex_priority.removeAll(to_remove);
+
+
         }
     }
+
 
     public int [] get_resource_priority(){
 

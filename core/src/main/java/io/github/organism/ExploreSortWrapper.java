@@ -1,62 +1,58 @@
 package io.github.organism;
 
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
     final int ENERGY_TO_CLAIM_NEUTRAL_VERTEX = 1;
     final int ENERGY_TO_CLAIM_OPPONENT_VERTEX = 1;
     final int ENERGY_TO_BREAK_HEX = 3;
     MapVertex vertex;
     Player current_player;
-    Integer resource_value;
+    Integer resource_value; // takes into account unclaimed-ness of hexes
     Integer energy_cost;
+
+    Integer unclaimed_neighbors;
+    Integer undiscovered_value;
+
 
     public ExploreSortWrapper(MapVertex v, Player p){
         vertex = v;
         current_player = p;
-        resource_value = 0;
         energy_cost = 0;
+        unclaimed_neighbors = 0;
+        undiscovered_value = 0;
     }
 
 
-    public int compute_vertex_value(MapVertex vertex) {
-        int value = 0;
-        int [] resource_priority = current_player.get_organism().get_resource_priority();
+    public void compute_and_store_vertex_properties(MapVertex vertex) {
 
-        // A vertex is valued by the resources of its most unclaimed hex
-        int best_unclaimed_count = 0;
-        int total_unclaimed_count = 0;
-        int best_hex_val = 0;
-        int total_val = 0;
+        // count up the number of unclaimed vertexes in the surrounding hexes
+
+        // count the resources in hexes with zero owned vertexes
+
+        int [] resource_priority = current_player.get_organism().get_resource_priority();
+        Set<MapVertex> unique_neighbors = new HashSet<>();
+        resource_value = 0;
+
+        int undiscovered_vertexes;
         for (MapHex hex : vertex.adjacent_hexes) {
 
-            // count the number of unclaimed vertexes
-            int vertexes_unclaimed = 6;
-            for (MapVertex v : hex.vertex_list){
-                if (v.player == current_player){
-                    vertexes_unclaimed -= 1;
-                }
-            }
-            total_unclaimed_count += vertexes_unclaimed;
-
-            // calculate the score to break ties
-            int hex_val = 0;
-            for (int i=0; i<hex.total_resources; i++){
-                hex_val += resource_priority[hex.resources[i]];
-            }
-            total_val += hex_val;
-
-            if (vertexes_unclaimed == best_unclaimed_count) {
-                if (hex_val > best_hex_val) {
-                    best_hex_val = hex_val;
+            undiscovered_vertexes = 0;
+            for (MapVertex v : hex.vertex_list) {
+                if (v.player != current_player) {
+                    unique_neighbors.add(v);
+                    undiscovered_vertexes++;
                 }
             }
 
-            if (vertexes_unclaimed > best_unclaimed_count) {
-                best_unclaimed_count = vertexes_unclaimed;
-                best_hex_val = hex_val;
+            for (int i=0; i<hex.total_resources; i++) {
+                resource_value += (int) Math.pow(resource_priority[hex.resources[i]], undiscovered_vertexes);
             }
         }
-        return 2 * (best_unclaimed_count) * (best_hex_val + 1) + (total_unclaimed_count);
+        unclaimed_neighbors = Math.max(9, unique_neighbors.size());
     }
 
     public int compute_vertex_cost(MapVertex vertex) {
@@ -73,16 +69,15 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
         return cost;
     }
 
-    public int compute_value(MapVertex vertex) {
-        return compute_vertex_value(vertex);
-    }
-
     public int compute_cost(MapVertex vertex) {
         return compute_vertex_cost(vertex);
     }
 
     @Override
     public int compareTo(ExploreSortWrapper other_wrapper) {
+        if (!Objects.equals(unclaimed_neighbors, other_wrapper.unclaimed_neighbors)) {
+            return unclaimed_neighbors.compareTo(other_wrapper.unclaimed_neighbors);
+        }
         return resource_value.compareTo(other_wrapper.resource_value);
     }
 
