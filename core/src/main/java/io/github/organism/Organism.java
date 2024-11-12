@@ -164,7 +164,6 @@ public class Organism {
 
         // spend up to half the player's energy per turn
         int budget = (int) Math.ceil(energy / 2d);
-        System.out.println(budget);
 
         // get all neighboring vertexes
         ArrayList<MapVertex> neighboring_vertexes = territory_vertex.get_external_vertex_layer(player);
@@ -176,7 +175,6 @@ public class Organism {
 
             ExploreSortWrapper w = new ExploreSortWrapper(v, player);
             w.energy_cost = w.compute_cost(w.vertex);
-            System.out.println(w.energy_cost);
             if (w.energy_cost <= budget) {
                 w.compute_and_store_vertex_properties(w.vertex);
                 explore_vertex_priority.add(w);
@@ -185,7 +183,6 @@ public class Organism {
 
         boolean vertex_claimed = true; // starts true
         ArrayList<ExploreSortWrapper> to_remove;
-        System.out.println(vertex_claimed + " " + explore_vertex_priority.size() + " " + budget);
         while (vertex_claimed && !explore_vertex_priority.isEmpty() && budget > 0) {
             vertex_claimed = false;
 

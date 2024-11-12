@@ -9,13 +9,11 @@ public class UniverseMap {
 
     TriangularGrid hex_grid;
     TriangularGrid vertex_grid;
-
     GameBoard game_board;
-
     int grid_radius;
 
     final int [][] VERTEX_POS = {
-        { 1, 0, 0},
+        { 1, 0,  0},
         { 0, 0, -1},
         { 0, 1, 0},
         { -1, 0, 0},

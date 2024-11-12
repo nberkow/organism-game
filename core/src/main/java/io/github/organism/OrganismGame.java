@@ -13,10 +13,14 @@ public class OrganismGame extends Game {
     GameScreen game_screen;
     MenuScreen menu_screen;
     LabScreen lab_screen;
+
+    MapSettingsScreen map_edit_screen;
     SpriteBatch batch;
     GameBoard game_board;
     OrthographicCamera camera;
     FitViewport viewport;
+
+    MapSettingsInputProcessor map_input_processor;
     GameInputProcessor input_processor;
     public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
     public final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
@@ -32,12 +36,17 @@ public class OrganismGame extends Game {
         menu_screen = new MenuScreen(this);
         game_screen = new GameScreen(this);
         lab_screen = new LabScreen(this);
+        map_edit_screen = new MapSettingsScreen(this);
 
         input_processor = new GameInputProcessor(game_screen);
+        map_input_processor = new MapSettingsInputProcessor(map_edit_screen);
         game_screen.input_processor = input_processor;
-        Gdx.input.setInputProcessor(input_processor);
 
-        this.setScreen(game_screen);
+        //Gdx.input.setInputProcessor(input_processor);
+        //this.setScreen(game_screen);
+
+        Gdx.input.setInputProcessor(map_input_processor);
+        this.setScreen(map_edit_screen);
 
     }
 

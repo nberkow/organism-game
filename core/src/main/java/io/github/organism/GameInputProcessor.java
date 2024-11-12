@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
@@ -47,14 +48,57 @@ public class GameInputProcessor implements InputProcessor {
 
     public boolean keyDown (int keycode) {
 
-        PlayerGameInputData player_input = new PlayerGameInputData();
-        // TODO: populate player_input
-        // match downstream with click behavior
+
+        int p = 0;
+        if (keycode == Input.Keys.K || keycode == Input.Keys.L || keycode == Input.Keys.SEMICOLON) {
+            p = 1;
+        }
+
+        int key_val = 0;
+        if (keycode == Input.Keys.S || keycode == Input.Keys.L) {
+            key_val = 1;
+        }
+        if (game_board.human_player_names.size() == 2 && (keycode == Input.Keys.D || keycode == Input.Keys.K || keycode == Input.Keys.SEMICOLON)) {
+            key_val = 2;
+        }
+
+        String player_name = game_board.human_player_names.get(p);
+        PlayerGameInputData input_data = player_input_data.get(player_name);
+
+        input_data.button_val = key_val;
+        input_data.button_input_ready = false;
+        input_data.time_held = 0d;
+        input_data.touched_button = true;
+        input_data.time_not_held = input_data.time_not_held % MIN_BETWEEN_PRESS_TIME;
 
         return false;
     }
 
     public boolean keyUp (int keycode) {
+
+        int p = 0;
+        if (keycode == Input.Keys.K || keycode == Input.Keys.L || keycode == Input.Keys.SEMICOLON) {
+            p = 1;
+        }
+
+        int key_val = 0;
+        if (keycode == Input.Keys.S || keycode == Input.Keys.L) {
+            key_val = 1;
+        }
+        if (keycode == Input.Keys.D || keycode == Input.Keys.K) {
+            key_val = 2;
+        }
+
+        String player_name = game_board.human_player_names.get(p);
+        PlayerGameInputData input_data = player_input_data.get(player_name);
+
+        input_data.button_val = key_val;
+        input_data.button_input_ready = true;
+        input_data.time_held = 0d;
+        input_data.touched_button = false;
+        input_data.holding_button = false;
+        input_data.time_not_held = 0;
+
         return false;
     }
 
@@ -78,10 +122,11 @@ public class GameInputProcessor implements InputProcessor {
             if (input_data.time_not_held > MIN_BETWEEN_PRESS_TIME) {
                 if (!input_data.holding_button) {
                     input_data.button_val = button_data.value;
-                    input_data.button_input_ready = false;
                     input_data.time_held = 0d;
+                    input_data.holding_button = false;
                     input_data.touched_button = true;
-                    input_data.time_not_held = input_data.time_not_held % MIN_BETWEEN_PRESS_TIME;
+                    input_data.time_not_held = 0d;
+                    input_data.button_input_ready = false;
                 }
             }
         }

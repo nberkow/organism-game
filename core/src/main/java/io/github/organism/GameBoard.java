@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Disposable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class GameBoard implements Disposable {
@@ -126,6 +127,7 @@ public class GameBoard implements Disposable {
         all_player_names = new ArrayList<>();
 
         // Setup the players based on the config
+
         distribute_resources();
         create_human_players();
         create_bot_players();
