@@ -1,12 +1,17 @@
 package io.github.organism;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
 
 public class MapSettingsInputProcessor implements InputProcessor {
 
     MapSettingsScreen map_screen;
+
+    String dragging_slider;
     public MapSettingsInputProcessor(MapSettingsScreen screen) {
+
         map_screen = screen;
+        dragging_slider = null;
     }
 
     /**
@@ -45,6 +50,13 @@ public class MapSettingsInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+        Vector2 touchPos = new Vector2(screenX, screenY);
+        map_screen.game_board.game.viewport.unproject(touchPos);
+        dragging_slider = map_screen.poll_sliders(touchPos.x, touchPos.y);
+
+        System.out.println(dragging_slider);
+
         return false;
     }
 
@@ -57,8 +69,32 @@ public class MapSettingsInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (dragging_slider == null){
+            return false;
+        }
+        
+        Vector2 touchPos = new Vector2(screenX, screenY);
+        map_screen.game_board.game.viewport.unproject(touchPos);
+
+        float[][] tick_coords = map_screen.bar_tick_coords.get(dragging_slider);
+        float [] slider_coords = map_screen.slider_coords.get(dragging_slider);
+
+        float min_dist = map_screen.bar_width;
+        float min_dist_x = 0;
+
+        for (float[] tickCoord : tick_coords) {
+            float x = tickCoord[0];
+            if (Math.abs(x - touchPos.x) < min_dist) {
+                min_dist = Math.abs(x - touchPos.x);
+                min_dist_x = x - map_screen.slider_width / 2;
+            }
+        }
+        slider_coords[0] = min_dist_x;
+
+        dragging_slider = null;
         return false;
     }
+
 
     /**
      * @param screenX
@@ -80,7 +116,20 @@ public class MapSettingsInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+
+        Vector2 touchPos = new Vector2(screenX, screenY);
+        map_screen.game_board.game.viewport.unproject(touchPos);
+        float x = touchPos.x - map_screen.slider_width/2f;
+
+        float [] coord = map_screen.slider_coords.get(dragging_slider);
+        float [] bar_coord = map_screen.bar_coords.get(dragging_slider);
+
+        if (dragging_slider != null) {
+            coord[0] = Math.min(Math.max(bar_coord[0], x), x);
+        }
+
         return false;
+
     }
 
     /**

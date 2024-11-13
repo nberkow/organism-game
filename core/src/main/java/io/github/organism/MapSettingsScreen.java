@@ -3,6 +3,8 @@ package io.github.organism;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 public class MapSettingsScreen implements Screen {
 
     final int DEFAULT_SIZE = 6;
+    final float TICK_WIDTH = 2f;
     OrganismGame game;
     GameBoard game_board;
     MapSettingsInputProcessor input_processor;
@@ -25,8 +28,13 @@ public class MapSettingsScreen implements Screen {
     float slider_height;
     float bar_spacing;
     HashMap<String, float []> parameters;
+    HashMap<String, float []> slider_coords;
+    HashMap<String, float []> bar_coords;
+    HashMap<String, float [][]> bar_tick_coords;
+    HashMap<String, float []> label_coords;
     ArrayList<String> label_order;
     public MapSettingsScreen(OrganismGame g){
+
         game = g;
         cfg = new GameConfig();
         game_board = new GameBoard(game, cfg);
@@ -37,7 +45,6 @@ public class MapSettingsScreen implements Screen {
         controls_x = this.game.VIRTUAL_WIDTH * 3 / 4f;
         controls_w = this.game.VIRTUAL_WIDTH / 2.5f;
         controls_h = this.game.VIRTUAL_HEIGHT / 1.2f;
-
 
         bar_width = controls_w * .9f;
         bar_height = 4;
@@ -61,7 +68,79 @@ public class MapSettingsScreen implements Screen {
         label_order.add("density");
 
         bar_spacing = controls_h / (1 + parameters.size());
+        bar_coords = new HashMap<>();
+        label_coords = new HashMap<>();
+        slider_coords = new HashMap<>();
+        bar_tick_coords = new HashMap<>();
+        load_initial_positions();
+    }
 
+    private void load_initial_positions() {
+        float y = controls_y + (controls_h/2f) - bar_spacing;
+        float slider_x;
+        int ticks;
+        float tick_spacing;
+
+        // rect coordinates in order
+        float [] bar_coord;
+        float [] label_coord;
+        float [] slider_coord;
+
+        // rect coordinates in order, per tick
+        float [][] bar_tick_coord;
+
+        for (String p : label_order){
+
+            label_coord = new float[] {bar_x, y + slider_height * 2};
+            label_coords.put(p, label_coord);
+
+            // lower bound, upper bound, step size, current value
+            float [] values = parameters.get(p);
+
+            ticks = (int) ((values[1] - values[0]) / values[2]);
+            bar_tick_coord = new float [ticks+1][4];
+
+            tick_spacing = bar_width / ticks;
+            for (int i=0; i<=ticks; i++){
+                bar_tick_coord[i][0] = bar_x + tick_spacing * i - 1;
+                bar_tick_coord[i][1] = y - slider_height * .6f;
+                bar_tick_coord[i][2] = TICK_WIDTH;
+                bar_tick_coord[i][3] = slider_height * 1.2f;
+            }
+            bar_tick_coords.put(p, bar_tick_coord);
+
+            bar_coord = new float []{
+                bar_x,
+                y - bar_height / 2,
+                bar_width,
+                bar_height
+            };
+            bar_coords.put(p, bar_coord);
+
+            slider_x = values[3] / (values[1] - values[0]) * bar_width;
+            slider_coord = new float [] {
+                bar_x + slider_x - slider_width/2,
+                y - slider_height/2,
+                slider_width,
+                slider_height
+            };
+            slider_coords.put(p, slider_coord);
+
+            y -= bar_spacing;
+        }
+    }
+    public String poll_sliders(float screenX, float screenY) {
+
+        String r = null;
+        for (String p : label_order){
+            float [] coord = slider_coords.get(p);
+            if (screenX > coord[0] && screenX < coord[0] + coord[2]){
+                if (screenY > coord[1] && screenY < coord[1] + coord[3]){
+                    r = p;
+                }
+            }
+        }
+        return r;
     }
 
     /**
@@ -77,6 +156,8 @@ public class MapSettingsScreen implements Screen {
      */
     @Override
     public void render(float delta) {
+
+        ScreenUtils.clear(game_board.background_color);
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (GridPosition pos : game_board.universe_map.hex_grid) {
@@ -90,62 +171,55 @@ public class MapSettingsScreen implements Screen {
     }
 
     public void render_bars(){
-        float y = controls_y + (controls_h/2f) - bar_spacing;
-        float slider_x;
-        int ticks;
-        float tick_spacing;
-        ArrayList<Float> label_y_vals = new ArrayList<>();
 
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (String p : label_order){
 
-            label_y_vals.add(y + slider_height * 2);
+            float[][] tick_coord = bar_tick_coords.get(p);
 
-            // lower bound, upper bound, step size, current value
-            float [] values = parameters.get(p);
-
-            ticks = (int) ((values[1] - values[0]) / values[2]);
-            tick_spacing = bar_width / ticks;
-            for (int i=0; i<=ticks; i++){
-                float tick_x = bar_x + tick_spacing * i;
+            for (float[] rect_coords : tick_coord) {
                 game_board.shape_renderer.setColor(Color.WHITE);
-                game_board.shape_renderer.rect(tick_x-1, y - slider_height * .6f, 2, slider_height * 1.2f);
+                game_board.shape_renderer.rect(
+                    rect_coords[0],
+                    rect_coords[1],
+                    rect_coords[2],
+                    rect_coords[3]
+                );
             }
 
             game_board.shape_renderer.setColor(Color.DARK_GRAY);
+            float[] bar_coord = bar_coords.get(p);
             game_board.shape_renderer.rect(
-                bar_x,
-                y - bar_height/2,
-                bar_width,
-                bar_height
+                bar_coord[0],
+                bar_coord[1],
+                bar_coord[2],
+                bar_coord[3]
             );
-
-            slider_x = values[3] / (values[1] - values[0]) * bar_width;
 
             game_board.shape_renderer.setColor(Color.GRAY);
+            float[] slider_coord = slider_coords.get(p);
             game_board.shape_renderer.rect(
-                bar_x + slider_x - slider_width/2,
-                y - slider_height/2,
-                slider_width,
-                slider_height
+                slider_coord[0],
+                slider_coord[1],
+                slider_coord[2],
+                slider_coord[3]
             );
-
-            y -= bar_spacing;
         }
+
         game_board.shape_renderer.end();
 
         game_board.batch.begin();
-        for (int i=0; i<label_y_vals.size(); i++){
-            String label = label_order.get(i);
-            Float label_y = label_y_vals.get(i);
+
+        for (String p : label_order){
+            float[] label_coord = label_coords.get(p);
             game_board.font.getData().setScale(1f);
             game_board.font.draw(
                 game_board.batch,
-                label,
-                bar_x,
-                label_y);
-        }
+                p,
+                label_coord[0],
+                label_coord[1]);
+            }
 
         game_board.batch.end();
 
@@ -192,4 +266,6 @@ public class MapSettingsScreen implements Screen {
     public void dispose() {
 
     }
+
+
 }
