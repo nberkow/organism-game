@@ -117,7 +117,6 @@ public class Organism {
         ArrayList<MapHex> neighboring_hexes = territory_hex.get_external_hex_layer(player);
         ArrayList<ExpandSortWrapper> hex_by_value = new ArrayList<>();
         for (MapHex neighbor : neighboring_hexes) {
-
             ExpandSortWrapper w = new ExpandSortWrapper(neighbor, player);
             w.compute_value();
             w.compute_cost();
@@ -193,7 +192,6 @@ public class Organism {
                     to_remove.add(explore_vertex_priority.get(i));
                 }
             }
-
 
             explore_vertex_priority.sort(Collections.reverseOrder());
 

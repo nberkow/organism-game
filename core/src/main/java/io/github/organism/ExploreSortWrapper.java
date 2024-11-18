@@ -42,14 +42,16 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
 
             undiscovered_vertexes = 0;
             for (MapVertex v : hex.vertex_list) {
-                if (v.player != current_player) {
+                if (v.player != current_player && !v.masked) {
                     unique_neighbors.add(v);
                     undiscovered_vertexes++;
                 }
             }
 
-            for (int i=0; i<hex.total_resources; i++) {
-                resource_value += (int) Math.pow(resource_priority[hex.resources[i]], undiscovered_vertexes);
+            if (hex.masked) {
+                for (int i = 0; i < hex.total_resources; i++) {
+                    resource_value += (int) Math.pow(resource_priority[hex.resources[i]], undiscovered_vertexes);
+                }
             }
         }
         unclaimed_neighbors = Math.max(9, unique_neighbors.size());

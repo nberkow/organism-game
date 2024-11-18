@@ -44,6 +44,16 @@ public class TriangularGrid implements Iterable<GridPosition> {
         return null;
     }
 
+    public void mask_pos(int i, int j, int k) {
+        MapElement p = grid.get(i).get(j).get(k).content;
+        if (p instanceof MapHex) {
+            ((MapHex) p).masked = true;
+        }
+        if (p instanceof MapVertex) {
+            ((MapVertex) p).masked = true;
+        }
+    }
+
     public void remove_pos(GridPosition p) {
         grid.get(p.i).get(p.j).remove(p.k);
         size -= 1;
@@ -83,7 +93,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
             }
             MapVertex vertex = (MapVertex) pos.content;
             for (MapVertex neighbor : vertex.adjacent_vertices){
-                if (neighbor.player != player){
+                if (neighbor.player != player && !neighbor.masked){
                     unique_vertices.add(neighbor);
                 }
             }
@@ -101,7 +111,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
             MapHex hex = (MapHex) pos.content;
             for (MapVertex vertex : hex.vertex_list){
                 for (MapHex neighbor : vertex.adjacent_hexes){
-                    if (neighbor.player != player){
+                    if (neighbor.player != player && !neighbor.masked){
                         unique_hexes.add(neighbor);
                     }
                 }
@@ -162,4 +172,6 @@ public class TriangularGrid implements Iterable<GridPosition> {
             }
         };
     }
+
+
 }

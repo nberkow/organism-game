@@ -16,7 +16,7 @@ public class MapHex implements MapElement{
 
     public Player player;
 
-    public final char type = 'H';
+    public boolean masked = false;
 
     public MapHex(GridPosition p){
         pos = p;
@@ -38,19 +38,16 @@ public class MapHex implements MapElement{
     }
 
     @Override
-    public char get_type() {
-        return type;
-    }
-
-    @Override
     public Player get_player() {
         return player;
     }
 
     @Override
     public void render() {
-        render_resources();
-        render_players();
+        if (!masked) {
+            render_resources();
+            render_players();
+        }
     }
 
     public void render_players() {
@@ -61,24 +58,26 @@ public class MapHex implements MapElement{
 
         for (int v=0; v<6; v++){
             MapVertex v1 = vertex_list[v];
-            float x1 = (float) ((v1.pos.j * Math.pow(3f, 0.5f) / 2f) - (v1.pos.k * Math.pow(3f, 0.5f) / 2f));
-            float y1 = v1.pos.i - v1.pos.j/2f - v1.pos.k/2f;
+            if (!v1.masked) {
+                float x1 = (float) ((v1.pos.j * Math.pow(3f, 0.5f) / 2f) - (v1.pos.k * Math.pow(3f, 0.5f) / 2f));
+                float y1 = v1.pos.i - v1.pos.j / 2f - v1.pos.k / 2f;
 
-            MapVertex v2 = vertex_list[(v+1) % 6];
-            float x2 = (float) ((v2.pos.j * Math.pow(3f, 0.5f) / 2f) - (v2.pos.k * Math.pow(3f, 0.5f) / 2f));
-            float y2 = v2.pos.i - v2.pos.j/2f - v2.pos.k/2f;
+                MapVertex v2 = vertex_list[(v + 1) % 6];
+                float x2 = (float) ((v2.pos.j * Math.pow(3f, 0.5f) / 2f) - (v2.pos.k * Math.pow(3f, 0.5f) / 2f));
+                float y2 = v2.pos.i - v2.pos.j / 2f - v2.pos.k / 2f;
 
-            c = Color.DARK_GRAY;
-            if(v1.player != null && v2.player == v1.player){
-                c = v2.player.get_organism().color;
+                c = Color.DARK_GRAY;
+                if (v1.player != null && v2.player == v1.player) {
+                    c = v2.player.get_organism().color;
+                }
+                pos.grid.game_board.shape_renderer.setColor(c);
+
+                pos.grid.game_board.shape_renderer.line(
+                    x1 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
+                    y1 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
+                    x2 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
+                    y2 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y);
             }
-            pos.grid.game_board.shape_renderer.setColor(c);
-
-            pos.grid.game_board.shape_renderer.line(
-                x1 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
-                y1 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
-                x2 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
-                y2 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y);
         }
         pos.grid.game_board.shape_renderer.end();
     }

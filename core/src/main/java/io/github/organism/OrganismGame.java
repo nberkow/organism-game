@@ -19,7 +19,6 @@ public class OrganismGame extends Game {
     GameBoard game_board;
     OrthographicCamera camera;
     FitViewport viewport;
-
     MapSettingsInputProcessor map_input_processor;
     GameInputProcessor input_processor;
     public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
@@ -39,8 +38,9 @@ public class OrganismGame extends Game {
         map_edit_screen = new MapSettingsScreen(this);
 
         input_processor = new GameInputProcessor(game_screen);
-        map_input_processor = new MapSettingsInputProcessor(map_edit_screen);
         game_screen.input_processor = input_processor;
+        map_input_processor = new MapSettingsInputProcessor(map_edit_screen);
+        map_edit_screen.input_processor = map_input_processor;
 
         //Gdx.input.setInputProcessor(input_processor);
         //this.setScreen(game_screen);

@@ -13,7 +13,7 @@ public class MapVertex implements MapElement{
     public Set<MapVertex> adjacent_vertices;
 
     public Player player;
-    public final char type = 'V';
+    public boolean masked = false;
 
     public MapVertex(GridPosition p) {
         pos = p;
@@ -21,10 +21,7 @@ public class MapVertex implements MapElement{
         adjacent_vertices = new HashSet<>();
     }
 
-    @Override
-    public char get_type() {
-        return type;
-    }
+
 
     @Override
     public Player get_player() {
@@ -37,21 +34,23 @@ public class MapVertex implements MapElement{
     @Override
     public void render() {
 
-        pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        float x = (float) ((pos.j * Math.pow(3f, 0.5f) / 2f) - (pos.k * Math.pow(3f, 0.5f) / 2f));
-        float y = pos.i - pos.j/2f - pos.k/2f;
+        if (!masked) {
+            pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+            float x = (float) ((pos.j * Math.pow(3f, 0.5f) / 2f) - (pos.k * Math.pow(3f, 0.5f) / 2f));
+            float y = pos.i - pos.j / 2f - pos.k / 2f;
 
-        Color c = Color.DARK_GRAY;
-        if (player != null){
-            c = player.get_organism().color;
+            Color c = Color.DARK_GRAY;
+            if (player != null) {
+                c = player.get_organism().color;
+            }
+
+            pos.grid.game_board.shape_renderer.setColor(c);
+            pos.grid.game_board.shape_renderer.circle(
+                x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
+                y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
+                1);
+            pos.grid.game_board.shape_renderer.end();
         }
-
-        pos.grid.game_board.shape_renderer.setColor(c);
-        pos.grid.game_board.shape_renderer.circle(
-            x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
-            y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
-            1);
-        pos.grid.game_board.shape_renderer.end();
     }
 
     public ArrayList<MapHex> get_opponent_hexes(Player player) {
