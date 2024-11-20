@@ -83,8 +83,6 @@ public class GameBoard implements Disposable {
 
     SpriteBatch batch;
 
-    ResourceDistributor gradient_set;
-
     GameConfig config;
 
     float hex_side_len;
@@ -116,7 +114,6 @@ public class GameBoard implements Disposable {
         font.setColor(foreground_color);
 
         // Initialize other game objects here
-        gradient_set = new ResourceDistributor(this);
         universe_map = new UniverseMap(this, radius);
         resource_distributor = new ResourceDistributor(this);
         grid_window = new GridWindow(this, 2);
@@ -128,7 +125,6 @@ public class GameBoard implements Disposable {
 
         // Setup the players based on the config
 
-        distribute_resources();
         create_human_players();
         create_bot_players();
         create_player_summary_displays();
@@ -139,13 +135,6 @@ public class GameBoard implements Disposable {
         }
         if (human_player_names.size() > 1) {
             player2_hud = new PlayerHud(this, players.get(human_player_names.get(1)),  true);
-        }
-    }
-
-    private void distribute_resources() {
-        resource_distributor.create_centers(1);
-        for (int i=0; i<config.resource_centers;i++) {
-            resource_distributor.create_symmetrical_patches(10);
         }
     }
 

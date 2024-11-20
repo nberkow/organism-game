@@ -48,18 +48,17 @@ public class MapSettingSelectionBoxes {
         radio_buttons = new HashMap<>();
         radio_buttons.put("human players", new ArrayList<>(Arrays.asList("0", "1", "2")));
         radio_buttons.put("players", new ArrayList<>(Arrays.asList("3", "6")));
-        radio_buttons.put("player layout", new ArrayList<>(Arrays.asList("radial", "random")));
-        radio_buttons.put("resource layout", new ArrayList<>(Arrays.asList("radial", "random")));
+        radio_buttons.put("layout", new ArrayList<>(Arrays.asList("radial", "random")));
         radio_buttons.put("opponents", new ArrayList<>(Arrays.asList("easy", "medium", "hard")));
 
         selected_vals = new HashMap<>();
         selected_vals.put("human players", "1");
         selected_vals.put("players", "3");
         selected_vals.put("player layout", "radial");
-        selected_vals.put("resource layout", "radial");
+        selected_vals.put("layout", "radial");
         selected_vals.put("opponents", "medium");
 
-        ordered_keys = new ArrayList<>(Arrays.asList("human players", "players", "player layout", "resource layout", "opponents"));
+        ordered_keys = new ArrayList<>(Arrays.asList("human players", "players", "layout", "opponents"));
         layouts = new HashMap<>();
 
         max_width = 0;

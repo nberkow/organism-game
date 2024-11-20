@@ -14,6 +14,7 @@ public class MapSettingsButtons {
     float buttons_x;
     float buttons_y;
     float [] preview_button_coords;
+    float [] save_button_coords;
     float [] start_button_coords;
     HashMap<String, float []> buttons;
     HashMap<String, GlyphLayout> button_text_layouts;
@@ -28,7 +29,7 @@ public class MapSettingsButtons {
         game_board = map_settings_screen.game_board;
 
         buttons = new HashMap<>();
-        buttons_x = map_settings_screen.controls_x * 1.15f;
+        buttons_x = map_settings_screen.controls_x;
         buttons_y = map_settings_screen.buttons_y;
 
         button_width = 120;
@@ -42,8 +43,16 @@ public class MapSettingsButtons {
         };
         buttons.put("preview", preview_button_coords);
 
-        start_button_coords = new float[]{
+        save_button_coords = new float[]{
             buttons_x + button_width * 1.1f,
+            buttons_y,
+            button_width,
+            button_height
+        };
+        buttons.put("save", save_button_coords);
+
+        start_button_coords = new float[]{
+            buttons_x + button_width * 2.2f,
             buttons_y,
             button_width,
             button_height
@@ -52,6 +61,7 @@ public class MapSettingsButtons {
 
         button_text_layouts = new HashMap<>();
         button_text_layouts.put("preview", new GlyphLayout(game_board.font, "preview"));
+        button_text_layouts.put("save", new GlyphLayout(game_board.font, "save"));
         button_text_layouts.put("start", new GlyphLayout(game_board.font, "start"));
 
     }

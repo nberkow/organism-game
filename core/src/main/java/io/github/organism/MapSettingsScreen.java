@@ -40,6 +40,8 @@ public class MapSettingsScreen implements Screen {
         sliders = new MapSettingsSliders(game, this);
         selection_boxes = new MapSettingSelectionBoxes(game, this);
         buttons = new MapSettingsButtons(this);
+
+        update_map();
     }
 
     /**
@@ -72,13 +74,32 @@ public class MapSettingsScreen implements Screen {
     }
 
     public void update_map() {
-        GameConfig cfg = new GameConfig();
+        create_config();
         cfg.radius = (int) Math.floor(sliders.slider_selected_vals.get("radius"));
 
         game_board = new GameBoard(game, cfg);
+        game_board.resource_distributor.distribute();
+
         game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
         game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
 
+    }
+
+    public void create_config() {
+        cfg = new GameConfig();
+
+        cfg.radius = (int) Math.ceil(sliders.slider_selected_vals.get("radius"));
+        cfg.resources = sliders.slider_selected_vals.get("resources");
+        cfg.vertex_density = sliders.slider_selected_vals.get("density");
+        cfg.human_players = Integer.parseInt(selection_boxes.selected_vals.get("human players"));
+        cfg.bot_players = Integer.parseInt(selection_boxes.selected_vals.get("players")) - cfg.human_players;
+        cfg.layout = selection_boxes.selected_vals.get("layout");
+        cfg.difficulty = selection_boxes.selected_vals.get("opponents");
+
+    }
+
+    public void save_config() {
+        //FIXME - create file handling
     }
 
     /**

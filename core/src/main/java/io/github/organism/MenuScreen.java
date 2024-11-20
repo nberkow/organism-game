@@ -14,7 +14,6 @@ public class MenuScreen implements Screen {
         game = g;
         GameConfig cfg = new GameConfig();
         cfg.radius = 12;
-        cfg.resource_centers = 1;
         cfg.seed = 21;
         cfg.human_players = 0;
         cfg.bot_players = 6;

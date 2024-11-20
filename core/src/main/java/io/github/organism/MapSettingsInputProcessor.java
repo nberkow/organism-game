@@ -12,12 +12,14 @@ public class MapSettingsInputProcessor implements InputProcessor {
     String dragging_slider;
     String [] radio_press;
     boolean preview_button_click;
+    boolean save_button_click;
     boolean start_button_click;
     public MapSettingsInputProcessor(MapSettingsScreen screen) {
         map_screen = screen;
         dragging_slider = null;
         radio_press = new String [2];
         preview_button_click = false;
+        save_button_click = false;
         start_button_click = false;
     }
 
@@ -65,7 +67,6 @@ public class MapSettingsInputProcessor implements InputProcessor {
             map_screen.sliders.update_on_single_click(touchPos.x, touchPos.y);
         }
 
-
         String button_press = map_screen.buttons.poll_buttons(touchPos.x, touchPos.y);
         radio_press = map_screen.selection_boxes.poll_selection_boxes(touchPos.x, touchPos.y);
         if (Objects.equals(button_press, "preview")) {
@@ -88,6 +89,11 @@ public class MapSettingsInputProcessor implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
         if (preview_button_click) {
+            map_screen.update_map();
+            preview_button_click = false;
+        }
+
+        if (save_button_click) {
             map_screen.update_map();
             preview_button_click = false;
         }
