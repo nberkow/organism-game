@@ -34,6 +34,7 @@ public class MapVertex implements MapElement{
     @Override
     public void render() {
 
+        /*
         if (!masked) {
             pos.grid.game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
             float x = (float) ((pos.j * Math.pow(3f, 0.5f) / 2f) - (pos.k * Math.pow(3f, 0.5f) / 2f));
@@ -50,7 +51,7 @@ public class MapVertex implements MapElement{
                 y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
                 1);
             pos.grid.game_board.shape_renderer.end();
-        }
+        }*/
     }
 
     public ArrayList<MapHex> get_opponent_hexes(Player player) {

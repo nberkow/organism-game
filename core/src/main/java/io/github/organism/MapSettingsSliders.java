@@ -15,9 +15,7 @@ public class MapSettingsSliders {
     float slider_box_h;
     OrganismGame game;
     MapSettingsScreen map_settings_screen;
-
     GameBoard game_board;
-
     float bar_x;
     float bar_width;
     float bar_height;

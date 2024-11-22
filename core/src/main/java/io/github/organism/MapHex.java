@@ -3,6 +3,9 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 public class MapHex implements MapElement{
 
     final float RESOURCE_JITTER = 0.4f;
@@ -66,10 +69,15 @@ public class MapHex implements MapElement{
                 float x2 = (float) ((v2.pos.j * Math.pow(3f, 0.5f) / 2f) - (v2.pos.k * Math.pow(3f, 0.5f) / 2f));
                 float y2 = v2.pos.i - v2.pos.j / 2f - v2.pos.k / 2f;
 
-                c = Color.DARK_GRAY;
+                c = pos.grid.game_board.background_color;
                 if (v1.player != null && v2.player == v1.player) {
                     c = v2.player.get_organism().color;
+                } else {
+                    if (is_common_hex_masked(v1, v2)) {
+                        c = Color.DARK_GRAY;
+                    }
                 }
+
                 pos.grid.game_board.shape_renderer.setColor(c);
 
                 pos.grid.game_board.shape_renderer.line(
@@ -80,6 +88,26 @@ public class MapHex implements MapElement{
             }
         }
         pos.grid.game_board.shape_renderer.end();
+    }
+
+    private boolean is_common_hex_masked(MapVertex v1, MapVertex v2) {
+
+        boolean masked = false;
+        HashSet<MapHex> intersection = new HashSet<>(v1.adjacent_hexes);
+        intersection.retainAll(v2.adjacent_hexes);
+
+        if (v1.adjacent_hexes.size() < 3 && v2.adjacent_hexes.size() < 3){
+            return true;
+        }
+
+        for (MapHex hex : new ArrayList<>(intersection)) {
+            if (hex.masked) {
+                masked = true;
+                break;
+            }
+        }
+
+        return masked;
     }
 
     public void render_resources(){

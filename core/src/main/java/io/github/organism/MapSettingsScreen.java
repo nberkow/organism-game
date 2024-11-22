@@ -78,7 +78,10 @@ public class MapSettingsScreen implements Screen {
         cfg.radius = (int) Math.floor(sliders.slider_selected_vals.get("radius"));
 
         game_board = new GameBoard(game, cfg);
+        game_board.void_distributor.distribute();
         game_board.resource_distributor.distribute();
+        ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomize_starting_coords();
+        game_board.player_start_assigner.assign_starting_hexes(starting_coords);
 
         game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
         game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;

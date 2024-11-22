@@ -76,8 +76,9 @@ public class GameBoard implements Disposable {
     ArrayList<String> bot_player_names;
     ArrayList<String> all_player_names;
     ShapeRenderer shape_renderer;
-
+    PlayerStartAssigner player_start_assigner;
     ResourceDistributor resource_distributor;
+    VoidDistributor void_distributor;
     PlayerHud player1_hud;
     PlayerHud player2_hud;
 
@@ -115,7 +116,9 @@ public class GameBoard implements Disposable {
 
         // Initialize other game objects here
         universe_map = new UniverseMap(this, radius);
+        player_start_assigner = new PlayerStartAssigner(this);
         resource_distributor = new ResourceDistributor(this);
+        void_distributor = new VoidDistributor(this);
         grid_window = new GridWindow(this, 2);
 
         player_summary_displays = new ArrayList<>();
@@ -128,51 +131,12 @@ public class GameBoard implements Disposable {
         create_human_players();
         create_bot_players();
         create_player_summary_displays();
-        ArrayList<int[]> starting_coords = randomize_starting_coords();
-        assign_starting_hexes(starting_coords);
         if (!human_player_names.isEmpty()) {
             player1_hud = new PlayerHud(this, players.get(human_player_names.get(0)), false);
         }
         if (human_player_names.size() > 1) {
             player2_hud = new PlayerHud(this, players.get(human_player_names.get(1)),  true);
         }
-    }
-
-    private void assign_starting_hexes(ArrayList<int[]> starting_coords) {
-        int i = 0;
-        for (String player_name : players.keySet()) {
-            Organism organism = players.get(player_name).get_organism();
-            int [] coords = starting_coords.get(i);
-            organism.claim_hex(coords[0], coords[1], coords[2]);
-            MapHex hex = (MapHex) universe_map.hex_grid.get_pos(coords[0], coords[1], coords[2]).content;
-            hex.add_resource(i%3, 3);
-            i ++;
-        }
-    }
-
-    public ArrayList<int[]> randomize_starting_coords(){
-
-        // randomly select a valid hex
-        int r = radius / 2;
-        int a = rng.nextInt(r + 1) - r/2;
-        int min_b = max(-r - a, -r);
-        int max_b = min(r - a, r);
-        int b = rng.nextInt(max_b - min_b) + min_b;
-        int c = -a - b;
-
-        ArrayList<int []> starting_coords = new ArrayList<>();
-
-        starting_coords.add(new int[] {a * 2, b * 2, c * 2});
-        starting_coords.add(new int[] {b * 2, c * 2, a * 2});
-        starting_coords.add(new int[] {c * 2, a * 2, b * 2});
-
-        if (config.human_players + config.bot_players == 6){
-            starting_coords.add(new int[] {-a * 2, -b * 2, -c * 2});
-            starting_coords.add(new int[] {-b * 2, -c * 2, -a * 2});
-            starting_coords.add(new int[] {-c * 2, -a * 2, -b * 2});
-        }
-
-        return starting_coords;
     }
 
     public void create_human_players(){
