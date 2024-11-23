@@ -3,6 +3,8 @@ package io.github.organism;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class MapSettingsInputProcessor implements InputProcessor {
@@ -11,16 +13,27 @@ public class MapSettingsInputProcessor implements InputProcessor {
 
     String dragging_slider;
     String [] radio_press;
-    boolean preview_button_click;
-    boolean save_button_click;
-    boolean start_button_click;
+    HashMap<String, Boolean> button_click_trackers;
+    ArrayList<String> button_labels;
+
     public MapSettingsInputProcessor(MapSettingsScreen screen) {
         map_screen = screen;
         dragging_slider = null;
         radio_press = new String [2];
-        preview_button_click = false;
-        save_button_click = false;
-        start_button_click = false;
+
+        button_labels = new ArrayList<>();
+        button_labels.add("preview");
+        button_labels.add("save");
+        button_labels.add("load");
+        button_labels.add("slot1");
+        button_labels.add("slot2");
+        button_labels.add("slot3");
+
+        button_click_trackers = new HashMap<>();
+        for (String b : button_labels) {
+            button_click_trackers.put(b, false);
+        }
+
     }
 
     /**
@@ -68,13 +81,18 @@ public class MapSettingsInputProcessor implements InputProcessor {
         }
 
         String button_press = map_screen.buttons.poll_buttons(touchPos.x, touchPos.y);
+        if (button_press == null) {
+            button_press = map_screen.file_buttons.poll_buttons(touchPos.x, touchPos.y);
+        }
+
         radio_press = map_screen.selection_boxes.poll_selection_boxes(touchPos.x, touchPos.y);
-        if (Objects.equals(button_press, "preview")) {
-            preview_button_click = true;
+
+        for (String label : button_labels) {
+            if (Objects.equals(button_press, label)) {
+                button_click_trackers.put(label, true);
+            }
         }
-        if (Objects.equals(button_press, "start")) {
-            start_button_click = true;
-        }
+
         return false;
     }
 
@@ -88,14 +106,38 @@ public class MapSettingsInputProcessor implements InputProcessor {
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
-        if (preview_button_click) {
+        if (button_click_trackers.get("preview")) {
             map_screen.update_map();
-            preview_button_click = false;
+            button_click_trackers.put("preview",false);
         }
 
-        if (save_button_click) {
-            map_screen.update_map();
-            preview_button_click = false;
+        if (button_click_trackers.get("save")) {
+            map_screen.render_file_buttons = true;
+            map_screen.game.file_handler.write_mode = true;
+            button_click_trackers.put("save",false);
+        }
+
+        if (button_click_trackers.get("load")) {
+            map_screen.render_file_buttons = true;
+            map_screen.game.file_handler.write_mode = false;
+            button_click_trackers.put("load",false);
+        }
+
+        if (map_screen.render_file_buttons) {
+            for (int i=3; i<6; i++){
+                String label = button_labels.get(i);
+                if (button_click_trackers.get(label)) {
+                    GameConfig config = map_screen.game.file_handler.handle_cfg(
+                        label, map_screen.game_board.config, "map");
+                    if (!map_screen.game.file_handler.write_mode) {
+                        map_screen.set_new_game_board(config);
+                    }
+
+                    System.out.println(label);
+                    button_click_trackers.put(label,false);
+                    map_screen.render_file_buttons = false;
+                }
+            }
         }
 
         if (radio_press[0] != null){

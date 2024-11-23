@@ -12,6 +12,7 @@ public class MapSettingsScreen implements Screen {
 
     final int DEFAULT_SIZE = 6;
     public float buttons_y;
+    public float file_buttons_y;
     float controls_x;
     float controls_w;
     OrganismGame game;
@@ -22,6 +23,9 @@ public class MapSettingsScreen implements Screen {
     MapSettingsSliders sliders;
     MapSettingSelectionBoxes selection_boxes;
     MapSettingsButtons buttons;
+    MapSettingsButtons file_buttons;
+
+    boolean render_file_buttons;
 
     public MapSettingsScreen(OrganismGame g){
 
@@ -32,6 +36,7 @@ public class MapSettingsScreen implements Screen {
         controls_w = this.game.VIRTUAL_WIDTH / 2.5f;
         buttons_y = this.game.VIRTUAL_HEIGHT * .05f;
 
+
         game_board = new GameBoard(game, cfg);
         game_board.radius = DEFAULT_SIZE;
         game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
@@ -39,7 +44,9 @@ public class MapSettingsScreen implements Screen {
 
         sliders = new MapSettingsSliders(game, this);
         selection_boxes = new MapSettingSelectionBoxes(game, this);
-        buttons = new MapSettingsButtons(this);
+        buttons = new MapSettingsButtons(this, new String[] {"preview", "save", "load"}, buttons_y);
+        file_buttons_y = buttons_y + buttons.button_height * 1.1f;
+        file_buttons = new MapSettingsButtons(this, new String[] {"slot1", "slot2", "slot3"}, file_buttons_y);
 
         update_map();
     }
@@ -71,6 +78,9 @@ public class MapSettingsScreen implements Screen {
         sliders.render();
         selection_boxes.render();
         buttons.render();
+        if (render_file_buttons) {
+            file_buttons.render();
+        }
     }
 
     public void update_map() {
@@ -101,8 +111,16 @@ public class MapSettingsScreen implements Screen {
 
     }
 
-    public void save_config() {
-        //FIXME - create file handling
+
+    public void set_new_game_board(GameConfig config) {
+        game_board = new GameBoard(this.game, config);
+        game_board.void_distributor.distribute();
+        game_board.resource_distributor.distribute();
+        ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomize_starting_coords();
+        game_board.player_start_assigner.assign_starting_hexes(starting_coords);
+
+        game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
+        game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
     }
 
     /**
@@ -145,7 +163,6 @@ public class MapSettingsScreen implements Screen {
     public void dispose() {
 
     }
-
 
 
 }

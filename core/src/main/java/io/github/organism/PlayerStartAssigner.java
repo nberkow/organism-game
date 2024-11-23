@@ -2,6 +2,7 @@ package io.github.organism;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.Collections.shuffle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,8 +52,8 @@ public class PlayerStartAssigner {
         ArrayList<int[]> starting_coords = new ArrayList<>();
 
         while (!assigned && iteration < 1e5) {
-            int r = cfg.radius / 2;
-            int a = rng.nextInt(r + 1) - r / 2;
+            int r = cfg.radius;
+            int a = rng.nextInt(r);
             int min_b = max(-r - a, -r);
             int max_b = min(r - a, r);
             int b = rng.nextInt(max_b - min_b) + min_b;
@@ -60,20 +61,20 @@ public class PlayerStartAssigner {
             if (a != 0 || b != 0) {
                 int c = -a - b;
 
-                MapHex proposed_hex = (MapHex) game_board.universe_map.hex_grid.get_pos(a * 2, b * 2, c * 2).content;
-                MapHex mirror_hex = (MapHex) game_board.universe_map.hex_grid.get_pos(-a * 2, -b * 2, -c * 2).content;
+                MapHex proposed_hex = (MapHex) game_board.universe_map.hex_grid.get_pos(a, b, c).content;
+                MapHex mirror_hex = (MapHex) game_board.universe_map.hex_grid.get_pos(-a, -b, -c).content;
 
 
                 if (!proposed_hex.masked && !mirror_hex.masked && proposed_hex.player == null && mirror_hex.player == null) {
 
-                    starting_coords.add(new int[]{a * 2, b * 2, c * 2});
-                    starting_coords.add(new int[]{b * 2, c * 2, a * 2});
-                    starting_coords.add(new int[]{c * 2, a * 2, b * 2});
+                    starting_coords.add(new int[]{a, b, c});
+                    starting_coords.add(new int[]{b, c, a});
+                    starting_coords.add(new int[]{c, a, b});
 
                     if (cfg.human_players + cfg.bot_players == 6) {
-                        starting_coords.add(new int[]{-a * 2, -b * 2, -c * 2});
-                        starting_coords.add(new int[]{-b * 2, -c * 2, -a * 2});
-                        starting_coords.add(new int[]{-c * 2, -a * 2, -b * 2});
+                        starting_coords.add(new int[]{-a, -b, -c});
+                        starting_coords.add(new int[]{-b, -c, -a});
+                        starting_coords.add(new int[]{-c, -a, -b});
                     }
                     assigned = true;
                 }
@@ -84,40 +85,45 @@ public class PlayerStartAssigner {
     }
 
     public ArrayList<int []>  random_starts(){
+        int total_players = cfg.bot_players + cfg.human_players;
         ArrayList<int []> starting_coords = new ArrayList<>();
-        float min_dist = (float) cfg.radius / 3;
+        float min_dist = (float) Math.max(cfg.radius / (cfg.human_players + cfg.bot_players), 2);
+
+        ArrayList<MapHex> map_hexes = new ArrayList<>();
+        for (GridPosition pos : game_board.universe_map.hex_grid){
+            map_hexes.add((MapHex) pos.content);
+        }
+        shuffle(map_hexes, rng);
 
         int i = 0;
-        while (starting_coords.size() < cfg.bot_players + cfg.human_players && i < 1e6) {
+        int idx = rng.nextInt(total_players); 
+
+        while (starting_coords.size() <= total_players && i < 1e6) {
             boolean usable = true;
+            System.out.println(idx);
+            MapHex hex = map_hexes.get(idx % map_hexes.size());
 
-            int r = cfg.radius / 2;
-            int a = rng.nextInt(r + 1) - r / 2;
-            int min_b = max(-r - a, -r);
-            int max_b = min(r - a, r);
-            int b = rng.nextInt(max_b - min_b) + min_b;
-            int c = -a - b;
-
-            MapHex hex = (MapHex) game_board.universe_map.hex_grid.get_pos(a, b, c).content;
-            if (hex.masked) {
+            if (hex.masked || hex.player != null) {
                 usable = false;
             }
 
             for (int[] placed_hex : starting_coords) {
                 float dist = (float)  Math.pow((
-                    Math.pow(placed_hex[0] - a, 2) +
-                    Math.pow(placed_hex[1] - b, 2) +
-                    Math.pow(placed_hex[2] - c, 2)),
+                    Math.pow(placed_hex[0] - hex.pos.i, 2) +
+                    Math.pow(placed_hex[1] - hex.pos.j, 2) +
+                    Math.pow(placed_hex[2] - hex.pos.k, 2)),
                 0.5f);
-                if (dist < min_dist) {
 
+                if (dist < min_dist) {
                     usable = false;
+                    break;
                 }
             }
             if (usable) {
-                starting_coords.add(new int[]{a, b, c});
+                starting_coords.add(new int[]{hex.pos.i, hex.pos.j, hex.pos.k});
             }
             i++;
+            idx += 1;
         }
         return starting_coords;
     }

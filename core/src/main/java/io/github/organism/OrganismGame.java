@@ -14,6 +14,8 @@ public class OrganismGame extends Game {
     MenuScreen menu_screen;
     LabScreen lab_screen;
 
+    FileHandler file_handler;
+
     MapSettingsScreen map_edit_screen;
     SpriteBatch batch;
     GameBoard game_board;
@@ -29,6 +31,7 @@ public class OrganismGame extends Game {
         // Initialize the camera and viewport for the virtual game world dimensions
         camera = new OrthographicCamera();
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
+        file_handler = new FileHandler();
         batch = new SpriteBatch();
         shape_renderer = new ShapeRenderer();
 

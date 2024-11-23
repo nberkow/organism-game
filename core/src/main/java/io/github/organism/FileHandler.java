@@ -1,4 +1,8 @@
 package io.github.organism;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,7 +14,23 @@ import java.util.HashMap;
 
 public class FileHandler {
 
-    public void write_cfg(GameConfig cfg, String path) {
+    public boolean write_mode = false;
+
+    public final String SAVE_PATH = "";
+    public GameConfig handle_cfg(String label, GameConfig config, String extension) {
+
+        FileHandle handle = Gdx.files.local( label + "." + extension);
+
+
+        if (write_mode) {
+            write_cfg(config, handle);
+        } else {
+            System.out.println("loading");
+            return read_cfg(handle);
+        }
+        return(null);
+    }
+    public void write_cfg(GameConfig cfg, FileHandle handle) {
 
         String file_content =
             "radius:" + cfg.radius + "\n" +
@@ -23,29 +43,19 @@ public class FileHandler {
             "human_players:" + cfg.human_players + "\n" +
             "bot_players:" + cfg.bot_players;
 
-            try {
-                FileWriter myWriter = new FileWriter("filename.txt");
-                myWriter.write(file_content);
-                myWriter.close();
-            } catch (IOException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
-        }
+        System.out.println(file_content);
+        handle.writeString(file_content, false);
 
-    public GameConfig read_cfg(String path) {
+    }
+
+    public GameConfig read_cfg(FileHandle handle) {
         GameConfig cfg = new GameConfig();
         HashMap<String, String> vals = new HashMap<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String [] fields = line.split(":");
-                vals.put(fields[0], fields[1]);
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        String [] lines = handle.readString().split("\n");
+        for (String line : lines){
+            String [] fields = line.split(":");
+            vals.put(fields[0], fields[1]);
         }
 
         cfg.radius = Integer.parseInt(vals.get("radius"));
@@ -60,4 +70,5 @@ public class FileHandler {
 
         return cfg;
     }
+
 }

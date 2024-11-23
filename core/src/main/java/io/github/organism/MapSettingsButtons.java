@@ -13,9 +13,9 @@ public class MapSettingsButtons {
 
     float buttons_x;
     float buttons_y;
-    float [] preview_button_coords;
-    float [] save_button_coords;
-    float [] start_button_coords;
+    float [] left_button_coords;
+    float [] right_button_coords;
+    float [] center_button_coords;
     HashMap<String, float []> buttons;
     HashMap<String, GlyphLayout> button_text_layouts;
     MapSettingsScreen map_settings_screen;
@@ -23,47 +23,46 @@ public class MapSettingsButtons {
     GameBoard game_board;
     OrganismGame game;
 
-    public MapSettingsButtons(MapSettingsScreen msc) {
+    public MapSettingsButtons(MapSettingsScreen msc, String [] labels, float b_y) {
         map_settings_screen = msc;
         game = map_settings_screen.game;
         game_board = map_settings_screen.game_board;
 
         buttons = new HashMap<>();
         buttons_x = map_settings_screen.controls_x;
-        buttons_y = map_settings_screen.buttons_y;
+        buttons_y = b_y;
 
         button_width = 120;
         button_height = 20;
 
-        preview_button_coords = new float[]{
+        left_button_coords = new float[]{
             buttons_x,
             buttons_y,
             button_width,
             button_height
         };
-        buttons.put("preview", preview_button_coords);
+        buttons.put(labels[0], left_button_coords);
 
-        save_button_coords = new float[]{
+        right_button_coords = new float[]{
             buttons_x + button_width * 1.1f,
             buttons_y,
             button_width,
             button_height
         };
-        buttons.put("save", save_button_coords);
+        buttons.put(labels[1], right_button_coords);
 
-        start_button_coords = new float[]{
+        center_button_coords = new float[]{
             buttons_x + button_width * 2.2f,
             buttons_y,
             button_width,
             button_height
         };
-        buttons.put("start", start_button_coords);
+        buttons.put(labels[2], center_button_coords);
 
         button_text_layouts = new HashMap<>();
-        button_text_layouts.put("preview", new GlyphLayout(game_board.font, "preview"));
-        button_text_layouts.put("save", new GlyphLayout(game_board.font, "save"));
-        button_text_layouts.put("start", new GlyphLayout(game_board.font, "start"));
-
+        button_text_layouts.put(labels[0], new GlyphLayout(game_board.font, labels[0]));
+        button_text_layouts.put(labels[1], new GlyphLayout(game_board.font, labels[1]));
+        button_text_layouts.put(labels[2], new GlyphLayout(game_board.font, labels[2]));
     }
 
     public String poll_buttons(float screenX, float screenY) {
