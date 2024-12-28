@@ -23,18 +23,13 @@ public class ExpandSortWrapper implements Comparable<ExpandSortWrapper> {
     public int compute_hex_value(MapHex hex) {
         int val = 0;
 
-        System.out.println("hex: " + hex.pos.i + " " + hex.pos.j + " " + hex.pos.k);
-
         int [] resource_priority = current_player.get_organism().get_resource_priority();
         for (int i=0; i<3; i++){
             val += resource_priority[hex.resources[i]] * 6;
         }
 
-        System.out.println("hexval: " + val);
-
         for (MapVertex v : hex.vertex_list) {
             val += compute_vertex_value(v);
-            System.out.println("hex vert: " + v +" " + val);
         }
 
         return val;
@@ -61,20 +56,9 @@ public class ExpandSortWrapper implements Comparable<ExpandSortWrapper> {
         int vertex_val = 0;
 
         int [] resource_priority = current_player.get_organism().get_resource_priority();
-
-        System.out.println("priority");
-        for (int r : resource_priority){
-            System.out.println("res: " + r);
-        }
-
-        System.out.println("starting: " + vertex_val);
         for (MapHex hex : vertex.adjacent_hexes) {
-            System.out.println("adjacent hex: " + hex.pos.i + " " + hex.pos.j + " " + hex.pos.k);
             if (hex.player != current_player) {
-                System.out.println("hex owner: " + hex.player);
-                System.out.println("resources: " + hex.total_resources);
                 for (int i = 0; i < hex.total_resources; i++) {
-                    System.out.println(i + " " + hex.resources[i] + " " + resource_priority[hex.resources[i]]);
                     vertex_val += resource_priority[hex.resources[i]];
                 }
             }

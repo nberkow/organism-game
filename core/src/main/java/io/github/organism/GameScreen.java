@@ -3,6 +3,8 @@ package io.github.organism;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 
+import java.util.ArrayList;
+
 public class GameScreen implements Screen {
 
     OrganismGame game;
@@ -15,14 +17,24 @@ public class GameScreen implements Screen {
         game = g;
         cfg = new GameConfig();
         game_board = new GameBoard(game, cfg);
+        game_board.void_distributor.distribute();
+        game_board.resource_distributor.distribute();
+
+        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.player_start_positions));
+        for (int i=0; i<sc; i++) {
+            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomize_starting_coords();
+            game_board.player_start_assigner.assign_starting_hexes(starting_coords);
+        }
         orchestrator = new GameOrchestrator(game_board);
     }
 
     private void input() {
-        input_processor.update_timers(Gdx.graphics.getDeltaTime());
-        input_processor.update_queues_with_input();
-        orchestrator.update_players();
-        orchestrator.update_timers_and_flags();
+        if (!orchestrator.paused) {
+            input_processor.update_timers(Gdx.graphics.getDeltaTime());
+            input_processor.update_queues_with_input();
+            orchestrator.update_players();
+            orchestrator.update_timers_and_flags();
+        }
     }
 
     private void logic() {

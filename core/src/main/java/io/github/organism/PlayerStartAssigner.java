@@ -38,7 +38,6 @@ public class PlayerStartAssigner {
     }
 
     public ArrayList<int[]> randomize_starting_coords(){
-        ArrayList<int []> starting_coords;
         if (Objects.equals(cfg.layout, "radial")) {
             return radial_starts();
         }
@@ -47,6 +46,7 @@ public class PlayerStartAssigner {
 
     public ArrayList<int[]>  radial_starts(){
         // randomly select a valid hex
+
         boolean assigned = false;
         int iteration = 0;
         ArrayList<int[]> starting_coords = new ArrayList<>();
@@ -96,7 +96,7 @@ public class PlayerStartAssigner {
         shuffle(map_hexes, rng);
 
         int i = 0;
-        int idx = rng.nextInt(total_players); 
+        int idx = rng.nextInt(total_players);
 
         while (starting_coords.size() <= total_players && i < 1e6) {
             boolean usable = true;

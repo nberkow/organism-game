@@ -33,7 +33,6 @@ public class MapSettingsInputProcessor implements InputProcessor {
         for (String b : button_labels) {
             button_click_trackers.put(b, false);
         }
-
     }
 
     /**
@@ -127,8 +126,8 @@ public class MapSettingsInputProcessor implements InputProcessor {
             for (int i=3; i<6; i++){
                 String label = button_labels.get(i);
                 if (button_click_trackers.get(label)) {
-                    GameConfig config = map_screen.game.file_handler.handle_cfg(
-                        label, map_screen.game_board.config, "map");
+                    GameConfig config = map_screen.game.file_handler.read_cfg(
+                        label, "map");
                     if (!map_screen.game.file_handler.write_mode) {
                         map_screen.set_new_game_board(config);
                     }

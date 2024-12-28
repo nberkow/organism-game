@@ -41,15 +41,15 @@ public class PlayerSummaryDisplay {
 
         Gdx.gl.glEnable(GL20.GL_BLEND);   // Ensure blending is enabled
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);  // Set blend function
-        game_board.font.getData().setScale(1f);
+        game_board.game.font.getData().setScale(1f);
 
         game_board.batch.begin();
-        game_board.font.draw(game_board.batch, player.get_player_name(), x, NAME_HEIGHT + y);
+        game_board.game.font.draw(game_board.batch, player.get_player_name(), x, NAME_HEIGHT + y);
         game_board.batch.end();
     }
     public void draw_energy_bar(){
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.shape_renderer.setColor(game_board.foreground_color);
+        game_board.shape_renderer.setColor(game_board.game.foreground_color);
         game_board.shape_renderer.rect(
             x, y + ENERGY_BAR_Y,
             (float) (energy_bar_width * (player.get_organism().energy / 100f)),
@@ -61,7 +61,7 @@ public class PlayerSummaryDisplay {
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i=0; i<player.get_move_queue().size(); i++){
             Integer state = player.get_move_queue().get(i);
-            game_board.shape_renderer.setColor(game_board.colors[state ]);
+            game_board.shape_renderer.setColor(game_board.game.colors[state]);
             game_board.shape_renderer.circle(
                 x + ACTION_RADIUS * (i) * 2 + (ACTION_RADIUS / 2),
                 y + ACTION_BAR_Y,

@@ -60,9 +60,9 @@ public class MapSettingsButtons {
         buttons.put(labels[2], center_button_coords);
 
         button_text_layouts = new HashMap<>();
-        button_text_layouts.put(labels[0], new GlyphLayout(game_board.font, labels[0]));
-        button_text_layouts.put(labels[1], new GlyphLayout(game_board.font, labels[1]));
-        button_text_layouts.put(labels[2], new GlyphLayout(game_board.font, labels[2]));
+        button_text_layouts.put(labels[0], new GlyphLayout(game_board.game.font, labels[0]));
+        button_text_layouts.put(labels[1], new GlyphLayout(game_board.game.font, labels[1]));
+        button_text_layouts.put(labels[2], new GlyphLayout(game_board.game.font, labels[2]));
     }
 
     public String poll_buttons(float screenX, float screenY) {
@@ -97,7 +97,7 @@ public class MapSettingsButtons {
                 button_coords[3]
             );
 
-            game_board.shape_renderer.setColor(game_board.background_color);
+            game_board.shape_renderer.setColor(game_board.game.background_color);
             game_board.shape_renderer.rect(
                 button_coords[0] + 2,
                 button_coords[1] + 2,
@@ -110,8 +110,8 @@ public class MapSettingsButtons {
             GlyphLayout layout = button_text_layouts.get(b);
             float b_x = button_coords[0] + button_coords[2]/2 - layout.width/2;
             float b_y = button_coords[1] + button_coords[3]/2 + layout.height/2;
-            game_board.font.getData().setScale(1f);
-            game_board.font.draw(
+            game_board.game.font.getData().setScale(1f);
+            game_board.game.font.draw(
                 game_board.batch,
                 b,
                 b_x, b_y);

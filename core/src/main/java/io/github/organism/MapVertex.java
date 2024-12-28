@@ -54,6 +54,11 @@ public class MapVertex implements MapElement{
         }*/
     }
 
+    @Override
+    public boolean get_masked() {
+        return masked;
+    }
+
     public ArrayList<MapHex> get_opponent_hexes(Player player) {
         ArrayList<MapHex> opponent_hexes = new ArrayList<>();
         for (MapHex hex : adjacent_hexes){

@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class Organism {
+
+    public final int MAX_ENERGY = 300;
     public int income;
     TriangularGrid territory_hex;
     TriangularGrid territory_vertex;
@@ -24,7 +26,7 @@ public class Organism {
         territory_vertex = new TriangularGrid(game_board);
         extract_queue = new ArrayList<>();
         resources = new Integer[3];
-        energy = game_board.DEFAULT_STARTING_ENERGY;
+        energy = GameBoard.DEFAULT_STARTING_ENERGY;
         income = 1;
     }
 
@@ -50,8 +52,10 @@ public class Organism {
 
     public void extract() {
         /*
-        permanently destroy a resource to gain income
+        permanently consume a resource to gain income
          */
+
+        // initialize data structures. Get an array of priority by resource and invert it to a hashmap
         int [] res_priority = get_resource_priority();
         HashMap<Integer, ArrayList<Integer>> res_by_priority = new HashMap<>();
         int i = 0;
@@ -99,7 +103,7 @@ public class Organism {
             }
             r++;
         }
-        energy += income;
+        energy = Math.min(energy + income, MAX_ENERGY);
     }
 
 

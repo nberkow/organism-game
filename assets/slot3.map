@@ -1,9 +1,0 @@
-radius:13
-seed:21
-map_view_size_param:130.0
-resources:1.0
-vertex_density:4.0
-resource_layout:radial
-difficulty:medium
-human_players:1
-bot_players:2

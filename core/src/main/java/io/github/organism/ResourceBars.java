@@ -37,7 +37,7 @@ public class ResourceBars {
             if (hud.parity == -1){
                 res = 2-r;
             }
-            game_board.shape_renderer.setColor(game_board.resource_colors_dark[res]);
+            game_board.shape_renderer.setColor(game_board.game.resource_colors_dark[res]);
             game_board.shape_renderer.rect(
                 x + inset,
                 y + inset + BAR_HEIGHT * res,
@@ -47,7 +47,7 @@ public class ResourceBars {
 
             float spacing = BAR_WIDTH / (7);
 
-            game_board.shape_renderer.setColor(game_board.background_color);
+            game_board.shape_renderer.setColor(game_board.game.background_color);
             int space_n;
             for (int s=0; s<6; s++){
                 space_n = s;
@@ -61,7 +61,7 @@ public class ResourceBars {
                 );
             }
 
-            game_board.shape_renderer.setColor(game_board.resource_colors_bright[res]);
+            game_board.shape_renderer.setColor(game_board.game.resource_colors_bright[res]);
             int val = Math.min(6, player.get_organism().resources[res]);
 
             game_board.shape_renderer.circle(
@@ -85,7 +85,7 @@ public class ResourceBars {
         }
         game_board.shape_renderer.end();
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game_board.shape_renderer.setColor(game_board.foreground_color);
+        game_board.shape_renderer.setColor(game_board.game.foreground_color);
 
         float border_x = x;
         if (hud.parity == -1){
@@ -103,7 +103,7 @@ public class ResourceBars {
         }
         game_board.shape_renderer.end();
         game_board.batch.begin();
-        game_board.font.draw(
+        game_board.game.font.draw(
             game_board.batch,
             "" + player.get_organism().income,
             font_x,

@@ -53,11 +53,13 @@ public class MapSettingsSliders {
         slider_parameters.put("radius", new float[]{4f, 30f, 1f, map_settings_screen.DEFAULT_SIZE});
         slider_parameters.put("resources", new float[]{0f, 3, 1/3f, 1});
         slider_parameters.put("density", new float[]{1, 6, 1, 3f});
+        slider_parameters.put("starts", new float[]{0, 1.2f, .2f, 0f});
 
         slider_label_order = new ArrayList<>();
         slider_label_order.add("radius");
         slider_label_order.add("resources");
         slider_label_order.add("density");
+        slider_label_order.add("starts");
 
         bar_spacing = slider_box_h / (.7f + slider_parameters.size());
         bar_coords = new HashMap<>();
@@ -195,8 +197,8 @@ public class MapSettingsSliders {
 
         for (String p : slider_label_order){
             float[] label_coord = label_coords.get(p);
-            game_board.font.getData().setScale(1f);
-            game_board.font.draw(
+            game_board.game.font.getData().setScale(1f);
+            game_board.game.font.draw(
                 game_board.batch,
                 p,
                 label_coord[0],

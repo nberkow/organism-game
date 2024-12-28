@@ -1,40 +1,30 @@
 package io.github.organism;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Random;
 
 
 public class FileHandler {
 
+    OrganismGame game;
     public boolean write_mode = false;
+    public Random rng;
 
-    public final String SAVE_PATH = "";
-    public GameConfig handle_cfg(String label, GameConfig config, String extension) {
-
-        FileHandle handle = Gdx.files.local( label + "." + extension);
-
-
-        if (write_mode) {
-            write_cfg(config, handle);
-        } else {
-            System.out.println("loading");
-            return read_cfg(handle);
-        }
-        return(null);
+    public FileHandler(OrganismGame g){
+        game = g;
     }
-    public void write_cfg(GameConfig cfg, FileHandle handle) {
+
+    public void write_cfg(GameConfig cfg, String name, String extension) {
+        FileHandle handle = Gdx.files.local( name + "." + extension);
+        rng.setSeed(cfg.seed);
+        int seed = rng.nextInt();
 
         String file_content =
             "radius:" + cfg.radius + "\n" +
-            "seed:" + cfg.seed + "\n" +
+            "seed:" + seed + "\n" +
             "map_view_size_param:" + cfg.map_view_size_param + "\n" +
             "resources:" + cfg.resources + "\n" +
             "vertex_density:" + cfg.vertex_density + "\n" +
@@ -48,7 +38,12 @@ public class FileHandler {
 
     }
 
-    public GameConfig read_cfg(FileHandle handle) {
+    public GameConfig read_cfg(String name, String extension) {
+        String dir = "map_configs";
+        if (Objects.equals(extension, "hmm")) {
+            dir = "model_configs";
+        }
+        FileHandle handle = Gdx.files.local( dir + "/" +    name + "." + extension);
         GameConfig cfg = new GameConfig();
         HashMap<String, String> vals = new HashMap<>();
 

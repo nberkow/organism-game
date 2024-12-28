@@ -53,6 +53,14 @@ public class MapHex implements MapElement{
         }
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public boolean get_masked() {
+        return masked;
+    }
+
     public void render_players() {
 
         Color c;
@@ -69,7 +77,7 @@ public class MapHex implements MapElement{
                 float x2 = (float) ((v2.pos.j * Math.pow(3f, 0.5f) / 2f) - (v2.pos.k * Math.pow(3f, 0.5f) / 2f));
                 float y2 = v2.pos.i - v2.pos.j / 2f - v2.pos.k / 2f;
 
-                c = pos.grid.game_board.background_color;
+                c = pos.grid.game_board.game.background_color;
                 if (v1.player != null && v2.player == v1.player) {
                     c = v2.player.get_organism().color;
                 } else {
@@ -125,8 +133,8 @@ public class MapHex implements MapElement{
             float x = (float) ((j_f * Math.pow(3f, 0.5f) / 2f) - (k_f * Math.pow(3f, 0.5f) / 2f));
             float y = i_f - j_f/2f - k_f/2f;
 
-            Color c1 = pos.grid.game_board.resource_colors_dark[resources[r]];
-            Color c2 = pos.grid.game_board.resource_colors_bright[resources[r]];
+            Color c1 = pos.grid.game_board.game.resource_colors_dark[resources[r]];
+            Color c2 = pos.grid.game_board.game.resource_colors_bright[resources[r]];
 
             pos.grid.game_board.shape_renderer.setColor(c1);
             pos.grid.game_board.shape_renderer.circle(

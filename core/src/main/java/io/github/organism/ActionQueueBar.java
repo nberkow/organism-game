@@ -45,7 +45,7 @@ public class ActionQueueBar {
             first_x = x + hud.HUD_WIDTH - margin;
         }
         for (int i=0; i<game_board.MAX_QUEUED_ACTIONS-1; i++){
-            game_board.shape_renderer.setColor(game_board.foreground_color);
+            game_board.shape_renderer.setColor(game_board.game.foreground_color);
             action_x_pos[i] = first_x + ((i) * spacing * hud.parity);
             game_board.shape_renderer.circle(action_x_pos[i], y, RADIUS);
             if (i == 10 || i == 0){
@@ -77,7 +77,7 @@ public class ActionQueueBar {
                 r = RADIUS * 1.5f - 1;
                 first = false;
             }
-            game_board.shape_renderer.setColor(game_board.colors[v]);
+            game_board.shape_renderer.setColor(game_board.game.colors[v]);
             game_board.shape_renderer.circle(action_x_pos[i], y, r);
 
             i -= 1;

@@ -2,7 +2,9 @@ package io.github.organism;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -22,7 +24,43 @@ public class OrganismGame extends Game {
     OrthographicCamera camera;
     FitViewport viewport;
     MapSettingsInputProcessor map_input_processor;
+    LabInputProcessor lab_input_processor;
     GameInputProcessor input_processor;
+
+    // Game colors
+    Color background_color = Color.BLACK;
+    Color foreground_color = Color.CYAN;
+
+    Color [] colors = {Color.RED, Color.BLUE, Color.GREEN};
+
+    BitmapFont font;
+
+    Color [] player_colors = {
+        new Color(0xB91372FF),
+        new Color(0xD497A7FF),
+        new Color(0x6EEB83FF),
+        new Color(0xE4FF1AFF),
+        new Color(0xE8AA14FF),
+        new Color(0xFF5714FF)
+    };
+
+    Color [] player_light_colors = {
+        new Color(0xB9137255),
+        new Color(0xD497A755),
+        new Color(0x6EEB8355),
+        new Color(0xE4FF1A55),
+        new Color(0xE8AA1455),
+        new Color(0xFF571455)
+    };
+
+    Color [] resource_colors_dark = {
+        new Color(0f, 0f, 0.3f, 0f),
+        new Color(0f, 0.2f, 0f, 0f),
+        new Color(0.2f, 0f, 0.2f, 0f)};
+    Color [] resource_colors_bright = {
+        new Color(0f, 0f, 0.5f, 0f),
+        new Color(0f, 0.4f, 0f, 0f),
+        new Color(0.4f, 0f, 0.2f, 0f)};
     public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
     public final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
 
@@ -31,9 +69,12 @@ public class OrganismGame extends Game {
         // Initialize the camera and viewport for the virtual game world dimensions
         camera = new OrthographicCamera();
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
-        file_handler = new FileHandler();
+        file_handler = new FileHandler(this);
         batch = new SpriteBatch();
         shape_renderer = new ShapeRenderer();
+
+        font = new BitmapFont();
+        font.setColor(foreground_color);
 
         menu_screen = new MenuScreen(this);
         game_screen = new GameScreen(this);
@@ -45,11 +86,17 @@ public class OrganismGame extends Game {
         map_input_processor = new MapSettingsInputProcessor(map_edit_screen);
         map_edit_screen.input_processor = map_input_processor;
 
+
+        lab_input_processor = new LabInputProcessor(lab_screen);
+
+        //Gdx.input.setInputProcessor(map_input_processor);
+        //this.setScreen(map_edit_screen);
+
         //Gdx.input.setInputProcessor(input_processor);
         //this.setScreen(game_screen);
 
-        Gdx.input.setInputProcessor(map_input_processor);
-        this.setScreen(map_edit_screen);
+        Gdx.input.setInputProcessor(lab_input_processor);
+        this.setScreen(lab_screen);
 
     }
 
@@ -68,6 +115,8 @@ public class OrganismGame extends Game {
     @Override
     public void dispose() {
         // Handle disposing of game resources
-        game_board.dispose();
+        if (!(game_board == null)){
+            game_board.dispose();
+        }
     }
 }

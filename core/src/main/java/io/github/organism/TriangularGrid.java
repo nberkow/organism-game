@@ -84,6 +84,15 @@ public class TriangularGrid implements Iterable<GridPosition> {
         return contains_position(p.i, p.j, p.k);
     }
 
+    public HashSet<MapHex> get_shared_hexes(MapVertex v1, MapVertex v2){
+        HashSet<MapHex> shared_hexes = new HashSet<>();
+        for (MapHex h : v1.adjacent_hexes) {
+            if (v2.adjacent_hexes.contains(h) && !h.masked) {
+                shared_hexes.add(h);
+            }
+        }
+        return shared_hexes;
+    }
     public ArrayList<MapVertex> get_external_vertex_layer(Player player){
         HashSet<MapVertex> unique_vertices = new HashSet<>();
 
@@ -93,7 +102,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
             }
             MapVertex vertex = (MapVertex) pos.content;
             for (MapVertex neighbor : vertex.adjacent_vertices){
-                if (neighbor.player != player && !neighbor.masked){
+                if (neighbor.player != player && !neighbor.masked && !get_shared_hexes(vertex, neighbor).isEmpty()){
                     unique_vertices.add(neighbor);
                 }
             }
@@ -118,6 +127,16 @@ public class TriangularGrid implements Iterable<GridPosition> {
             }
         }
         return new ArrayList<>(unique_hexes);
+    }
+
+    public int get_unmasked_vertices(){
+        int c = 0;
+        for (GridPosition pos : this) {
+            if (!pos.content.get_masked()) {
+                c++;
+            }
+        }
+        return c;
     }
 
     @Override

@@ -3,18 +3,14 @@ package io.github.organism;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LabInputProcessor implements InputProcessor {
-    GameBoard game_board;
+    LabScreen lab_screen;
 
-
-
-
-
-    public LabInputProcessor(GameBoard gb){
-        game_board = gb;
-
+    public LabInputProcessor(LabScreen screen){
+        lab_screen = screen;
     }
 
     /**
@@ -53,6 +49,10 @@ public class LabInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+        Vector2 touchPos = new Vector2(screenX, screenY);
+        lab_screen.game.viewport.unproject(touchPos);
+
         return false;
     }
 
@@ -65,6 +65,10 @@ public class LabInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+        Vector2 touchPos = new Vector2(screenX, screenY);
+        lab_screen.game.viewport.unproject(touchPos);
+
         return false;
     }
 

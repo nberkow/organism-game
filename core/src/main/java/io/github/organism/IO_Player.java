@@ -64,4 +64,10 @@ public class IO_Player  implements Player {
     }
 
     public void generate_and_queue() {}
+
+    /**
+     *
+     */
+    @Override
+    public void transition() {}
 }

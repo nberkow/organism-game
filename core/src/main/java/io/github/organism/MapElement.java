@@ -9,4 +9,5 @@ public interface MapElement {
 
     void render();
 
+    boolean get_masked();
 }

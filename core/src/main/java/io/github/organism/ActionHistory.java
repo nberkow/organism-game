@@ -18,12 +18,4 @@ public class ActionHistory {
         total_assimilation.add(a);
     }
 
-    public HMM calculate_model(){
-        HMM m = new HMM(game_board);
-        m.init(0);
-        /*
-        Calculate the various probabilities from the move history
-         */
-        return m;
-    }
 }

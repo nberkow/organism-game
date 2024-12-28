@@ -1,5 +1,7 @@
 package io.github.organism;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -7,84 +9,117 @@ public class HMM {
 
     public HashMap<Integer, HashMap<String, HashMap<Integer, Double>>> params = new HashMap<>();
     public double randomness;
-    private Random rng;
+    private final Random rng;
 
-    public Integer state;
-    private HashMap<String, Double> bias;
+    public Integer states;
+    public Integer inputs;
+    public Integer current_state;
+    private double [][][] transition_weights;
+    private double [][][] emission_weights;
 
     GameBoard game_board;
-    public HMM(GameBoard gb) {
+    public HMM(GameBoard gb, int s, float r, int n) {
         game_board = gb;
+        states = Math.max(3, s);
+        inputs = n;
+
         rng = game_board.rng;
-        state = rng.nextInt(2);
-        bias = new HashMap<>();
-        bias.put("emission", 0.8);
-        bias.put("transition", 1d/3);
-    }
-
-    public void init(double r){
-
         randomness = r;
-        for (int state_in=0; state_in<=2; state_in++){
-            params.put(state_in, new HashMap<>());
-            for (String probability_type : new String [] {"emission", "transition"}){
-                HashMap<String, HashMap<Integer, Double>> s_in = params.get(state_in);
-                s_in.put(probability_type, new HashMap<>());
 
-                double denom = 0d;
-                for (int state_out=0; state_out<=2; state_out++){
-                    HashMap<Integer, Double> s_out = params.get(state_in).get(probability_type);
-                    double noise = rng.nextDouble() - 0.5;
-                    double probability = (1 - bias.get(probability_type)/2) * (1 - randomness) + noise * randomness;
-                    if (state_in == state_out) {
-                        probability = (bias.get(probability_type))*(1 - randomness) + noise * randomness;
-                    }
-                    s_out.put(state_out, probability);
-                    denom += probability;
-                }
+        current_state = rng.nextInt(states);
 
-                // normalize
-                for (int state_out=0; state_out<=2; state_out++){
-                    double prob = params.get(state_in).get(probability_type).get(state_out);
-                    HashMap<Integer, Double> s_out = params.get(state_in).get(probability_type);
-                    s_out.put(state_out, prob / denom);
+        init_transition_weights();
+        init_emission_weights();
+    }
+    private void init_transition_weights() {
+        transition_weights = new double[states][states][inputs];
+        for (int i=0; i<states; i++){
+            for (int j=0; j<states; j++){
+                for (int k=0; k<inputs; k++){
+                    transition_weights[i][j][k] = rng.nextDouble();
                 }
             }
         }
     }
 
-    public Integer generate_move() {
+    private void init_emission_weights() {
+        // there are 4 possible emissions, 1 for each move plus a null output
+        emission_weights = new double[states][4][inputs];
+        for (int i=0; i<states; i++){
+            for (int j=0; j<4; j++){
+                for (int k=0; k<inputs; k++){
+                    emission_weights[i][j][k] = rng.nextDouble();
+                }
+            }
+        }
+    }
+
+    private double calculate_score(float [] input_vals, double [] weights){
+        double score = 0;
+        for (int i=0; i<input_vals.length; i++){
+            score += (weights[i] * Math.log(input_vals[i]));
+        }
+        return score;
+    }
+
+    private ArrayList<Double> normalize_scores(ArrayList<Double> scores) {
+        double max_score = Collections.max(scores);
+        double total = 0;
+
+        for (int i=0; i<scores.size(); i++){
+            scores.set(i, Math.pow(Math.E, scores.get(i) - max_score));
+            total += scores.get(i);
+        }
+
+        for (int i=0; i<scores.size(); i++){
+            scores.set(i, scores.get(i) / total);
+        }
+
+        return scores;
+    }
+
+    private int weighted_random_choice(ArrayList<Double> scores) {
+        int s = rng.nextInt(scores.size());
+        double score_sum = 0;
+        double r = rng.nextDouble();
+
+        while (score_sum < r) {
+            s = (s+1) % scores.size();
+            score_sum += scores.get(s);
+        }
+        return s;
+    }
+
+    public Integer emit(float [] input_vals) {
         /*
-        Emit a move based on the current state and transition to the next state
+        Emit a move based on the current state
         */
-
-        HashMap<Integer, Double> emission_probabilities = params.get(state).get("emission");
-        double rnum = rng.nextDouble();
-        Integer emission = null;
-        Double sum = 0d;
-        int i = 0;
-        while (i<=2 && emission == null){
-            sum += emission_probabilities.get(i);
-            if (rnum < sum){
-                emission = i;
-            }
-            i++;
+        ArrayList<Double> scores = new ArrayList<>();
+        double [] weights = {};
+        for (int emission=0; emission<4; emission++){
+            weights = emission_weights[current_state][emission];
+            scores.add(calculate_score(input_vals, weights));
         }
+        ArrayList<Double> norm_scores = normalize_scores(scores);
+        int emit = weighted_random_choice(norm_scores);
+        System.out.println("emitting " + emit);
 
-        // transition to the next state
-        HashMap<Integer, Double> transition_probabilities = params.get(state).get("transition");
-        rnum = rng.nextDouble();
-        Integer transition = null;
-        sum = 0d;
-        i = 0;
-        while (i<=2 && transition == null){
-            sum += transition_probabilities.get(i);
-            if (rnum < sum){
-                transition = i;
-            }
-            i++;
+        return emit;
+
+    }
+
+    public void transition(float [] input_vals) {
+        /*
+        Transition to a new state
+        */
+        ArrayList<Double> scores = new ArrayList<>();
+        double [] weights = {};
+        for (int state_to=0; state_to<states; state_to++){
+            weights = transition_weights[current_state][state_to];
+            scores.add(calculate_score(input_vals, weights));
         }
-        state = transition;
-        return emission;
+        ArrayList<Double> norm_scores = normalize_scores(scores);
+        current_state = weighted_random_choice(norm_scores);
+
     }
 }

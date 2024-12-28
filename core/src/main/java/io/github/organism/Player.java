@@ -17,4 +17,6 @@ public interface Player {
     LinkedList<Integer> get_move_queue();
 
     void generate_and_queue();
+
+    void transition();
 }

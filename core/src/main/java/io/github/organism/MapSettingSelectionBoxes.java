@@ -64,13 +64,13 @@ public class MapSettingSelectionBoxes {
         max_width = 0;
         GlyphLayout layout;
         for (String k : ordered_keys){
-            layout = new GlyphLayout(game_board.font, k);
+            layout = new GlyphLayout(game_board.game.font, k);
             layouts.put(k, layout);
             if (layout.width > max_width){
                 max_width = layout.width;
             }
             for (String p : radio_buttons.get(k)){
-                layout = new GlyphLayout(game_board.font, p);
+                layout = new GlyphLayout(game_board.game.font, p);
                 layouts.put(p, layout);
                 if (layout.width > max_width){
                     max_width = layout.width;
@@ -126,21 +126,21 @@ public class MapSettingSelectionBoxes {
 
     public void render() {
 
-        game_board.font.getData().setScale(1f);
+        game_board.game.font.getData().setScale(1f);
         game.batch.begin();
         GlyphLayout layout;
         for (String k : ordered_keys){
 
             float [] xy = label_coords.get(k).get(k);
             layout = layouts.get(k);
-            game_board.font.draw(
+            game_board.game.font.draw(
                 game_board.batch, layout, xy[0], xy[1]
             );
             for (String p : label_coords.get(k).keySet()){
                 layout = layouts.get(p);
                 if (!k.equals(p)) {
                     xy = label_coords.get(k).get(p);
-                    game_board.font.draw(
+                    game_board.game.font.draw(
                         game_board.batch, layout, xy[0], xy[1]
                     );
                 }
@@ -154,14 +154,14 @@ public class MapSettingSelectionBoxes {
                 float [] xy = button_coords.get(k).get(p);
                 String selected = selected_vals.get(k);
 
-                game.shape_renderer.setColor(game_board.foreground_color);
+                game.shape_renderer.setColor(game_board.game.foreground_color);
                 game.shape_renderer.circle(xy[0], xy[1], BUTTON_RADIUS);
 
-                game.shape_renderer.setColor(game_board.background_color);
+                game.shape_renderer.setColor(game_board.game.background_color);
                 game.shape_renderer.circle(xy[0], xy[1], BUTTON_RADIUS - 1);
 
                 if (selected.equals(p)) {
-                    game.shape_renderer.setColor(game_board.foreground_color);
+                    game.shape_renderer.setColor(game_board.game.foreground_color);
                     game.shape_renderer.circle(xy[0], xy[1], BUTTON_RADIUS - 2);
                 }
             }
