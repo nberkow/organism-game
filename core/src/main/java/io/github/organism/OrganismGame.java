@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class OrganismGame extends Game {
+
     ShapeRenderer shape_renderer;
     GameScreen game_screen;
     MenuScreen menu_screen;
@@ -31,8 +32,10 @@ public class OrganismGame extends Game {
     Color background_color = Color.BLACK;
     Color foreground_color = Color.CYAN;
 
-    Color [] colors = {Color.RED, Color.BLUE, Color.GREEN};
+    Color [] colors = {Color.RED, Color.BLUE, Color.RED};
+    Color expand_color = Color.BLUE;
 
+    Color exterminate_color = Color.RED;
     BitmapFont font;
 
     Color [] player_colors = {
@@ -119,4 +122,5 @@ public class OrganismGame extends Game {
             game_board.dispose();
         }
     }
+
 }

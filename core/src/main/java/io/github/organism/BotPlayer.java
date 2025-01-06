@@ -1,30 +1,43 @@
 package io.github.organism;
 
+import com.badlogic.gdx.graphics.Color;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
 public class BotPlayer implements Player{
 
     public LinkedList<Integer> move_queue;
-    public ActionHistory move_history;
+    //public ActionHistory move_history;
 
     public GameBoard game_board;
 
+    public int index;
+
+    public Color color;
     public String player_name;
 
     public HMM model;
 
     public Organism organism;
 
-    public BotPlayer(GameBoard gb, String name, Organism org, HMM m){
+    int most_recent_move;
+    HashMap<String, Player> diplomacy;
+
+    public BotPlayer(GameBoard gb, String name, int idx, Organism org, HMM m, Color c){
 
         game_board = gb;
         model = m;
+        color = c;
         player_name = name;
+        index = idx;
         organism = org;
         move_queue = new LinkedList<>();
-        move_history = new ActionHistory(game_board);
+        diplomacy = new HashMap<>();
+        diplomacy.put("enemy", null);
+        diplomacy.put("ally", null);
     }
 
     public void queue_move(Integer move) {
@@ -70,9 +83,35 @@ public class BotPlayer implements Player{
 
     public Integer get_move() {
         if (!move_queue.isEmpty()) {
-            return move_queue.remove();
+            int m = move_queue.remove();
+            most_recent_move = m;
+            return m;
         }
         return on_empty_queue();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Color get_color() {
+        return color;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public int get_index() {
+        return index;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public HashMap<String, Player> get_diplomacy() {
+        return diplomacy;
     }
 
     public Integer on_empty_queue() {
@@ -104,5 +143,13 @@ public class BotPlayer implements Player{
                 queue_move(move);
             }
         }
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public int get_most_recent_move() {
+        return most_recent_move;
     }
 }

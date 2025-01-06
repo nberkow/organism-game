@@ -14,8 +14,8 @@ public class HMM {
     public Integer states;
     public Integer inputs;
     public Integer current_state;
-    private double [][][] transition_weights;
-    private double [][][] emission_weights;
+    public double [][][] transition_weights;
+    public double [][][] emission_weights;
 
     GameBoard game_board;
     public HMM(GameBoard gb, int s, float r, int n) {
@@ -101,10 +101,8 @@ public class HMM {
             scores.add(calculate_score(input_vals, weights));
         }
         ArrayList<Double> norm_scores = normalize_scores(scores);
-        int emit = weighted_random_choice(norm_scores);
-        System.out.println("emitting " + emit);
 
-        return emit;
+        return weighted_random_choice(norm_scores);
 
     }
 

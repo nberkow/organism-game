@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -25,12 +26,10 @@ public class GameBoard implements Disposable {
     final float PLAYER_SUMMARY_HEIGHT = 40;
     public long seed;
 
-
+    GameOrchestrator orchestrator;
 
     // Gameplay parameters
     public static final int DEFAULT_STARTING_ENERGY = 6;
-
-    public String winner;
 
     // Gameplay
     HashMap<String, Player> players = new HashMap<>();
@@ -47,14 +46,13 @@ public class GameBoard implements Disposable {
     VoidDistributor void_distributor;
     PlayerHud player1_hud;
     PlayerHud player2_hud;
-
     SpriteBatch batch;
-
     GameConfig config;
-
     int radius;
     Random rng;
     OrganismGame game;
+
+    MoveLogger move_logger;
 
     public GameBoard(OrganismGame game, GameConfig cfg) {
         this.game = game;
@@ -63,8 +61,8 @@ public class GameBoard implements Disposable {
         seed = config.seed;
         radius = config.radius;
         grid_window_y = GRID_WINDOW_HEIGHT;
+        move_logger = null;
         show_data = true;
-        winner = null;
 
         shape_renderer = game.shape_renderer;
         hex_side_len = config.map_view_size_param/radius; // starting default
@@ -99,15 +97,23 @@ public class GameBoard implements Disposable {
         }
     }
 
+    public void set_orchestrator(GameOrchestrator o) {
+        orchestrator = o;
+    }
+
     public void create_human_players(){
         for (int p=0; p<config.human_players; p++){
+            int index = all_player_names.size();
+            Color color = game.player_colors[index];
             String name = "human " + p;
             Organism organism = new Organism(this);
             Player player = new IO_Player(
                 this,
                 name,
+                index,
                 organism,
-                false
+                false,
+                color
             );
             organism.color = game.player_colors[p];
             organism.player = player;
@@ -120,14 +126,18 @@ public class GameBoard implements Disposable {
 
     public void create_bot_players(){
         for (int b=0; b<config.bot_players; b++){
+            int index = all_player_names.size();
+            Color color = game.player_colors[index];
             String name = "bot " + b;
             HMM m = new HMM(this, 6, 0.5f, 6);
             Organism organism = new Organism(this);
             BotPlayer player = new BotPlayer(
                 this,
                 name,
+                index,
                 organism,
-                m
+                m,
+                color
             );
             organism.color = game.player_colors[b + config.human_players];
             organism.player = player;
@@ -150,7 +160,7 @@ public class GameBoard implements Disposable {
     }
 
     public void logic() {
-        // Check for victory and mark winner = true;
+        //
     }
 
     public void render() {

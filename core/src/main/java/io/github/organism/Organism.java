@@ -45,8 +45,13 @@ public class Organism {
 
     public void update_income(){
         income = 1;
+        Player ally = player.get_diplomacy().get("ally");
         for (int r=0; r<3; r++){
-            income *= Math.min(Math.max(resources[r], 1), 6);
+            int resource_count = resources[r];
+            if (ally != null) {
+                resource_count = Math.max(resources[r], ally.get_organism().resources[r]);
+            }
+            income *= Math.min(Math.max(resource_count, 1), 6);
         }
     }
 
@@ -55,63 +60,54 @@ public class Organism {
         permanently consume a resource to gain income
          */
 
-        // initialize data structures. Get an array of priority by resource and invert it to a hashmap
-        int [] res_priority = get_resource_priority();
-        HashMap<Integer, ArrayList<Integer>> res_by_priority = new HashMap<>();
-        int i = 0;
-        for (int r : res_priority){
-            if (!res_by_priority.containsKey(r)){
-                res_by_priority.put(r, new ArrayList<>());
+        // get the most abundant resource
+        int target_res = 0;
+        for (int i = 1; i < resources.length; i++) {
+            if (resources[i] > resources[target_res]) {
+                target_res = i;
             }
-            res_by_priority.get(r).add(i);
-            i++;
         }
 
-        ArrayList<Integer> res_list = new ArrayList<>(res_by_priority.keySet());
-        Collections.sort(res_list);
-
-        int r = 0;
-        int q;
+        // find the hex to update
+        int h = 0;
         boolean done = false;
-        int target_res;
-        while (r < res_list.size() && !done){
-            q = 0;
-            ArrayList<Integer> tied_res = res_by_priority.get(res_list.get(r));
-            while (q<tied_res.size() && !done){
-                target_res = tied_res.get(q);
-                int h = 0;
-                MapHex hex;
-                while (h < extract_queue.size() && !done) {
-                    hex = extract_queue.get(h);
-                    int j = hex.total_resources - 1;
-                    while (j >= 0 && !done) {
-                        if (hex.resources[j] == target_res && hex.total_resources > 0) {
-                            done = true;
-                            hex.resources[j] = 0;
-                            hex.total_resources--;
+        MapHex hex;
+        while (h < extract_queue.size() && !done) {
 
-                            // shift remaining resources up
-                            for (int p = j; p < hex.total_resources - 1; p++) {
-                                hex.resources[p] = hex.resources[p + 1];
-                                hex.resources[p + 1] = 0;
-                            }
-                        }
-                        j--;
+            hex = extract_queue.get(h);
+            int j = hex.total_resources - 1;
+
+            while (j >= 0 && !done) {
+
+                if (hex.resources[j] == target_res && hex.total_resources > 0) {
+
+                    done = true;
+                    hex.resources[j] = 0;
+                    hex.total_resources--;
+
+                    // shift remaining resources up
+                    for (int p = j; p < hex.total_resources - 1; p++) {
+                        hex.resources[p] = hex.resources[p + 1];
+                        hex.resources[p + 1] = 0;
                     }
-                    h++;
-                } q++;
+                }
+                j--;
             }
-            r++;
+            h++;
         }
         energy = Math.min(energy + income, MAX_ENERGY);
     }
 
 
-    public void expand() {
+    public void expand(Player enemy_player) {
+
+    }
+
+
+    public void expand_() {
 
         /*
-        - get all the external vertexes
-        - get all the hexes they are in
+        - get all the external hexes
         - sort the hexes by value and claim as many as possible
         - sort the unused vertexes by value and claim as many as possible
          */
@@ -127,7 +123,6 @@ public class Organism {
             hex_by_value.add(w);
         }
         hex_by_value.sort(Collections.reverseOrder());
-
 
         for (ExpandSortWrapper w : hex_by_value){
             if (w.energy_cost <= budget) {
@@ -156,7 +151,7 @@ public class Organism {
         }
     }
 
-    public void explore () {
+    public void explore_ () {
         /*
         - find adjacent vertices
         - compute value based on surrounding hexes
@@ -220,10 +215,7 @@ public class Organism {
                 }
             }
 
-
             explore_vertex_priority.removeAll(to_remove);
-
-
         }
     }
 
@@ -245,6 +237,7 @@ public class Organism {
     public void claim_hex(MapHex h){
 
         // remove previous player and add self
+
         if (h.player != player) {
             if (h.player != null) {
                 h.player.get_organism().territory_hex.remove_pos(h.pos);
@@ -271,6 +264,7 @@ public class Organism {
         if (v.player != null){
             v.player.get_organism().territory_vertex.remove_pos(v.pos);
         }
+
         v.player = player;
         territory_vertex.add_pos(v.pos);
 
@@ -291,21 +285,6 @@ public class Organism {
         }
     }
 
-    public void make_move(Integer move) {
-        if (move != null){
-            if (move == 0) {
-                extract();
-            }
-            if (move == 1) {
-                expand();
-            }
-            if (move == 2) {
-                explore();
-            }
-        }
-        update_resources();
-        update_income();
-    }
 }
 
 

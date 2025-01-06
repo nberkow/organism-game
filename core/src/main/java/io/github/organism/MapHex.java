@@ -40,6 +40,11 @@ public class MapHex implements MapElement{
         }
     }
 
+    public void add_resource(int resource_type) {
+        resources[total_resources] = resource_type;
+        total_resources += 1;
+    }
+
     @Override
     public Player get_player() {
         return player;
@@ -154,11 +159,6 @@ public class MapHex implements MapElement{
             n++;
         }
 
-    }
-
-    public void add_resource(int resource_type) {
-        resources[total_resources] = resource_type;
-        total_resources += 1;
     }
 
     public Integer [] get_resources() {
