@@ -7,6 +7,8 @@ public class Simulation {
     LabScreen lab_screen;
     GameBoard current_game;
     GameOrchestrator current_game_orchestrator;
+
+    ModelPoolDisplay model_pool_display;
     float map_center_x;
     float map_center_y;
     GameConfig cfg;
@@ -23,11 +25,32 @@ public class Simulation {
                         "XVI", "XVII", "XVIII", "XIX", "XX"};
 
     String[]  player_names_array = {
-        "Alexander", "Hannibal", "Belisarius", "Gaozu", "Jang Bogo", "Cimon",
-        "Pompey", "Trajan", "Macedonius", "Barca", "Epaminonda",
-        "Antigonus", "Cyrus", "Wu", "Menander", "Modu Chanyu", "Bimbisara"
+        "Serpula lacrymans",
+        "Turkey tail",
+        "Hoof fungus",
+        "Chicken of the woods",
+        "Red-Belted Conk",
+        "Honey fungus",
+        "Splitgill mushroom",
+        "Artist's bracket",
+        "Oyster Mushroom",
+        "Pleurotus",
+        "Coniophora",
+        "Dyer's polypore",
+        "Shiitake",
+        "Kretzschmaria deusta",
+        "Sulphur tuft",
+        "Porodaedalea pini",
+        "Donkioporia expansa",
+        "Northern cinnabar polypore",
+        "Fibroporia vaillantii",
+        "Dead man's fingers",
+        "Phanerodontia chrysosporium",
+        "Chaetomium",
+        "China root",
+        "Ceratocystis",
+        "Bondarzewia berkeleyi"
     };
-
 
     HashMap<int [], HMM> model_pool;
 
@@ -56,6 +79,7 @@ public class Simulation {
         model_pool = new HashMap<>();
         win_records = new HashMap<>();
         champions = new HashMap<>();
+        model_pool_display = new ModelPoolDisplay(lab_screen.game, this);
         //move_logger = new MoveLogger(lab_screen.game);
     }
 
@@ -258,6 +282,7 @@ public class Simulation {
     public void draw(){
         current_game.game.camera.update();
         current_game.render();
+        model_pool_display.render();
     }
 
     public void render(){

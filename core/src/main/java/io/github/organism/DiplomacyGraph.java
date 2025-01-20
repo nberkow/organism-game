@@ -37,6 +37,8 @@ public class DiplomacyGraph {
     float graph_radius;
     float player_radius;
 
+    float line_midpoint;
+
 
     float span = 80; // Angular span in degrees
     int segments = 30;
@@ -55,10 +57,13 @@ public class DiplomacyGraph {
 
         players_counted = new HashSet<>();
 
-        x_pos = game.VIRTUAL_WIDTH * 0.85f;
-        y_pos = game.VIRTUAL_HEIGHT * 0.85f;
-        graph_radius = game.VIRTUAL_WIDTH / 20f;
+        graph_radius = game.VIRTUAL_WIDTH / 15f;
         player_radius = graph_radius / 3;
+        line_midpoint = 0.7f;
+
+        x_pos = game.VIRTUAL_WIDTH * 0.8f + (game.VIRTUAL_WIDTH / 12f);
+        y_pos = game.VIRTUAL_HEIGHT * 0.85f;
+
 
     }
 
@@ -207,8 +212,36 @@ public class DiplomacyGraph {
             game.shape_renderer.polyline(player_outer_arc_vertices[i]);
 
         }
-        game.shape_renderer.end();
 
+
+        // inner relationship lines
+        for (int i=0; i<3; i++) {
+            // Draw the arc as a polyline
+            color = Color.DARK_GRAY;
+
+            int[] p = current_game.all_player_ids.get(i);
+            Player player = current_game.players.get(p);
+
+            int[] q = current_game.all_player_ids.get((i + 2) % 3);
+            Player opponent = current_game.players.get(q);
+
+            String r = relationships.get(player).get(opponent);
+
+            if (Objects.equals(r, "friendly")) {
+                color = Color.BLUE;
+            }
+
+            if (Objects.equals(r, "hostile")) {
+                color = Color.RED;
+            }
+
+            game.shape_renderer.setColor(color);
+            double end_x =  (player_coords[i][0] * (1-line_midpoint) + (player_coords[(i+2) % 3][0]) * (line_midpoint));
+            double end_y =  (player_coords[i][1] * (1-line_midpoint) + (player_coords[(i+2) % 3][1]) * (line_midpoint));
+            game.shape_renderer.line((float) player_coords[i][0], (float) player_coords[i][1], (float) end_x, (float) end_y);
+
+        }
+        game.shape_renderer.end();
 
         // player circles
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
