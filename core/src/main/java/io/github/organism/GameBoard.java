@@ -16,6 +16,7 @@ public class GameBoard implements Disposable {
     // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.7f;
     public boolean show_data;
+
     float hex_side_len;
     float center_x;
     float center_y;
@@ -28,18 +29,20 @@ public class GameBoard implements Disposable {
 
     GameOrchestrator orchestrator;
 
+    DiplomacyGraph diplomacy_graph;
+
     // Gameplay parameters
     public static final int DEFAULT_STARTING_ENERGY = 6;
 
     // Gameplay
-    HashMap<String, Player> players = new HashMap<>();
+    HashMap<int [], Player> players = new HashMap<>();
 
     GridWindow grid_window;
     UniverseMap universe_map;
     ArrayList<PlayerSummaryDisplay> player_summary_displays;
-    ArrayList<String> human_player_names;
-    ArrayList<String> bot_player_names;
-    ArrayList<String> all_player_names;
+    ArrayList<int []> human_player_ids;
+    ArrayList<int []> bot_player_ids;
+    ArrayList<int []> all_player_ids;
     ShapeRenderer shape_renderer;
     PlayerStartAssigner player_start_assigner;
     ResourceDistributor resource_distributor;
@@ -74,27 +77,34 @@ public class GameBoard implements Disposable {
 
         // Initialize other game objects here
         universe_map = new UniverseMap(this, radius);
+        diplomacy_graph = new DiplomacyGraph(this.game, this);
+        //iplomacy_graph.set_pos(
+        //    this.game.VIRTUAL_WIDTH,
+        //    this.game.VIRTUAL_HEIGHT
+        //);
+
         player_start_assigner = new PlayerStartAssigner(this);
         resource_distributor = new ResourceDistributor(this);
         void_distributor = new VoidDistributor(this);
         grid_window = new GridWindow(this, 2);
 
         player_summary_displays = new ArrayList<>();
-        human_player_names = new ArrayList<>();
-        bot_player_names = new ArrayList<>();
-        all_player_names = new ArrayList<>();
+        human_player_ids = new ArrayList<>();
+        bot_player_ids = new ArrayList<>();
+        all_player_ids = new ArrayList<>();
+        all_player_ids = new ArrayList<>();
 
         // Setup the players based on the config
 
-        create_human_players();
-        create_bot_players();
-        create_player_summary_displays();
-        if (!human_player_names.isEmpty()) {
-            player1_hud = new PlayerHud(this, players.get(human_player_names.get(0)), false);
+        //create_human_players();
+        //create_bot_players();
+
+        /*if (!human_player_ids.isEmpty()) {
+            player1_hud = new PlayerHud(this, players.get(human_player_ids.get(0)), false);
         }
-        if (human_player_names.size() > 1) {
-            player2_hud = new PlayerHud(this, players.get(human_player_names.get(1)),  true);
-        }
+        if (human_player_ids.size() > 1) {
+            player2_hud = new PlayerHud(this, players.get(human_player_ids.get(1)),  true);
+        }*/
     }
 
     public void set_orchestrator(GameOrchestrator o) {
@@ -103,7 +113,8 @@ public class GameBoard implements Disposable {
 
     public void create_human_players(){
         for (int p=0; p<config.human_players; p++){
-            int index = all_player_names.size();
+            int index = all_player_ids.size();
+            int [] player_id = new int [] {index, 0};
             Color color = game.player_colors[index];
             String name = "human " + p;
             Organism organism = new Organism(this);
@@ -111,40 +122,41 @@ public class GameBoard implements Disposable {
                 this,
                 name,
                 index,
+                player_id,
                 organism,
                 false,
                 color
             );
             organism.color = game.player_colors[p];
             organism.player = player;
-            players.put(name, player);
+            players.put(player_id, player);
 
-            human_player_names.add(name);
-            all_player_names.add(name);
+            human_player_ids.add(player_id);
+            all_player_ids.add(player_id);
         }
     }
 
-    public void create_bot_players(){
-        for (int b=0; b<config.bot_players; b++){
-            int index = all_player_names.size();
-            Color color = game.player_colors[index];
-            String name = "bot " + b;
-            HMM m = new HMM(this, 6, 0.5f, 6);
-            Organism organism = new Organism(this);
-            BotPlayer player = new BotPlayer(
-                this,
-                name,
-                index,
-                organism,
-                m,
-                color
-            );
-            organism.color = game.player_colors[b + config.human_players];
-            organism.player = player;
-            players.put(name, player);
-            bot_player_names.add(name);
-            all_player_names.add(name);
-        }
+    public void create_bot_player(String name, int [] player_id, HMM model){
+
+        int index = all_player_ids.size();
+        Color color = game.player_colors[index % game.player_colors.length];
+        Organism organism = new Organism(this);
+        BotPlayer player = new BotPlayer(
+            this,
+            name,
+            index,
+            player_id,
+            organism,
+            model,
+            color
+        );
+
+        organism.color = game.player_colors[index];
+        organism.player = player;
+        players.put(player_id, player);
+        bot_player_ids.add(player_id);
+        all_player_ids.add(player_id);
+
     }
 
     public void create_player_summary_displays(){
@@ -185,6 +197,8 @@ public class GameBoard implements Disposable {
                 p.render();
             }
         }
+
+        diplomacy_graph.render();
     }
 
     @Override

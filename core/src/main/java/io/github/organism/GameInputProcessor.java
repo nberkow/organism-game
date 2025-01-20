@@ -13,7 +13,8 @@ public class GameInputProcessor implements InputProcessor {
     GameScreen screen;
     double held_button_base_freq;
 
-    HashMap<String, PlayerGameInputData> player_input_data;
+    HashMap<int [], PlayerGameInputData> player_input_data;
+    private String player_name;
 
     public GameInputProcessor(GameScreen screen){
         this.screen = screen;
@@ -21,8 +22,8 @@ public class GameInputProcessor implements InputProcessor {
 
         held_button_base_freq = .2;
         player_input_data = new HashMap<>();
-        for (String player_name : game_board.human_player_names){
-            player_input_data.put(player_name, new PlayerGameInputData());
+        for (int [] tournament_id : game_board.human_player_ids){
+            player_input_data.put(tournament_id, new PlayerGameInputData());
         }
     }
 
@@ -58,12 +59,12 @@ public class GameInputProcessor implements InputProcessor {
         if (keycode == Input.Keys.S || keycode == Input.Keys.L) {
             key_val = 1;
         }
-        if (game_board.human_player_names.size() == 2 && (keycode == Input.Keys.D || keycode == Input.Keys.K || keycode == Input.Keys.SEMICOLON)) {
+        if (game_board.human_player_ids.size() == 2 && (keycode == Input.Keys.D || keycode == Input.Keys.K || keycode == Input.Keys.SEMICOLON)) {
             key_val = 2;
         }
 
-        String player_name = game_board.human_player_names.get(p);
-        PlayerGameInputData input_data = player_input_data.get(player_name);
+        int [] player_id = game_board.human_player_ids.get(p);
+        PlayerGameInputData input_data = player_input_data.get(player_id);
 
         input_data.button_val = key_val;
         input_data.button_input_ready = false;
@@ -89,8 +90,8 @@ public class GameInputProcessor implements InputProcessor {
             key_val = 2;
         }
 
-        String player_name = game_board.human_player_names.get(p);
-        PlayerGameInputData input_data = player_input_data.get(player_name);
+        int [] player_id = game_board.human_player_ids.get(p);
+        PlayerGameInputData input_data = player_input_data.get(player_id);
 
         input_data.button_val = key_val;
         input_data.button_input_ready = true;
@@ -116,8 +117,8 @@ public class GameInputProcessor implements InputProcessor {
 
         if (button_data != null){
 
-            String player_name = game_board.human_player_names.get(button_data.player - 1);
-            PlayerGameInputData input_data = player_input_data.get(player_name);
+            int [] player_id= game_board.human_player_ids.get(button_data.player - 1);
+            PlayerGameInputData input_data = player_input_data.get(player_id);
 
             if (input_data.time_not_held > MIN_BETWEEN_PRESS_TIME) {
                 if (!input_data.holding_button) {
@@ -142,8 +143,8 @@ public class GameInputProcessor implements InputProcessor {
         GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null) {
-            String player_name = game_board.human_player_names.get(button_data.player - 1);
-            PlayerGameInputData input_data = player_input_data.get(player_name);
+            int [] player_id = game_board.human_player_ids.get(button_data.player - 1);
+            PlayerGameInputData input_data = player_input_data.get(player_id);
             if (input_data.touched_button){
                 input_data.time_held = 0d;
                 input_data.holding_button = false;
@@ -174,8 +175,8 @@ public class GameInputProcessor implements InputProcessor {
     }
 
     public void update_timers(double time_delta){
-        for (String player_name : game_board.human_player_names){
-            PlayerGameInputData input_data = player_input_data.get(player_name);
+        for (int [] p : game_board.human_player_ids){
+            PlayerGameInputData input_data = player_input_data.get(p);
 
             input_data.time_held += time_delta;
             if (input_data.touched_button && !input_data.holding_button) {
@@ -188,10 +189,10 @@ public class GameInputProcessor implements InputProcessor {
     }
 
     public void update_queues_with_input(){
-        for (String player_name : game_board.human_player_names){
+        for (int [] p : game_board.human_player_ids){
 
-            Player player = game_board.players.get(player_name);
-            PlayerGameInputData input_data = player_input_data.get(player_name);
+            Player player = game_board.players.get(p);
+            PlayerGameInputData input_data = player_input_data.get(p);
 
             // if the button is being held
             if (input_data.holding_button){

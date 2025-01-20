@@ -1,14 +1,17 @@
 package io.github.organism;
 
+import static java.util.Collections.sort;
+
 import com.badlogic.gdx.graphics.Color;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 public class Organism {
 
     public final int MAX_ENERGY = 300;
+
+    final int VERTEX_COST_TAKE_VERTEX = 3;
     public int income;
     TriangularGrid territory_hex;
     TriangularGrid territory_vertex;
@@ -45,7 +48,7 @@ public class Organism {
 
     public void update_income(){
         income = 1;
-        Player ally = player.get_diplomacy().get("ally");
+        Player ally = game_board.diplomacy_graph.get_ally(player);
         for (int r=0; r<3; r++){
             int resource_count = resources[r];
             if (ally != null) {
@@ -99,8 +102,83 @@ public class Organism {
     }
 
 
-    public void expand(Player enemy_player) {
+    public void expand(Player enemy_player, int remove_cost) {
+        /*
+        - claim adjacent hexes
+        - prioritize
+         - direction of enemy
+         - partially owned hexes
+         - hexes with resources
+        - claim until out of budget
+         */
 
+        int budget = energy / 2;
+        ArrayList<MapVertex> adjacent_vertexes = territory_vertex.get_external_vertex_layer(player);
+        ArrayList<MapVertex> enemy_adjacent_vertexes = territory_vertex.get_external_vertex_layer(enemy_player);
+
+        ArrayList<ExpandSortWrapper> vertex_priority = new ArrayList<>();
+
+        for (MapVertex v : adjacent_vertexes) {
+            ExpandSortWrapper w = new ExpandSortWrapper(v, player);
+            compute_adjacent_hex_value(w);
+            compute_vertex_enemy_distance(w, enemy_adjacent_vertexes);
+            w.remove_player_cost = game_board.diplomacy_graph.get_remove_cost(player, enemy_player);
+            vertex_priority.add(w);
+        }
+        sort(vertex_priority);
+
+        for (ExpandSortWrapper w : vertex_priority) {
+
+            int cost = w.remove_player_cost + VERTEX_COST_TAKE_VERTEX;
+            if (cost <= budget) {
+                claim_vertex(w.vertex);
+                budget -= cost;
+                energy -= cost;
+            }
+        }
+    }
+
+    private void compute_vertex_enemy_distance(ExpandSortWrapper w, ArrayList<MapVertex> enemy_adjacent_vertexes) {
+        w.best_enemy_distance = Double.MAX_VALUE;
+        MapVertex v = w.vertex;
+
+        double distance;
+        for (MapVertex e : enemy_adjacent_vertexes) {
+            distance = Math.pow(
+                Math.pow(v.pos.i - e.pos.i, 2) +
+                    Math.pow(v.pos.j - e.pos.j, 2) +
+                    Math.pow(v.pos.k - e.pos.k, 2), 0.5);
+            if (distance < w.best_enemy_distance) {
+                w.best_enemy_distance = distance;
+            }
+        }
+    }
+
+
+
+    public void compute_adjacent_hex_value(ExpandSortWrapper w) {
+        w.total_adjacent_hex_value = 0;
+        w.adjacent_hex_completeness = 0;
+
+        int [] resource_priority = player.get_organism().get_resource_priority();
+        for (MapHex hex : w.vertex.adjacent_hexes) {
+            if (hex.player != player) {
+
+                for (int i = 0; i < hex.total_resources; i++) {
+                    w.total_adjacent_hex_value += resource_priority[hex.resources[i]];
+                }
+
+                int c = 0;
+                for (MapVertex n : hex.vertex_list) {
+                    if (n.player == player) {
+                        c += 1;
+                    }
+                }
+                if (c > w.adjacent_hex_completeness) {
+                    w.adjacent_hex_completeness = c;
+                }
+            }
+        }
     }
 
 
@@ -110,7 +188,7 @@ public class Organism {
         - get all the external hexes
         - sort the hexes by value and claim as many as possible
         - sort the unused vertexes by value and claim as many as possible
-         */
+
 
         // claim the best neighboring hexes
         int budget = (int) Math.ceil(energy / 2d);
@@ -149,6 +227,8 @@ public class Organism {
                 budget -= w.energy_cost;
             }
         }
+        */
+
     }
 
     public void explore_ () {

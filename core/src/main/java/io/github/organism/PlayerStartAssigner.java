@@ -12,7 +12,7 @@ import java.util.Random;
 public class PlayerStartAssigner {
 
     GameBoard game_board;
-    HashMap<String, Player> players;
+    HashMap<int [], Player> players;
     UniverseMap universe_map;
     Random rng;
     GameConfig cfg;
@@ -27,8 +27,8 @@ public class PlayerStartAssigner {
 
     public void assign_starting_hexes(ArrayList<int[]> starting_coords) {
         int i = 0;
-        for (String player_name : players.keySet()) {
-            Organism organism = players.get(player_name).get_organism();
+        for (int [] p : players.keySet()) {
+            Organism organism = players.get(p).get_organism();
             int [] coords = starting_coords.get(i);
             organism.claim_hex(coords[0], coords[1], coords[2]);
             MapHex hex = (MapHex) universe_map.hex_grid.get_pos(coords[0], coords[1], coords[2]).content;

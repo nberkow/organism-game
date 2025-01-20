@@ -13,8 +13,6 @@ public interface Player {
 
     public int get_index();
 
-    public HashMap<String, Player> get_diplomacy();
-
     public Integer on_empty_queue();
 
     String get_player_name();

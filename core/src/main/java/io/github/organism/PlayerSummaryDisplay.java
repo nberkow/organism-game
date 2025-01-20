@@ -61,31 +61,13 @@ public class PlayerSummaryDisplay {
 
     public void draw_action_queue(){
 
-
         Color color;
-        Color outline_color;
         for (int i=0; i<player.get_move_queue().size(); i++){
             Integer state = player.get_move_queue().get(i);
-            color = game_board.game.expand_color;
-            outline_color = game_board.game.expand_color;
-            if (state == 0) {
-                color = game_board.game.player_colors[(player.get_index()+2) % 3];
-                outline_color = game_board.game.exterminate_color;
-            }
-            if (state == 2) {
-                color = game_board.game.player_colors[(player.get_index()+1) % 3];
-                outline_color = game_board.game.exterminate_color;
-            }
+            color = game_board.game.colors[state];
+
             game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
             game_board.shape_renderer.setColor(color);
-            game_board.shape_renderer.circle(
-                x + ACTION_RADIUS * (i) * 2 + (ACTION_RADIUS / 2),
-                y + ACTION_BAR_Y,
-                ACTION_RADIUS * 0.5f);
-            game_board.shape_renderer.end();
-
-            game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-            game_board.shape_renderer.setColor(outline_color);
             game_board.shape_renderer.circle(
                 x + ACTION_RADIUS * (i) * 2 + (ACTION_RADIUS / 2),
                 y + ACTION_BAR_Y,

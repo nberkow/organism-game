@@ -94,6 +94,7 @@ public class FileHandler {
         handle.writeString(all_lines, true);
     }
 
+    /*
     public HMM load_model(GameBoard game_board, String prefix){
 
         String dir = "model_configs";
@@ -125,5 +126,5 @@ public class FileHandler {
         }
 
         return model;
-    }
+    }*/
 }

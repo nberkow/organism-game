@@ -7,31 +7,36 @@ import java.util.Random;
 
 public class HMM {
 
-    public HashMap<Integer, HashMap<String, HashMap<Integer, Double>>> params = new HashMap<>();
-    public double randomness;
     private final Random rng;
 
-    public Integer states;
-    public Integer inputs;
+    public int [] player_tournament_id;
+    public static Integer states;
+    public static Integer inputs;
     public Integer current_state;
     public double [][][] transition_weights;
     public double [][][] emission_weights;
 
-    GameBoard game_board;
-    public HMM(GameBoard gb, int s, float r, int n) {
-        game_board = gb;
+    OrganismGame game;
+    public HMM(OrganismGame g, int s, int n) {
+        game = g;
         states = Math.max(3, s);
         inputs = n;
 
-        rng = game_board.rng;
-        randomness = r;
-
+        rng = game.rng;
         current_state = rng.nextInt(states);
 
-        init_transition_weights();
-        init_emission_weights();
     }
-    private void init_transition_weights() {
+
+    public void set_weights(double [][][] tr, double [][][] em) {
+        transition_weights = tr;
+        emission_weights = em;
+    }
+
+    public void init_random_weights() {
+        init_random_transition_weights();
+        init_random_emission_weights();
+    }
+    private void init_random_transition_weights() {
         transition_weights = new double[states][states][inputs];
         for (int i=0; i<states; i++){
             for (int j=0; j<states; j++){
@@ -42,7 +47,7 @@ public class HMM {
         }
     }
 
-    private void init_emission_weights() {
+    private void init_random_emission_weights() {
         // there are 4 possible emissions, 1 for each move plus a null output
         emission_weights = new double[states][4][inputs];
         for (int i=0; i<states; i++){

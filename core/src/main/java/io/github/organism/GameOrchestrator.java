@@ -23,15 +23,9 @@ public class GameOrchestrator {
     double queue_clock = 0d;
     double hmm_transition_clock = 0d;
     boolean paused = true;
-    HashMap<String, Float> player_territory;
-    HashMap<String, Integer> current_moves;
+    HashMap<int [], Float> player_territory;
+    HashMap<int [], Integer> current_moves;
     float total_territory;
-
-    final int VERTEX_COST_REMOVE_ENEMY_PLAYER = 9;
-    final int VERTEX_COST_REMOVE_EXTRACTING_PLAYER = 9;
-    final int VERTEX_COST_REMOVE_FLANKED_PLAYER = 1;
-    final int VERTEX_COST_TAKE_VERTEX = 3;
-
 
     public GameOrchestrator(GameBoard gb) {
         game_board = gb;
@@ -39,7 +33,7 @@ public class GameOrchestrator {
         turn_max = total_territory * 36;
         player_territory = new HashMap<>();
         current_moves = new HashMap<>();
-        for (String p : game_board.players.keySet()) {
+        for (int [] p : game_board.players.keySet()) {
             player_territory.put(p, (float) game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices());
         }
     }
@@ -74,13 +68,13 @@ public class GameOrchestrator {
         }
 
         if (hmm_transition) {
-            for (String b : game_board.bot_player_names){
-                game_board.players.get(b).transition();
+            for (int [] b : game_board.bot_player_ids){
+                game_board.players.get(b). transition();
             }
         }
 
         if (queue_bot_actions) {
-            for (String b : game_board.bot_player_names){
+            for (int [] b : game_board.bot_player_ids){
                 game_board.players.get(b).generate_and_queue();
             }
         }
@@ -91,31 +85,39 @@ public class GameOrchestrator {
         }
     }
 
-    public boolean test_victory_conditions() {
+    public int [] test_victory_conditions() {
 
-        if (turn > turn_max) {
-            return true;
-        }
 
-        for (String p : game_board.players.keySet()) {
+        int [] leader = null;
+        float leader_territory = 0;
+
+        for (int [] p : game_board.players.keySet()) {
             float p_territory = game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             player_territory.put(p, p_territory);
+            if (p_territory > leader_territory) {
+                leader = p;
+                leader_territory = p_territory;
+            }
 
             if (p_territory / total_territory >= VICTORY_THRESHOLD) {
-                return true;
+                return p;
             }
         }
 
-        return false;
+        if (turn >= turn_max) {
+            return leader;
+        }
+
+        return null;
     }
 
-    public void enqueue_action(String player_name, int button_val) {
+    public void enqueue_action(int [] player_id, int button_val) {
         // run one of the three actions depending on the button val
-        Player player = game_board.players.get(player_name);
+        Player player = game_board.players.get(player_id);
         player.queue_move(button_val);
     }
 
-    private void resolve_moves(Integer[] all_player_moves) {
+    private void resolve_moves(HashMap<Player, Integer> all_player_moves) {
         /*
         Resolve moves based on all player responses
 
@@ -128,36 +130,46 @@ public class GameOrchestrator {
         - free territory cost: 3
         - remove enemy player cost 9, take vertex cost 3
         - remove extracting player cost: 3, take vertex cost 3
-        - remove player attacking other player cost: 1
+        - remove player attacking other player (flanked player) cost: 1
 
          */
 
         // move execution rotates order
 
-        for (int p=0; p<game_board.all_player_names.size(); p++){
-            Player player = game_board.players.get(game_board.all_player_names.get((p + turn) % 3));
+        for (int i=0; i<game_board.all_player_ids.size(); i++){
+            int p = (i + turn) % 3;
+            Player player = game_board.players.get(game_board.all_player_ids.get(p));
             player.get_organism().update_income();
-            int move = all_player_moves[p];
 
+            Player left_player = game_board.players.get(game_board.all_player_ids.get((p+2) % 3));
+            Player right_player = game_board.players.get(game_board.all_player_ids.get((p+1) % 3));
+
+            Player target;
+            int move = all_player_moves.get(player);
             if (move == 0 || move == 2) {
-                Player enemy_player = player.get_diplomacy().get("enemy");
-                player.get_organism().expand(enemy_player);
+
+                target = left_player;
+                if (move == 0) {
+                    target = right_player;
+                }
+
+                int remove_cost = game_board.diplomacy_graph.get_remove_cost(player, target);
+                player.get_organism().expand(target, remove_cost);
             }
 
             else {
                 player.get_organism().extract();
             }
-
         }
     }
 
     private void dequeue_and_execute(){
 
-        Integer [] all_player_moves = new Integer[3];
-        for (int p=0; p<game_board.all_player_names.size(); p++){
-            Player player = game_board.players.get(game_board.all_player_names.get(p));
+        HashMap<Player, Integer> all_player_moves = new HashMap<>();
+        for (int p=0; p<game_board.all_player_ids.size(); p++){
+            Player player = game_board.players.get(game_board.all_player_ids.get(p));
             Integer move = player.get_move();
-            all_player_moves[p] = move;
+            all_player_moves.put(player, move);
         }
 
         update_diplomacy(all_player_moves);
@@ -165,7 +177,7 @@ public class GameOrchestrator {
 
     }
 
-    private void update_diplomacy(Integer[] all_player_moves) {
+    private void update_diplomacy(HashMap<Player, Integer> all_player_moves) {
         /*
         If all players choose expand (cooperate) all players are neutral. this clears
         enemy relationships
@@ -181,38 +193,25 @@ public class GameOrchestrator {
         */
 
         for (int p=0; p<3; p++) {
-            Player player = game_board.players.get(game_board.all_player_names.get(p));
-            Player left_player = game_board.players.get(game_board.all_player_names.get((p+2) % 3));
-            Player right_player = game_board.players.get(game_board.all_player_names.get((p+1) % 3));
-            HashMap<String, Player> diplomacy = player.get_diplomacy();
+            Player player = game_board.players.get(game_board.all_player_ids.get(p));
+            Player left_player = game_board.players.get(game_board.all_player_ids.get((p+2) % 3));
+            Player right_player = game_board.players.get(game_board.all_player_ids.get((p+1) % 3));
 
-            int move = all_player_moves[p];
+            int move = all_player_moves.get(player);
+
             if (move == 0) {
-                diplomacy.put("enemy", left_player);
-                if (diplomacy.get("ally") == left_player) {
-                    diplomacy.put("ally", null);
-                }
+                game_board.diplomacy_graph.set_relationship(player, left_player, "hostile");
+                game_board.diplomacy_graph.set_relationship(player, right_player, "neutral");
             }
 
             if (move == 2) {
-                diplomacy.put("enemy", right_player);
-                if (diplomacy.get("ally") == right_player) {
-                    diplomacy.put("ally", null);
-                }
+                game_board.diplomacy_graph.set_relationship(player, left_player, "neutral");
+                game_board.diplomacy_graph.set_relationship(player, right_player, "hostile");
             }
 
             if (move == 1) {
-                if (all_player_moves[(p+2) % 3] == 1 && all_player_moves[(p+1) % 3] == 1) {
-                    player.get_diplomacy().put("enemy", null);
-                    player.get_diplomacy().put("ally", null);
-                } else {
-                    if (all_player_moves[(p+2) % 3] == 1) {
-                        player.get_diplomacy().put("ally", left_player);
-                    }
-                    if (all_player_moves[(p+1) % 3] == 1) {
-                        player.get_diplomacy().put("ally", right_player);
-                    }
-                }
+                game_board.diplomacy_graph.set_relationship(player, left_player, "friendly");
+                game_board.diplomacy_graph.set_relationship(player, right_player, "friendly");
             }
         }
     }
@@ -230,7 +229,7 @@ public class GameOrchestrator {
         most_recent_move_stats.put("turn", String.valueOf(turn));
 
         int i = 1;
-        for (String p : game_board.all_player_names) {
+        for (int [] p : game_board.all_player_ids) {
             int move = game_board.players.get(p).get_most_recent_move();
             int territory = game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             most_recent_move_stats.put("player" + i + "_move", String.valueOf(move));

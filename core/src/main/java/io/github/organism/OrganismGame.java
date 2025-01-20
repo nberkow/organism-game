@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.Random;
+
 public class OrganismGame extends Game {
 
     ShapeRenderer shape_renderer;
@@ -28,12 +30,13 @@ public class OrganismGame extends Game {
     LabInputProcessor lab_input_processor;
     GameInputProcessor input_processor;
 
+    Random rng;
+
     // Game colors
     Color background_color = Color.BLACK;
     Color foreground_color = Color.CYAN;
 
     Color [] colors = {Color.RED, Color.BLUE, Color.RED};
-    Color expand_color = Color.BLUE;
 
     Color exterminate_color = Color.RED;
     BitmapFont font;
@@ -75,6 +78,9 @@ public class OrganismGame extends Game {
         file_handler = new FileHandler(this);
         batch = new SpriteBatch();
         shape_renderer = new ShapeRenderer();
+
+        rng = new Random();
+        rng.setSeed(10);
 
         font = new BitmapFont();
         font.setColor(foreground_color);

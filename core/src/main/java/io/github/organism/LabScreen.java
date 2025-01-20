@@ -13,7 +13,7 @@ public class LabScreen implements Screen {
     float controls_w;
 
     TerritoryBar territory_bar;
-    LabControlBar control_bar;
+    //LabControlBar control_bar;
     OrganismGame game;
     public LabScreen(OrganismGame organism_game) {
 
@@ -25,7 +25,7 @@ public class LabScreen implements Screen {
         controls_x = this.game.VIRTUAL_WIDTH * 5 / 6f;
         controls_w = this.game.VIRTUAL_WIDTH / 2.5f;
 
-        control_bar = new LabControlBar(this, this.game.VIRTUAL_HEIGHT - 10);
+        //control_bar = new LabControlBar(this, this.game.VIRTUAL_HEIGHT - 10);
         territory_bar = new TerritoryBar(game);
 
         setup();
@@ -36,11 +36,8 @@ public class LabScreen implements Screen {
         GameConfig cfg = game.file_handler.read_cfg("kingdoms", "map");
         cfg.human_players = 0;
         cfg.bot_players = 3;
-        System.out.println(cfg.layout);
 
         current_sim = new Simulation(this, cfg, 1000);
-        current_sim.create_game();
-        current_sim.set_random_models();
         current_sim.run_simulation();
         visible_game = current_sim.current_game;
     }
@@ -60,7 +57,7 @@ public class LabScreen implements Screen {
     @Override
     public void render(float delta) {
         current_sim.render();
-        control_bar.render();
+        //control_bar.render();
         territory_bar.render(current_sim.current_game);
     }
 

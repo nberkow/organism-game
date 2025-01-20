@@ -16,7 +16,7 @@ public class TerritoryBar {
     float bar_spacing = 5;
     float max_height = 200;
 
-    HashMap<String, Float> heights;
+    HashMap<int [], Float> heights;
 
     OrganismGame game;
     public TerritoryBar(OrganismGame g) {
@@ -31,7 +31,7 @@ public class TerritoryBar {
 
     public void logic(GameBoard gb){
         float total_territory = gb.universe_map.vertex_grid.get_unmasked_vertices();
-        for (String p : gb.all_player_names) {
+        for (int [] p : gb.all_player_ids) {
             float player_territory = gb.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             heights.put(p, max_height * player_territory / total_territory);
         }
@@ -46,7 +46,7 @@ public class TerritoryBar {
 
 
         float x = x_pos;
-        for (String p : gb.all_player_names) {
+        for (int [] p : gb.all_player_ids) {
             Player player = gb.players.get(p);
             game.shape_renderer.setColor(player.get_color());
             game.shape_renderer.rect(x, y_pos, bar_width, heights.get(p));

@@ -2,15 +2,15 @@ package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 
 public class IO_Player  implements Player {
 
     String player_name;
 
-    int index;
+
+    int [] tournament_id; // id in tournament or other large player collection
+    int game_index; // index within game
 
     Color color;
     Organism organism;
@@ -21,22 +21,19 @@ public class IO_Player  implements Player {
     int most_recent_move;
     ActionHistory move_history;
 
-    HashMap<String, Player> diplomacy;
     boolean player_2 = false;
 
-    public IO_Player(GameBoard gb, String name, int idx, Organism org, boolean p2, Color c){
+    public IO_Player(GameBoard gb, String name, int idx, int [] id, Organism org, boolean p2, Color c){
 
         game_board = gb;
         player_name = name;
-        index = idx;
+        game_index = idx;
+        tournament_id = id;
         organism = org;
         player_2 = p2;
         color = c;
         move_queue = new LinkedList<>();
         move_history = new ActionHistory(game_board);
-        diplomacy = new HashMap<>();
-        diplomacy.put("enemy", null);
-        diplomacy.put("ally", null);
     }
 
     @Override
@@ -69,16 +66,12 @@ public class IO_Player  implements Player {
      */
     @Override
     public int get_index() {
-        return index;
+        return game_index;
     }
 
     /**
      * @return
      */
-    @Override
-    public HashMap<String, Player> get_diplomacy() {
-        return diplomacy;
-    }
 
     @Override
     public Integer on_empty_queue() {

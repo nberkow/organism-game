@@ -3,9 +3,8 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.Color;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Objects;
 
 public class BotPlayer implements Player{
 
@@ -13,8 +12,8 @@ public class BotPlayer implements Player{
     //public ActionHistory move_history;
 
     public GameBoard game_board;
-
-    public int index;
+    public int game_index; // index within a single game
+    int [] tournament_id; // id in tournament or other large player collection
 
     public Color color;
     public String player_name;
@@ -24,21 +23,20 @@ public class BotPlayer implements Player{
     public Organism organism;
 
     int most_recent_move;
-    HashMap<String, Player> diplomacy;
 
-    public BotPlayer(GameBoard gb, String name, int idx, Organism org, HMM m, Color c){
+    public BotPlayer(GameBoard gb, String name, int idx, int [] id, Organism org, HMM mod, Color c){
 
         game_board = gb;
-        model = m;
         color = c;
         player_name = name;
-        index = idx;
+        tournament_id = id;
+        game_index = idx;
         organism = org;
+        model = mod;
         move_queue = new LinkedList<>();
-        diplomacy = new HashMap<>();
-        diplomacy.put("enemy", null);
-        diplomacy.put("ally", null);
+
     }
+
 
     public void queue_move(Integer move) {
         move_queue.add(move);
@@ -64,8 +62,8 @@ public class BotPlayer implements Player{
         hmm_inputs[1] = organism.territory_vertex.get_unmasked_vertices();
 
         ArrayList<Player> opponents = new ArrayList<>();
-        for (String p : game_board.players.keySet()) {
-            if (!Objects.equals(p, player_name)){
+        for (int [] p : game_board.players.keySet()) {
+            if (!Arrays.equals(p, tournament_id)){
                 opponents.add(game_board.players.get(p));
             }
         }
@@ -103,16 +101,12 @@ public class BotPlayer implements Player{
      */
     @Override
     public int get_index() {
-        return index;
+        return game_index;
     }
 
     /**
      * @return
      */
-    @Override
-    public HashMap<String, Player> get_diplomacy() {
-        return diplomacy;
-    }
 
     public Integer on_empty_queue() {
         return null;
