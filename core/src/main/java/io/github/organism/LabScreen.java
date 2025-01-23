@@ -37,7 +37,7 @@ public class LabScreen implements Screen {
         cfg.human_players = 0;
         cfg.bot_players = 3;
 
-        current_sim = new Simulation(this, cfg, 1000);
+        current_sim = new Simulation(this, cfg, 10);
         current_sim.run_simulation();
         visible_game = current_sim.current_game;
     }

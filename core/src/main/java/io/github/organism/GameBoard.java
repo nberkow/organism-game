@@ -92,7 +92,6 @@ public class GameBoard implements Disposable {
         human_player_ids = new ArrayList<>();
         bot_player_ids = new ArrayList<>();
         all_player_ids = new ArrayList<>();
-        all_player_ids = new ArrayList<>();
 
         // Setup the players based on the config
 
@@ -136,10 +135,10 @@ public class GameBoard implements Disposable {
         }
     }
 
-    public void create_bot_player(String name, int [] player_id, HMM model){
+    public void create_bot_player(String name, int [] player_id, Color color, HMM model){
 
         int index = all_player_ids.size();
-        Color color = game.player_colors[index % game.player_colors.length];
+
         Organism organism = new Organism(this);
         BotPlayer player = new BotPlayer(
             this,
@@ -203,8 +202,22 @@ public class GameBoard implements Disposable {
 
     @Override
     public void dispose() {
-        // Dispose of resources properly
-        if (shape_renderer != null) shape_renderer.dispose();
-        // Clean up any other resources like textures or sounds here
+        grid_window.dispose();
+        universe_map.dispose();
+        orchestrator.dispose();
+        diplomacy_graph.dispose();
+        for (Player p : players.values()) {
+            p.dispose();
+        }
+        human_player_ids.clear();
+        bot_player_ids.clear();
+        all_player_ids.clear();
+        shape_renderer = null;
+        player_start_assigner = null;
+        resource_distributor = null;
+        void_distributor = null;
+        player1_hud = null;
+        player2_hud = null;
+        batch = null;
     }
 }

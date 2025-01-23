@@ -84,7 +84,7 @@ public class MapHex implements MapElement{
 
                 c = pos.grid.game_board.game.background_color;
                 if (v1.player != null && v2.player == v1.player) {
-                    c = v2.player.get_organism().color;
+                    c = v2.player.get_color();
                 } else {
                     if (is_common_hex_masked(v1, v2)) {
                         c = Color.DARK_GRAY;

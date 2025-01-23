@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 public class TriangularGrid implements Iterable<GridPosition> {
     HashMap<Integer, HashMap<Integer, HashMap<Integer, GridPosition>>> grid;
@@ -193,4 +192,8 @@ public class TriangularGrid implements Iterable<GridPosition> {
     }
 
 
+    public void dispose() {
+        grid.clear();
+        game_board = null;
+    }
 }

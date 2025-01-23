@@ -45,8 +45,8 @@ public class ModelPoolDisplay {
         int max_count = 0;
         HashMap<Integer, Integer> wins_hist = new HashMap<>();
 
-        for (int [] p : simulation.model_pool.keySet()) {
-            int wins = p[1];
+        for (int [] p : simulation.win_records.keySet()) {
+            int wins = simulation.win_records.get(p);
 
             if (wins > max_wins){
                 max_wins = wins;
@@ -65,7 +65,7 @@ public class ModelPoolDisplay {
         }
 
 
-        bar_height = ((box_height - (margin * 2)) / Math.max(10, max_count)) - margin;
+        bar_height = ((box_height - (margin * 2)) / Math.max(10, wins_hist.size())) - margin;
 
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         game.shape_renderer.setColor(Color.DARK_GRAY);
@@ -81,8 +81,6 @@ public class ModelPoolDisplay {
                 bar_width = bar_max_width * ((float) wins_hist.get(w) / max_count);
             }
 
-            System.out.println("\n");
-
             game.shape_renderer.rect(
                 x_pos + margin,
                 y_pos + margin + ((bar_height + margin) * w),
@@ -92,5 +90,10 @@ public class ModelPoolDisplay {
 
         }
         game.shape_renderer.end();
+    }
+
+    public void dispose() {
+        game = null;
+        simulation = null;
     }
 }

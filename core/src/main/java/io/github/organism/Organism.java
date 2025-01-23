@@ -10,7 +10,6 @@ import java.util.Collections;
 public class Organism {
 
     public final int MAX_ENERGY = 300;
-
     final int VERTEX_COST_TAKE_VERTEX = 3;
     public int income;
     TriangularGrid territory_hex;
@@ -365,6 +364,10 @@ public class Organism {
         }
     }
 
+    public void dispose() {
+        territory_vertex = null;
+        territory_hex = null;
+    }
 }
 
 

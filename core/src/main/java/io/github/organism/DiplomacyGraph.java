@@ -11,8 +11,6 @@ import java.util.Objects;
 
 public class DiplomacyGraph {
 
-
-
     OrganismGame game;
     GameBoard current_game;
 
@@ -23,7 +21,6 @@ public class DiplomacyGraph {
     Color [] player_colors;
 
     boolean render_params_set;
-
 
     final int VERTEX_COST_REMOVE_ENEMY_PLAYER = 9;
     final int VERTEX_COST_REMOVE_EXTRACTING_PLAYER = 3;
@@ -254,5 +251,9 @@ public class DiplomacyGraph {
                 player_radius);
         }
         game.shape_renderer.end();
+    }
+
+    public void dispose() {
+         relationships.clear();
     }
 }

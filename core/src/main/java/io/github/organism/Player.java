@@ -26,4 +26,8 @@ public interface Player {
     int get_most_recent_move();
 
     void transition();
+
+    void dispose();
+
+    int[] get_tournament_id();
 }

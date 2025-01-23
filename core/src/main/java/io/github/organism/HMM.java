@@ -125,4 +125,10 @@ public class HMM {
         current_state = weighted_random_choice(norm_scores);
 
     }
+
+    public void dispose() {
+        transition_weights = null;
+        emission_weights = null;
+        game = null;
+    }
 }

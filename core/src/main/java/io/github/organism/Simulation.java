@@ -1,4 +1,7 @@
 package io.github.organism;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,17 +10,25 @@ public class Simulation {
     LabScreen lab_screen;
     GameBoard current_game;
     GameOrchestrator current_game_orchestrator;
-
     ModelPoolDisplay model_pool_display;
+
+    RoundSummary round_summary;
     float map_center_x;
     float map_center_y;
     GameConfig cfg;
     int iterations;
 
     int MODEL_STATES = 36;
-
     int MODEL_INPUTS = 6;
 
+    boolean show_summary_screen;
+    boolean next_round_begin;
+
+    int between_round_pause = 10;
+    float between_round_pause_timer;
+
+    HashMap<int [], String> player_names;
+    HashMap<int [], Color> player_colors;
     int name_index;
     String[] numerals = {"I", "II", "III", "IV", "V",
                         "VI", "VII", "VIII", "IX", "X",
@@ -64,6 +75,8 @@ public class Simulation {
     //MoveLogger move_logger;
 
     boolean log_written = false;
+
+
     int current_iteration;
 
     public Simulation(LabScreen screen, GameConfig c, int n) {
@@ -80,10 +93,19 @@ public class Simulation {
         win_records = new HashMap<>();
         champions = new HashMap<>();
         model_pool_display = new ModelPoolDisplay(lab_screen.game, this);
+
+        round_summary = new RoundSummary(lab_screen.game, this);
+        player_colors = new HashMap<>();
+        player_names = new HashMap<>();
         //move_logger = new MoveLogger(lab_screen.game);
+
+        show_summary_screen = false;
+        next_round_begin = true;
+        between_round_pause_timer = 0;
     }
 
     public void create_game_board() {
+
         current_game = new GameBoard(lab_screen.game, cfg);
         current_game.void_distributor.distribute();
         current_game.resource_distributor.distribute();
@@ -111,10 +133,11 @@ public class Simulation {
         for (int i=0; i<pool_size; i++){
             HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
             model.init_random_weights();
-            int [] player_id  = new int[] {name_index, 0};
             name_index += 1;
+            int [] player_id  = new int[] {name_index, 0};
             model.player_tournament_id = player_id;
             model_pool.put(player_id, model);
+            win_records.put(player_id, 0);
         }
     }
 
@@ -131,10 +154,21 @@ public class Simulation {
         current_game_orchestrator.run();
     }
 
-    private void setup_next_round(int[] winner_id) {
+    private void finish_this_round(int[] winner_id) {
 
         System.out.println("iteration: " + current_iteration + "/" + iterations);
+        int wins = win_records.get(winner_id);
+        //noinspection Java8MapApi
+        win_records.put(winner_id, wins + 1);
+        round_summary.set_winner(winner_id);
+        show_summary_screen = true;
+    }
+
+    private void setup_next_round(int[] winner_id) {
         setup_next_round_models(winner_id);
+
+        current_game.dispose();
+        current_game_orchestrator.dispose();
 
         create_game_board();
         create_players_from_model_pool();
@@ -156,8 +190,11 @@ public class Simulation {
         for (int i=0; i<3; i++) {
             int [] player_id = player_ids.get(i);
             HMM model = model_pool.remove(player_id);
-            String name = player_names_array[player_id[0] % player_names_array.length] + " " + numerals[player_id[1]];
-            current_game.create_bot_player(name, player_id, model);
+            String name = player_names_array[player_id[0] % player_names_array.length] + " " + numerals[player_id[1] % numerals.length];
+            Color color = lab_screen.game.player_colors[player_id[0] % lab_screen.game.player_colors.length];
+            current_game.create_bot_player(name, player_id, color, model);
+            player_names.put(player_id, name);
+            player_colors.put(player_id, color);
         }
 
         // reset diplomacy with newly created players
@@ -165,7 +202,13 @@ public class Simulation {
     }
 
     public void setup_next_round_models(int[] winner_id) {
-        HMM offspring = get_last_round_offspring(winner_id);
+
+        // add the winner back to the model pool
+        BotPlayer winner = (BotPlayer) current_game.players.get(winner_id);
+        model_pool.put(winner_id, winner.model);
+
+        // add a model by averaging the last round models
+        HMM offspring = get_last_round_offspring();
         int [] offspring_player_id = new int [] {
             winner_id[0],
             (winner_id[1] + 1) % numerals.length
@@ -173,17 +216,17 @@ public class Simulation {
         offspring.player_tournament_id = offspring_player_id;
         model_pool.put(offspring_player_id, offspring);
 
-        for (int i=0; i<2; i++) {
-            HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
-            model.init_random_weights();
-            int[] player_id = new int[]{name_index, 0};
-            name_index = (name_index + 1) % player_names_array.length;
-            model.player_tournament_id = player_id;
-            model_pool.put(player_id, model);
-        }
+        // add a brand new random model
+        HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
+        model.init_random_weights();
+        int[] player_id = new int[]{name_index, 0};
+        name_index = (name_index + 1) % player_names_array.length;
+        model.player_tournament_id = player_id;
+        model_pool.put(player_id, model);
+
     }
 
-    public HMM get_last_round_offspring(int[] winner_id) {
+    public HMM get_last_round_offspring() {
 
         /*
         in the future this can have more behaviors
@@ -254,13 +297,29 @@ public class Simulation {
     public void logic(){
         if (!current_game_orchestrator.paused) {
             int [] winner_id = current_game_orchestrator.test_victory_conditions();
+
+            // if victory conditions were met, finish up the last round and start the timer for the next one
             if (winner_id != null) {
                 current_game_orchestrator.pause();
 
-                if (current_iteration < iterations) {
-                    setup_next_round(winner_id);
+                if (!show_summary_screen) {
+                    // end of round housekeeping
+                    finish_this_round(winner_id);
+                    show_summary_screen = true;
+                    next_round_begin = false;
+                    between_round_pause_timer = 0f;
+                }
+
+                between_round_pause_timer += Gdx.graphics.getDeltaTime();
+                if (between_round_pause_timer >= between_round_pause) {
+                    show_summary_screen = false;
+                    next_round_begin = true;
+                }
+
+                if (current_iteration < iterations & next_round_begin) {
                     current_iteration ++;
-                    run_simulation();
+                    setup_next_round(winner_id); // this will set winner id back to null
+                    next_round_begin = false;
                 }
 
             }
@@ -283,11 +342,21 @@ public class Simulation {
         current_game.game.camera.update();
         current_game.render();
         model_pool_display.render();
+        if (show_summary_screen) {
+            round_summary.render();
+        }
     }
 
     public void render(){
         logic();
         draw();
+    }
+
+    public void dispose() {
+        model_pool.clear();
+        win_records.clear();
+        champions.clear();
+        current_game.dispose();
     }
 
 }

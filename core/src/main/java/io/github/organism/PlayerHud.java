@@ -5,16 +5,12 @@ public class PlayerHud {
     final float BUTTON_SIDE_DIST = 50;
     float x, y;
     float HUD_Y = 0;
-
     float SIDE_BUFFER = 10;
     final float HUD_WIDTH = 400;
     final float HUD_HEIGHT = 180;
     final float BUTTONS_X  = 60;
     final float BUTTONS_Y  = 25;
-
     final float ENERGYBAR_Y  = y + HUD_HEIGHT * .4f;
-
-
     Player player;
     GameBoard game_board;
     GameplayButtons game_buttons;
@@ -36,6 +32,7 @@ public class PlayerHud {
             parity = -1;
             side = game_board.game.VIRTUAL_WIDTH - HUD_WIDTH;
         }
+
         x = side + SIDE_BUFFER * parity;
         y = HUD_Y + SIDE_BUFFER;
         player = p;
@@ -67,9 +64,6 @@ public class PlayerHud {
         game_buttons.render();
         resource_bars.render();
         action_queue_bar.render();
-
-
-
     }
 
 }

@@ -112,4 +112,23 @@ public class IO_Player  implements Player {
     public void transition() {
         // interface consistency. used for bot players
     }
+
+    /**
+     *
+     */
+    @Override
+    public void dispose() {
+        organism.dispose();
+        game_board = null;
+        move_history = null;
+        move_queue = null;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public int[] get_tournament_id() {
+        return tournament_id;
+    }
 }

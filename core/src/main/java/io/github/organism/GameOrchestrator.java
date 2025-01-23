@@ -11,7 +11,7 @@ public class GameOrchestrator {
 
     int turn = 0;
     GameBoard game_board;
-    double action_time = 1d;
+    double action_time = .1d;
     double queue_time = action_time / 4;
 
     double hmm_transition_time = action_time / 50;
@@ -30,7 +30,7 @@ public class GameOrchestrator {
     public GameOrchestrator(GameBoard gb) {
         game_board = gb;
         total_territory = (float) game_board.universe_map.vertex_grid.get_unmasked_vertices();
-        turn_max = total_territory * 36;
+        turn_max = total_territory * 3;
         player_territory = new HashMap<>();
         current_moves = new HashMap<>();
         for (int [] p : game_board.players.keySet()) {
@@ -39,11 +39,16 @@ public class GameOrchestrator {
     }
 
     public void update_timers_and_flags() {
-        turn ++;
+
+        if (turn >= turn_max) {
+            return;
+        }
+
         action_clock += Gdx.graphics.getDeltaTime();
         execute_actions = false;
         if (action_clock > action_time){
             execute_actions = true;
+            turn ++;
             action_clock = action_clock % action_time;
         }
 
@@ -165,6 +170,7 @@ public class GameOrchestrator {
 
     private void dequeue_and_execute(){
 
+
         HashMap<Player, Integer> all_player_moves = new HashMap<>();
         for (int p=0; p<game_board.all_player_ids.size(); p++){
             Player player = game_board.players.get(game_board.all_player_ids.get(p));
@@ -174,7 +180,6 @@ public class GameOrchestrator {
 
         update_diplomacy(all_player_moves);
         resolve_moves(all_player_moves);
-
     }
 
     private void update_diplomacy(HashMap<Player, Integer> all_player_moves) {
@@ -194,26 +199,31 @@ public class GameOrchestrator {
 
         for (int p=0; p<3; p++) {
             Player player = game_board.players.get(game_board.all_player_ids.get(p));
-            Player left_player = game_board.players.get(game_board.all_player_ids.get((p+2) % 3));
-            Player right_player = game_board.players.get(game_board.all_player_ids.get((p+1) % 3));
+            Player left_player = game_board.players.get(game_board.all_player_ids.get((p + 2) % 3));
+            Player right_player = game_board.players.get(game_board.all_player_ids.get((p + 1) % 3));
 
-            int move = all_player_moves.get(player);
-
-            if (move == 0) {
-                game_board.diplomacy_graph.set_relationship(player, left_player, "hostile");
-                game_board.diplomacy_graph.set_relationship(player, right_player, "neutral");
-            }
-
-            if (move == 2) {
+            Integer move = all_player_moves.get(player);
+            if (move == null) {
                 game_board.diplomacy_graph.set_relationship(player, left_player, "neutral");
-                game_board.diplomacy_graph.set_relationship(player, right_player, "hostile");
-            }
+                game_board.diplomacy_graph.set_relationship(player, right_player, "neutral");
+            } else {
+                if (move == 0) {
+                    game_board.diplomacy_graph.set_relationship(player, left_player, "hostile");
+                    game_board.diplomacy_graph.set_relationship(player, right_player, "neutral");
+                }
 
-            if (move == 1) {
-                game_board.diplomacy_graph.set_relationship(player, left_player, "friendly");
-                game_board.diplomacy_graph.set_relationship(player, right_player, "friendly");
+                if (move == 2) {
+                    game_board.diplomacy_graph.set_relationship(player, left_player, "neutral");
+                    game_board.diplomacy_graph.set_relationship(player, right_player, "hostile");
+                }
+
+                if (move == 1) {
+                    game_board.diplomacy_graph.set_relationship(player, left_player, "friendly");
+                    game_board.diplomacy_graph.set_relationship(player, right_player, "friendly");
+                }
             }
         }
+
     }
 
     public void run(){
@@ -240,4 +250,6 @@ public class GameOrchestrator {
     }
 
 
+    public void dispose() {
+    }
 }

@@ -93,6 +93,11 @@ public class UniverseMap {
 
         }
     }
+
+    public void dispose() {
+        hex_grid.dispose();
+        vertex_grid.dispose();
+    }
 }
 
 
