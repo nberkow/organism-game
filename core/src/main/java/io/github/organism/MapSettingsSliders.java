@@ -1,9 +1,11 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 
 public class MapSettingsSliders {
@@ -32,10 +34,13 @@ public class MapSettingsSliders {
 
     HashMap<String, Float> slider_selected_vals;
 
+    BitmapFont font;
+
     public MapSettingsSliders(OrganismGame g, MapSettingsScreen msc) {
         game = g;
         map_settings_screen = msc;
         game_board = map_settings_screen.game_board;
+        font = game.fonts.get(16);
 
         slider_box_x = map_settings_screen.controls_x;
         slider_box_y = game_board.center_y;
@@ -197,8 +202,7 @@ public class MapSettingsSliders {
 
         for (String p : slider_label_order){
             float[] label_coord = label_coords.get(p);
-            game_board.game.font.getData().setScale(1f);
-            game_board.game.font.draw(
+            font.draw(
                 game_board.batch,
                 p,
                 label_coord[0],

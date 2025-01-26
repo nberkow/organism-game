@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ public class HMM {
 
     private final Random rng;
 
-    public int [] player_tournament_id;
+    public Point player_tournament_id;
     public static Integer states;
     public static Integer inputs;
     public Integer current_state;

@@ -1,9 +1,11 @@
 package io.github.organism;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,9 +13,10 @@ import java.util.HashMap;
 public class RoundSummary {
 
 
-    int [] winner_id;
+    Point winner_id;
     OrganismGame game;
-    BitmapFont font;
+    BitmapFont font16;
+    BitmapFont font32;
     GlyphLayout layout;
 
     Simulation simulation;
@@ -31,44 +34,39 @@ public class RoundSummary {
     float standings_y;
 
     float standings_width;
-    float standings_vspace;
+    float standings_v_space;
 
-    ArrayList<GlyphLayout> standings_layouts_players;
-    ArrayList<GlyphLayout> standings_layouts_wins;
+    ArrayList<String> standings_players;
+    ArrayList<String> standings_wins;
 
-    ArrayList<int []> standings_ids;
-    HashMap<Integer, ArrayList<int []>> players_by_win;
+    ArrayList<Point> standings_ids;
+    HashMap<Integer, ArrayList<Point>> players_by_win;
     public RoundSummary(OrganismGame g, Simulation sim){
         game = g;
         simulation = sim;
-        font = game.font;
+        font32 = game.fonts.get(32);
+        font16= game.fonts.get(16);
 
-        box_x = game.VIRTUAL_WIDTH / 4f;
-        box_y = game.VIRTUAL_WIDTH * 3 / 4f;
+        box_width = game.VIRTUAL_WIDTH / 1.5f;
+        box_height = game.VIRTUAL_WIDTH / 2.5f;
 
-        box_width = game.VIRTUAL_WIDTH / 2f;
-        box_height = game.VIRTUAL_WIDTH / 2f;
+        box_x = (game.VIRTUAL_WIDTH  - box_width)/2;
+        box_y = (game.VIRTUAL_HEIGHT - box_height)/2;
 
         text_center_x = game.VIRTUAL_WIDTH / 2f;
-        text_center_y = game.VIRTUAL_WIDTH / 1.5f;
+        text_center_y = game.VIRTUAL_HEIGHT * .75f;
 
         standings_y = game.VIRTUAL_HEIGHT / 1.7f;
 
         margin = game.VIRTUAL_WIDTH / 40f;
-        standings_width = game.VIRTUAL_WIDTH / 5f;
-        standings_vspace = game.VIRTUAL_WIDTH / 20f;
-
+        standings_width = box_width / 3f;
+        standings_v_space = box_height / 20f;
 
     }
 
-    public void set_winner(int[] w) {
+    public void set_winner(Point w) {
         winner_id = w;
-        text = simulation.player_names.get(w) + " wins!";
-
-        layout = new GlyphLayout(font, text);
-
-        font_x = text_center_x - (layout.width / 2);
-        font_y = text_center_y + (layout.height / 2);
+        text = simulation.player_names.get(winner_id) + " wins!";
 
         format_standings();
     }
@@ -76,11 +74,11 @@ public class RoundSummary {
     public void format_standings(){
         players_by_win = new HashMap<>();
 
-        standings_layouts_players = new ArrayList<>();
-        standings_layouts_wins = new ArrayList<>();
+        standings_players = new ArrayList<>();
+        standings_wins = new ArrayList<>();
         standings_ids = new ArrayList<>();
 
-        for (int [] p : simulation.player_names.keySet()){
+        for (Point p : simulation.player_names.keySet()){
             Integer wins = simulation.win_records.get(p);
             if (!players_by_win.containsKey(wins)) {
                 players_by_win.put(wins, new ArrayList<>());
@@ -90,14 +88,22 @@ public class RoundSummary {
 
         ArrayList<Integer> unique_wins = new ArrayList<>(players_by_win.keySet()) ;
         unique_wins.sort(Comparator.reverseOrder());
+        int lines_to_print = 10;
 
-        for (Integer w : unique_wins){
-            for (int [] p : players_by_win.get(w)){
-                standings_ids.add(p);
-                String name = simulation.player_names.get(p);
-                standings_layouts_players.add(new GlyphLayout(font, name));
-                standings_layouts_wins.add(new GlyphLayout(font, "" + w));
-            }
+        ArrayList<Point> tied_players;
+        for (Integer w : unique_wins) {
+            tied_players = players_by_win.get(w);
+            if (lines_to_print >= tied_players.size()) {
+
+                for (Point  p : tied_players) {
+                    standings_ids.add(p);
+                    String name = simulation.player_names.get(p);
+                    standings_players.add(name);
+                    standings_wins.add("" + w);
+                    lines_to_print--;
+                }
+
+            } else lines_to_print = 0;
         }
     }
 
@@ -108,7 +114,7 @@ public class RoundSummary {
         game.shape_renderer.end();
 
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(game.foreground_color);
+        game.shape_renderer.setColor(Color.DARK_GRAY);
         game.shape_renderer.rect(
             box_x + margin,
             box_y + margin,
@@ -116,33 +122,29 @@ public class RoundSummary {
             box_height - (margin * 2));
         game.shape_renderer.end();
 
-
         game.batch.begin();
-        font.setColor(simulation.player_colors.get(winner_id));
-        game.font.getData().setScale(4f);
-        font.draw(game.batch, layout, font_x, font_y);
-
-        game.font.getData().setScale(2f);
+        font32.setColor(simulation.tournament_player_colors.get(winner_id));
+        layout = new GlyphLayout(font32, text);
+        font_x = text_center_x - (layout.width / 2);
+        font_y = text_center_y;
+        font32.draw(game.batch, layout, font_x, font_y);
 
         float standings_x = (game.VIRTUAL_WIDTH / 2f) - (standings_width / 2f);
 
-        for (int i=0; i<standings_layouts_players.size(); i++){
-            int [] p = standings_ids.get(i);
-            font.setColor(game.foreground_color);
-            if (p == winner_id) {
-                font.setColor(simulation.player_colors.get(winner_id));
-            }
+        for (int i=0; i<standings_players.size(); i++){
+            Point p = standings_ids.get(i);
 
-            font.draw(game.batch,
-                standings_layouts_players.get(i),
+            font16.setColor(simulation.tournament_player_colors.get(p));
+
+            font16.draw(game.batch,
+                standings_players.get(i),
                 standings_x,
-                standings_y - (standings_vspace * i));
+                standings_y - (standings_v_space * i));
 
-            font.draw(game.batch,
-                standings_layouts_wins.get(i),
+            font16.draw(game.batch,
+                standings_wins.get(i),
                 standings_x + standings_width,
-                standings_y - (standings_vspace * i));
-
+                standings_y - (standings_v_space * i));
         }
 
         game.batch.end();

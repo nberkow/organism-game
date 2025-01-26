@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class ResourceBars {
@@ -16,8 +17,11 @@ public class ResourceBars {
     float inset;
     float x, y;
 
+    BitmapFont font;
+
     public  ResourceBars(GameBoard gb, PlayerHud ph, Player p){
         game_board = gb;
+        font = game_board.game.fonts.get(32);
         hud = ph;
         player = p;
         inset = 2;
@@ -103,7 +107,7 @@ public class ResourceBars {
         }
         game_board.shape_renderer.end();
         game_board.batch.begin();
-        game_board.game.font.draw(
+        font.draw(
             game_board.batch,
             "" + player.get_organism().income,
             font_x,

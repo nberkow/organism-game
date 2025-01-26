@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.HashMap;
 import java.util.Random;
 
 public class OrganismGame extends Game {
@@ -39,25 +41,17 @@ public class OrganismGame extends Game {
     Color [] colors = {Color.RED, Color.BLUE, Color.RED};
 
     Color exterminate_color = Color.RED;
-    BitmapFont font;
+    HashMap<Integer, BitmapFont> fonts;
 
     Color [] player_colors = {
         new Color(0xB91372FF),
         new Color(0xD497A7FF),
         new Color(0x6EEB83FF),
-        new Color(0xE4FF1AFF),
-        new Color(0xE8AA14FF),
-        new Color(0xFF5714FF)
+        Color.GREEN, Color.RED, Color.MAROON, Color.MAGENTA, Color.BROWN, Color.LIME,
+        Color.OLIVE, Color.FIREBRICK, Color.FOREST, Color.PINK, Color.GOLDENROD,
+        Color.CORAL, Color.CHARTREUSE, Color.SCARLET, Color.ORANGE, Color.SKY
     };
 
-    Color [] player_light_colors = {
-        new Color(0xB9137255),
-        new Color(0xD497A755),
-        new Color(0x6EEB8355),
-        new Color(0xE4FF1A55),
-        new Color(0xE8AA1455),
-        new Color(0xFF571455)
-    };
 
     Color [] resource_colors_dark = {
         new Color(0f, 0f, 0.3f, 0f),
@@ -78,12 +72,16 @@ public class OrganismGame extends Game {
         file_handler = new FileHandler(this);
         batch = new SpriteBatch();
         shape_renderer = new ShapeRenderer();
+        Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
         rng = new Random();
         rng.setSeed(10);
 
-        font = new BitmapFont();
-        font.setColor(foreground_color);
+        fonts = new HashMap<>();
+        for (int i=3;i<7;i++){
+            int size = (int) Math.pow(2, i);
+            fonts.put(size, new BitmapFont(Gdx.files.internal("fonts/dubai" + size + ".fnt")));
+        }
 
         menu_screen = new MenuScreen(this);
         game_screen = new GameScreen(this);

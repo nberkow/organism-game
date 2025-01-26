@@ -1,7 +1,9 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -13,7 +15,7 @@ public class BotPlayer implements Player{
 
     public GameBoard game_board;
     public int game_index; // index within a single game
-    public int [] tournament_id; // id in tournament or other large player collection
+    public Point tournament_id; // id in tournament or other large player collection
 
     public Color color;
     public String player_name;
@@ -24,7 +26,7 @@ public class BotPlayer implements Player{
 
     int most_recent_move;
 
-    public BotPlayer(GameBoard gb, String name, int idx, int [] id, Organism org, HMM mod, Color c){
+    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, HMM mod, Color c){
 
         game_board = gb;
         color = c;
@@ -58,63 +60,58 @@ public class BotPlayer implements Player{
 
 
     public float [] gather_inputs(){
-        float [] hmm_inputs = new float [6];
+        float [] hmm_inputs = new float [Simulation.MODEL_INPUTS];
 
-        // this player's energy
-        hmm_inputs[0] = (float) organism.energy / organism.MAX_ENERGY;
+        // how many moves to consider from each players queue
+        int move_queue_depth = 6;
 
-        // this player's territory
-        hmm_inputs[1] = organism.territory_vertex.get_unmasked_vertices();
+        // move queue depth plus two states for each player's energy and territory
+        int register_size = move_queue_depth + 2;
 
-        ArrayList<Player> opponents = new ArrayList<>();
+        // expand targets are not visible in player queues, so this can be expand, extract or null
+        int option_per_move = 3;
 
-        /*
-        System.out.println("\n\n\ngather inputs");
-        System.out.println("this player name: " + player_name);
-        System.out.println("this player id " + tournament_id[0] + " " + tournament_id[1]);
-        System.out.println("game board players size: " + game_board.players.size());
-        System.out.println("\nprinting players before adding");
-        for (int [] p : game_board.players.keySet()) {
-            System.out.println("key: " + p[0] + " " + p[1]);
-        }
-        System.out.println("\ngoing into add players loop");*/
+        // add player stats in order, starting with self
+        for (int i=0; i<3; i++) {
+            int p = ((i + game_index) % 3);
+            int register_index = p * (register_size);
 
+            Point player_id = game_board.all_player_ids.get(p);
+            Player player = game_board.players.get(player_id);
+            Organism organism = player.get_organism();
 
-        int i =0;
-        for (int [] p : game_board.players.keySet()) {
-            BotPlayer pl = (BotPlayer) game_board.players.get(p);
-            //System.out.println("loop i: " + i);
-            //System.out.println("checking against name: " + pl.get_player_name());
-            //System.out.println("checking against player id " + pl.tournament_id[0] + " " + pl.tournament_id[1]);
+            // player's energy
+            hmm_inputs[register_index] = (float) organism.energy / organism.MAX_ENERGY;
 
-            if (!Arrays.equals(p, tournament_id)){
-                //System.out.println("added opponent: "+ pl.get_player_name());
-                //System.out.println("added opponent: " + pl.tournament_id[0] + " " + pl.tournament_id[1]);
-                opponents.add(game_board.players.get(p));
+            // player's territory
+            hmm_inputs[register_index + 1] = organism.territory_vertex.get_unmasked_vertices();
+
+            // indicator variable for each players move queue
+            // 0 or 1 for each possibility (0,1 or Null), for
+            // -- 0 and 2 both mean expand (register 0)
+            // -- 1 means extract
+
+            LinkedList<Integer> move_queue = player.get_move_queue();
+            int pos;
+
+            int move_indicator = 2; // value for null
+            for (int q=0; q<move_queue_depth; q++) {
+                if (q < move_queue.size()) {
+                    move_indicator = move_queue.get(q) % 2; // 0 and 2 both mean expand. 1 means extract
+                }
+                for (int m=0; m<option_per_move; m++) {
+                    System.out.println(" q: " + q + "  m: " + m);
+                    pos = register_index + 2 + (q * option_per_move) + m;
+                    System.out.println(pos);
+                    hmm_inputs[pos] = 0;
+                    if (move_indicator == m) {
+                        hmm_inputs[pos] = 1;
+                    }
+                }
             }
-            else {
-                //System.out.println("not adding (name): "+ pl.get_player_name());
-                //System.out.println("not adding: (id): " + pl.tournament_id[0] + " " + pl.tournament_id[1]);
-            }
-
-            //System.out.println("opponents: " + opponents.size());
-            i++;
         }
-
-
-        // opponent energy and territory
-        hmm_inputs[2] = (float) opponents.get(0).get_organism().energy / organism.MAX_ENERGY;
-        hmm_inputs[3] = opponents.get(0).get_organism().territory_vertex.get_unmasked_vertices();
-
-        BotPlayer opponent = (BotPlayer) opponents.get(1);
-        //System.out.println(opponent.get_player_name());
-        //System.out.println(opponent.tournament_id[0] + " : " + opponent.tournament_id[1]);
-
-        hmm_inputs[4] = (float) opponents.get(1).get_organism().energy / organism.MAX_ENERGY;
-        hmm_inputs[5] = opponents.get(1).get_organism().territory_vertex.get_unmasked_vertices();
 
         return hmm_inputs;
-
     }
 
     public Integer get_move() {
@@ -197,7 +194,7 @@ public class BotPlayer implements Player{
      * @return
      */
     @Override
-    public int[] get_tournament_id() {
+    public Point get_tournament_id() {
        return tournament_id;
     }
 }

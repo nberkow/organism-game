@@ -2,6 +2,7 @@ package io.github.organism;
 
 import com.badlogic.gdx.Gdx;
 
+import java.awt.Point;
 import java.util.HashMap;
 
 public class GameOrchestrator {
@@ -23,17 +24,17 @@ public class GameOrchestrator {
     double queue_clock = 0d;
     double hmm_transition_clock = 0d;
     boolean paused = true;
-    HashMap<int [], Float> player_territory;
-    HashMap<int [], Integer> current_moves;
+    HashMap<Point, Float> player_territory;
+    HashMap<Point, Integer> current_moves;
     float total_territory;
 
     public GameOrchestrator(GameBoard gb) {
         game_board = gb;
         total_territory = (float) game_board.universe_map.vertex_grid.get_unmasked_vertices();
-        turn_max = total_territory * 3;
+        turn_max = 10;// total_territory;
         player_territory = new HashMap<>();
         current_moves = new HashMap<>();
-        for (int [] p : game_board.players.keySet()) {
+        for (Point p : game_board.players.keySet()) {
             player_territory.put(p, (float) game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices());
         }
     }
@@ -73,13 +74,13 @@ public class GameOrchestrator {
         }
 
         if (hmm_transition) {
-            for (int [] b : game_board.bot_player_ids){
-                game_board.players.get(b). transition();
+            for (Point b : game_board.bot_player_ids){
+                game_board.players.get(b).transition();
             }
         }
 
         if (queue_bot_actions) {
-            for (int [] b : game_board.bot_player_ids){
+            for (Point b : game_board.bot_player_ids){
                 game_board.players.get(b).generate_and_queue();
             }
         }
@@ -90,13 +91,12 @@ public class GameOrchestrator {
         }
     }
 
-    public int [] test_victory_conditions() {
+    public Point test_victory_conditions() {
 
-
-        int [] leader = null;
+        Point leader = null;
         float leader_territory = 0;
 
-        for (int [] p : game_board.players.keySet()) {
+        for (Point p : game_board.players.keySet()) {
             float p_territory = game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             player_territory.put(p, p_territory);
             if (p_territory > leader_territory) {
@@ -150,20 +150,20 @@ public class GameOrchestrator {
             Player right_player = game_board.players.get(game_board.all_player_ids.get((p+1) % 3));
 
             Player target;
-            int move = all_player_moves.get(player);
-            if (move == 0 || move == 2) {
+            Integer move = all_player_moves.get(player);
+            if (move != null) {
+                if (move == 0 || move == 2) {
 
-                target = left_player;
-                if (move == 0) {
-                    target = right_player;
+                    target = left_player;
+                    if (move == 0) {
+                        target = right_player;
+                    }
+
+                    int remove_cost = game_board.diplomacy_graph.get_remove_cost(player, target);
+                    player.get_organism().expand(target, remove_cost);
+                } else {
+                    player.get_organism().extract();
                 }
-
-                int remove_cost = game_board.diplomacy_graph.get_remove_cost(player, target);
-                player.get_organism().expand(target, remove_cost);
-            }
-
-            else {
-                player.get_organism().extract();
             }
         }
     }
@@ -239,7 +239,7 @@ public class GameOrchestrator {
         most_recent_move_stats.put("turn", String.valueOf(turn));
 
         int i = 1;
-        for (int [] p : game_board.all_player_ids) {
+        for (Point p : game_board.all_player_ids) {
             int move = game_board.players.get(p).get_most_recent_move();
             int territory = game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             most_recent_move_stats.put("player" + i + "_move", String.valueOf(move));

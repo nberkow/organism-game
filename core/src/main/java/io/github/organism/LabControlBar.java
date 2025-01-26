@@ -3,6 +3,7 @@ package io.github.organism;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -22,8 +23,6 @@ public class LabControlBar {
 
     ArrayList<String> radio_button_labels;
 
-    ArrayList<String> model_names;
-
     boolean options_updated;
 
     OrganismGame game;
@@ -33,11 +32,14 @@ public class LabControlBar {
     HashMap<String, float []> radio_button_coords;
     HashMap<String, Boolean> radio_button_states;
 
+    BitmapFont font;
+
     LabScreen lab_screen;
     public LabControlBar(LabScreen screen, float b_y) {
         lab_screen = screen;
         game = lab_screen.game;
         options_updated = true;
+        font = game.fonts.get(16);
 
         buttons_x = lab_screen.controls_x + 10;
         buttons_y = b_y;
@@ -66,7 +68,7 @@ public class LabControlBar {
                 button_width,
                 button_height}
             );
-            button_text_layouts.put(button_labels.get(i), new GlyphLayout(game.font, button_labels.get(i)));
+            button_text_layouts.put(button_labels.get(i), new GlyphLayout(font, button_labels.get(i)));
         }
         button_coords.get("new simulation")[1] = 20;
 
@@ -87,7 +89,7 @@ public class LabControlBar {
         int r=0;
         boolean state = true;
         for (String radio_button : radio_button_labels) {
-            button_text_layouts.put(radio_button, new GlyphLayout(game.font, radio_button));
+            button_text_layouts.put(radio_button, new GlyphLayout(font, radio_button));
             radio_button_states.put(radio_button, state);
             radio_button_coords.put(radio_button, new float [] {
                 lab_screen.controls_x + 10,
@@ -106,9 +108,9 @@ public class LabControlBar {
             FileHandle[] files = Gdx.files.local("map_configs/").list();
             for (FileHandle file : files) {
                 String name = file.name().substring(0, file.name().length() - 4);
-                GlyphLayout layout = new GlyphLayout(game.font, name);
+                GlyphLayout layout = new GlyphLayout(font, name);
 
-                game.font.draw(
+                font.draw(
                     game.batch,
                     layout,
                     file_box_coords[0] + BUTTON_RADIUS * 1.5f,
@@ -128,9 +130,9 @@ public class LabControlBar {
             FileHandle[] files = Gdx.files.local("model_configs/").list();
             for (FileHandle file : files) {
                 String name = file.name().substring(0, file.name().length() - 4);
-                GlyphLayout layout = new GlyphLayout(game.font, name);
+                GlyphLayout layout = new GlyphLayout(font, name);
 
-                game.font.draw(
+                font.draw(
                     game.batch,
                     layout,
                     model_box_coords[0] + BUTTON_RADIUS * 1.5f,
@@ -172,7 +174,7 @@ public class LabControlBar {
 
             game.shape_renderer.end();
             game.batch.begin();
-            game.font.draw(
+            font.draw(
                 game.batch,
                 button_text_layouts.get(b),
                 coords[0] + BUTTON_RADIUS * 1.5f,
@@ -207,8 +209,8 @@ public class LabControlBar {
             GlyphLayout layout = button_text_layouts.get(b);
             float b_x = coords[0] + coords[2]/2 - layout.width/2;
             float b_y = coords[1] + coords[3]/2 + layout.height/2;
-            game.font.getData().setScale(1f);
-            game.font.draw(
+            font.getData().setScale(1f);
+            font.draw(
                 game.batch,
                 b,
                 b_x, b_y);

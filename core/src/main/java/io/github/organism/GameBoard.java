@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Disposable;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -35,14 +36,14 @@ public class GameBoard implements Disposable {
     public static final int DEFAULT_STARTING_ENERGY = 6;
 
     // Gameplay
-    HashMap<int [], Player> players = new HashMap<>();
+    HashMap<Point, Player> players = new HashMap<>();
 
     GridWindow grid_window;
     UniverseMap universe_map;
     ArrayList<PlayerSummaryDisplay> player_summary_displays;
-    ArrayList<int []> human_player_ids;
-    ArrayList<int []> bot_player_ids;
-    ArrayList<int []> all_player_ids;
+    ArrayList<Point> human_player_ids;
+    ArrayList<Point> bot_player_ids;
+    ArrayList<Point> all_player_ids;
     ShapeRenderer shape_renderer;
     PlayerStartAssigner player_start_assigner;
     ResourceDistributor resource_distributor;
@@ -78,10 +79,6 @@ public class GameBoard implements Disposable {
         // Initialize other game objects here
         universe_map = new UniverseMap(this, radius);
         diplomacy_graph = new DiplomacyGraph(this.game, this);
-        //iplomacy_graph.set_pos(
-        //    this.game.VIRTUAL_WIDTH,
-        //    this.game.VIRTUAL_HEIGHT
-        //);
 
         player_start_assigner = new PlayerStartAssigner(this);
         resource_distributor = new ResourceDistributor(this);
@@ -113,7 +110,7 @@ public class GameBoard implements Disposable {
     public void create_human_players(){
         for (int p=0; p<config.human_players; p++){
             int index = all_player_ids.size();
-            int [] player_id = new int [] {index, 0};
+            Point player_id = new Point(index, 0);
             Color color = game.player_colors[index];
             String name = "human " + p;
             Organism organism = new Organism(this);
@@ -126,7 +123,6 @@ public class GameBoard implements Disposable {
                 false,
                 color
             );
-            organism.color = game.player_colors[p];
             organism.player = player;
             players.put(player_id, player);
 
@@ -135,7 +131,7 @@ public class GameBoard implements Disposable {
         }
     }
 
-    public void create_bot_player(String name, int [] player_id, Color color, HMM model){
+    public void create_bot_player(String name, Point player_id, Color color, HMM model){
 
         int index = all_player_ids.size();
 
@@ -150,7 +146,6 @@ public class GameBoard implements Disposable {
             color
         );
 
-        organism.color = game.player_colors[index];
         organism.player = player;
         players.put(player_id, player);
         bot_player_ids.add(player_id);

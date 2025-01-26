@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -26,6 +27,8 @@ public class MapSettingSelectionBoxes {
 
     float max_width;
 
+    BitmapFont font;
+
     HashMap<String, ArrayList<String>> radio_buttons;
     HashMap<String, String> selected_vals;
     HashMap<String, HashMap<String, float []>> button_coords;
@@ -37,6 +40,7 @@ public class MapSettingSelectionBoxes {
         map_settings_screen = scr;
         game_board = map_settings_screen.game_board;
         game = g;
+        font = game.fonts.get(32);
 
         selection_box_x = map_settings_screen.controls_x * 1.05f;
         selection_box_y = map_settings_screen.game_board.center_y * .45f;
@@ -64,13 +68,13 @@ public class MapSettingSelectionBoxes {
         max_width = 0;
         GlyphLayout layout;
         for (String k : ordered_keys){
-            layout = new GlyphLayout(game_board.game.font, k);
+            layout = new GlyphLayout(font, k);
             layouts.put(k, layout);
             if (layout.width > max_width){
                 max_width = layout.width;
             }
             for (String p : radio_buttons.get(k)){
-                layout = new GlyphLayout(game_board.game.font, p);
+                layout = new GlyphLayout(font, p);
                 layouts.put(p, layout);
                 if (layout.width > max_width){
                     max_width = layout.width;
@@ -126,21 +130,21 @@ public class MapSettingSelectionBoxes {
 
     public void render() {
 
-        game_board.game.font.getData().setScale(1f);
+        font.getData().setScale(1f);
         game.batch.begin();
         GlyphLayout layout;
         for (String k : ordered_keys){
 
             float [] xy = label_coords.get(k).get(k);
             layout = layouts.get(k);
-            game_board.game.font.draw(
+            font.draw(
                 game_board.batch, layout, xy[0], xy[1]
             );
             for (String p : label_coords.get(k).keySet()){
                 layout = layouts.get(p);
                 if (!k.equals(p)) {
                     xy = label_coords.get(k).get(p);
-                    game_board.game.font.draw(
+                    font.draw(
                         game_board.batch, layout, xy[0], xy[1]
                     );
                 }

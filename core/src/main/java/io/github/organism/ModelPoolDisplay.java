@@ -3,6 +3,7 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -20,12 +21,11 @@ public class ModelPoolDisplay {
     float bar_height;
     float bar_max_width;
 
-    ArrayList<Player> ranked_players;
 
     public ModelPoolDisplay(OrganismGame g, Simulation s){
         game = g;
         simulation = s;
-        ranked_players = new ArrayList<>();
+
         x_pos = game.VIRTUAL_WIDTH * 0.8f;
         y_pos = game.VIRTUAL_HEIGHT * 0.1f;
         box_height = game.VIRTUAL_HEIGHT / 2f;
@@ -45,7 +45,7 @@ public class ModelPoolDisplay {
         int max_count = 0;
         HashMap<Integer, Integer> wins_hist = new HashMap<>();
 
-        for (int [] p : simulation.win_records.keySet()) {
+        for (Point p : simulation.win_records.keySet()) {
             int wins = simulation.win_records.get(p);
 
             if (wins > max_wins){
@@ -65,7 +65,7 @@ public class ModelPoolDisplay {
         }
 
 
-        bar_height = ((box_height - (margin * 2)) / Math.max(10, wins_hist.size())) - margin;
+        bar_height = ((box_height - (margin * 2)) / Math.max(10, max_wins)) - margin;
 
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         game.shape_renderer.setColor(Color.DARK_GRAY);

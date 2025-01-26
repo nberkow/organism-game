@@ -4,6 +4,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -12,7 +13,7 @@ import java.util.Random;
 public class PlayerStartAssigner {
 
     GameBoard game_board;
-    HashMap<int [], Player> players;
+    HashMap<Point, Player> players;
     UniverseMap universe_map;
     Random rng;
     GameConfig cfg;
@@ -25,9 +26,9 @@ public class PlayerStartAssigner {
         cfg = game_board.config;
     }
 
-    public void assign_starting_hexes(ArrayList<int[]> starting_coords) {
+    public void assign_starting_hexes(ArrayList<int []> starting_coords) {
         int i = 0;
-        for (int [] p : players.keySet()) {
+        for (Point p : players.keySet()) {
             Organism organism = players.get(p).get_organism();
             int [] coords = starting_coords.get(i);
             organism.claim_hex(coords[0], coords[1], coords[2]);
@@ -37,19 +38,19 @@ public class PlayerStartAssigner {
         }
     }
 
-    public ArrayList<int[]> randomize_starting_coords(){
+    public ArrayList<int []> randomize_starting_coords(){
         if (Objects.equals(cfg.layout, "radial")) {
             return radial_starts();
         }
         return  random_starts();
     }
 
-    public ArrayList<int[]>  radial_starts(){
+    public ArrayList<int []>  radial_starts(){
         // randomly select a valid hex
 
         boolean assigned = false;
         int iteration = 0;
-        ArrayList<int[]> starting_coords = new ArrayList<>();
+        ArrayList<int []> starting_coords = new ArrayList<>();
 
         while (!assigned && iteration < 1e5) {
             int r = cfg.radius;
@@ -67,14 +68,14 @@ public class PlayerStartAssigner {
 
                 if (!proposed_hex.masked && !mirror_hex.masked && proposed_hex.player == null && mirror_hex.player == null) {
 
-                    starting_coords.add(new int[]{a, b, c});
-                    starting_coords.add(new int[]{b, c, a});
-                    starting_coords.add(new int[]{c, a, b});
+                    starting_coords.add(new int [] {a, b, c});
+                    starting_coords.add(new int []{b, c, a});
+                    starting_coords.add(new int []{c, a, b});
 
                     if (cfg.human_players + cfg.bot_players == 6) {
-                        starting_coords.add(new int[]{-a, -b, -c});
-                        starting_coords.add(new int[]{-b, -c, -a});
-                        starting_coords.add(new int[]{-c, -a, -b});
+                        starting_coords.add(new int []{-a, -b, -c});
+                        starting_coords.add(new int []{-b, -c, -a});
+                        starting_coords.add(new int []{-c, -a, -b});
                     }
                     assigned = true;
                 }
@@ -107,7 +108,7 @@ public class PlayerStartAssigner {
                 usable = false;
             }
 
-            for (int[] placed_hex : starting_coords) {
+            for (int [] placed_hex : starting_coords) {
                 float dist = (float)  Math.pow((
                     Math.pow(placed_hex[0] - hex.pos.i, 2) +
                     Math.pow(placed_hex[1] - hex.pos.j, 2) +
@@ -120,7 +121,7 @@ public class PlayerStartAssigner {
                 }
             }
             if (usable) {
-                starting_coords.add(new int[]{hex.pos.i, hex.pos.j, hex.pos.k});
+                starting_coords.add(new int [] {hex.pos.i, hex.pos.j, hex.pos.k});
             }
             i++;
             idx += 1;

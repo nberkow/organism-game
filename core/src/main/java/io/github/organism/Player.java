@@ -1,6 +1,7 @@
 
 package io.github.organism;
 
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.LinkedList;
 import com.badlogic.gdx.graphics.Color;
@@ -29,5 +30,5 @@ public interface Player {
 
     void dispose();
 
-    int[] get_tournament_id();
+    Point get_tournament_id();
 }

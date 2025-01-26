@@ -5,6 +5,7 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
@@ -85,7 +86,7 @@ public class DiplomacyGraph {
             player_coords[i] = coords;
 
             // record the player colors in order
-            int [] p = current_game.all_player_ids.get(i);
+            Point p = current_game.all_player_ids.get(i);
             Player player = current_game.players.get(p);
             player_colors[i] = player.get_color();
 
@@ -189,10 +190,10 @@ public class DiplomacyGraph {
             // Draw the arc as a polyline
             color = Color.DARK_GRAY;
 
-            int [] p = current_game.all_player_ids.get(i);
+            Point p = current_game.all_player_ids.get(i);
             Player player = current_game.players.get(p);
 
-            int [] q = current_game.all_player_ids.get((i + 1) % 3);
+            Point q = current_game.all_player_ids.get((i + 1) % 3);
             Player opponent = current_game.players.get(q);
 
             String r = relationships.get(player).get(opponent);
@@ -216,10 +217,10 @@ public class DiplomacyGraph {
             // Draw the arc as a polyline
             color = Color.DARK_GRAY;
 
-            int[] p = current_game.all_player_ids.get(i);
+            Point p = current_game.all_player_ids.get(i);
             Player player = current_game.players.get(p);
 
-            int[] q = current_game.all_player_ids.get((i + 2) % 3);
+            Point q = current_game.all_player_ids.get((i + 2) % 3);
             Player opponent = current_game.players.get(q);
 
             String r = relationships.get(player).get(opponent);

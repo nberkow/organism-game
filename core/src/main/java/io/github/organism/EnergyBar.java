@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class EnergyBar {
@@ -27,7 +28,7 @@ public class EnergyBar {
     float small_bar_y;
     float small_bar_width;
     float small_bar_height;
-
+    BitmapFont font;
     public EnergyBar(GameBoard gb, PlayerHud ph, Player p, float width, float height){
         game_board = gb;
         player = p;
@@ -46,11 +47,13 @@ public class EnergyBar {
         small_bar_width = (width - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2) + TICK_SPACING) / MAX_ENERGY - TICK_SPACING;
         small_bar_height = height - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2);
 
+        font = game_board.game.fonts.get(32);
+
     }
 
 
     public void render(){
-        game_board.game.font.getData().setScale(4f);
+        font.getData().setScale(4f);
 
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
         game_board.shape_renderer.setColor(game_board.game.foreground_color);

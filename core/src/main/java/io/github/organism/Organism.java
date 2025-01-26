@@ -18,7 +18,6 @@ public class Organism {
     int energy;
     GameBoard game_board;
     Player player;
-    Color color;
 
     ArrayList<MapHex> extract_queue;
 

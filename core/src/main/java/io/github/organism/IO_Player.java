@@ -2,6 +2,7 @@ package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
 
+import java.awt.Point;
 import java.util.LinkedList;
 
 public class IO_Player  implements Player {
@@ -9,7 +10,7 @@ public class IO_Player  implements Player {
     String player_name;
 
 
-    int [] tournament_id; // id in tournament or other large player collection
+    Point tournament_id; // id in tournament or other large player collection
     int game_index; // index within game
 
     Color color;
@@ -23,7 +24,7 @@ public class IO_Player  implements Player {
 
     boolean player_2 = false;
 
-    public IO_Player(GameBoard gb, String name, int idx, int [] id, Organism org, boolean p2, Color c){
+    public IO_Player(GameBoard gb, String name, int idx, Point id, Organism org, boolean p2, Color c){
 
         game_board = gb;
         player_name = name;
@@ -128,7 +129,7 @@ public class IO_Player  implements Player {
      * @return
      */
     @Override
-    public int[] get_tournament_id() {
+    public Point get_tournament_id() {
         return tournament_id;
     }
 }

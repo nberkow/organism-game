@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -23,10 +24,13 @@ public class MapSettingsButtons {
     GameBoard game_board;
     OrganismGame game;
 
+    BitmapFont font;
+
     public MapSettingsButtons(MapSettingsScreen msc, String [] labels, float b_y) {
         map_settings_screen = msc;
         game = map_settings_screen.game;
         game_board = map_settings_screen.game_board;
+        font = game.fonts.get(32);
 
         buttons = new HashMap<>();
         buttons_x = map_settings_screen.controls_x;
@@ -60,9 +64,9 @@ public class MapSettingsButtons {
         buttons.put(labels[2], center_button_coords);
 
         button_text_layouts = new HashMap<>();
-        button_text_layouts.put(labels[0], new GlyphLayout(game_board.game.font, labels[0]));
-        button_text_layouts.put(labels[1], new GlyphLayout(game_board.game.font, labels[1]));
-        button_text_layouts.put(labels[2], new GlyphLayout(game_board.game.font, labels[2]));
+        button_text_layouts.put(labels[0], new GlyphLayout(font, labels[0]));
+        button_text_layouts.put(labels[1], new GlyphLayout(font, labels[1]));
+        button_text_layouts.put(labels[2], new GlyphLayout(font, labels[2]));
     }
 
     public String poll_buttons(float screenX, float screenY) {
@@ -110,8 +114,8 @@ public class MapSettingsButtons {
             GlyphLayout layout = button_text_layouts.get(b);
             float b_x = button_coords[0] + button_coords[2]/2 - layout.width/2;
             float b_y = button_coords[1] + button_coords[3]/2 + layout.height/2;
-            game_board.game.font.getData().setScale(1f);
-            game_board.game.font.draw(
+            font.getData().setScale(1f);
+            font.draw(
                 game_board.batch,
                 b,
                 b_x, b_y);

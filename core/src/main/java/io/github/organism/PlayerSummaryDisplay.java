@@ -3,6 +3,7 @@ package io.github.organism;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class PlayerSummaryDisplay {
@@ -23,12 +24,15 @@ public class PlayerSummaryDisplay {
     final float ENERGY_BAR_Y = 28;
     final float ACTION_BAR_Y= 22;
 
+    BitmapFont font;
+
     PlayerSummaryDisplay(GameBoard gb, Player p, float x, float y){
         this.x = x;
         this.y = y;
         player = p;
         game_board = gb;
         energy_bar_width = ACTION_RADIUS * (game_board.MAX_QUEUED_ACTIONS - 1);
+        font = game_board.game.fonts.get(16);
     }
 
     public void render(){
@@ -39,15 +43,12 @@ public class PlayerSummaryDisplay {
 
     public void draw_name(){
 
-        Gdx.gl.glEnable(GL20.GL_BLEND);   // Ensure blending is enabled
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);  // Set blend function
-        game_board.game.font.getData().setScale(1f);
-        game_board.game.font.setColor(player.get_color());
+        font.setColor(player.get_color());
 
         game_board.batch.begin();
-        game_board.game.font.draw(game_board.batch, player.get_player_name(), x, NAME_HEIGHT + y);
+        font.draw(game_board.batch, player.get_player_name(), x, NAME_HEIGHT + y);
         game_board.batch.end();
-        game_board.game.font.setColor(game_board.game.foreground_color);
+        font.setColor(game_board.game.foreground_color);
     }
     public void draw_energy_bar(){
         game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
