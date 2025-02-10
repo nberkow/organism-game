@@ -4,6 +4,7 @@ import static java.util.Collections.sort;
 
 import com.badlogic.gdx.graphics.Color;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -15,6 +16,8 @@ public class Organism {
     TriangularGrid territory_hex;
     TriangularGrid territory_vertex;
     Integer [] resources;
+
+    Integer [] ally_resources;
     int energy;
     GameBoard game_board;
     Player player;
@@ -27,8 +30,10 @@ public class Organism {
         territory_vertex = new TriangularGrid(game_board);
         extract_queue = new ArrayList<>();
         resources = new Integer[3];
+        ally_resources = new Integer[3];
         energy = GameBoard.DEFAULT_STARTING_ENERGY;
         income = 1;
+
     }
 
     public void update_resources(){
@@ -44,13 +49,14 @@ public class Organism {
         }
     }
 
+
     public void update_income(){
         income = 1;
-        Player ally = game_board.diplomacy_graph.get_ally(player);
+
         for (int r=0; r<3; r++){
             int resource_count = resources[r];
-            if (ally != null) {
-                resource_count = Math.max(resources[r], ally.get_organism().resources[r]);
+            if (player.get_ally_id() != null) {
+
             }
             income *= Math.min(Math.max(resource_count, 1), 6);
         }
@@ -120,7 +126,7 @@ public class Organism {
             ExpandSortWrapper w = new ExpandSortWrapper(v, player);
             compute_adjacent_hex_value(w);
             compute_vertex_enemy_distance(w, enemy_adjacent_vertexes);
-            w.remove_player_cost = game_board.diplomacy_graph.get_remove_cost(player, enemy_player);
+            w.remove_player_cost = game_board.diplomacy_graph.get_remove_cost(player.get_tournament_id(), enemy_player.get_tournament_id());
             vertex_priority.add(w);
         }
         sort(vertex_priority);
@@ -367,6 +373,8 @@ public class Organism {
         territory_vertex = null;
         territory_hex = null;
     }
+
+
 }
 
 

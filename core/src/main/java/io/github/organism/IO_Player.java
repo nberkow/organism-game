@@ -11,6 +11,8 @@ public class IO_Player  implements Player {
 
 
     Point tournament_id; // id in tournament or other large player collection
+
+    Point ally_id;
     int game_index; // index within game
 
     Color color;
@@ -21,6 +23,7 @@ public class IO_Player  implements Player {
 
     int most_recent_move;
     ActionHistory move_history;
+
 
     boolean player_2 = false;
 
@@ -131,5 +134,16 @@ public class IO_Player  implements Player {
     @Override
     public Point get_tournament_id() {
         return tournament_id;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Point get_ally_id() {
+        return ally_id;
+    }
+    public void set_ally_id(Point p) {
+        ally_id = p;
     }
 }

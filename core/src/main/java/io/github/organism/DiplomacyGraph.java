@@ -6,9 +6,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
+
+enum Relationship {NEUTRAL, ENEMY, ALLY};
 
 public class DiplomacyGraph {
 
@@ -17,29 +20,30 @@ public class DiplomacyGraph {
 
     HashSet<Player> players_counted;
 
+
     // rendering
     double [][] player_coords;
     Color [] player_colors;
 
     boolean render_params_set;
 
-    final int VERTEX_COST_REMOVE_ENEMY_PLAYER = 9;
-    final int VERTEX_COST_REMOVE_EXTRACTING_PLAYER = 3;
-    final int VERTEX_COST_REMOVE_FLANKED_PLAYER = 1;
+    final int VERTEX_COST_REMOVE_ENEMY = 6;
+    final int VERTEX_COST_REMOVE_NEUTRAL = 3;
+    final int VERTEX_COST_REMOVE_ALLY = 0;
 
-    HashMap<Player, HashMap<Player, String>> relationships;
+    HashMap<Point, HashMap<Point, Relationship>> relationships;
+
+    HashMap<Point, HashMap<Point, Color>> turn_edge_colors;
 
     /* render params */
     float x_pos;
     float y_pos;
     float graph_radius;
     float player_radius;
-
-    float line_midpoint;
-
-
-    float span = 80; // Angular span in degrees
+    float span = 120; // Angular span in degrees
     int segments = 30;
+
+
 
     float[][] player_outer_arc_vertices;
     double [] player_start_degrees;
@@ -57,12 +61,93 @@ public class DiplomacyGraph {
 
         graph_radius = game.VIRTUAL_WIDTH / 15f;
         player_radius = graph_radius / 3;
-        line_midpoint = 0.7f;
 
         x_pos = game.VIRTUAL_WIDTH * 0.8f + (game.VIRTUAL_WIDTH / 12f);
         y_pos = game.VIRTUAL_HEIGHT * 0.85f;
+    }
 
+    public void update_diplomacy(HashMap<Point, Integer> all_player_moves) {
 
+        // get colors for this turn's actions
+        set_minor_edge_colors(all_player_moves);
+
+        // check for all extract moves.
+        handle_extracting_players(all_player_moves);
+
+        // check for expand moves
+        handle_expanding_players(all_player_moves);
+    }
+
+    public void set_minor_edge_colors(HashMap<Point, Integer> all_player_moves) {
+
+    }
+
+    public void handle_extracting_players(HashMap<Point, Integer> all_player_moves) {
+
+        // - if one player extracts, previous relationships are kept (overwritten if attacked)
+        // - if two players extract they form an alliance
+        // - if three players extract, previous relationships are kept (overwritten if attacked)
+
+        ArrayList<Point> extracting_players = new ArrayList<>();
+        ArrayList<Point> expanding_players = new ArrayList<>();
+
+        for (Point m : all_player_moves.keySet()) {
+            if (all_player_moves.get(m) == 1) {
+                extracting_players.add(m);
+            }
+            else {
+                expanding_players.add(m);
+            }
+        }
+
+        // two players extract. alliance formed. other alliances broken
+        if (extracting_players.size() == 2) {
+            Point p = extracting_players.get(0);
+            Point q = extracting_players.get(1);
+
+            relationships.get(p).put(q, Relationship.ALLY);
+            relationships.get(q).put(p, Relationship.ALLY);
+
+            current_game.players.get(p).set_ally_id(q);
+            current_game.players.get(q).set_ally_id(p);
+
+            Point e = expanding_players.get(0);
+            relationships.get(e).put(q, Relationship.NEUTRAL);
+            relationships.get(e).put(p, Relationship.NEUTRAL);
+        }
+    }
+
+    private void handle_expanding_players(HashMap<Point, Integer> all_player_moves) {
+
+        // if a player attacks another player they become enemies.
+        // if they were allies, alliance is canceled
+        for (int i=0; i<3; i++) {
+
+            Point p = current_game.all_player_ids.get(i);
+            Integer move = all_player_moves.get(p);
+            Point q = null;
+            if (move == 0 | move == 2){
+
+                // attacking clockwise (left)
+                if (move == 0) {
+                    q = current_game.all_player_ids.get((i + 2) % 3);
+                }
+                // attacking counter-clockwise (right)
+                if (move == 2) {
+                    q = current_game.all_player_ids.get((i + 2) % 3);
+                }
+
+                relationships.get(p).put(q, Relationship.ENEMY);
+                relationships.get(q).put(p, Relationship.ENEMY);
+
+                if (current_game.players.get(p).get_ally_id() == q) {
+                    current_game.players.get(p).set_ally_id(null);
+                }
+                if (current_game.players.get(q).get_ally_id() == p) {
+                    current_game.players.get(q).set_ally_id(null);
+                }
+            }
+        }
     }
 
     private void calculate_render_params(){
@@ -102,66 +187,41 @@ public class DiplomacyGraph {
 
             }
         }
-
-    }
-
-    public void set_relationship(Player p, Player q, String r) {
-        relationships.get(p).put(q, r);
-        players_counted.add(p);
     }
 
     public void set_all_neutral() {
-        for (Player p : current_game.players.values()) {
+        for (Point p : current_game.players.keySet()) {
             relationships.put(p, new HashMap<>());
-            for (Player q : current_game.players.values()) {
+            for (Point q : current_game.players.keySet()) {
                 if (p != q) {
-                    relationships.get(p).put(q, "neutral");
+                    relationships.get(p).put(q, Relationship.NEUTRAL);
                 }
             }
         }
     }
 
-    public void cancel_all_ally() {
+    public Integer get_remove_cost(Point player, Point target) {
 
-        boolean all_ally = true;
-        for (Player p : current_game.players.values()) {
-            for (Player q : current_game.players.values()) {
-                String relationship = relationships.get(p).get(q);
-                if (!Objects.equals(relationship, "friendly")) {
-                    all_ally = false;
-                }
-            }
+        if (Objects.equals(relationships.get(target).get(player), Relationship.ENEMY)){
+            return VERTEX_COST_REMOVE_ENEMY;
         }
 
-        if (all_ally) {
-            set_all_neutral();
+        if (Objects.equals(relationships.get(target).get(player), Relationship.NEUTRAL)){
+            return VERTEX_COST_REMOVE_NEUTRAL;
         }
 
+        if (Objects.equals(relationships.get(target).get(player), Relationship.ALLY)){
+            return VERTEX_COST_REMOVE_ALLY;
+        }
+
+        return null;
     }
 
-    public int get_remove_cost(Player player, Player target) {
+    public Point get_ally(Point p) {
 
-        // if target player is expanding toward this player (hostile to player)
-        if (Objects.equals(relationships.get(target).get(player), "hostile")){
-            return VERTEX_COST_REMOVE_ENEMY_PLAYER;
-        }
-
-        // target player is extracting (friendly to all)
-        if (Objects.equals(relationships.get(target).get(player), "friendly")){
-            return VERTEX_COST_REMOVE_EXTRACTING_PLAYER;
-        }
-
-        // target player is not friendly, must be attacking other player
-        return VERTEX_COST_REMOVE_FLANKED_PLAYER;
-    }
-
-    public Player get_ally(Player player) {
-        cancel_all_ally();
-
-        for (Player q : relationships.keySet()){
-            if (Objects.equals(relationships.get(player).get(q), "friendly")) {
-                if (Objects.equals(relationships.get(q).get(player), "friendly")) {
-
+        for (Point q : relationships.keySet()){
+            if (Objects.equals(relationships.get(p).get(q), Relationship.ALLY)) {
+                if (Objects.equals(relationships.get(q).get(p), Relationship.ALLY)) {
                     return q;
                 }
             }
@@ -187,23 +247,15 @@ public class DiplomacyGraph {
         Color color;
 
         for (int i=0; i<3; i++) {
-            // Draw the arc as a polyline
+            // Draw the arc as a poly rectline
             color = Color.DARK_GRAY;
 
             Point p = current_game.all_player_ids.get(i);
-            Player player = current_game.players.get(p);
-
             Point q = current_game.all_player_ids.get((i + 1) % 3);
-            Player opponent = current_game.players.get(q);
 
-            String r = relationships.get(player).get(opponent);
-
-            if (Objects.equals(r, "friendly")) {
-                color = Color.BLUE;
-            }
-
-            if (Objects.equals(r, "hostile")) {
-                color = Color.RED;
+            Relationship r = relationships.get(p).get(q);
+            if (r == Relationship.ALLY) {
+                color = game.action_colors[1];
             }
 
             game.shape_renderer.setColor(color);
@@ -214,28 +266,20 @@ public class DiplomacyGraph {
 
         // inner relationship lines
         for (int i=0; i<3; i++) {
-            // Draw the arc as a polyline
+            // Draw the arc as a poly rectline
             color = Color.DARK_GRAY;
 
             Point p = current_game.all_player_ids.get(i);
-            Player player = current_game.players.get(p);
-
             Point q = current_game.all_player_ids.get((i + 2) % 3);
-            Player opponent = current_game.players.get(q);
 
-            String r = relationships.get(player).get(opponent);
-
-            if (Objects.equals(r, "friendly")) {
-                color = Color.BLUE;
-            }
-
-            if (Objects.equals(r, "hostile")) {
-                color = Color.RED;
+            Relationship r = relationships.get(p).get(q);
+            if (r == Relationship.ENEMY) {
+                color = game.action_colors[0];
             }
 
             game.shape_renderer.setColor(color);
-            double end_x =  (player_coords[i][0] * (1-line_midpoint) + (player_coords[(i+2) % 3][0]) * (line_midpoint));
-            double end_y =  (player_coords[i][1] * (1-line_midpoint) + (player_coords[(i+2) % 3][1]) * (line_midpoint));
+            double end_x =  player_coords[(i+2) % 3][0];
+            double end_y =  player_coords[(i+2) % 3][1];
             game.shape_renderer.line((float) player_coords[i][0], (float) player_coords[i][1], (float) end_x, (float) end_y);
 
         }
@@ -257,4 +301,6 @@ public class DiplomacyGraph {
     public void dispose() {
          relationships.clear();
     }
+
+
 }

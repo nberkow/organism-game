@@ -64,7 +64,7 @@ public class MapSettingsScreen implements Screen {
     public void render(float delta) {
 
         ScreenUtils.clear(game_board.game.background_color);
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (GridPosition pos : game_board.universe_map.hex_grid) {
             if (pos.content != null) pos.content.render();

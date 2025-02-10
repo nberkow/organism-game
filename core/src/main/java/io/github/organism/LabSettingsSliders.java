@@ -7,65 +7,58 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapSettingsSliders {
+public class LabSettingsSliders {
 
     final float TICK_WIDTH = 2f;
-    float slider_box_x;
-    float slider_box_y;
-    float slider_box_w;
-    float slider_box_h;
     OrganismGame game;
-    MapSettingsScreen map_settings_screen;
-    GameBoard game_board;
+    LabScreen lab_screen;
     float bar_x;
     float bar_width;
     float bar_height;
     float slider_width;
     float slider_height;
     float bar_spacing;
-    HashMap<String, float []> slider_parameters;
-    HashMap<String, float []> slider_coords;
-    HashMap<String, float []> bar_coords;
-    HashMap<String, float [][]> bar_tick_coords;
-    HashMap<String, float []> label_coords;
+    HashMap<String, float[]> slider_parameters;
+    HashMap<String, float[]> slider_coords;
+    HashMap<String, float[]> bar_coords;
+    HashMap<String, float[][]> bar_tick_coords;
+    HashMap<String, float[]> label_coords;
     ArrayList<String> slider_label_order;
-    HashMap<String, float []> slider_values;
+    HashMap<String, float[]> slider_values;
 
     HashMap<String, Float> slider_selected_vals;
 
     BitmapFont font;
+    LabScreenControlOverlay overlay;
 
-    public MapSettingsSliders(OrganismGame g, MapSettingsScreen msc) {
+
+    public LabSettingsSliders(OrganismGame g, LabScreen lsc, LabScreenControlOverlay oly) {
         game = g;
-        map_settings_screen = msc;
-        game_board = map_settings_screen.game_board;
+        lab_screen = lsc;
+        overlay = oly;
         font = game.fonts.get(16);
 
-        slider_box_x = map_settings_screen.controls_x;
-        slider_box_y = game_board.center_y;
-        slider_box_w = map_settings_screen.controls_w;
-        slider_box_h = this.game.VIRTUAL_HEIGHT / 1.8f;
+        slider_parameters = new HashMap<>();
+        slider_parameters.put("resource value", new float[]{0f, 3, 1/3f, 1});
+        slider_parameters.put("attack enemy cost", new float[]{1, 6, 1, 3f});
+        slider_parameters.put("attack ally cost", new float[]{0, 1.2f, .2f, 0f});
+        slider_parameters.put("claim vertex cost", new float[]{0, 1.2f, .2f, 0f});
+        slider_parameters.put("speed", new float[]{0, 1.2f, .2f, 0f});
 
-        bar_width = slider_box_w * .9f;
+        slider_label_order = new ArrayList<>();
+        slider_label_order.add("resource value");
+        slider_label_order.add("attack enemy cost");
+        slider_label_order.add("attack ally cost");
+        slider_label_order.add("claim vertex cost");
+        slider_label_order.add("speed");
+
+        bar_width = overlay.slider_box_w * .8f;
         bar_height = 4;
-        bar_x = slider_box_x + (slider_box_w - bar_width)/2;
-
+        bar_x = overlay.slider_box_x + (overlay.slider_box_w - bar_width)/2;
         slider_width = bar_width * .1f;
         slider_height = bar_height * 3;
 
-        slider_parameters = new HashMap<>();
-        slider_parameters.put("radius", new float[]{4f, 30f, 1f, map_settings_screen.DEFAULT_SIZE});
-        slider_parameters.put("resources", new float[]{0f, 3, 1/3f, 1});
-        slider_parameters.put("density", new float[]{1, 6, 1, 3f});
-        slider_parameters.put("starts", new float[]{0, 1.2f, .2f, 0f});
-
-        slider_label_order = new ArrayList<>();
-        slider_label_order.add("radius");
-        slider_label_order.add("resources");
-        slider_label_order.add("density");
-        slider_label_order.add("starts");
-
-        bar_spacing = slider_box_h / (.7f + slider_parameters.size());
+        bar_spacing = overlay.slider_box_h / (.7f + slider_parameters.size());
         bar_coords = new HashMap<>();
         label_coords = new HashMap<>();
         slider_coords = new HashMap<>();
@@ -73,13 +66,11 @@ public class MapSettingsSliders {
         slider_values = new HashMap<>();
         slider_selected_vals = new HashMap<>();
 
-
-
         load_initial_positions();
     }
 
     private void load_initial_positions() {
-        float y = slider_box_y + slider_box_h - bar_spacing;
+        float y = overlay.slider_box_y + overlay.slider_box_h - bar_spacing;
         float slider_x;
         int ticks;
         float tick_spacing;
@@ -94,7 +85,7 @@ public class MapSettingsSliders {
 
         for (String p : slider_label_order){
 
-            label_coord = new float[] {map_settings_screen.controls_x, y + slider_height * 2};
+            label_coord = new float[] {overlay.slider_box_x, y + slider_height * 2};
             label_coords.put(p, label_coord);
 
             // lower bound, upper bound, step size, current value
@@ -154,27 +145,20 @@ public class MapSettingsSliders {
     public void render(){
 
         /*
-        shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        shape_renderer.rect(
-            slider_box_x, slider_box_y, slider_box_w, slider_box_h
+        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shape_renderer.setColor(Color.CYAN);
+        game.shape_renderer.rect(
+            overlay.slider_box_x, overlay.slider_box_y, overlay.slider_box_w, overlay.slider_box_h
         );
-        shape_renderer.end();*/
+        game.shape_renderer.end();
+        //System.out.println(overlay.slider_box_x + "\t" + overlay.slider_box_y + "\t" + overlay.slider_box_w + "\t" + overlay.slider_box_h);
+        */
+
 
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (String p : slider_label_order){
 
-            float[][] tick_coord = bar_tick_coords.get(p);
-
-            for (float[] rect_coords : tick_coord) {
-                game.shape_renderer.setColor(Color.WHITE);
-                game.shape_renderer.rect(
-                    rect_coords[0],
-                    rect_coords[1],
-                    rect_coords[2],
-                    rect_coords[3]
-                );
-            }
 
             game.shape_renderer.setColor(Color.DARK_GRAY);
             float[] bar_coord = bar_coords.get(p);
@@ -194,7 +178,6 @@ public class MapSettingsSliders {
                 slider_coord[3]
             );
         }
-
         game.shape_renderer.end();
 
         game.batch.begin();

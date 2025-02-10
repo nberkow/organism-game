@@ -17,6 +17,8 @@ public class HMM {
     public double [][][] transition_weights;
     public double [][][] emission_weights;
 
+    int transition_bit_mask;
+
     OrganismGame game;
     public HMM(OrganismGame g, int s, int n) {
         game = g;
@@ -34,18 +36,19 @@ public class HMM {
     }
 
     public void init_random_weights() {
+        init_random_transition_mask();
         init_random_transition_weights();
+        apply_transition_mask();
         init_random_emission_weights();
     }
+
+    private void init_random_transition_mask() {
+        int n = states * states * inputs;
+        transition_bit_mask = rng.nextInt((int) Math.pow(2, n));
+    }
+
     private void init_random_transition_weights() {
         transition_weights = new double[states][states][inputs];
-        for (int i=0; i<states; i++){
-            for (int j=0; j<states; j++){
-                for (int k=0; k<inputs; k++){
-                    transition_weights[i][j][k] = rng.nextDouble();
-                }
-            }
-        }
     }
 
     private void init_random_emission_weights() {
@@ -55,6 +58,22 @@ public class HMM {
             for (int j=0; j<4; j++){
                 for (int k=0; k<inputs; k++){
                     emission_weights[i][j][k] = rng.nextDouble();
+                }
+            }
+        }
+    }
+
+    public void apply_transition_mask() {
+        int n = 0;
+        int b;
+        for (int i=0; i<states; i++){
+            for (int j=0; j<states; j++){
+                for (int k=0; k<inputs; k++){
+                    b = (int) Math.pow(2, n);
+                    if ((b & transition_bit_mask) != b) {
+                        transition_weights[i][j][k] = 0;
+                    }
+                    n++;
                 }
             }
         }
@@ -131,5 +150,9 @@ public class HMM {
         transition_weights = null;
         emission_weights = null;
         game = null;
+    }
+
+    public void ablate() {
+
     }
 }

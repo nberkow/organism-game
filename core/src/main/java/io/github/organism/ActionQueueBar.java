@@ -37,7 +37,7 @@ public class ActionQueueBar {
     public void render(){
 
 
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         float [] action_x_pos = new float [game_board.MAX_QUEUED_ACTIONS];
 
         float first_x = x + margin;
@@ -45,26 +45,26 @@ public class ActionQueueBar {
             first_x = x + hud.HUD_WIDTH - margin;
         }
         for (int i=0; i<game_board.MAX_QUEUED_ACTIONS-1; i++){
-            game_board.shape_renderer.setColor(game_board.game.foreground_color);
+            game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
             action_x_pos[i] = first_x + ((i) * spacing * hud.parity);
-            game_board.shape_renderer.circle(action_x_pos[i], y, RADIUS);
+            game_board.game.shape_renderer.circle(action_x_pos[i], y, RADIUS);
             if (i == 10 || i == 0){
-                game_board.shape_renderer.circle(action_x_pos[i], y, RADIUS + 2);
+                game_board.game.shape_renderer.circle(action_x_pos[i], y, RADIUS + 2);
             }
             if (i == 0){
-                game_board.shape_renderer.circle(action_x_pos[i], y, RADIUS + 3);
+                game_board.game.shape_renderer.circle(action_x_pos[i], y, RADIUS + 3);
             }
 
         }
         // make the last circle larger
         action_x_pos[game_board.MAX_QUEUED_ACTIONS-1] = first_x + (hud.parity * ((game_board.MAX_QUEUED_ACTIONS-1) * spacing + RADIUS));
-        game_board.shape_renderer.circle(
+        game_board.game.shape_renderer.circle(
             action_x_pos[game_board.MAX_QUEUED_ACTIONS-1],
             y,
             RADIUS * 1.5f);
-        game_board.shape_renderer.end();
+        game_board.game.shape_renderer.end();
 
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // end circle
         int i = game_board.MAX_QUEUED_ACTIONS-1;
@@ -77,11 +77,11 @@ public class ActionQueueBar {
                 r = RADIUS * 1.5f - 1;
                 first = false;
             }
-            game_board.shape_renderer.setColor(game_board.game.colors[v]);
-            game_board.shape_renderer.circle(action_x_pos[i], y, r);
+            game_board.game.shape_renderer.setColor(game_board.game.action_colors[v]);
+            game_board.game.shape_renderer.circle(action_x_pos[i], y, r);
 
             i -= 1;
         }
-        game_board.shape_renderer.end();
+        game_board.game.shape_renderer.end();
     }
 }

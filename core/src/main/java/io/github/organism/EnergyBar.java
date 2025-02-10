@@ -53,17 +53,16 @@ public class EnergyBar {
 
 
     public void render(){
-        font.getData().setScale(4f);
 
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.shape_renderer.setColor(game_board.game.foreground_color);
-        game_board.shape_renderer.rect(
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
+        game_board.game.shape_renderer.rect(
             x,
             y,
             x_width,
             y_height);
-        game_board.shape_renderer.setColor(game_board.game.background_color);
-        game_board.shape_renderer.rect(
+        game_board.game.shape_renderer.setColor(game_board.game.background_color);
+        game_board.game.shape_renderer.rect(
             x + GAP_WIDTH,
             y + GAP_WIDTH,
             x_width - (GAP_WIDTH * 2),
@@ -75,15 +74,15 @@ public class EnergyBar {
             first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
         }
 
-        game_board.shape_renderer.setColor(game_board.game.foreground_color);
+        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
         for (int i=0; i<player.get_organism().energy; i++) {
-            game_board.shape_renderer.rect(
+            game_board.game.shape_renderer.rect(
                 first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),
                 y + GAP_WIDTH * 2,
                 small_bar_width,
                 y_height - (GAP_WIDTH * 4));
         }
 
-        game_board.shape_renderer.end();
+        game_board.game.shape_renderer.end();
     }
 }

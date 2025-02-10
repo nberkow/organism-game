@@ -1,12 +1,11 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class PlayerSummaryDisplay {
+
 
     float x, y;
     Player player;
@@ -15,6 +14,8 @@ public class PlayerSummaryDisplay {
 
     final float ENERGY_BAR_HEIGHT = 8;
 
+    final float INCOME_BAR_HEIGHT = 8;
+
     final float ACTION_RADIUS = ENERGY_BAR_HEIGHT / 2;
 
     float energy_bar_width;
@@ -22,7 +23,9 @@ public class PlayerSummaryDisplay {
     final float NAME_HEIGHT = 50;
 
     final float ENERGY_BAR_Y = 28;
-    final float ACTION_BAR_Y= 22;
+    final float INCOME_BAR_Y= 22;
+
+    final float ACTION_BAR_Y= 18;
 
     BitmapFont font;
 
@@ -45,19 +48,29 @@ public class PlayerSummaryDisplay {
 
         font.setColor(player.get_color());
 
-        game_board.batch.begin();
-        font.draw(game_board.batch, player.get_player_name(), x, NAME_HEIGHT + y);
-        game_board.batch.end();
+        game_board.game.batch.begin();
+        font.draw(game_board.game.batch, player.get_player_name(), x, NAME_HEIGHT + y);
+        game_board.game.batch.end();
         font.setColor(game_board.game.foreground_color);
     }
     public void draw_energy_bar(){
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.shape_renderer.setColor(game_board.game.foreground_color);
-        game_board.shape_renderer.rect(
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
+        game_board.game.shape_renderer.rect(
             x, y + ENERGY_BAR_Y,
             (float) (energy_bar_width * (player.get_organism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
-        game_board.shape_renderer.end();
+        game_board.game.shape_renderer.end();
+    }
+
+    public void draw_income_bar(){
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
+        game_board.game.shape_renderer.rect(
+            x, y + INCOME_BAR_Y,
+            (float) (energy_bar_width * (player.get_organism().energy / 100f)),
+            ENERGY_BAR_HEIGHT);
+        game_board.game.shape_renderer.end();
     }
 
     public void draw_action_queue(){
@@ -65,15 +78,15 @@ public class PlayerSummaryDisplay {
         Color color;
         for (int i=0; i<player.get_move_queue().size(); i++){
             Integer state = player.get_move_queue().get(i);
-            color = game_board.game.colors[state];
+            color = game_board.game.action_colors[state];
 
-            game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-            game_board.shape_renderer.setColor(color);
-            game_board.shape_renderer.circle(
+            game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+            game_board.game.shape_renderer.setColor(color);
+            game_board.game.shape_renderer.circle(
                 x + ACTION_RADIUS * (i) * 2 + (ACTION_RADIUS / 2),
                 y + ACTION_BAR_Y,
                 ACTION_RADIUS * 0.9f);
-            game_board.shape_renderer.end();
+            game_board.game.shape_renderer.end();
         }
 
     }

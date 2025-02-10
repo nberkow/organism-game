@@ -1,8 +1,6 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Disposable;
 
@@ -22,9 +20,9 @@ public class GameBoard implements Disposable {
     float center_x;
     float center_y;
     float grid_window_y;
-    final int MAX_QUEUED_ACTIONS = 20;
-    final float PLAYER_SUMMARY_X = 30;
-    final float PLAYER_SUMMARY_Y = 400;
+    final int MAX_QUEUED_ACTIONS = 12;
+    static final float PLAYER_SUMMARY_X = 30;
+    static final float PLAYER_SUMMARY_Y = 400;
     final float PLAYER_SUMMARY_HEIGHT = 40;
     public long seed;
 
@@ -44,13 +42,11 @@ public class GameBoard implements Disposable {
     ArrayList<Point> human_player_ids;
     ArrayList<Point> bot_player_ids;
     ArrayList<Point> all_player_ids;
-    ShapeRenderer shape_renderer;
     PlayerStartAssigner player_start_assigner;
     ResourceDistributor resource_distributor;
     VoidDistributor void_distributor;
     PlayerHud player1_hud;
     PlayerHud player2_hud;
-    SpriteBatch batch;
     GameConfig config;
     int radius;
     Random rng;
@@ -61,14 +57,13 @@ public class GameBoard implements Disposable {
     public GameBoard(OrganismGame game, GameConfig cfg) {
         this.game = game;
         this.config = cfg;
-        this.batch = game.batch;
+
         seed = config.seed;
         radius = config.radius;
         grid_window_y = GRID_WINDOW_HEIGHT;
         move_logger = null;
         show_data = true;
 
-        shape_renderer = game.shape_renderer;
         hex_side_len = config.map_view_size_param/radius; // starting default
         center_x = this.game.VIRTUAL_WIDTH / 2f;
         center_y = this.game.VIRTUAL_HEIGHT / grid_window_y;
@@ -174,8 +169,7 @@ public class GameBoard implements Disposable {
         logic();
 
         ScreenUtils.clear(game.background_color);
-        batch.setProjectionMatrix(this.game.viewport.getCamera().combined);
-        shape_renderer.setProjectionMatrix(this.game.viewport.getCamera().combined);
+
         grid_window.render();
 
         if (player1_hud != null) {
@@ -207,12 +201,12 @@ public class GameBoard implements Disposable {
         human_player_ids.clear();
         bot_player_ids.clear();
         all_player_ids.clear();
-        shape_renderer = null;
+        game.shape_renderer = null;
         player_start_assigner = null;
         resource_distributor = null;
         void_distributor = null;
         player1_hud = null;
         player2_hud = null;
-        batch = null;
+        game.batch = null;
     }
 }

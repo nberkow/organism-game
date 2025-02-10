@@ -1,11 +1,8 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class BotPlayer implements Player{
@@ -26,6 +23,8 @@ public class BotPlayer implements Player{
 
     int most_recent_move;
 
+    Point ally_id;
+
     public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, HMM mod, Color c){
 
         game_board = gb;
@@ -36,6 +35,7 @@ public class BotPlayer implements Player{
         organism = org;
         model = mod;
         move_queue = new LinkedList<>();
+        ally_id = null;
 
     }
 
@@ -100,9 +100,7 @@ public class BotPlayer implements Player{
                     move_indicator = move_queue.get(q) % 2; // 0 and 2 both mean expand. 1 means extract
                 }
                 for (int m=0; m<option_per_move; m++) {
-                    System.out.println(" q: " + q + "  m: " + m);
                     pos = register_index + 2 + (q * option_per_move) + m;
-                    System.out.println(pos);
                     hmm_inputs[pos] = 0;
                     if (move_indicator == m) {
                         hmm_inputs[pos] = 1;
@@ -196,5 +194,17 @@ public class BotPlayer implements Player{
     @Override
     public Point get_tournament_id() {
        return tournament_id;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Point get_ally_id() {
+        return ally_id;
+    }
+
+    public void set_ally_id(Point p) {
+        ally_id = p;
     }
 }

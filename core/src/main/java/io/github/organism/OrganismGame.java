@@ -4,11 +4,11 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import java.util.HashMap;
@@ -38,9 +38,10 @@ public class OrganismGame extends Game {
     Color background_color = Color.BLACK;
     Color foreground_color = Color.CYAN;
 
-    Color [] colors = {Color.RED, Color.BLUE, Color.RED};
+    Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
 
-    Color exterminate_color = Color.RED;
+    Color [] diplomacy_colors = { Color.GREEN, Color.RED};
+
     HashMap<Integer, BitmapFont> fonts;
 
     Color [] player_colors = {
@@ -69,10 +70,20 @@ public class OrganismGame extends Game {
         // Initialize the camera and viewport for the virtual game world dimensions
         camera = new OrthographicCamera();
         viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
-        file_handler = new FileHandler(this);
+        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true); // Ensure viewport is set up
+        camera.update();
+
         batch = new SpriteBatch();
+        batch.enableBlending();
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        batch.setProjectionMatrix(this.viewport.getCamera().combined);
+
         shape_renderer = new ShapeRenderer();
+        shape_renderer.setProjectionMatrix(this.viewport.getCamera().combined);
+
         Gdx.app.setLogLevel(Application.LOG_DEBUG);
+
+        file_handler = new FileHandler(this);
 
         rng = new Random();
         rng.setSeed(10);

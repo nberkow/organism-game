@@ -26,10 +26,9 @@ public class Simulation {
 
     boolean show_summary_screen;
     boolean next_round_begin;
-
     boolean write_files;
 
-    float between_round_pause = 1.5f;
+    float between_round_pause = 0f;
     float between_round_pause_timer;
 
     HashMap<Point, String> player_names;
@@ -149,6 +148,7 @@ public class Simulation {
         for (int i=0; i<pool_size; i++){
             HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
             model.init_random_weights();
+            model.ablate();
             player_primary_index += 1;
             Point player_id  = new Point(player_primary_index, 0);
             model.player_tournament_id = player_id;
@@ -237,6 +237,7 @@ public class Simulation {
         BotPlayer winner = (BotPlayer) current_game.players.get(winner_id);
         HMM winner_model_copy = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
         winner_model_copy.set_weights(winner.model.transition_weights, winner.model.emission_weights);
+        winner_model_copy.transition_bit_mask = winner.model.transition_bit_mask;
         model_pool.put(winner_id, winner_model_copy);
 
         // recycle colors and mark eliminated players in gray
@@ -257,6 +258,8 @@ public class Simulation {
 
         // add a model by averaging the last round models
         HMM offspring = get_last_round_offspring();
+        offspring.transition_bit_mask = winner.model.transition_bit_mask;
+        offspring.apply_transition_mask();
         Point offspring_player_id = new Point(
             winner_id.x,
             winner_id.y + 1
@@ -402,7 +405,7 @@ public class Simulation {
         current_game.game.camera.update();
         current_game.render();
         model_pool_display.render();
-        if (show_summary_screen) {
+        if (show_summary_screen & between_round_pause > 0 ) {
             round_summary.render();
         }
     }
@@ -459,12 +462,9 @@ public class Simulation {
 
     public void write_champions_to_file(){
 
-        System.out.println("CHAMPIONS: " + current_champions.size());
         for (Point p : current_champions.keySet()) {
-            System.out.println(current_champions.get(p).player_tournament_id);
             lab_screen.game.file_handler.save_model(current_champions.get(p), p.x + "_" + p.y);
         }
-        System.out.println("--CHAMPIONS--");
     }
 
 }

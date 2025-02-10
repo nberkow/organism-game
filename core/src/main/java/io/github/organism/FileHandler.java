@@ -92,6 +92,7 @@ public class FileHandler {
 
         String all_lines = String.join("\n", content);
         handle.writeString(all_lines, true);
+        System.out.println("saved: " + dir + "/" + prefix + ".hmm");
     }
 
     /*

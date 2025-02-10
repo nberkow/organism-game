@@ -1,45 +1,114 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class LabScreen implements Screen {
+
     ArrayList<Simulation> running_simulations;
     ArrayList<GameConfig> game_configs;
     GameBoard visible_game;
     Simulation current_sim;
-    float controls_x;
-    float controls_w;
 
+    float overlay_x;
+    float overlay_w;
+    float overlay_y;
+    float overlay_h;
+    float center_y;
+
+    float buttons_box_w;
+    float buttons_box_h;
+    float buttons_box_x;
+    float buttons_box_y;
     TerritoryBar territory_bar;
-    //LabControlBar control_bar;
     OrganismGame game;
+
+    LabScreenControlOverlay overlay;
+
+    LabSettingsButtons all_buttons;
+
+    boolean show_control_overlay;
+
+    String [] button_names;
     public LabScreen(OrganismGame organism_game) {
 
         game = organism_game;
-        visible_game = null;
+        show_control_overlay = false;
+
         running_simulations = new ArrayList<>();
         game_configs = new ArrayList<>();
 
-        controls_x = this.game.VIRTUAL_WIDTH * 5 / 6f;
-        controls_w = this.game.VIRTUAL_WIDTH / 2.5f;
+        overlay_w = this.game.VIRTUAL_WIDTH / 1.8f;
+        overlay_x = (this.game.VIRTUAL_WIDTH - overlay_w) / 2;
+        overlay_h = this.game.VIRTUAL_HEIGHT * 0.9f;
+        overlay_y = (this.game.VIRTUAL_HEIGHT - overlay_h) / 2f;
 
-        //control_bar = new LabControlBar(this, this.game.VIRTUAL_HEIGHT - 10);
+        center_y = this.game.VIRTUAL_HEIGHT / 2f;
+
+        overlay = new LabScreenControlOverlay(game, this);
         territory_bar = new TerritoryBar(game);
 
-        setup();
+        buttons_box_w = this.game.VIRTUAL_WIDTH / 6.5f;
+        buttons_box_h = this.game.VIRTUAL_HEIGHT / 5f;
+        buttons_box_x = GameBoard.PLAYER_SUMMARY_X * 0.9f;
+        buttons_box_y = GameBoard.PLAYER_SUMMARY_Y - (buttons_box_h * 1.75f);
+
+        all_buttons = new LabSettingsButtons(game, this, overlay);
+        overlay.setup_buttons();
+
+        setup_buttons();
 
     }
 
-    public void setup(){
+    public void setup_sim(){
         GameConfig cfg = game.file_handler.read_cfg("kingdoms", "map");
         cfg.human_players = 0;
         cfg.bot_players = 3;
 
-        current_sim = new Simulation(this, cfg, 25);
+        current_sim = new Simulation(this, cfg, 1000);
         current_sim.run_simulation();
         visible_game = current_sim.current_game;
+    }
+
+    public void setup_buttons() {
+
+        button_names = new String[]{
+            "setup",
+            "run",
+            "save models"
+        };
+
+        float combined_button_height = all_buttons.base_button_height * button_names.length;
+        float spacing = (buttons_box_h - combined_button_height) / (button_names.length + 1);
+
+        for (int i=0; i<button_names.length; i++) {
+            all_buttons.side_button_coords.put(button_names[i],
+                new float[]{
+                    buttons_box_x,
+                    buttons_box_y + (spacing + all_buttons.base_button_height) * i,
+                    all_buttons.base_button_width,
+                    all_buttons.base_button_height
+                });
+        }
+    }
+
+    public void handle_button_click(String button_clicked) {
+
+        if (show_control_overlay) {
+            if (Objects.equals(button_clicked, "back")) {
+                show_control_overlay = false;
+
+            }
+        }
+        else {
+            if (Objects.equals(button_clicked, "setup")) {
+                show_control_overlay = true;
+            }
+        }
     }
 
 
@@ -56,9 +125,17 @@ public class LabScreen implements Screen {
      */
     @Override
     public void render(float delta) {
-        current_sim.render();
-        //control_bar.render();
-        territory_bar.render(current_sim.current_game);
+        ScreenUtils.clear(game.background_color);
+        if (current_sim != null) {
+            current_sim.render();
+            territory_bar.render(current_sim.current_game);
+        }
+
+        if (show_control_overlay) {
+            overlay.render();
+        }
+        all_buttons.render();
+
     }
 
     /**
@@ -101,4 +178,6 @@ public class LabScreen implements Screen {
     public void dispose() {
 
     }
+
+
 }

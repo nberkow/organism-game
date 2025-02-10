@@ -31,4 +31,8 @@ public interface Player {
     void dispose();
 
     Point get_tournament_id();
+
+    Point get_ally_id();
+
+    void set_ally_id(Point p);
 }

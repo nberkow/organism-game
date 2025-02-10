@@ -130,7 +130,6 @@ public class MapSettingSelectionBoxes {
 
     public void render() {
 
-        font.getData().setScale(1f);
         game.batch.begin();
         GlyphLayout layout;
         for (String k : ordered_keys){
@@ -138,14 +137,14 @@ public class MapSettingSelectionBoxes {
             float [] xy = label_coords.get(k).get(k);
             layout = layouts.get(k);
             font.draw(
-                game_board.batch, layout, xy[0], xy[1]
+                game_board.game.batch, layout, xy[0], xy[1]
             );
             for (String p : label_coords.get(k).keySet()){
                 layout = layouts.get(p);
                 if (!k.equals(p)) {
                     xy = label_coords.get(k).get(p);
                     font.draw(
-                        game_board.batch, layout, xy[0], xy[1]
+                        game_board.game.batch, layout, xy[0], xy[1]
                     );
                 }
             }

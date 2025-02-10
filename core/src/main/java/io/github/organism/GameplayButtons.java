@@ -55,7 +55,7 @@ public class GameplayButtons {
             StepButton b = new StepButton(
                 center_x + (i - 1) * radius * 2.7f * hud.parity,
                 center_y,
-                radius, game_board.game.colors[i], i, 1);
+                radius, game_board.game.action_colors[i], i, 1);
             buttons.add(b);
         }
     }
@@ -71,21 +71,21 @@ public class GameplayButtons {
     }
 
     public void render() {
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         for (StepButton b : buttons) {
-            game_board.shape_renderer.setColor(game_board.game.foreground_color);
-            game_board.shape_renderer.circle(b.x, b.y, b.radius * 1.2f);
+            game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
+            game_board.game.shape_renderer.circle(b.x, b.y, b.radius * 1.2f);
         }
 
-        game_board.shape_renderer.end();
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shape_renderer.end();
+        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (StepButton b : buttons) {
-            game_board.shape_renderer.setColor(b.c);
-            game_board.shape_renderer.circle(b.x, b.y, b.radius);
+            game_board.game.shape_renderer.setColor(b.c);
+            game_board.game.shape_renderer.circle(b.x, b.y, b.radius);
         }
 
-        game_board.shape_renderer.end();
+        game_board.game.shape_renderer.end();
 
     }
 }
