@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -9,15 +10,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class LabSettingsSliders {
+public class SliderGroup {
     OrganismGame game;
-    LabScreen lab_screen;
+    Screen screen;
     float bar_x;
     float bar_width;
     float bar_height;
     float slider_width;
     float slider_height;
     float bar_spacing;
+
     HashMap<String, float[]> slider_parameters;
     HashMap<String, float[]> slider_coords;
     HashMap<String, float[]> bar_coords;
@@ -25,92 +27,78 @@ public class LabSettingsSliders {
     HashMap<String, float[]> label_coords;
     HashMap<String, float[]> value_coords;
     ArrayList<String> slider_label_order;
-    HashMap<String, float[]> slider_values;
+    HashMap<String, float[]> slider_tick_values;
+    HashMap<String, Float> slider_selected_values;
 
-    HashMap<String, Float> slider_selected_vals;
+    float slider_box_w;
+    float slider_box_h;
+
+    float slider_box_x;
+    float slider_box_y;
 
     BitmapFont font;
-    LabScreenControlOverlay overlay;
-    public float game_speed;
 
-
-    public LabSettingsSliders(OrganismGame g, LabScreen lsc, LabScreenControlOverlay oly) {
+    public SliderGroup(OrganismGame g, Screen s, float x, float y, float w, float h) {
         game = g;
-        lab_screen = lsc;
-        overlay = oly;
-        font = game.fonts.get(16);
+        screen = s;
 
-        bar_width = overlay.slider_box_w * .8f;
+        slider_box_x = x;
+        slider_box_y = y;
+        slider_box_w = w;
+        slider_box_h = h;
+
+        bar_width = slider_box_w * .8f;
         bar_height = 4;
-        bar_x = overlay.slider_box_x + (overlay.slider_box_w - bar_width)/2;
+        bar_x = slider_box_x + (slider_box_w - bar_width)/2;
+
         slider_width = bar_width * .1f;
         slider_height = bar_height * 3;
 
-        slider_label_order = new ArrayList<>();
-        slider_label_order.add("resource value");
-        slider_label_order.add("attack enemy cost");
-        slider_label_order.add("attack ally cost");
-        slider_label_order.add("attack neutral cost");
-        slider_label_order.add("claim vertex cost");
-        slider_label_order.add("speed");
-        set_slider_defaults();
+        font = game.fonts.get(16);
 
-        bar_spacing = overlay.slider_box_h / (.7f + slider_parameters.size());
         bar_coords = new HashMap<>();
         label_coords = new HashMap<>();
         value_coords = new HashMap<>();
         slider_coords = new HashMap<>();
         bar_tick_coords = new HashMap<>();
-        slider_values = new HashMap<>();
-        slider_selected_vals = new HashMap<>();
-
-
-        load_initial_positions();
-    }
-
-    public void set_slider_defaults(){
+        slider_tick_values = new HashMap<>();
+        slider_selected_values = new HashMap<>();
         slider_parameters = new HashMap<>();
-        slider_parameters.put("resource value", new float[]{1, 6, 0.2f, SettingsManager.BASE_RESOURCE_VALUE});
-        slider_parameters.put("attack enemy cost", new float[]{0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ENEMY});
-        slider_parameters.put("attack ally cost", new float[]{0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY});
-        slider_parameters.put("attack neutral cost", new float[]{0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL});
-        slider_parameters.put("claim vertex cost", new float[]{0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX});
-        slider_parameters.put("speed", new float[]{1, 5, 1, 1f});
-        update_settings_from_sliders();
+        slider_label_order = new ArrayList<>();
     }
 
-    public void update_settings_from_sliders() {
-
-        lab_screen.settings_manager.base_resource_value = slider_parameters.get("resource value")[3];
-        lab_screen.settings_manager.remove_enemy_cost = slider_parameters.get("attack enemy cost")[3];
-        lab_screen.settings_manager.remove_ally_cost = slider_parameters.get("attack ally cost")[3];
-        lab_screen.settings_manager.remove_neutral_cost = slider_parameters.get("attack neutral cost")[3];
-        lab_screen.settings_manager.take_vertex_cost = slider_parameters.get("claim vertex cost")[3];
-        game_speed = slider_parameters.get("speed")[3];
-
+    public void add_slider(String label, float range_min, float range_max, float increment, float starting_val){
+        slider_label_order.add(label);
+        slider_parameters.put(label, new float[]{range_min, range_max, increment, starting_val});
+        slider_selected_values.put(label, starting_val);
     }
 
-    public void update_sliders_from_current_settings() {
+    public void reset_sliders() {
+        float slider_x;
+        for (String s : slider_label_order) {
+            float [] values = slider_parameters.get(s);
+            slider_x = (values[3] - values[0]) / (values[1] - values[0]) * bar_width;
 
-        slider_parameters.put("resource value", new float[]{1, 6, 0.2f, lab_screen.settings_manager.base_resource_value});
-        slider_parameters.put("attack enemy cost", new float[]{0, 24, .2f, lab_screen.settings_manager.remove_enemy_cost});
-        slider_parameters.put("attack ally cost", new float[]{0, 24, .2f, lab_screen.settings_manager.remove_ally_cost});
-        slider_parameters.put("attack neutral cost", new float[]{0, 24, .2f, lab_screen.settings_manager.remove_neutral_cost});
-        slider_parameters.put("claim vertex cost", new float[]{0, 24, .2f, lab_screen.settings_manager.take_vertex_cost});
-        slider_parameters.put("speed", new float[]{1, 5, 1, game_speed});
+            float[] coords = slider_coords.get(s);
+            float[] new_coords = new float [] {
+                bar_x + slider_x - slider_width/2,
+                coords[1],
+                slider_width,
+                slider_height
+            };
 
-        for (String s : slider_selected_vals.keySet()){
-            float manual_pos = slider_parameters.get(s)[3] + bar_x;
-            slider_selected_vals.put(s, manual_pos);
-            float [] s_coord = slider_coords.get(s);
-            s_coord[0] = manual_pos - slider_width/2;
-            slider_coords.put(s, s_coord);
+            slider_coords.put(s, new_coords);
+            slider_selected_values.put(s, values[3]);
         }
-
     }
 
-    private void load_initial_positions() {
-        float y = overlay.slider_box_y + overlay.slider_box_h - bar_spacing;
+    public void update_settings_from_sliders() {}
+    public void update_sliders_from_current_settings() {}
+
+    public void load_initial_positions() {
+
+        bar_spacing = slider_box_h / (.7f + slider_parameters.size());
+        float y = slider_box_y + slider_box_h - bar_spacing;
         float slider_x;
         int ticks;
         float tick_spacing;
@@ -126,10 +114,10 @@ public class LabSettingsSliders {
 
         for (String p : slider_label_order){
 
-            label_coord = new float[] {overlay.slider_box_x, y + slider_height * 2};
+            label_coord = new float[] {slider_box_x, y + slider_height * 2};
             label_coords.put(p, label_coord);
 
-            value_coord = new float[] {overlay.slider_box_x + overlay.slider_box_w, y + slider_height * 2};
+            value_coord = new float[] {slider_box_x + slider_box_w, y + slider_height * 2};
             value_coords.put(p, value_coord);
 
             // lower bound, upper bound, step size, current value
@@ -148,8 +136,8 @@ public class LabSettingsSliders {
                 tick_vals[i] = i * values[2] + values[0];
             }
             bar_tick_coords.put(p, bar_tick_coord);
-            slider_values.put(p, tick_vals);
-            slider_selected_vals.put(p, values[3]);
+            slider_tick_values.put(p, tick_vals);
+            slider_selected_values.put(p, values[3]);
 
             bar_coord = new float []{
                 bar_x,
@@ -200,7 +188,7 @@ public class LabSettingsSliders {
             if (x > coord[0] && x < coord[0] + coord[2] &&
                 y > coord[1] - slider_height && y < coord[1] + coord[3] + slider_height){
                 float[][] tick_coord = bar_tick_coords.get(n);
-                float [] values = slider_values.get(n);
+                float [] values = slider_tick_values.get(n);
 
                 for (int i=0; i<tick_coord.length; i++) {
                     float[] rect_coords = tick_coord[i];
@@ -214,7 +202,7 @@ public class LabSettingsSliders {
             }
 
             if (best_dist < Float.MAX_VALUE) {
-                slider_selected_vals.put(n, best_dist_val);
+                slider_selected_values.put(n, best_dist_val);
                 float [] s_coord = slider_coords.get(n);
                 s_coord[0] = best_dist_pos - slider_width/2;
                 slider_coords.put(n, s_coord);
@@ -273,7 +261,7 @@ public class LabSettingsSliders {
 
         for (String p : slider_label_order){
             float[] value_coord = value_coords.get(p);
-            float val = slider_selected_vals.get(p);
+            float val = slider_selected_values.get(p);
             GlyphLayout g = new GlyphLayout(font, String.format(Locale.US,"%.2f", val));
             font.draw(
                 game.batch,
@@ -284,5 +272,6 @@ public class LabSettingsSliders {
 
         game.batch.end();
     }
+
 
 }

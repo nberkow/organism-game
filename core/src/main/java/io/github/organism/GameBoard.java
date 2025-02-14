@@ -12,9 +12,11 @@ import java.util.Random;
 public class GameBoard implements Disposable {
 
 
+    public static final float DEFAULT_SPEED = 2f;
     // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.7f;
     public boolean show_data;
+    public float speed;
 
     float hex_side_len;
     float center_x;

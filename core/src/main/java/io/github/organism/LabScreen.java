@@ -31,6 +31,8 @@ public class LabScreen implements Screen {
 
     LabSettingsButtons all_buttons;
 
+    SettingsManager settings_manager;
+
     boolean show_control_overlay;
 
     String [] button_names;
@@ -38,6 +40,7 @@ public class LabScreen implements Screen {
 
         game = organism_game;
         show_control_overlay = false;
+        settings_manager = new SettingsManager(game, this);
 
         running_simulations = new ArrayList<>();
         game_configs = new ArrayList<>();
@@ -98,10 +101,16 @@ public class LabScreen implements Screen {
 
     public void handle_button_click(String button_clicked) {
 
+
         if (show_control_overlay) {
             if (Objects.equals(button_clicked, "back")) {
                 show_control_overlay = false;
-
+            }
+            if (Objects.equals(button_clicked, "reset")) {
+                overlay.sliders.reset_sliders();
+            }
+            if (Objects.equals(button_clicked, "save")) {
+                overlay.sliders.update_settings_from_sliders();
             }
         }
         else {

@@ -14,7 +14,7 @@ public class ExpandSortWrapper implements Comparable<ExpandSortWrapper> {
     Integer adjacent_hex_completeness;
     Double best_enemy_distance;
     Integer total_adjacent_hex_value;
-    Integer remove_player_cost;
+    Float remove_player_cost;
 
     public ExpandSortWrapper(MapVertex v, Player p){
         vertex = v;

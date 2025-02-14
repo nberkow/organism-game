@@ -27,13 +27,7 @@ public class DiplomacyGraph {
 
     boolean render_params_set;
 
-    final int VERTEX_COST_REMOVE_ENEMY = 6;
-    final int VERTEX_COST_REMOVE_NEUTRAL = 3;
-    final int VERTEX_COST_REMOVE_ALLY = 0;
-
     HashMap<Point, HashMap<Point, Relationship>> relationships;
-
-    HashMap<Point, HashMap<Point, Color>> turn_edge_colors;
 
     /* render params */
     float x_pos;
@@ -64,6 +58,7 @@ public class DiplomacyGraph {
 
         x_pos = game.VIRTUAL_WIDTH * 0.8f + (game.VIRTUAL_WIDTH / 12f);
         y_pos = game.VIRTUAL_HEIGHT * 0.85f;
+
     }
 
     public void update_diplomacy(HashMap<Point, Integer> all_player_moves) {
@@ -200,18 +195,18 @@ public class DiplomacyGraph {
         }
     }
 
-    public Integer get_remove_cost(Point player, Point target) {
+    public Float get_remove_cost(Point player, Point target) {
 
         if (Objects.equals(relationships.get(target).get(player), Relationship.ENEMY)){
-            return VERTEX_COST_REMOVE_ENEMY;
+            return game.lab_screen.settings_manager.remove_enemy_cost;
         }
 
         if (Objects.equals(relationships.get(target).get(player), Relationship.NEUTRAL)){
-            return VERTEX_COST_REMOVE_NEUTRAL;
+            return game.lab_screen.settings_manager.remove_neutral_cost;
         }
 
         if (Objects.equals(relationships.get(target).get(player), Relationship.ALLY)){
-            return VERTEX_COST_REMOVE_ALLY;
+            return game.lab_screen.settings_manager.remove_ally_cost;
         }
 
         return null;

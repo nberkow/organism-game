@@ -160,8 +160,7 @@ public class GameOrchestrator {
                         target = right_player;
                     }
 
-                    int remove_cost = game_board.diplomacy_graph.get_remove_cost(player.get_tournament_id(), target.get_tournament_id());
-                    player.get_organism().expand(target, remove_cost);
+                    player.get_organism().expand(target);
                 } else {
                     player.get_organism().extract();
                 }

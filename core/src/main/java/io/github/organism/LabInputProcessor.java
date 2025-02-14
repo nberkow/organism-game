@@ -3,8 +3,6 @@ package io.github.organism;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
 public class LabInputProcessor implements InputProcessor {
@@ -67,7 +65,6 @@ public class LabInputProcessor implements InputProcessor {
         button_clicked = lab_screen.all_buttons.poll_buttons(touchPos.x, touchPos.y);
 
         return false;
-
     }
 
     /**
@@ -97,7 +94,7 @@ public class LabInputProcessor implements InputProcessor {
 
         float[][] tick_coords = lab_screen.overlay.sliders.bar_tick_coords.get(dragging_slider);
         float [] slider_coords = lab_screen.overlay.sliders.slider_coords.get(dragging_slider);
-        float [] slider_vals = lab_screen.overlay.sliders.slider_values.get(dragging_slider);
+        float [] slider_vals = lab_screen.overlay.sliders.slider_tick_values.get(dragging_slider);
 
         float min_dist = lab_screen.overlay.sliders.bar_width;
         float min_dist_x = 0;
@@ -113,7 +110,7 @@ public class LabInputProcessor implements InputProcessor {
             }
             t++;
         }
-        lab_screen.overlay.sliders.slider_selected_vals.put(dragging_slider, slider_val);
+        lab_screen.overlay.sliders.slider_selected_values.put(dragging_slider, slider_val);
         slider_coords[0] = min_dist_x;
 
         dragging_slider = null;

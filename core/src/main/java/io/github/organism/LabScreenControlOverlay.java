@@ -21,7 +21,7 @@ public class LabScreenControlOverlay {
     OrganismGame game;
     LabScreen lab_screen;
     BitmapFont font;
-    LabSettingsSliders sliders;
+    SliderGroup sliders;
 
     String [] button_names;
 
@@ -29,6 +29,13 @@ public class LabScreenControlOverlay {
         game = g;
         lab_screen = lsc;
         font = game.fonts.get(16);
+        setup_sliders();
+
+
+
+    }
+
+    public void setup_sliders() {
 
         slider_box_w = lab_screen.overlay_w * .75f;
         slider_box_h = lab_screen.overlay_h * .55f;
@@ -36,20 +43,28 @@ public class LabScreenControlOverlay {
         slider_box_x = (game.VIRTUAL_WIDTH - slider_box_w) / 2f;
         slider_box_y = (game.VIRTUAL_HEIGHT - slider_box_h) / 2f + game.VIRTUAL_HEIGHT / 8f;
 
-        sliders = new LabSettingsSliders(game, lab_screen, this);
+        sliders = new SliderGroup(game, lab_screen, slider_box_x, slider_box_y, slider_box_w, slider_box_h);
+
+        sliders.add_slider("resource value", 1, 6, 0.2f, SettingsManager.BASE_RESOURCE_VALUE);
+        sliders.add_slider("attack enemy cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ENEMY);
+        sliders.add_slider("attack ally cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY);
+        sliders.add_slider("attack neutral cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL);
+        sliders.add_slider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
+        sliders.add_slider("speed", 1, 5, 1, 1f);
+        sliders.load_initial_positions();
+    }
+
+    public void setup_buttons() {
 
         buttons_box_w = slider_box_w;
         buttons_box_h = lab_screen.overlay_h * .20f;
 
         buttons_box_x = slider_box_x;
         buttons_box_y = (game.VIRTUAL_HEIGHT - slider_box_h) / 2f - game.VIRTUAL_HEIGHT / 10f;
-    }
-
-    public void setup_buttons() {
 
         button_names = new String[]{
             "back",
-            "load",
+            "reset",
             "save"
         };
 
