@@ -5,89 +5,64 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
-public class LabSettingsButtons {
+public class LabScreenButtons {
 
-    LabScreenControlOverlay overlay;
+    SettingsOverlay overlay;
     LabScreen lab_screen;
     OrganismGame game;
 
     BitmapFont font;
-
-    HashMap<String, float []> overlay_button_coords;
     HashMap<String, float []> side_button_coords;
 
     float base_button_height;
     float base_button_width;
 
-    public LabSettingsButtons(OrganismGame g, LabScreen lsc, LabScreenControlOverlay oly){
+    public LabScreenButtons(OrganismGame g, LabScreen lsc){
         game = g;
         lab_screen = lsc;
-        overlay = oly;
         font = game.fonts.get(16);
 
         base_button_width = game.VIRTUAL_WIDTH / 10f;
         base_button_height = game.VIRTUAL_HEIGHT / 20f;
 
         side_button_coords = new HashMap<>();
-        overlay_button_coords = new HashMap<>();
     }
 
     public void render() {
+
+        if (game.shape_renderer == null){
+            return;
+        }
 
         game.shape_renderer.setColor(Color.CYAN);
         for (String b : side_button_coords.keySet()) {
             draw_button(b, side_button_coords.get(b));
         }
 
-        /* debug rect
-        game.shape_renderer.setColor(Color.CYAN);
-        game.shape_renderer.rect(
-            lab_screen.buttons_box_x, lab_screen.buttons_box_y, lab_screen.buttons_box_w, lab_screen.buttons_box_w
-        );*/
-
-        if (lab_screen.show_control_overlay) {
-            for (String b : overlay_button_coords.keySet()) {
-                draw_button(b, overlay_button_coords.get(b));
-            }
-
-            /* debug rect
-            game.shape_renderer.rect(
-                overlay.buttons_box_x, overlay.buttons_box_y, overlay.buttons_box_w, overlay.buttons_box_h
-            );*/
-
-        }
     }
 
     public String poll_buttons(float x, float y) {
-        if (lab_screen.show_control_overlay) {
-            for (String b : lab_screen.all_buttons.overlay_button_coords.keySet()) {
-                float [] coords = lab_screen.all_buttons.overlay_button_coords.get(b);
-                if (x >= coords[0] & x <= (coords[0] + coords[2])){
-                    if (y >= coords[1] & y <= (coords[1] + coords[3])){
-                        return(b);
-                    }
+
+        for (String b : lab_screen.buttons.side_button_coords.keySet()) {
+            float[] coords = lab_screen.buttons.side_button_coords.get(b);
+            if (x >= coords[0] & x <= (coords[0] + coords[2])) {
+                if (y >= coords[1] & y <= (coords[1] + coords[3])) {
+                    return(b);
                 }
             }
         }
 
-        else {
-            for (String b : lab_screen.all_buttons.side_button_coords.keySet()) {
-                float[] coords = lab_screen.all_buttons.side_button_coords.get(b);
-                if (x >= coords[0] & x <= (coords[0] + coords[2])) {
-                    if (y >= coords[1] & y <= (coords[1] + coords[3])) {
-                        return(b);
-                    }
-                }
-            }
-        }
         return null;
     }
 
 
     private void draw_button(String b, float[] button_coords) {
+
+        if (game.batch == null){
+            return;
+        }
 
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         game.shape_renderer.rect(

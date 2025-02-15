@@ -35,7 +35,7 @@ public class MapSettingsScreen implements Screen {
         controls_w = this.game.VIRTUAL_WIDTH / 2.5f;
         buttons_y = this.game.VIRTUAL_HEIGHT * .05f;
 
-        game_board = new GameBoard(game, cfg);
+        game_board = new GameBoard(game, cfg, this);
         game_board.radius = DEFAULT_SIZE;
         game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
         game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
@@ -85,7 +85,7 @@ public class MapSettingsScreen implements Screen {
         create_config();
         cfg.radius = (int) Math.floor(sliders.slider_selected_vals.get("radius"));
 
-        game_board = new GameBoard(game, cfg);
+        game_board = new GameBoard(game, cfg, this);
         game_board.void_distributor.distribute();
         game_board.resource_distributor.distribute();
 
@@ -118,7 +118,7 @@ public class MapSettingsScreen implements Screen {
 
 
     public void set_new_game_board(GameConfig config) {
-        game_board = new GameBoard(this.game, config);
+        game_board = new GameBoard(this.game, config, this);
         game_board.void_distributor.distribute();
         game_board.resource_distributor.distribute();
 

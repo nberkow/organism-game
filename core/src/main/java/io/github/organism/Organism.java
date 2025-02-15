@@ -51,6 +51,7 @@ public class Organism {
 
     public void update_income(){
         income = 1;
+        float base_resource_val = game_board.config.gameplay_settings.get("resource value");
 
         for (int r=0; r<3; r++){
             int resource_count = resources[r];
@@ -59,7 +60,13 @@ public class Organism {
                 int ally_resource_count = game_board.players.get(ally_id).get_organism().resources[r];
                 resource_count += ally_resource_count;
             }
-            income *= Math.min(Math.max(resource_count, 1f), 6f) * game_board.game.lab_screen.settings_manager.base_resource_value;
+
+            if (resource_count > 0) {
+                income *= Math.min(resource_count, 6f) * base_resource_val;
+            }
+        }
+        if (income < base_resource_val * 3 / 2) {
+            income = base_resource_val * 3 / 2;
         }
     }
 
@@ -134,7 +141,7 @@ public class Organism {
 
         for (ExpandSortWrapper w : vertex_priority) {
 
-            float cost = w.remove_player_cost + game_board.game.lab_screen.settings_manager.take_vertex_cost;
+            float cost = w.remove_player_cost + game_board.config.gameplay_settings.get("claim vertex cost");
             if (cost <= budget) {
                 claim_vertex(w.vertex);
                 budget -= cost;
@@ -158,8 +165,6 @@ public class Organism {
             }
         }
     }
-
-
 
     public void compute_adjacent_hex_value(ExpandSortWrapper w) {
         w.total_adjacent_hex_value = 0;

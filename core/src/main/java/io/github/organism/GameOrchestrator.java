@@ -12,7 +12,8 @@ public class GameOrchestrator {
 
     int turn = 0;
     GameBoard game_board;
-    double action_time = 1d;
+    double base_action_time = 1d;
+    double action_time = base_action_time;
     double queue_time = action_time / 10;
 
     double hmm_transition_time = action_time / 50;
@@ -37,6 +38,12 @@ public class GameOrchestrator {
         for (Point p : game_board.players.keySet()) {
             player_territory.put(p, (float) game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices());
         }
+    }
+
+    public void update_speed(float speed){
+        action_time = base_action_time / speed;
+        queue_time = action_time / 10;
+        hmm_transition_time = action_time / 50;
     }
 
     public void update_timers_and_flags() {

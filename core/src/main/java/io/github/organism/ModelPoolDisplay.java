@@ -41,6 +41,10 @@ public class ModelPoolDisplay {
 
     public void render() {
 
+        if (game.shape_renderer == null) {
+            return;
+        }
+
         float max_wins = 0;
         int max_count = 0;
         HashMap<Integer, Integer> wins_hist = new HashMap<>();

@@ -18,6 +18,7 @@ public class DiplomacyGraph {
     OrganismGame game;
     GameBoard current_game;
 
+    SettingsManager settings_manager;
     HashSet<Player> players_counted;
 
 
@@ -36,8 +37,6 @@ public class DiplomacyGraph {
     float player_radius;
     float span = 120; // Angular span in degrees
     int segments = 30;
-
-
 
     float[][] player_outer_arc_vertices;
     double [] player_start_degrees;
@@ -82,11 +81,16 @@ public class DiplomacyGraph {
         // - if one player extracts, previous relationships are kept (overwritten if attacked)
         // - if two players extract they form an alliance
         // - if three players extract, previous relationships are kept (overwritten if attacked)
+        // - if any players have empty queues don't update
 
         ArrayList<Point> extracting_players = new ArrayList<>();
         ArrayList<Point> expanding_players = new ArrayList<>();
 
         for (Point m : all_player_moves.keySet()) {
+            if (all_player_moves.get(m) == null){
+                return;
+            }
+
             if (all_player_moves.get(m) == 1) {
                 extracting_players.add(m);
             }
@@ -116,6 +120,14 @@ public class DiplomacyGraph {
 
         // if a player attacks another player they become enemies.
         // if they were allies, alliance is canceled
+
+        for (Integer m : all_player_moves.values()){
+            if (m == null) {
+                return;
+            }
+        }
+
+
         for (int i=0; i<3; i++) {
 
             Point p = current_game.all_player_ids.get(i);
@@ -198,15 +210,15 @@ public class DiplomacyGraph {
     public Float get_remove_cost(Point player, Point target) {
 
         if (Objects.equals(relationships.get(target).get(player), Relationship.ENEMY)){
-            return game.lab_screen.settings_manager.remove_enemy_cost;
+            return current_game.config.gameplay_settings.get("attack enemy cost");
         }
 
         if (Objects.equals(relationships.get(target).get(player), Relationship.NEUTRAL)){
-            return game.lab_screen.settings_manager.remove_neutral_cost;
+            return current_game.config.gameplay_settings.get("attack neutral cost");
         }
 
         if (Objects.equals(relationships.get(target).get(player), Relationship.ALLY)){
-            return game.lab_screen.settings_manager.remove_ally_cost;
+            return current_game.config.gameplay_settings.get("attack ally cost");
         }
 
         return null;
@@ -231,6 +243,9 @@ public class DiplomacyGraph {
 
     public void render(){
 
+        if (game.shape_renderer == null) {
+            return;
+        }
 
         if (!render_params_set) {
             calculate_render_params();

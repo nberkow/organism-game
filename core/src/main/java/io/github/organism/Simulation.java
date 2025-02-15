@@ -15,6 +15,8 @@ public class Simulation {
     GameOrchestrator current_game_orchestrator;
     ModelPoolDisplay model_pool_display;
     RoundSummary round_summary;
+
+    SettingsManager setting_manager;
     float map_center_x;
     float map_center_y;
     GameConfig cfg;
@@ -28,7 +30,7 @@ public class Simulation {
     boolean next_round_begin;
     boolean write_files;
 
-    float between_round_pause = 0f;
+    float between_round_pause = 2f;
     float between_round_pause_timer;
 
     HashMap<Point, String> player_names;
@@ -99,7 +101,6 @@ public class Simulation {
         current_champions = new HashMap<>();
 
         model_pool_display = new ModelPoolDisplay(lab_screen.game, this);
-
         round_summary = new RoundSummary(lab_screen.game, this);
         available_colors = new ArrayList<>();
         available_colors.addAll(Arrays.asList(lab_screen.game.player_colors));
@@ -121,7 +122,7 @@ public class Simulation {
             available_colors.addAll(Arrays.asList(lab_screen.game.player_colors));
         }
 
-        current_game = new GameBoard(lab_screen.game, cfg);
+        current_game = new GameBoard(lab_screen.game, cfg, lab_screen);
         current_game.void_distributor.distribute();
         current_game.resource_distributor.distribute();
 
@@ -167,6 +168,7 @@ public class Simulation {
         create_players_from_model_pool();
         create_player_starts();
         current_game.create_player_summary_displays();
+        current_game_orchestrator.update_speed(cfg.gameplay_settings.get("speed"));
         current_game_orchestrator.run();
     }
 
@@ -194,6 +196,7 @@ public class Simulation {
         create_players_from_model_pool();
         create_player_starts();
         current_game.create_player_summary_displays();
+        current_game_orchestrator.update_speed(cfg.gameplay_settings.get("speed"));
         current_game_orchestrator.run();
     }
 

@@ -15,6 +15,10 @@ public class GridWindow {
 
     public void render(){
 
+        if (game_board.game.shape_renderer == null) {
+            return;
+        }
+
         game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (GridPosition pos : game_board.universe_map.hex_grid) {

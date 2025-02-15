@@ -40,6 +40,10 @@ public class TerritoryBar {
 
     public void draw(GameBoard gb) {
 
+        if (game.shape_renderer == null){
+            return;
+        }
+
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
         game.shape_renderer.setColor(Color.GREEN);
         float t_width = bar_width * 3 + bar_spacing * 5;

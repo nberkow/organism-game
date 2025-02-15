@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 public class SliderGroup {
     OrganismGame game;
@@ -92,9 +93,6 @@ public class SliderGroup {
         }
     }
 
-    public void update_settings_from_sliders() {}
-    public void update_sliders_from_current_settings() {}
-
     public void load_initial_positions() {
 
         bar_spacing = slider_box_h / (.7f + slider_parameters.size());
@@ -138,6 +136,7 @@ public class SliderGroup {
             bar_tick_coords.put(p, bar_tick_coord);
             slider_tick_values.put(p, tick_vals);
             slider_selected_values.put(p, values[3]);
+
 
             bar_coord = new float []{
                 bar_x,
@@ -262,6 +261,12 @@ public class SliderGroup {
         for (String p : slider_label_order){
             float[] value_coord = value_coords.get(p);
             float val = slider_selected_values.get(p);
+            if (Objects.equals(p, "iterations")) {
+                val = (float) Math.pow(10, val);
+            }
+            if (Objects.equals(p, "speed")) {
+                val = (float) Math.pow(2, val);
+            }
             GlyphLayout g = new GlyphLayout(font, String.format(Locale.US,"%.2f", val));
             font.draw(
                 game.batch,

@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Disposable;
@@ -16,7 +17,6 @@ public class GameBoard implements Disposable {
     // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.7f;
     public boolean show_data;
-    public float speed;
 
     float hex_side_len;
     float center_x;
@@ -27,6 +27,10 @@ public class GameBoard implements Disposable {
     static final float PLAYER_SUMMARY_Y = 400;
     final float PLAYER_SUMMARY_HEIGHT = 40;
     public long seed;
+
+    public Screen screen;
+
+    SettingsManager settings_manager;
 
     GameOrchestrator orchestrator;
 
@@ -56,9 +60,17 @@ public class GameBoard implements Disposable {
 
     MoveLogger move_logger;
 
-    public GameBoard(OrganismGame game, GameConfig cfg) {
-        this.game = game;
-        this.config = cfg;
+    public GameBoard(OrganismGame g, GameConfig cfg, Screen scr) {
+        game = g;
+        config = cfg;
+        screen = scr;
+
+        if (screen instanceof LabScreen){
+            settings_manager = ((LabScreen) screen).settings_manager;
+        }
+        if (screen instanceof GameScreen){
+            settings_manager = ((GameScreen) screen).settings_manager;
+        }
 
         seed = config.seed;
         radius = config.radius;
@@ -75,6 +87,7 @@ public class GameBoard implements Disposable {
 
         // Initialize other game objects here
         universe_map = new UniverseMap(this, radius);
+
         diplomacy_graph = new DiplomacyGraph(this.game, this);
 
         player_start_assigner = new PlayerStartAssigner(this);
@@ -203,12 +216,10 @@ public class GameBoard implements Disposable {
         human_player_ids.clear();
         bot_player_ids.clear();
         all_player_ids.clear();
-        game.shape_renderer = null;
         player_start_assigner = null;
         resource_distributor = null;
         void_distributor = null;
         player1_hud = null;
         player2_hud = null;
-        game.batch = null;
     }
 }

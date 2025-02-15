@@ -28,10 +28,6 @@ public class OrganismGame extends Game {
     GameBoard game_board;
     OrthographicCamera camera;
     FitViewport viewport;
-    MapSettingsInputProcessor map_input_processor;
-    LabInputProcessor lab_input_processor;
-    GameInputProcessor input_processor;
-
     Random rng;
 
     // Game colors
@@ -95,17 +91,19 @@ public class OrganismGame extends Game {
         }
 
         menu_screen = new MenuScreen(this);
+
+
         game_screen = new GameScreen(this);
-        lab_screen = new LabScreen(this);
+        game_screen.input_processor = new GameInputProcessor(game_screen);
+        game_screen.overlay.input_processor = new SettingsOverlayInputProcessor(game_screen.overlay);
+
         map_edit_screen = new MapSettingsScreen(this);
+        map_edit_screen.input_processor = new MapSettingsInputProcessor(map_edit_screen);
 
-        input_processor = new GameInputProcessor(game_screen);
-        game_screen.input_processor = input_processor;
-        map_input_processor = new MapSettingsInputProcessor(map_edit_screen);
-        map_edit_screen.input_processor = map_input_processor;
+        lab_screen = new LabScreen(this);
+        lab_screen.input_processor = new LabScreenInputProcessor(lab_screen);
+        lab_screen.overlay.input_processor = new SettingsOverlayInputProcessor(lab_screen.overlay);
 
-
-        lab_input_processor = new LabInputProcessor(lab_screen);
 
         //Gdx.input.setInputProcessor(map_input_processor);
         //this.setScreen(map_edit_screen);
@@ -113,7 +111,7 @@ public class OrganismGame extends Game {
         //Gdx.input.setInputProcessor(input_processor);
         //this.setScreen(game_screen);
 
-        Gdx.input.setInputProcessor(lab_input_processor);
+        Gdx.input.setInputProcessor(lab_screen.input_processor);
         this.setScreen(lab_screen);
 
     }

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 public class GameScreen implements Screen {
 
+    public SettingsManager settings_manager;
+    public SettingsOverlay overlay;
     OrganismGame game;
     GameBoard game_board;
     GameInputProcessor input_processor;
@@ -16,7 +18,7 @@ public class GameScreen implements Screen {
     public GameScreen(OrganismGame g){
         game = g;
         cfg = new GameConfig();
-        game_board = new GameBoard(game, cfg);
+        game_board = new GameBoard(game, cfg, this);
         game_board.void_distributor.distribute();
         game_board.resource_distributor.distribute();
 
@@ -26,6 +28,19 @@ public class GameScreen implements Screen {
             game_board.player_start_assigner.assign_starting_hexes(starting_coords);
         }
         orchestrator = new GameOrchestrator(game_board);
+
+        setup_overlay();
+
+    }
+
+    private void setup_overlay(){
+
+        float overlay_w = this.game.VIRTUAL_WIDTH / 1.8f;
+        float overlay_x = (this.game.VIRTUAL_WIDTH - overlay_w) / 2;
+        float overlay_h = this.game.VIRTUAL_HEIGHT * 0.9f;
+        float overlay_y = (this.game.VIRTUAL_HEIGHT - overlay_h) / 2f;
+
+        overlay = new SettingsOverlay(game, this, overlay_x, overlay_y, overlay_w, overlay_h);
     }
 
     private void input() {

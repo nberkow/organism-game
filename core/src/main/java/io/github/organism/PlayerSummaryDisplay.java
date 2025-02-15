@@ -46,6 +46,10 @@ public class PlayerSummaryDisplay {
 
     public void draw_name(){
 
+        if (game_board.game.batch == null) {
+            return;
+        }
+
         font.setColor(player.get_color());
 
         game_board.game.batch.begin();
@@ -54,6 +58,10 @@ public class PlayerSummaryDisplay {
         font.setColor(game_board.game.foreground_color);
     }
     public void draw_energy_bar(){
+        if (game_board.game.shape_renderer == null) {
+            return;
+        }
+
         game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
         game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
         game_board.game.shape_renderer.rect(
@@ -74,6 +82,10 @@ public class PlayerSummaryDisplay {
     }
 
     public void draw_action_queue(){
+
+        if (game_board.game.shape_renderer == null){
+            return;
+        }
 
         Color color;
         for (int i=0; i<player.get_move_queue().size(); i++){

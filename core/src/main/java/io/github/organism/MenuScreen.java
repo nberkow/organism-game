@@ -19,7 +19,7 @@ public class MenuScreen implements Screen {
         cfg.bot_players = 6;
         cfg.map_view_size_param = 350;
 
-        menu_game_board = new GameBoard(game, cfg);
+        menu_game_board = new GameBoard(game, cfg, this);
         menu_game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
         menu_game_board.show_data = false;
 
