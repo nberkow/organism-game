@@ -12,7 +12,10 @@ public class PlayerHud {
     final float BUTTONS_Y  = 25;
     final float ENERGYBAR_Y  = y + HUD_HEIGHT * .4f;
     Player player;
-    GameBoard game_board;
+
+    OrganismGame game;
+
+    GameScreen game_screen;
     GameplayButtons game_buttons;
     EnergyBar energy_bar;
 
@@ -22,26 +25,30 @@ public class PlayerHud {
     float side;
     int parity;
 
-    public PlayerHud(GameBoard gb, Player p, boolean player2){
-        game_board = gb;
+    public PlayerHud(OrganismGame g, GameScreen scr, Player p, boolean player2){
+
+        game = g;
+        game_screen = scr;
+        player = p;
 
         parity = 1;
         side = 0;
 
         if (player2) {
             parity = -1;
-            side = game_board.game.VIRTUAL_WIDTH - HUD_WIDTH;
+            side = game.VIRTUAL_WIDTH - HUD_WIDTH;
         }
 
         x = side + SIDE_BUFFER * parity;
         y = HUD_Y + SIDE_BUFFER;
-        player = p;
 
-        game_buttons = new GameplayButtons(game_board, this);
-        energy_bar = new EnergyBar(game_board, this,player, HUD_WIDTH * 1.1f, HUD_HEIGHT / 10);
-        action_queue_bar = new ActionQueueBar(game_board, this, player);
-        resource_bars = new ResourceBars(game_board, this, player);
+        game_buttons = new GameplayButtons(game, this);
+        energy_bar = new EnergyBar(game, this, player, HUD_WIDTH * 1.1f, HUD_HEIGHT / 10);
+        action_queue_bar = new ActionQueueBar(game, this);
+        resource_bars = new ResourceBars(game, this, player);
     }
+
+
 
     public void render(){
 

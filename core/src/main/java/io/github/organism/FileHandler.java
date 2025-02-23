@@ -2,6 +2,10 @@ package io.github.organism;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.UUID;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -63,69 +67,104 @@ public class FileHandler {
         return cfg;
     }
 
-    public void save_model(HMM model, String prefix){
+    public void save_model(HMM model, String name){
         String dir = "model_configs";
-        FileHandle handle = Gdx.files.local( dir + "/" + prefix + ".hmm");
+        UUID uuid = UUID.randomUUID();
+        String uuid_string = uuid.toString();
+
+
+        FileHandle handle = Gdx.files.local( dir + "/" + uuid_string + ".hmm");
         int states = model.transition_weights.length;
         int inputs = model.transition_weights[0][0].length;
+        int mask = model.transition_bit_mask;
 
+        handle.writeString(name + "\n", true);
         handle.writeString(states + "\n", true);
         handle.writeString(inputs + "\n", true);
+        handle.writeString(mask + "\n", true);
 
+        ArrayList<String> content = get_strings(model);
+
+        String all_lines = String.join("\n", content);
+        handle.writeString(all_lines, true);
+        System.out.println("saved: " + dir + "/" + uuid_string + ".hmm");
+    }
+
+    private static ArrayList<String> get_strings(HMM model) {
         ArrayList<String> content = new ArrayList<>();
 
-        for (int i=0; i<model.emission_weights.length; i++){
-            for (int j=0; j<model.emission_weights[i].length; j++){
-                for (int k = 0; k <model.emission_weights[i][j].length; k++){
+        for (int i = 0; i< model.emission_weights.length; i++){
+            for (int j = 0; j< model.emission_weights[i].length; j++){
+                for (int k = 0; k < model.emission_weights[i][j].length; k++){
                     content.add(i + "\t" + j + "\t" + k + "\t" + model.emission_weights[i][j][k]);
                 }
             }
         }
 
-        for (int i=0; i<model.transition_weights.length; i++){
-            for (int j=0; j<model.transition_weights[i].length; j++){
-                for (int k = 0; k <model.transition_weights[i][j].length; k++){
+        for (int i = 0; i< model.transition_weights.length; i++){
+            for (int j = 0; j< model.transition_weights[i].length; j++){
+                for (int k = 0; k < model.transition_weights[i][j].length; k++){
                     content.add(i + "\t" + j + "\t" + k + "\t" + model.transition_weights[i][j][k]);
                 }
             }
         }
-
-        String all_lines = String.join("\n", content);
-        handle.writeString(all_lines, true);
-        System.out.println("saved: " + dir + "/" + prefix + ".hmm");
+        return content;
     }
 
-    /*
-    public HMM load_model(GameBoard game_board, String prefix){
+    public ArrayList<HMM> load_models() {
+        String dir_name = "model_configs";
+        File directory = new File(dir_name);
+        String[] file_names = directory.list();
+
+        ArrayList<HMM> models = new ArrayList<>();
+        if (file_names != null){
+            for (String f : file_names){
+                models.add(load_model(f));
+            }
+        }
+
+        return(models);
+    }
+
+
+    public HMM load_model(String file_name){
 
         String dir = "model_configs";
-        FileHandle handle = Gdx.files.local( dir + "/" + prefix + ".hmm");
+        FileHandle handle = Gdx.files.local( dir + "/" + file_name);
         String [] content = handle.readString().split("\n");
 
-        int states = Integer.parseInt(content[0]);
-        int inputs = Integer.parseInt(content[1]);
+        String name = content[0].trim();
+        int states = Integer.parseInt(content[1]);
+        int inputs = Integer.parseInt(content[2]);
+        int mask = Integer.parseInt(content[3]);
 
-        int index = 2;
-        HMM model = new HMM(game_board, states, 0, inputs);
+        int index = 4;
+        HMM model = new HMM(game, states, inputs);
+        model.name = name;
+        model.transition_bit_mask = mask;
 
+        model.emission_weights = new double[states][4][inputs];
         for (int i=0; i<states * 4 * inputs; i++){
-            String [] elements = content[i+index].split("\t");
+            String [] elements = content[index].split("\t");
             int a = Integer.parseInt(elements[0]);
             int b = Integer.parseInt(elements[1]);
             int c = Integer.parseInt(elements[2]);
             double w = Double.parseDouble(elements[3]);
             model.emission_weights[a][b][c] = w;
+            index ++;
         }
 
+        model.transition_weights = new double[states][states][inputs];
         for (int i=0; i<states * states * inputs; i++){
-            String [] elements = content[i+index].split("\t");
+            String [] elements = content[index].split("\t");
             int a = Integer.parseInt(elements[0]);
             int b = Integer.parseInt(elements[1]);
             int c = Integer.parseInt(elements[2]);
             double w = Double.parseDouble(elements[3]);
             model.transition_weights[a][b][c] = w;
+            index ++;
         }
 
         return model;
-    }*/
+    }
 }

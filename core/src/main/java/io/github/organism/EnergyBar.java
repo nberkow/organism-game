@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -13,7 +12,7 @@ public class EnergyBar {
     final float TICK_SPACING = 1f;
     final float GAP_WIDTH = 2f;
 
-    GameBoard game_board;
+    OrganismGame game;
     Player player;
 
     PlayerHud hud;
@@ -29,8 +28,8 @@ public class EnergyBar {
     float small_bar_width;
     float small_bar_height;
     BitmapFont font;
-    public EnergyBar(GameBoard gb, PlayerHud ph, Player p, float width, float height){
-        game_board = gb;
+    public EnergyBar(OrganismGame g, PlayerHud ph, Player p, float width, float height){
+        game = g;
         player = p;
         hud = ph;
         y_height =  height;
@@ -47,22 +46,22 @@ public class EnergyBar {
         small_bar_width = (width - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2) + TICK_SPACING) / MAX_ENERGY - TICK_SPACING;
         small_bar_height = height - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2);
 
-        font = game_board.game.fonts.get(32);
+        font = game.fonts.get(32);
 
     }
 
 
     public void render(){
 
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
-        game_board.game.shape_renderer.rect(
+        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shape_renderer.setColor(game.foreground_color);
+        game.shape_renderer.rect(
             x,
             y,
             x_width,
             y_height);
-        game_board.game.shape_renderer.setColor(game_board.game.background_color);
-        game_board.game.shape_renderer.rect(
+        game.shape_renderer.setColor(game.background_color);
+        game.shape_renderer.rect(
             x + GAP_WIDTH,
             y + GAP_WIDTH,
             x_width - (GAP_WIDTH * 2),
@@ -74,15 +73,15 @@ public class EnergyBar {
             first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
         }
 
-        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
+        game.shape_renderer.setColor(game.foreground_color);
         for (int i=0; i<player.get_organism().energy; i++) {
-            game_board.game.shape_renderer.rect(
+            game.shape_renderer.rect(
                 first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),
                 y + GAP_WIDTH * 2,
                 small_bar_width,
                 y_height - (GAP_WIDTH * 4));
         }
 
-        game_board.game.shape_renderer.end();
+        game.shape_renderer.end();
     }
 }

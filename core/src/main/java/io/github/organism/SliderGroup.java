@@ -272,7 +272,8 @@ public class SliderGroup {
                 game.batch,
                 g,
                 value_coord[0] - g.width,
-                value_coord[1]);
+                value_coord[1]
+            );
         }
 
         game.batch.end();

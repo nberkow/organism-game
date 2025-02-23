@@ -12,7 +12,7 @@ public class GameplayButtons {
     A temp class for input handling.
      */
 
-    public class StepButton {
+    public static class StepButton {
         float x;
         float y;
         float radius;
@@ -31,16 +31,16 @@ public class GameplayButtons {
         }
     }
 
-    GameBoard game_board;
     PlayerHud hud;
     ArrayList<StepButton> buttons;
     float center_x;
     float center_y;
 
+    OrganismGame game;
     float radius = 13f;
-    public GameplayButtons(GameBoard gb, PlayerHud ph) {
+    public GameplayButtons(OrganismGame g, PlayerHud ph) {
 
-        game_board = gb;
+        game = g;
         hud = ph;
         buttons = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class GameplayButtons {
             StepButton b = new StepButton(
                 center_x + (i - 1) * radius * 2.7f * hud.parity,
                 center_y,
-                radius, game_board.game.action_colors[i], i, 1);
+                radius, game.action_colors[i], i, 1);
             buttons.add(b);
         }
     }
@@ -71,21 +71,21 @@ public class GameplayButtons {
     }
 
     public void render() {
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
         for (StepButton b : buttons) {
-            game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
-            game_board.game.shape_renderer.circle(b.x, b.y, b.radius * 1.2f);
+            game.shape_renderer.setColor(game.foreground_color);
+            game.shape_renderer.circle(b.x, b.y, b.radius * 1.2f);
         }
 
-        game_board.game.shape_renderer.end();
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shape_renderer.end();
+        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (StepButton b : buttons) {
-            game_board.game.shape_renderer.setColor(b.c);
-            game_board.game.shape_renderer.circle(b.x, b.y, b.radius);
+            game.shape_renderer.setColor(b.c);
+            game.shape_renderer.circle(b.x, b.y, b.radius);
         }
 
-        game_board.game.shape_renderer.end();
+        game.shape_renderer.end();
 
     }
 }

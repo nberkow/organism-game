@@ -8,22 +8,26 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class LabScreen implements Screen {
-
-    ArrayList<Simulation> running_simulations;
-    ArrayList<GameConfig> game_configs;
-    GameBoard visible_game;
     Simulation current_sim;
 
     float buttons_box_w;
     float buttons_box_h;
     float buttons_box_x;
     float buttons_box_y;
+
+    float checkbox_area_w;
+    float checkbox_area_h;
+    float checkbox_area_x;
+    float checkbox_area_y;
+    boolean write_files;
     TerritoryBar territory_bar;
     OrganismGame game;
 
     SettingsOverlay overlay;
 
     LabScreenButtons buttons;
+
+    CheckBoxGroup checkboxes;
 
     SettingsManager settings_manager;
 
@@ -33,15 +37,14 @@ public class LabScreen implements Screen {
     public LabScreen(OrganismGame organism_game) {
 
         game = organism_game;
-
-        running_simulations = new ArrayList<>();
-        game_configs = new ArrayList<>();
         territory_bar = new TerritoryBar(game);
 
         setup_overlay();
         setup_buttons();
+        setup_checkboxes();
 
     }
+
     public void setup_sim(){
         GameConfig cfg = game.file_handler.read_cfg("kingdoms", "map");
         cfg.human_players = 0;
@@ -51,7 +54,6 @@ public class LabScreen implements Screen {
         current_sim = new Simulation(this, cfg, iterations);
 
         current_sim.run_simulation();
-        visible_game = current_sim.current_game;
     }
     private void setup_overlay(){
 
@@ -91,6 +93,19 @@ public class LabScreen implements Screen {
         }
     }
 
+    private void setup_checkboxes() {
+        checkbox_area_w = this.game.VIRTUAL_WIDTH / 6.5f;
+        checkbox_area_h = this.game.VIRTUAL_HEIGHT / 5f;
+        checkbox_area_x = GameBoard.PLAYER_SUMMARY_X * 0.9f;
+        checkbox_area_y = buttons_box_y + buttons_box_h;
+        checkboxes = new CheckBoxGroup(game, checkbox_area_x, checkbox_area_y, checkbox_area_w, checkbox_area_h);
+
+        checkboxes.add_checkbox("save winners", false);
+        checkboxes.add_checkbox("show leaderboard", true);
+
+        checkboxes.calculate_coords();
+    }
+
     public void handle_button_click(String button_clicked) {
 
         if (Objects.equals(button_clicked, "setup")) {
@@ -101,8 +116,29 @@ public class LabScreen implements Screen {
         if (Objects.equals(button_clicked, "run")) {
             setup_sim();
         }
-    }
 
+        if (Objects.equals(button_clicked, "kill")) {
+            current_sim.kill = true;
+        }
+    }
+    public void handle_checkbox_click(String box_clicked) {
+        boolean state = checkboxes.checkbox_states.get(box_clicked);
+
+        if (Objects.equals(box_clicked, "show leaderboard")){
+            if (!state) {
+                current_sim.between_round_pause = 2;
+            }
+            else {
+                current_sim.between_round_pause = 0;
+            }
+        }
+
+        if (Objects.equals(box_clicked, "save winners")){
+            write_files = !state;
+        }
+
+        checkboxes.checkbox_states.put(box_clicked, !state);
+    }
 
     /**
      *
@@ -127,6 +163,7 @@ public class LabScreen implements Screen {
             overlay.render();
         }
         buttons.render();
+        checkboxes.render();
 
     }
 
@@ -170,6 +207,7 @@ public class LabScreen implements Screen {
     public void dispose() {
 
     }
+
 
 
 }

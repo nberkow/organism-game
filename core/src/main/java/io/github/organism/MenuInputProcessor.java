@@ -6,8 +6,11 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.HashMap;
 
 public class MenuInputProcessor implements InputProcessor {
+    MenuScreen menu_screen;
 
-
+    public MenuInputProcessor(MenuScreen scr){
+        menu_screen = scr;
+    }
 
 
     /**
@@ -104,6 +107,4 @@ public class MenuInputProcessor implements InputProcessor {
         return false;
     }
 
-    public void update_timers(float deltaTime) {
-    }
 }

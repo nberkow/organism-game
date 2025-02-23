@@ -16,6 +16,7 @@ public class HMM {
     public Integer current_state;
     public double [][][] transition_weights;
     public double [][][] emission_weights;
+    public String name;
 
     int transition_bit_mask;
 
@@ -24,6 +25,7 @@ public class HMM {
         game = g;
         states = Math.max(3, s);
         inputs = n;
+        name = "bot";
 
         rng = game.rng;
         current_state = rng.nextInt(states);
@@ -48,7 +50,18 @@ public class HMM {
     }
 
     private void init_random_transition_weights() {
+        // the number of possible transitions is the number of states squared
+
+        // every input has a weight for every transition pair
+
         transition_weights = new double[states][states][inputs];
+        for (int i=0; i<states; i++){
+            for (int j=0; j<states; j++){
+                for (int k=0; k<inputs; k++){
+                    transition_weights[i][j][k] = rng.nextDouble();
+                }
+            }
+        }
     }
 
     private void init_random_emission_weights() {

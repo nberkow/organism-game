@@ -9,6 +9,7 @@ public class LabScreenInputProcessor implements InputProcessor {
     LabScreen lab_screen;
     String dragging_slider;
     String button_clicked;
+    String box_clicked;
 
     public LabScreenInputProcessor(LabScreen screen){
 
@@ -57,6 +58,7 @@ public class LabScreenInputProcessor implements InputProcessor {
         Vector2 touchPos = new Vector2(screenX, screenY);
         lab_screen.game.viewport.unproject(touchPos);
         button_clicked = lab_screen.buttons.poll_buttons(touchPos.x, touchPos.y);
+        box_clicked = lab_screen.checkboxes.poll_boxes(touchPos.x, touchPos.y);
 
         return false;
     }
@@ -79,6 +81,14 @@ public class LabScreenInputProcessor implements InputProcessor {
 
             if (Objects.equals(button_up, button_clicked)) {
                 lab_screen.handle_button_click(button_clicked);
+            }
+        }
+
+        if (box_clicked != null) {
+            String box_up = lab_screen.checkboxes.poll_boxes(touchPos.x, touchPos.y);
+
+            if (Objects.equals(box_up, box_clicked)) {
+                lab_screen.handle_checkbox_click(box_clicked);
             }
         }
 

@@ -10,7 +10,7 @@ import java.util.Collections;
 
 public class Organism {
 
-    public final float MAX_ENERGY = 300f;
+    public final float MAX_ENERGY = 100f;
     public float income;
     TriangularGrid territory_hex;
     TriangularGrid territory_vertex;
@@ -50,7 +50,7 @@ public class Organism {
 
 
     public void update_income(){
-        income = 1;
+        float new_income = 1;
         float base_resource_val = game_board.config.gameplay_settings.get("resource value");
 
         for (int r=0; r<3; r++){
@@ -62,12 +62,17 @@ public class Organism {
             }
 
             if (resource_count > 0) {
-                income *= Math.min(resource_count, 6f) * base_resource_val;
+                new_income *= Math.min(resource_count, 6f) * base_resource_val;
             }
         }
-        if (income < base_resource_val * 3 / 2) {
-            income = base_resource_val * 3 / 2;
+
+        if (new_income < base_resource_val) {
+            new_income = base_resource_val;
+            if (player.get_ally_id() != null) {
+                new_income = (float) Math.floor(1.5f * new_income);
+            }
         }
+        income = Math.min(new_income, MAX_ENERGY - energy);
     }
 
     public void extract() {
@@ -125,6 +130,7 @@ public class Organism {
          */
 
         float budget = energy / 2;
+
         ArrayList<MapVertex> adjacent_vertexes = territory_vertex.get_external_vertex_layer(player);
         ArrayList<MapVertex> enemy_adjacent_vertexes = territory_vertex.get_external_vertex_layer(enemy_player);
 
@@ -134,7 +140,7 @@ public class Organism {
             ExpandSortWrapper w = new ExpandSortWrapper(v, player);
             compute_adjacent_hex_value(w);
             compute_vertex_enemy_distance(w, enemy_adjacent_vertexes);
-            w.remove_player_cost = game_board.diplomacy_graph.get_remove_cost(player.get_tournament_id(), enemy_player.get_tournament_id());
+            w.remove_player_cost = game_board.diplomacy_graph.get_remove_cost(v, player.get_tournament_id());
             vertex_priority.add(w);
         }
         sort(vertex_priority);

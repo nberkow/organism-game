@@ -161,10 +161,10 @@ public class BotPlayer implements Player{
 
     @Override
     public void generate_and_queue() {
-        float prob = (float) move_queue.size() / game_board.MAX_QUEUED_ACTIONS;
-        float t = game_board.rng.nextFloat() / 2;
+        float prob = (float) Math.pow(1-((float) move_queue.size() / game_board.MAX_QUEUED_ACTIONS), 2);
+        float t = game_board.rng.nextFloat() * 10;
 
-        if (t > prob){
+        if (t < prob){
             Integer move = compute_move();
             if (move < 3) {
                 queue_move(move);

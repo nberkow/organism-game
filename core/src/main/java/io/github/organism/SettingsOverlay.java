@@ -62,7 +62,7 @@ public class SettingsOverlay {
         sliders.add_slider("attack ally cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY);
         sliders.add_slider("attack neutral cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL);
         sliders.add_slider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
-        sliders.add_slider("speed", 1, 5, 1, 5f);
+        sliders.add_slider("speed", 1, 7, 1, 7f);
         sliders.add_slider("iterations", 1, 9, 1, 1f);
         sliders.load_initial_positions();
         save_slider_settings(); // populates the data structure with defaults
@@ -149,6 +149,13 @@ public class SettingsOverlay {
         }
         if (Objects.equals(button_clicked, "save")) {
             save_slider_settings();
+            show_control_overlay = false;
+            if (screen instanceof LabScreen){
+                Gdx.input.setInputProcessor(((LabScreen) screen).input_processor);
+            }
+            if (screen instanceof GameScreen){
+                Gdx.input.setInputProcessor(((GameScreen) screen).input_processor);
+            }
         }
     }
 }

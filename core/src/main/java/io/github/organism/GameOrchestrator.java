@@ -14,16 +14,13 @@ public class GameOrchestrator {
     GameBoard game_board;
     double base_action_time = 1d;
     double action_time = base_action_time;
-    double queue_time = action_time / 10;
 
-    double hmm_transition_time = action_time / 50;
+    double queue_action_frequency = 10;
+
+    double hmm_transition_frequency = 50;
 
     boolean execute_actions = false;
-    boolean queue_bot_actions = false;
-    private boolean hmm_transition = false;
     double action_clock = 0d;
-    double queue_clock = 0d;
-    double hmm_transition_clock = 0d;
     boolean paused = true;
     HashMap<Point, Float> player_territory;
     HashMap<Point, Integer> current_moves;
@@ -42,8 +39,6 @@ public class GameOrchestrator {
 
     public void update_speed(float speed){
         action_time = base_action_time / speed;
-        queue_time = action_time / 10;
-        hmm_transition_time = action_time / 50;
     }
 
     public void update_timers_and_flags() {
@@ -60,19 +55,6 @@ public class GameOrchestrator {
             action_clock = action_clock % action_time;
         }
 
-        queue_clock += Gdx.graphics.getDeltaTime();
-        queue_bot_actions = false;
-        if (queue_clock > queue_time){
-            queue_bot_actions = true;
-            queue_clock = queue_clock % queue_time;
-        }
-
-        hmm_transition_clock += Gdx.graphics.getDeltaTime();
-        hmm_transition = false;
-        if (hmm_transition_clock > hmm_transition_time){
-            hmm_transition = true;
-            hmm_transition_clock = hmm_transition_clock % hmm_transition_time;
-        }
     }
 
     public void update_players() {
@@ -80,20 +62,21 @@ public class GameOrchestrator {
             p.get_organism().update_resources();
         }
 
-        if (hmm_transition) {
-            for (Point b : game_board.bot_player_ids){
-                game_board.players.get(b).transition();
-            }
-        }
-
-        if (queue_bot_actions) {
-            for (Point b : game_board.bot_player_ids){
-                game_board.players.get(b).generate_and_queue();
-            }
-        }
-
         // dequeue an action from each player's queue and execute it
         if (execute_actions) {
+
+            for (int i=0; i<queue_action_frequency; i++) {
+                for (Point b : game_board.bot_player_ids) {
+                    game_board.players.get(b).transition();
+                }
+            }
+
+            for (int i=0; i<hmm_transition_frequency; i++) {
+                for (Point b : game_board.bot_player_ids) {
+                    game_board.players.get(b).generate_and_queue();
+                }
+            }
+
             dequeue_and_execute();
 
         }

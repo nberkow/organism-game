@@ -15,21 +15,14 @@ public class GameInputProcessor implements InputProcessor {
     double held_button_base_freq;
 
     HashMap<Point, PlayerGameInputData> player_input_data;
-    private String player_name;
 
-    public GameInputProcessor(GameScreen screen){
-        this.screen = screen;
-        game_board = screen.game_board;
-
+    public GameInputProcessor(GameScreen scr){
+        screen = scr;
         held_button_base_freq = .2;
         player_input_data = new HashMap<>();
-        for (Point tournament_id : game_board.human_player_ids){
-            player_input_data.put(tournament_id, new PlayerGameInputData());
-        }
     }
 
-    @SuppressWarnings("InnerClassMayBeStatic")
-    public class PlayerGameInputData {
+    public static class PlayerGameInputData {
         Boolean holding_button;
         Boolean touched_button;
         double time_held;
@@ -48,24 +41,33 @@ public class GameInputProcessor implements InputProcessor {
         }
     }
 
-    public boolean keyDown (int keycode) {
+    public void clear_players() {
+        player_input_data = new HashMap<>();
+    }
 
+    public void add_player(Point player_id) {
+        player_input_data.put(player_id, new PlayerGameInputData());
+    }
+
+    public boolean keyDown (int keycode) {
 
         int p = 0;
         if (keycode == Input.Keys.K || keycode == Input.Keys.L || keycode == Input.Keys.SEMICOLON) {
             p = 1;
         }
+        Point player_id = game_board.human_player_ids.get(p);
+        PlayerGameInputData input_data = player_input_data.get(player_id);
 
-        int key_val = 0;
+        int key_val = -1;
+        if (keycode == Input.Keys.A || keycode == Input.Keys.SEMICOLON) {
+            key_val = 0;
+        }
         if (keycode == Input.Keys.S || keycode == Input.Keys.L) {
             key_val = 1;
         }
-        if (game_board.human_player_ids.size() == 2 && (keycode == Input.Keys.D || keycode == Input.Keys.K || keycode == Input.Keys.SEMICOLON)) {
+        if (keycode == Input.Keys.D || keycode == Input.Keys.K) {
             key_val = 2;
         }
-
-        Point player_id = game_board.human_player_ids.get(p);
-        PlayerGameInputData input_data = player_input_data.get(player_id);
 
         input_data.button_val = key_val;
         input_data.button_input_ready = false;
@@ -83,16 +85,19 @@ public class GameInputProcessor implements InputProcessor {
             p = 1;
         }
 
-        int key_val = 0;
+        Point player_id = game_board.human_player_ids.get(p);
+        PlayerGameInputData input_data = player_input_data.get(player_id);
+
+        int key_val = -1;
+        if (keycode == Input.Keys.A || keycode == Input.Keys.SEMICOLON) {
+            key_val = 0;
+        }
         if (keycode == Input.Keys.S || keycode == Input.Keys.L) {
             key_val = 1;
         }
         if (keycode == Input.Keys.D || keycode == Input.Keys.K) {
             key_val = 2;
         }
-
-        Point player_id = game_board.human_player_ids.get(p);
-        PlayerGameInputData input_data = player_input_data.get(player_id);
 
         input_data.button_val = key_val;
         input_data.button_input_ready = true;
@@ -114,11 +119,11 @@ public class GameInputProcessor implements InputProcessor {
 
         Vector2 touchPos = new Vector2(screenX, screenY);
         game_board.game.viewport.unproject(touchPos);
-        GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
+        GameplayButtons.StepButton button_data = screen.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null){
 
-            Point player_id= game_board.human_player_ids.get(button_data.player - 1);
+            Point player_id = game_board.human_player_ids.get(button_data.player - 1);
             PlayerGameInputData input_data = player_input_data.get(player_id);
 
             if (input_data.time_not_held > MIN_BETWEEN_PRESS_TIME) {
@@ -141,7 +146,7 @@ public class GameInputProcessor implements InputProcessor {
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
         game_board.game.viewport.unproject(touchPos);
-        GameplayButtons.StepButton button_data = game_board.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
+        GameplayButtons.StepButton button_data = screen.player1_hud.game_buttons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null) {
             Point player_id = game_board.human_player_ids.get(button_data.player - 1);

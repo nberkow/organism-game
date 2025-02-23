@@ -42,7 +42,7 @@ public class IO_Player  implements Player {
 
     @Override
     public void queue_move(Integer move) {
-        if (move_queue.size() < game_board.MAX_QUEUED_ACTIONS){
+        if (move_queue.size() < GameBoard.MAX_QUEUED_ACTIONS){
             move_queue.add(move);
         }
     }

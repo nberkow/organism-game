@@ -10,7 +10,7 @@ public class ResourceBars {
     final float BAR_WIDTH = 90 + MARGIN * 2;
 
     final float RADIUS = 7;
-    GameBoard game_board;
+    OrganismGame game;
     PlayerHud hud;
     Player player;
 
@@ -19,9 +19,9 @@ public class ResourceBars {
 
     BitmapFont font;
 
-    public  ResourceBars(GameBoard gb, PlayerHud ph, Player p){
-        game_board = gb;
-        font = game_board.game.fonts.get(32);
+    public  ResourceBars(OrganismGame g, PlayerHud ph, Player p){
+        game = g;
+        font = game.fonts.get(32);
         hud = ph;
         player = p;
         inset = 2;
@@ -33,7 +33,7 @@ public class ResourceBars {
     }
 
     public void render(){
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         int res;
         for (int r=0; r<3; r++){
@@ -41,8 +41,8 @@ public class ResourceBars {
             if (hud.parity == -1){
                 res = 2-r;
             }
-            game_board.game.shape_renderer.setColor(game_board.game.resource_colors_dark[res]);
-            game_board.game.shape_renderer.rect(
+            game.shape_renderer.setColor(game.resource_colors_dark[res]);
+            game.shape_renderer.rect(
                 x + inset,
                 y + inset + BAR_HEIGHT * res,
                 BAR_WIDTH,
@@ -51,24 +51,24 @@ public class ResourceBars {
 
             float spacing = BAR_WIDTH / (7);
 
-            game_board.game.shape_renderer.setColor(game_board.game.background_color);
+            game.shape_renderer.setColor(game.background_color);
             int space_n;
             for (int s=0; s<6; s++){
                 space_n = s;
                 if (hud.parity == -1){
                     space_n = 5-s;
                 }
-                game_board.game.shape_renderer.circle(
+                game.shape_renderer.circle(
                     x + inset + (RADIUS * 2) + spacing * space_n,
                     y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
                     RADIUS
                 );
             }
 
-            game_board.game.shape_renderer.setColor(game_board.game.resource_colors_bright[res]);
+            game.shape_renderer.setColor(game.resource_colors_bright[res]);
             int val = Math.min(6, player.get_organism().resources[res]);
 
-            game_board.game.shape_renderer.circle(
+            game.shape_renderer.circle(
                 x + inset + (RADIUS * 2),
                 y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
                 RADIUS / 2
@@ -80,22 +80,22 @@ public class ResourceBars {
                 if (hud.parity == -1){
                     space_n = 5-s;
                 }
-                game_board.game.shape_renderer.circle(
+                game.shape_renderer.circle(
                     x + inset + (RADIUS * 2) + spacing * space_n,
                     y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
                     RADIUS
                 );
             }
         }
-        game_board.game.shape_renderer.end();
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
+        game.shape_renderer.end();
+        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shape_renderer.setColor(game.foreground_color);
 
         float border_x = x;
         if (hud.parity == -1){
             border_x = x - BAR_WIDTH - inset * 2;
         }
-        game_board.game.shape_renderer.rect(
+        game.shape_renderer.rect(
             border_x,
             y,
             BAR_WIDTH * 2 + inset * 2,
@@ -105,13 +105,13 @@ public class ResourceBars {
         if (hud.parity == -1){
             font_x = border_x + hud.HUD_WIDTH - (BAR_WIDTH * 1.3f);
         }
-        game_board.game.shape_renderer.end();
-        game_board.game.batch.begin();
+        game.shape_renderer.end();
+        game.batch.begin();
         font.draw(
-            game_board.game.batch,
+            game.batch,
             "" + player.get_organism().income,
             font_x,
             y + BAR_HEIGHT * 2.5f);
-        game_board.game.batch.end();
+        game.batch.end();
     }
 }

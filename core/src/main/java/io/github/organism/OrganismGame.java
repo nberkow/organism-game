@@ -17,6 +17,8 @@ import java.util.Random;
 public class OrganismGame extends Game {
 
     ShapeRenderer shape_renderer;
+
+    ArcadeLoop main_arcade_loop;
     GameScreen game_screen;
     MenuScreen menu_screen;
     LabScreen lab_screen;
@@ -35,8 +37,6 @@ public class OrganismGame extends Game {
     Color foreground_color = Color.CYAN;
 
     Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
-
-    Color [] diplomacy_colors = { Color.GREEN, Color.RED};
 
     HashMap<Integer, BitmapFont> fonts;
 
@@ -90,8 +90,10 @@ public class OrganismGame extends Game {
             fonts.put(size, new BitmapFont(Gdx.files.internal("fonts/dubai" + size + ".fnt")));
         }
 
-        menu_screen = new MenuScreen(this);
+        main_arcade_loop = new ArcadeLoop(this);
 
+        menu_screen = new MenuScreen(this);
+        menu_screen.input_processor = new MenuInputProcessor(menu_screen);
 
         game_screen = new GameScreen(this);
         game_screen.input_processor = new GameInputProcessor(game_screen);
@@ -108,11 +110,16 @@ public class OrganismGame extends Game {
         //Gdx.input.setInputProcessor(map_input_processor);
         //this.setScreen(map_edit_screen);
 
-        //Gdx.input.setInputProcessor(input_processor);
-        //this.setScreen(game_screen);
+        Gdx.input.setInputProcessor(game_screen.input_processor);
+        main_arcade_loop.setup_for_arcade(1);
+        this.setScreen(game_screen);
 
-        Gdx.input.setInputProcessor(lab_screen.input_processor);
-        this.setScreen(lab_screen);
+        //Gdx.input.setInputProcessor(lab_screen.input_processor);
+        //this.setScreen(lab_screen);
+
+        //Gdx.input.setInputProcessor(menu_screen.input_processor);
+        //main_arcade_loop.setup_for_menu();
+        //this.setScreen(menu_screen);
 
     }
 

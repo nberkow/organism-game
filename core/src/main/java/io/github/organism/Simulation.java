@@ -9,14 +9,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-public class Simulation {
+public class Simulation implements GameMode{
     LabScreen lab_screen;
     GameBoard current_game;
     GameOrchestrator current_game_orchestrator;
     ModelPoolDisplay model_pool_display;
     RoundSummary round_summary;
 
-    SettingsManager setting_manager;
     float map_center_x;
     float map_center_y;
     GameConfig cfg;
@@ -30,6 +29,10 @@ public class Simulation {
     boolean next_round_begin;
     boolean write_files;
 
+    int max_models_to_save = 3;
+
+    boolean kill = false;
+
     float between_round_pause = 2f;
     float between_round_pause_timer;
 
@@ -42,7 +45,6 @@ public class Simulation {
                         "VI", "VII", "VIII", "IX", "X",
                         "XI", "XII", "XIII", "XIV", "XV",
                         "XVI", "XVII", "XVIII", "XIX", "XX"};
-    HashMap<Point, HMM> current_champions;
 
     int min_wins = 2;
 
@@ -75,7 +77,7 @@ public class Simulation {
     };
 
     HashMap<Point, HMM> model_pool;
-    HashMap<Point, Integer> win_records;
+    HashMap<Point, Point> win_records;
 
     int pool_size = 9;
 
@@ -98,7 +100,6 @@ public class Simulation {
 
         model_pool = new HashMap<>();
         win_records = new HashMap<>();
-        current_champions = new HashMap<>();
 
         model_pool_display = new ModelPoolDisplay(lab_screen.game, this);
         round_summary = new RoundSummary(lab_screen.game, this);
@@ -113,7 +114,7 @@ public class Simulation {
         next_round_begin = true;
         between_round_pause_timer = 0;
 
-        write_files = true;
+        write_files = screen.write_files;
     }
 
     public void create_game_board() {
@@ -154,7 +155,7 @@ public class Simulation {
             Point player_id  = new Point(player_primary_index, 0);
             model.player_tournament_id = player_id;
             model_pool.put(player_id, model);
-            win_records.put(player_id, 0);
+            win_records.put(player_id, new Point(0, 0));
         }
     }
 
@@ -176,14 +177,20 @@ public class Simulation {
 
         System.out.println("iteration: " + current_iteration + "/" + iterations);
 
-        int wins = win_records.get(winner_id);
-        //noinspection Java8MapApi
-        win_records.put(winner_id, wins + 1);
-
+        for (Point p : current_game.players.keySet()) {
+            Point rec = win_records.get(p);
+            if (p == winner_id){
+                rec.x += 1;
+            }
+            else {
+                rec.y += 1;
+            }
+            win_records.put(p, rec);
+        }
 
         round_summary.set_winner(winner_id);
-        update_champions(winner_id);
         show_summary_screen = true;
+
     }
 
     private void setup_next_round(Point winner_id) {
@@ -202,7 +209,7 @@ public class Simulation {
 
     private void create_players_from_model_pool() {
         /*
-        randomly remove 3 models from the pool
+        randomly select 3 models from the pool
 
         use these to create 3 players on the current game board
          */
@@ -210,10 +217,9 @@ public class Simulation {
         ArrayList<Point> player_ids = new ArrayList<>(model_pool.keySet());
         Collections.shuffle(player_ids, lab_screen.game.rng);
 
-
         for (int i=0; i<3; i++) {
             Point player_id = player_ids.get(i);
-            HMM model = model_pool.remove(player_id);
+            HMM model = model_pool.get(player_id);
             String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
 
             Color color;
@@ -232,32 +238,57 @@ public class Simulation {
         current_game.diplomacy_graph = new DiplomacyGraph(this.lab_screen.game, current_game);
     }
 
-    public void setup_next_round_models(Point winner_id) {
+    public void prune_model_pool(){
 
-        //System.out.println("next round models");
-
-        // add the winner back to the model pool
-        BotPlayer winner = (BotPlayer) current_game.players.get(winner_id);
-        HMM winner_model_copy = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
-        winner_model_copy.set_weights(winner.model.transition_weights, winner.model.emission_weights);
-        winner_model_copy.transition_bit_mask = winner.model.transition_bit_mask;
-        model_pool.put(winner_id, winner_model_copy);
-
-        // recycle colors and mark eliminated players in gray
         ArrayList<Point> to_remove = new ArrayList<>();
-        for (Point p : current_game.all_player_ids) {
-            if (!p.equals(winner_id)) {
+        HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
+
+        for (Point p : model_pool.keySet()) {
+            Point rec = win_records.get(p);
+            float margin = (rec.x - rec.y);
+            if (margin < 1 & rec.y > 0) {
+                // recycle colors and mark eliminated players in gray
+                to_remove.add(p);
                 Color player_color = tournament_player_colors.get(p);
                 if (player_color != null && !player_color.equals(Color.DARK_GRAY)) {
                     available_colors.add(player_color); // Recycle color
                 }
                 tournament_player_colors.put(p, Color.DARK_GRAY); // Mark eliminated players
-                to_remove.add(p);
+            }
+            if (!models_by_win_margin.containsKey(margin)) {
+                models_by_win_margin.put(margin, new ArrayList<>());
             }
         }
-        for (Point p : to_remove) {
+
+        System.out.println("removing " + to_remove.size());
+        for (Point p : to_remove){
             model_pool.remove(p);
         }
+        System.out.println("new size: " + model_pool.size());
+
+    }
+
+    public void add_new_random_models(int n){
+        // add new random models
+
+        System.out.println("adding random " + n);
+        for (int i=0; i<n; i++) {
+            HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
+            model.init_random_weights();
+            player_primary_index++;
+            Point player_id = new Point(player_primary_index, 0);
+            model.player_tournament_id = player_id;
+            model_pool.put(player_id, model);
+            win_records.put(player_id, new Point(0, 0));
+        }
+        System.out.println("new size: " + model_pool.size());
+    }
+
+    public void setup_next_round_models(Point winner_id) {
+
+        //System.out.println("next round models");
+
+        BotPlayer winner = (BotPlayer) current_game.players.get(winner_id);
 
         // add a model by averaging the last round models
         HMM offspring = get_last_round_offspring();
@@ -267,6 +298,7 @@ public class Simulation {
             winner_id.x,
             winner_id.y + 1
         );
+        System.out.println(offspring_player_id);
 
         // avoid collisions from different inheritance paths
         while (tournament_player_colors.containsKey(offspring_player_id)){
@@ -279,19 +311,15 @@ public class Simulation {
 
         offspring.player_tournament_id = offspring_player_id;
         model_pool.put(offspring_player_id, offspring);
-        win_records.put(offspring_player_id, 0);
+        win_records.put(offspring_player_id, new Point(0, 0));
 
-        // add a brand new random model
-        HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
-        model.init_random_weights();
-        player_primary_index++;
-        Point player_id = new Point(player_primary_index, 0);
-        model.player_tournament_id = player_id;
-        model_pool.put(player_id, model);
-        win_records.put(player_id, 0);
+        prune_model_pool();
 
-        //System.out.println("3: " + player_id[0] + " " + player_id[1]);
-        //System.out.println(model.transition_weights);
+        int n = pool_size - model_pool.size();
+        if (n > 0) {
+            add_new_random_models(n);
+        }
+
     }
 
     public HMM get_last_round_offspring() {
@@ -355,7 +383,6 @@ public class Simulation {
 
         HMM offspring = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
         offspring.set_weights(avg_transition_weights, avg_emission_weights);
-
         return offspring;
     }
 
@@ -375,7 +402,7 @@ public class Simulation {
                     next_round_begin = false;
                     between_round_pause_timer = 0f;
 
-                    if (current_iteration == iterations) {
+                    if (current_iteration == iterations & write_files) {
                         write_champions_to_file();
                     }
                 }
@@ -401,7 +428,11 @@ public class Simulation {
                 next_round_begin = false;
                 show_summary_screen = false;
             }
+
         }
+    }
+
+    private void finish_sim() {
     }
 
     public void draw(){
@@ -414,8 +445,14 @@ public class Simulation {
     }
 
     public void render(){
-        logic();
-        draw();
+
+        if (kill) {
+            dispose();
+        }
+        else {
+            logic();
+            draw();
+        }
     }
 
     public void dispose() {
@@ -424,50 +461,31 @@ public class Simulation {
         current_game.dispose();
     }
 
-    public void update_champions(Point winner_id) {
-        int wins = win_records.get(winner_id);
 
-        // add the winner of the last round to the list of champions
-        if (wins >= min_wins & !current_champions.containsKey(winner_id)) {
+    public void write_champions_to_file(){
+        System.out.println("save files");
 
-            HMM winner_model_copy = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
-            BotPlayer winning_player = (BotPlayer) current_game.players.get(winner_id);
-            winner_model_copy.transition_weights = winning_player.model.transition_weights;
-            winner_model_copy.emission_weights = winning_player.model.emission_weights;
-            winner_model_copy.player_tournament_id = winning_player.tournament_id;
+        HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
 
-            current_champions.put(winner_id, winner_model_copy);
-            System.out.println("adding: " + winner_id);
-
+        for (Point p : model_pool.keySet()){
+            Point rec = win_records.get(p);
+            float margin = rec.x - rec.y;
+            if (!models_by_win_margin.containsKey(margin)){
+                models_by_win_margin.put(margin, new ArrayList<>());
+            }
+            ArrayList<Point> m = models_by_win_margin.get(margin);
+            m.add(p);
+            models_by_win_margin.put(margin, m);
         }
 
-        // remove last round losers if their record is not high
-        ArrayList<Integer> leaderboard_wins = new ArrayList<>(win_records.values());
-        leaderboard_wins.sort(Comparator.reverseOrder());
-
-        ArrayList<Point> to_remove = new ArrayList<>();
-        for (Point p : current_game.players.keySet()) {
-            if (!p.equals(winner_id)) {
-                int eliminated_player_wins = win_records.get(p);
-                if (eliminated_player_wins < leaderboard_wins.get(2)) {
-                    to_remove.add(p);
+        int s = 0;
+        for (Float m : models_by_win_margin.keySet()) {
+            for (Point p : models_by_win_margin.get(m)){
+                if (s < max_models_to_save){
+                    lab_screen.game.file_handler.save_model(model_pool.get(p), player_names.get(p));
+                    s++;
                 }
             }
         }
-
-        for (Point p : to_remove) {
-            System.out.println("removing: " + p);
-            current_champions.remove(p);
-        }
-
-        System.out.println("size: " + current_champions.size());
     }
-
-    public void write_champions_to_file(){
-
-        for (Point p : current_champions.keySet()) {
-            lab_screen.game.file_handler.save_model(current_champions.get(p), p.x + "_" + p.y);
-        }
-    }
-
 }

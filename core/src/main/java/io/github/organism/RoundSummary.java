@@ -79,27 +79,29 @@ public class RoundSummary {
         standings_ids = new ArrayList<>();
 
         for (Point p : simulation.player_names.keySet()){
-            Integer wins = simulation.win_records.get(p);
-            if (!players_by_win.containsKey(wins)) {
-                players_by_win.put(wins, new ArrayList<>());
+            Point rec = simulation.win_records.get(p);
+            int win_margin = (rec.x - rec.y) * (rec.x + rec.y);
+            if (!players_by_win.containsKey(win_margin)) {
+                players_by_win.put(win_margin, new ArrayList<>());
             }
-            players_by_win.get(wins).add(p);
+            players_by_win.get(win_margin).add(p);
         }
 
-        ArrayList<Integer> unique_wins = new ArrayList<>(players_by_win.keySet()) ;
-        unique_wins.sort(Comparator.reverseOrder());
+        ArrayList<Integer> unique_win_margins = new ArrayList<>(players_by_win.keySet()) ;
+        unique_win_margins.sort(Comparator.reverseOrder());
         int lines_to_print = 10;
 
         ArrayList<Point> tied_players;
-        for (Integer w : unique_wins) {
+        for (Integer w : unique_win_margins) {
             tied_players = players_by_win.get(w);
             if (lines_to_print >= tied_players.size()) {
 
                 for (Point  p : tied_players) {
                     standings_ids.add(p);
                     String name = simulation.player_names.get(p);
+                    Point rec = simulation.win_records.get(p);
                     standings_players.add(name);
-                    standings_wins.add("" + w);
+                    standings_wins.add(rec.x + "/" + (rec.x + rec.y));
                     lines_to_print--;
                 }
 

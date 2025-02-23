@@ -2,7 +2,9 @@ package io.github.organism;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.awt.Point;
 import java.util.ArrayList;
 
 public class GameScreen implements Screen {
@@ -10,26 +12,42 @@ public class GameScreen implements Screen {
     public SettingsManager settings_manager;
     public SettingsOverlay overlay;
     OrganismGame game;
-    GameBoard game_board;
     GameInputProcessor input_processor;
-
     GameConfig cfg;
-    GameOrchestrator orchestrator;
+    PlayerHud player1_hud;
+    PlayerHud player2_hud;
+    ArrayList<String> io_player_names;
+    ArrayList<Point> io_player_ids;;
+
     public GameScreen(OrganismGame g){
         game = g;
-        cfg = new GameConfig();
-        game_board = new GameBoard(game, cfg, this);
-        game_board.void_distributor.distribute();
-        game_board.resource_distributor.distribute();
-
-        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.player_start_positions));
-        for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomize_starting_coords();
-            game_board.player_start_assigner.assign_starting_hexes(starting_coords);
-        }
-        orchestrator = new GameOrchestrator(game_board);
-
         setup_overlay();
+        overlay.setup_sliders();
+
+        io_player_names = new ArrayList<>();
+        io_player_ids = new ArrayList<>();
+    }
+
+    public void clear_players(){
+        io_player_names = new ArrayList<>();
+        io_player_ids = new ArrayList<>();
+        input_processor.clear_players();
+    }
+
+    public void add_player(Player player, boolean player2){
+
+        io_player_names.add(player.get_player_name());
+        Point player_id = player.get_tournament_id();
+        io_player_ids.add(player_id);
+
+        if (!player2) {
+            player1_hud = new PlayerHud(game, this, player, false);
+        }
+
+        else {
+            player2_hud = new PlayerHud(game, this, player, true);
+        }
+        input_processor.add_player(player_id);
 
     }
 
@@ -44,30 +62,20 @@ public class GameScreen implements Screen {
     }
 
     private void input() {
-        if (!orchestrator.paused) {
+        if (!game.main_arcade_loop.current_game_orchestrator.paused) {
             input_processor.update_timers(Gdx.graphics.getDeltaTime());
             input_processor.update_queues_with_input();
-            orchestrator.update_players();
-            orchestrator.update_timers_and_flags();
+            game.main_arcade_loop.current_game_orchestrator.update_players();
+            game.main_arcade_loop.current_game_orchestrator.update_timers_and_flags();
         }
     }
 
-    private void logic() {
+    private void logic() {}
 
-
-    }
-
-    private void draw() {
-        // Ensure the camera is updated before drawing
-        game_board.game.camera.update();
-        game_board.render();
-    }
+    private void draw() {}
 
     @Override
-    public void resize(int width, int height) {
-        // Update the viewport and camera based on the new window size
-        game_board.game.viewport.update(width, height, true);  // true centers the camera
-    }
+    public void resize(int width, int height) { }
     /**
      *
      */
@@ -82,8 +90,25 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         input();
-        logic();
-        draw();
+
+        ScreenUtils.clear(game.background_color);
+
+        if (game.main_arcade_loop != null) {
+            game.main_arcade_loop.render();
+        }
+
+        if (player1_hud != null) {
+            player1_hud.render();
+        }
+
+
+        if (player2_hud != null) {
+            player2_hud.render();
+        }
+
+        if (overlay.show_control_overlay) {
+            overlay.render();
+        }
     }
 
     /**
