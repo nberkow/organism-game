@@ -2,6 +2,7 @@ package io.github.organism;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class HMM {
     public double [][][] emission_weights;
     public String name;
 
-    int transition_bit_mask;
+    BitSet transition_bit_mask;
 
     OrganismGame game;
     public HMM(OrganismGame g, int s, int n) {
@@ -45,8 +46,15 @@ public class HMM {
     }
 
     private void init_random_transition_mask() {
-        int n = states * states * inputs;
-        transition_bit_mask = rng.nextInt((int) Math.pow(2, n));
+        int totalBits = states * states * inputs;
+        transition_bit_mask = new BitSet(totalBits);
+
+        // Randomly set bits in the BitSet
+        for (int i = 0; i < totalBits; i++) {
+            if (rng.nextBoolean()) {
+                transition_bit_mask.set(i); // Set the bit at position i
+            }
+        }
     }
 
     private void init_random_transition_weights() {
@@ -77,16 +85,15 @@ public class HMM {
     }
 
     public void apply_transition_mask() {
-        int n = 0;
-        int b;
-        for (int i=0; i<states; i++){
-            for (int j=0; j<states; j++){
-                for (int k=0; k<inputs; k++){
-                    b = (int) Math.pow(2, n);
-                    if ((b & transition_bit_mask) != b) {
+        int n = 0; // Bit position counter
+        for (int i = 0; i < states; i++) {
+            for (int j = 0; j < states; j++) {
+                for (int k = 0; k < inputs; k++) {
+                    // Check if the bit at position n is not set
+                    if (!transition_bit_mask.get(n)) {
                         transition_weights[i][j][k] = 0;
                     }
-                    n++;
+                    n++; // Move to the next bit position
                 }
             }
         }

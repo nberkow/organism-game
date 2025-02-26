@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.UUID;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -76,12 +77,13 @@ public class FileHandler {
         FileHandle handle = Gdx.files.local( dir + "/" + uuid_string + ".hmm");
         int states = model.transition_weights.length;
         int inputs = model.transition_weights[0][0].length;
-        int mask = model.transition_bit_mask;
+        BitSet mask = model.transition_bit_mask;
+        String mask_string = bitset_to_hex(mask);
 
         handle.writeString(name + "\n", true);
         handle.writeString(states + "\n", true);
         handle.writeString(inputs + "\n", true);
-        handle.writeString(mask + "\n", true);
+        handle.writeString(mask_string + "\n", true);
 
         ArrayList<String> content = get_strings(model);
 
@@ -126,7 +128,29 @@ public class FileHandler {
         return(models);
     }
 
+    private static String bitset_to_hex(BitSet bitSet) {
+        byte[] bytes = bitSet.toByteArray();
+        StringBuilder hex = new StringBuilder();
+        for (byte b : bytes) {
+            hex.append(String.format("%02X", b));
+        }
+        return hex.toString();
+    }
 
+    private static BitSet hex_to_bitset(String hex_string) {
+        byte[] bytes = hex_string_to_bytearray(hex_string);
+        return BitSet.valueOf(bytes);
+    }
+
+    private static byte[] hex_string_to_bytearray(String hexString) {
+        int len = hexString.length();
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    + Character.digit(hexString.charAt(i + 1), 16));
+        }
+        return bytes;
+    }
     public HMM load_model(String file_name){
 
         String dir = "model_configs";
@@ -136,7 +160,8 @@ public class FileHandler {
         String name = content[0].trim();
         int states = Integer.parseInt(content[1]);
         int inputs = Integer.parseInt(content[2]);
-        int mask = Integer.parseInt(content[3]);
+        String mask_string = content[3];
+        BitSet mask = hex_to_bitset(mask_string);
 
         int index = 4;
         HMM model = new HMM(game, states, inputs);

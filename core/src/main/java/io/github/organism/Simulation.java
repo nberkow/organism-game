@@ -25,6 +25,7 @@ public class Simulation implements GameMode{
     // 3 players * ((3 indicator variable per move * 6 moves) + energy + territory)
     static int MODEL_INPUTS = 3 * ((3 * 6) + 2);
 
+    float mutation_rate;
     boolean show_summary_screen;
     boolean next_round_begin;
     boolean write_files;
@@ -83,7 +84,7 @@ public class Simulation implements GameMode{
 
 
     //MoveLogger move_logger;
-    boolean log_written = false;
+    //boolean log_written = false;
 
 
     int current_iteration;
@@ -113,6 +114,7 @@ public class Simulation implements GameMode{
         show_summary_screen = false;
         next_round_begin = true;
         between_round_pause_timer = 0;
+        mutation_rate = (float) Math.pow(1f/MODEL_STATES, 3);
 
         write_files = screen.write_files;
     }
@@ -293,6 +295,12 @@ public class Simulation implements GameMode{
         // add a model by averaging the last round models
         HMM offspring = get_last_round_offspring();
         offspring.transition_bit_mask = winner.model.transition_bit_mask;
+        for (int i=0; i<offspring.transition_bit_mask.size(); i++) {
+            if (lab_screen.game.rng.nextFloat() < mutation_rate) {
+                offspring.transition_bit_mask.flip(i);
+            }
+        }
+
         offspring.apply_transition_mask();
         Point offspring_player_id = new Point(
             winner_id.x,
