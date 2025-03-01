@@ -191,9 +191,19 @@ public class TriangularGrid implements Iterable<GridPosition> {
         };
     }
 
-
     public void dispose() {
         grid.clear();
         game_board = null;
+    }
+
+    public int count_resources() {
+        int res = 0;
+        for (GridPosition pos : this) {
+            if (pos.content instanceof MapHex) {
+                MapHex h = (MapHex) pos.content;
+                res += h.total_resources;
+            }
+        }
+        return res;
     }
 }

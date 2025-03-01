@@ -6,7 +6,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 
 public class Simulation implements GameMode{
@@ -33,6 +32,8 @@ public class Simulation implements GameMode{
     int max_models_to_save = 3;
 
     boolean kill = false;
+
+    boolean silent = true;
 
     float between_round_pause = 2f;
     float between_round_pause_timer;
@@ -78,8 +79,10 @@ public class Simulation implements GameMode{
     };
 
     HashMap<Point, HMM> model_pool;
-    HashMap<Point, Point> win_records;
+    HashMap<Point, ArrayList<Point>> win_records;
+    HashMap<Point, ArrayList<Integer>> win_record_turns;
 
+    WinRecordGraph win_record_graph;
     int pool_size = 9;
 
 
@@ -101,6 +104,7 @@ public class Simulation implements GameMode{
 
         model_pool = new HashMap<>();
         win_records = new HashMap<>();
+        win_record_turns = new HashMap<>();
 
         model_pool_display = new ModelPoolDisplay(lab_screen.game, this);
         round_summary = new RoundSummary(lab_screen.game, this);
@@ -117,6 +121,35 @@ public class Simulation implements GameMode{
         mutation_rate = (float) Math.pow(1f/MODEL_STATES, 3);
 
         write_files = screen.write_files;
+
+        float graph_width = (float) lab_screen.game.VIRTUAL_WIDTH / 2;
+        float graph_height = graph_width * .9f;
+
+        win_record_graph = new WinRecordGraph(
+            lab_screen.game, this,
+        (lab_screen.game.VIRTUAL_WIDTH - graph_width)/2,
+        (lab_screen.game.VIRTUAL_HEIGHT - graph_height)/2,
+                graph_width,
+                graph_height
+        );
+    }
+
+    public void run_silent(){
+
+        // setup and run one game until victory
+        create_game_board();
+        create_players_from_model_pool();
+        create_player_starts();
+        current_game.create_player_summary_displays();
+        current_game_orchestrator.run();
+        while (!current_game_orchestrator.finished) {
+            logic();
+        }
+        Point winner_id = current_game_orchestrator.test_victory_conditions();
+
+        finish_this_round(winner_id);
+        setup_next_round_models(winner_id);
+
     }
 
     public void create_game_board() {
@@ -134,6 +167,8 @@ public class Simulation implements GameMode{
 
         current_game.center_x = map_center_x;
         current_game.center_y = map_center_y;
+        current_game.show_player_summary = true;
+        current_game.show_diplomacy = true;
     }
 
     public void create_player_starts() {
@@ -157,7 +192,15 @@ public class Simulation implements GameMode{
             Point player_id  = new Point(player_primary_index, 0);
             model.player_tournament_id = player_id;
             model_pool.put(player_id, model);
-            win_records.put(player_id, new Point(0, 0));
+
+            ArrayList<Point> wins = new ArrayList<>();
+            ArrayList<Integer> turns = new ArrayList<>();
+
+            wins.add(new Point(0, 0));
+            turns.add(0);
+
+            win_records.put(player_id, wins);
+            win_record_turns.put(player_id, turns);
         }
     }
 
@@ -180,14 +223,16 @@ public class Simulation implements GameMode{
         System.out.println("iteration: " + current_iteration + "/" + iterations);
 
         for (Point p : current_game.players.keySet()) {
-            Point rec = win_records.get(p);
+            Point prev_rec = win_records.get(p).get(0);
+            Point rec = new Point(prev_rec.x, prev_rec.y);
             if (p == winner_id){
                 rec.x += 1;
             }
             else {
                 rec.y += 1;
             }
-            win_records.put(p, rec);
+            win_records.get(p).add(0, rec);
+            win_record_turns.get(p).add(0, current_iteration);
         }
 
         round_summary.set_winner(winner_id);
@@ -196,6 +241,7 @@ public class Simulation implements GameMode{
     }
 
     private void setup_next_round(Point winner_id) {
+
         setup_next_round_models(winner_id);
 
         current_game.dispose();
@@ -246,7 +292,7 @@ public class Simulation implements GameMode{
         HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
 
         for (Point p : model_pool.keySet()) {
-            Point rec = win_records.get(p);
+            Point rec = win_records.get(p).get(0);
             float margin = (rec.x - rec.y);
             if (margin < 1 & rec.y > 0) {
                 // recycle colors and mark eliminated players in gray
@@ -281,7 +327,12 @@ public class Simulation implements GameMode{
             Point player_id = new Point(player_primary_index, 0);
             model.player_tournament_id = player_id;
             model_pool.put(player_id, model);
-            win_records.put(player_id, new Point(0, 0));
+            ArrayList<Point> rec = new ArrayList<>();
+            rec.add(new Point(0, 0));
+            win_records.put(player_id, rec);
+            ArrayList<Integer> turn = new ArrayList<>();
+            turn.add(current_iteration);
+            win_record_turns.put(player_id, turn);
         }
         System.out.println("new size: " + model_pool.size());
     }
@@ -289,7 +340,6 @@ public class Simulation implements GameMode{
     public void setup_next_round_models(Point winner_id) {
 
         //System.out.println("next round models");
-
         BotPlayer winner = (BotPlayer) current_game.players.get(winner_id);
 
         // add a model by averaging the last round models
@@ -319,7 +369,13 @@ public class Simulation implements GameMode{
 
         offspring.player_tournament_id = offspring_player_id;
         model_pool.put(offspring_player_id, offspring);
-        win_records.put(offspring_player_id, new Point(0, 0));
+        ArrayList<Point> rec = new ArrayList<>();
+        rec.add(new Point(0, 0));
+        win_records.put(offspring_player_id, rec);
+
+        ArrayList<Integer> turn = new ArrayList<>();
+        turn.add(current_iteration);
+        win_record_turns.put(offspring_player_id, turn);
 
         prune_model_pool();
 
@@ -394,14 +450,22 @@ public class Simulation implements GameMode{
         return offspring;
     }
 
+    public void silent_logic(){
+        int iterations = Math.round(lab_screen.overlay.saved_settings.get("iterations"));
+        if (current_iteration < iterations){
+            run_silent();
+            current_iteration ++;
+        }
+    }
+
 
     public void logic(){
         Point winner_id = current_game_orchestrator.test_victory_conditions();
         if (!current_game_orchestrator.paused) {
-
             // if victory conditions were met, finish up the last round and start the timer for the next one
             if (winner_id != null) {
                 current_game_orchestrator.pause();
+                current_game_orchestrator.finished = true;
 
                 if (!show_summary_screen) {
                     // end of round housekeeping
@@ -440,8 +504,6 @@ public class Simulation implements GameMode{
         }
     }
 
-    private void finish_sim() {
-    }
 
     public void draw(){
         current_game.game.camera.update();
@@ -452,14 +514,28 @@ public class Simulation implements GameMode{
         }
     }
 
+    public void silent_draw(){
+        model_pool_display.render();
+        win_record_graph.render();
+    }
+
+
+
     public void render(){
 
         if (kill) {
             dispose();
         }
         else {
-            logic();
-            draw();
+            if (silent) {
+                silent_logic();
+                silent_draw();
+            }
+            else{
+                logic();
+                draw();
+            }
+
         }
     }
 
@@ -471,12 +547,12 @@ public class Simulation implements GameMode{
 
 
     public void write_champions_to_file(){
-        System.out.println("save files");
+        System.out.println("saving files");
 
         HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
 
         for (Point p : model_pool.keySet()){
-            Point rec = win_records.get(p);
+            Point rec = win_records.get(p).get(0);
             float margin = rec.x - rec.y;
             if (!models_by_win_margin.containsKey(margin)){
                 models_by_win_margin.put(margin, new ArrayList<>());

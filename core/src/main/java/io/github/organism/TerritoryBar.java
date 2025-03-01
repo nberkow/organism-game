@@ -47,7 +47,7 @@ public class TerritoryBar {
         game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
         game.shape_renderer.setColor(Color.GREEN);
         float t_width = bar_width * 3 + bar_spacing * 5;
-        game.shape_renderer.rect(x_pos-bar_spacing, victory_threshold * max_height, t_width, 2);
+        game.shape_renderer.rect(x_pos-bar_spacing, y_pos + (victory_threshold * max_height), t_width, 2);
 
 
         float x = x_pos;

@@ -79,7 +79,7 @@ public class RoundSummary {
         standings_ids = new ArrayList<>();
 
         for (Point p : simulation.player_names.keySet()){
-            Point rec = simulation.win_records.get(p);
+            Point rec = simulation.win_records.get(p).get(0);
             int win_margin = (rec.x - rec.y) * (rec.x + rec.y);
             if (!players_by_win.containsKey(win_margin)) {
                 players_by_win.put(win_margin, new ArrayList<>());
@@ -99,9 +99,9 @@ public class RoundSummary {
                 for (Point  p : tied_players) {
                     standings_ids.add(p);
                     String name = simulation.player_names.get(p);
-                    Point rec = simulation.win_records.get(p);
+                    Point rec = simulation.win_records.get(p).get(0);
                     standings_players.add(name);
-                    standings_wins.add(rec.x + "/" + (rec.x + rec.y));
+                    standings_wins.add(rec.x + " - " + rec.y);
                     lines_to_print--;
                 }
 

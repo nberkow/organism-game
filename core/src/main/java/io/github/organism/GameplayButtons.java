@@ -60,6 +60,13 @@ public class GameplayButtons {
         }
     }
 
+    public void set_button_colors(Color left_color, Color right_color){
+        buttons.get(0).c = left_color;
+        buttons.get(2).c = right_color;
+    }
+
+
+
     public StepButton check_buttons(float mouse_x, float mouse_y){
         for (StepButton b : buttons) {
             float d = (float) pow(pow(mouse_x - b.x, 2f) + pow(mouse_y - b.y, 2f), 0.5);

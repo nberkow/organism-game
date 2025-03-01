@@ -139,6 +139,10 @@ public class GameBoard implements Disposable {
         }
     }
 
+    public int count_resources(){
+        return universe_map.hex_grid.count_resources();
+    }
+
     public void logic() {
         //
     }
@@ -150,9 +154,6 @@ public class GameBoard implements Disposable {
         ScreenUtils.clear(game.background_color);
 
         grid_window.render();
-
-
-
         if (show_player_summary) {
             for (PlayerSummaryDisplay p : player_summary_displays) {
                 p.render();

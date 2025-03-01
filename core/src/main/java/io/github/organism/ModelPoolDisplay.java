@@ -51,7 +51,7 @@ public class ModelPoolDisplay {
         HashMap<Integer, Integer> wins_hist = new HashMap<>();
 
         for (Point p : simulation.win_records.keySet()) {
-            Point rec = simulation.win_records.get(p);
+            Point rec = simulation.win_records.get(p).get(0);
             int win_margin = (rec.x - rec.y);
 
             if (win_margin > max_win_margin){

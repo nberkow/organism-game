@@ -114,8 +114,8 @@ public class OrganismGame extends Game {
         //main_arcade_loop.setup_for_arcade(1);
         //this.setScreen(game_screen);
 
-        //Gdx.input.setInputProcessor(lab_screen.input_processor);
-        //this.setScreen(lab_screen);
+        Gdx.input.setInputProcessor(lab_screen.input_processor);
+        this.setScreen(lab_screen);
 
         //Gdx.input.setInputProcessor(menu_screen.input_processor);
         //main_arcade_loop.setup_for_menu();

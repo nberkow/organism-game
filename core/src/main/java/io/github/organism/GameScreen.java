@@ -17,7 +17,7 @@ public class GameScreen implements Screen {
     PlayerHud player1_hud;
     PlayerHud player2_hud;
     ArrayList<String> io_player_names;
-    ArrayList<Point> io_player_ids;;
+    ArrayList<Point> io_player_ids;
 
     public GameScreen(OrganismGame g){
         game = g;
@@ -32,6 +32,11 @@ public class GameScreen implements Screen {
         io_player_names = new ArrayList<>();
         io_player_ids = new ArrayList<>();
         input_processor.clear_players();
+    }
+
+    public ArrayList<Player> get_io_players(){
+        ArrayList<Player> players = new ArrayList<>();
+        return players;
     }
 
     public void add_player(Player player, boolean player2){

@@ -179,6 +179,7 @@ public class ArcadeLoop implements GameMode{
         create_players_from_model_pool(game_cfg.bot_players);
         create_human_players();
         create_player_starts();
+        set_player_button_colors();
 
         current_game.create_player_summary_displays();
         current_game.show_player_summary = true;
@@ -187,8 +188,6 @@ public class ArcadeLoop implements GameMode{
         current_game.show_diplomacy = true;
 
         current_game_orchestrator.update_speed(1);
-
-
         current_game_orchestrator.run();
     }
 
@@ -263,9 +262,40 @@ public class ArcadeLoop implements GameMode{
         create_human_players();
         create_bot_players();
         create_player_starts();
+        set_player_button_colors();
         current_game.create_player_summary_displays();
         current_game_orchestrator.update_speed(menu_cfg.gameplay_settings.get("speed"));
         current_game_orchestrator.run();
+    }
+
+    private void set_player_button_colors() {
+        GameScreen game_screen = (GameScreen) current_screen;
+        ArrayList<Player> players = game_screen.get_io_players();
+
+        // player 1
+        Player p = players.get(0);
+        int idx = current_game.all_player_ids.indexOf(p);
+
+        Point left_p = current_game.all_player_ids.get((idx + 2) % 3);
+        Color left_c = tournament_player_colors.get(left_p);
+
+        Point right_p = current_game.all_player_ids.get((idx + 1) % 3);
+        Color right_c = tournament_player_colors.get(right_p);
+
+        game_screen.player1_hud.game_buttons.set_button_colors(left_c, right_c);
+
+        if (players.size() == 2) {
+            p = players.get(1);
+            idx = current_game.all_player_ids.indexOf(p);
+
+            left_p = current_game.all_player_ids.get((idx + 2) % 3);
+            left_c = tournament_player_colors.get(left_p);
+
+            right_p = current_game.all_player_ids.get((idx + 1) % 3);
+            right_c = tournament_player_colors.get(right_p);
+
+            game_screen.player2_hud.game_buttons.set_button_colors(left_c, right_c);
+        }
     }
 
     public void create_human_players(){

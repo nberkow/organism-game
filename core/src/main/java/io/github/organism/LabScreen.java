@@ -34,6 +34,8 @@ public class LabScreen implements Screen {
     LabScreenInputProcessor input_processor;
 
     String [] button_names;
+
+    boolean silent = false;
     public LabScreen(OrganismGame organism_game) {
 
         game = organism_game;
@@ -54,6 +56,17 @@ public class LabScreen implements Screen {
         current_sim = new Simulation(this, cfg, iterations);
 
         current_sim.run_simulation();
+    }
+
+    public void setup_silent_sim(){
+        GameConfig cfg = game.file_handler.read_cfg("kingdoms", "map");
+        cfg.human_players = 0;
+        cfg.bot_players = 3;
+        cfg.gameplay_settings = overlay.saved_settings;
+        int iterations = Math.round(overlay.saved_settings.get("iterations"));
+        current_sim = new Simulation(this, cfg, iterations);
+        current_sim.initialize_model_pool();
+        current_sim.run_silent();
     }
     private void setup_overlay(){
 
@@ -114,7 +127,9 @@ public class LabScreen implements Screen {
         }
 
         if (Objects.equals(button_clicked, "run")) {
-            setup_sim();
+            silent = true;
+            setup_silent_sim();
+
         }
 
         if (Objects.equals(button_clicked, "kill")) {
@@ -154,6 +169,7 @@ public class LabScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(game.background_color);
+
         if (current_sim != null) {
             current_sim.render();
             territory_bar.render(current_sim.current_game);
@@ -162,6 +178,7 @@ public class LabScreen implements Screen {
         if (overlay.show_control_overlay) {
             overlay.render();
         }
+
         buttons.render();
         checkboxes.render();
 

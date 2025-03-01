@@ -4,9 +4,12 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class MenuInputProcessor implements InputProcessor {
     MenuScreen menu_screen;
+
+    String button_clicked;
 
     public MenuInputProcessor(MenuScreen scr){
         menu_screen = scr;
@@ -49,6 +52,7 @@ public class MenuInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        button_clicked = menu_screen.buttons.poll_buttons(screenX, screenY);
         return false;
     }
 
@@ -61,6 +65,9 @@ public class MenuInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (Objects.equals(button_clicked, menu_screen.buttons.poll_buttons(screenX, screenY))) {
+            menu_screen.handle_button_click(button_clicked);
+        }
         return false;
     }
 

@@ -8,6 +8,7 @@ import java.util.HashMap;
 public class GameOrchestrator {
 
     final float VICTORY_THRESHOLD = 2/3f;
+    public boolean finished;
     float turn_max;
 
     int turn = 0;
@@ -25,6 +26,8 @@ public class GameOrchestrator {
     HashMap<Point, Float> player_territory;
     HashMap<Point, Integer> current_moves;
     float total_territory;
+    int resource_exhausted_countdown = 36;
+    boolean show_countdown;
 
     public GameOrchestrator(GameBoard gb) {
         game_board = gb;
@@ -35,6 +38,7 @@ public class GameOrchestrator {
         for (Point p : game_board.players.keySet()) {
             player_territory.put(p, (float) game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices());
         }
+        finished = false;
     }
 
     public void update_speed(float speed){
@@ -87,6 +91,16 @@ public class GameOrchestrator {
         Point leader = null;
         float leader_territory = 0;
 
+        int remaining_resources = game_board.count_resources();
+
+        if (show_countdown) {
+            resource_exhausted_countdown -= 1;
+        }
+
+        if (remaining_resources == 0) {
+            show_countdown = true;
+        }
+
         for (Point p : game_board.players.keySet()) {
             float p_territory = game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             player_territory.put(p, p_territory);
@@ -98,6 +112,10 @@ public class GameOrchestrator {
             if (p_territory / total_territory >= VICTORY_THRESHOLD) {
                 return p;
             }
+        }
+
+        if (resource_exhausted_countdown <= 0) {
+            return leader;
         }
 
         if (turn >= turn_max) {
