@@ -32,7 +32,7 @@ public class Organism {
 
     }
 
-    public void update_resources(){
+    public void updateResources(){
         resources = new Integer [] {0, 0, 0};
 
         for (GridPosition pos : territory_hex){
@@ -54,7 +54,7 @@ public class Organism {
             int resource_count = resources[r];
             Point ally_id = player.get_ally_id();
             if (ally_id != null) {
-                int ally_resource_count = game_board.players.get(ally_id).get_organism().resources[r];
+                int ally_resource_count = game_board.players.get(ally_id).getOrganism().resources[r];
                 resource_count += ally_resource_count;
             }
 
@@ -173,7 +173,7 @@ public class Organism {
         w.total_adjacent_hex_value = 0;
         w.adjacent_hex_completeness = 0;
 
-        int [] resource_priority = player.get_organism().get_resource_priority();
+        int [] resource_priority = player.getOrganism().get_resource_priority();
         for (MapHex hex : w.vertex.adjacent_hexes) {
             if (hex.player != player) {
 
@@ -214,7 +214,7 @@ public class Organism {
 
         if (h.player != player) {
             if (h.player != null) {
-                h.player.get_organism().territory_hex.remove_pos(h.pos);
+                h.player.getOrganism().territory_hex.remove_pos(h.pos);
             }
             territory_hex.add_pos(h.pos);
             h.player = player;
@@ -236,7 +236,7 @@ public class Organism {
     public void claim_vertex(MapVertex v){
 
         if (v.player != null){
-            v.player.get_organism().territory_vertex.remove_pos(v.pos);
+            v.player.getOrganism().territory_vertex.remove_pos(v.pos);
         }
 
         v.player = player;

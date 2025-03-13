@@ -90,7 +90,7 @@ public class IO_Player  implements Player {
 
 
     @Override
-    public Organism get_organism() {
+    public Organism getOrganism() {
         return organism;
     }
 

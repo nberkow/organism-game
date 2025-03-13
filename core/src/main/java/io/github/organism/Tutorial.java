@@ -33,6 +33,8 @@ public class Tutorial implements GameMode {
 
         createHumanPlayer();
 
+        createDummyPlayers();
+
         createPlayerStarts();
 
         currentGameOrchestrator.run();
@@ -62,7 +64,6 @@ public class Tutorial implements GameMode {
         createBotPlayer();
 
         createHumanPlayer();
-
         createPlayerStarts();
 
         setPlayerButtonColors();
@@ -116,7 +117,6 @@ public class Tutorial implements GameMode {
         );
         organism.player = player;
         currentGame.players.put(playerId, player);
-        game.gameScreen.add_player(player, false);
 
         currentGame.humanPlayerIds.add(playerId);
         currentGame.allPlayerIds.add(playerId);
@@ -124,6 +124,15 @@ public class Tutorial implements GameMode {
         screen.player1Hud = new PlayerHud(game, screen, player, false);
         screen.inputProcessor.add_player(playerId);
 
+    }
+
+    public void createDummyPlayers(){
+        for (int i=0; i<2; i++) {
+            DummyPlayer player = new DummyPlayer();
+            Point playerId = new Point(0, i);
+            currentGame.players.put(playerId, player);
+            currentGame.allPlayerIds.add(playerId);
+        }
     }
 
     private void createGameBoard() {

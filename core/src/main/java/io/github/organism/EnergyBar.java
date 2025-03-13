@@ -74,7 +74,7 @@ public class EnergyBar {
         }
 
         game.shapeRenderer.setColor(game.foreground_color);
-        for (int i=0; i<player.get_organism().energy; i++) {
+        for (int i = 0; i<player.getOrganism().energy; i++) {
             game.shapeRenderer.rect(
                 first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),
                 y + GAP_WIDTH * 2,

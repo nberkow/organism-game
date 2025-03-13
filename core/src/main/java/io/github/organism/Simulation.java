@@ -424,12 +424,12 @@ public class Simulation implements GameMode{
 
         double total_territory = 0;
         for (Point player_id : currentGame.players.keySet()) {
-            double territory = currentGame.players.get(player_id).get_organism().territory_vertex.get_unmasked_vertices();
+            double territory = currentGame.players.get(player_id).getOrganism().territory_vertex.get_unmasked_vertices();
             total_territory += territory;
         }
 
         for (Point player_id  : currentGame.players.keySet()) {
-            double territory = currentGame.players.get(player_id).get_organism().territory_vertex.get_unmasked_vertices();
+            double territory = currentGame.players.get(player_id).getOrganism().territory_vertex.get_unmasked_vertices();
             weights.put(player_id, territory / total_territory);
         }
 

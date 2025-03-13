@@ -29,11 +29,13 @@ public class PlayerStartAssigner {
     public void assignStartingHexes(ArrayList<int []> starting_coords) {
         int i = 0;
         for (Point p : players.keySet()) {
-            Organism organism = players.get(p).get_organism();
+            Organism organism = players.get(p).getOrganism();
             int [] coords = starting_coords.get(i);
-            organism.claim_hex(coords[0], coords[1], coords[2]);
-            MapHex hex = (MapHex) universe_map.hex_grid.get_pos(coords[0], coords[1], coords[2]).content;
-            hex.add_resource(i%3, 3);
+            if (organism!= null) {
+                organism.claim_hex(coords[0], coords[1], coords[2]);
+                MapHex hex = (MapHex) universe_map.hex_grid.get_pos(coords[0], coords[1], coords[2]).content;
+                hex.add_resource(i % 3, 3);
+            }
             i ++;
         }
     }

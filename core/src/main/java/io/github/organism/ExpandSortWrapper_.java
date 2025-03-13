@@ -19,7 +19,7 @@ public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
     public int compute_hex_value(MapHex hex) {
         int val = 0;
 
-        int [] resource_priority = current_player.get_organism().get_resource_priority();
+        int [] resource_priority = current_player.getOrganism().get_resource_priority();
         for (int i=0; i<3; i++){
             val += resource_priority[hex.resources[i]] * 6;
         }
@@ -51,7 +51,7 @@ public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
     public int compute_vertex_value(MapVertex vertex) {
         int vertex_val = 0;
 
-        int [] resource_priority = current_player.get_organism().get_resource_priority();
+        int [] resource_priority = current_player.getOrganism().get_resource_priority();
         for (MapHex hex : vertex.adjacent_hexes) {
             if (hex.player != current_player) {
                 for (int i = 0; i < hex.total_resources; i++) {

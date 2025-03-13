@@ -32,7 +32,7 @@ public class TerritoryBar {
     public void logic(GameBoard gb){
         float total_territory = gb.universe_map.vertex_grid.get_unmasked_vertices();
         for (Point p : gb.allPlayerIds) {
-            float player_territory = gb.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
+            float player_territory = gb.players.get(p).getOrganism().territory_vertex.get_unmasked_vertices();
             heights.put(p, max_height * player_territory / total_territory);
         }
     }

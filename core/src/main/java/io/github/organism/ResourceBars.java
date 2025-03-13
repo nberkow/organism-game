@@ -66,7 +66,7 @@ public class ResourceBars {
             }
 
             game.shapeRenderer.setColor(game.resourceColorsBright[res]);
-            int val = Math.min(6, player.get_organism().resources[res]);
+            int val = Math.min(6, player.getOrganism().resources[res]);
 
             game.shapeRenderer.circle(
                 x + inset + (RADIUS * 2),
@@ -109,7 +109,7 @@ public class ResourceBars {
         game.batch.begin();
         font.draw(
             game.batch,
-            "" + player.get_organism().income,
+            "" + player.getOrganism().income,
             font_x,
             y + BAR_HEIGHT * 2.5f);
         game.batch.end();

@@ -33,7 +33,7 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
 
         // count the resources in hexes with zero owned vertexes
 
-        int [] resource_priority = current_player.get_organism().get_resource_priority();
+        int [] resource_priority = current_player.getOrganism().get_resource_priority();
         Set<MapVertex> unique_neighbors = new HashSet<>();
         resource_value = 0;
 

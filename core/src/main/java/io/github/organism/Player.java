@@ -17,7 +17,7 @@ public interface Player {
 
     String getPlayerName();
 
-    Organism get_organism();
+    Organism getOrganism();
 
     public float [] gather_inputs();
 

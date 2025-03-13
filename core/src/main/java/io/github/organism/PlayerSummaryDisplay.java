@@ -66,7 +66,7 @@ public class PlayerSummaryDisplay {
         game_board.game.shapeRenderer.setColor(game_board.game.foreground_color);
         game_board.game.shapeRenderer.rect(
             x, y + ENERGY_BAR_Y,
-            (float) (energy_bar_width * (player.get_organism().energy / 100f)),
+            (float) (energy_bar_width * (player.getOrganism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
         game_board.game.shapeRenderer.end();
     }
@@ -76,7 +76,7 @@ public class PlayerSummaryDisplay {
         game_board.game.shapeRenderer.setColor(game_board.game.foreground_color);
         game_board.game.shapeRenderer.rect(
             x, y + INCOME_BAR_Y,
-            (float) (energy_bar_width * (player.get_organism().energy / 100f)),
+            (float) (energy_bar_width * (player.getOrganism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
         game_board.game.shapeRenderer.end();
     }

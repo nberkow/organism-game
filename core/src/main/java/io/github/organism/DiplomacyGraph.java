@@ -16,7 +16,7 @@ enum Relationship {NEUTRAL, ENEMY, ALLY};
 public class DiplomacyGraph {
 
     OrganismGame game;
-    GameBoard current_game;
+    GameBoard currentGame;
 
     SettingsManager settings_manager;
     HashSet<Player> players_counted;
@@ -43,7 +43,7 @@ public class DiplomacyGraph {
     public DiplomacyGraph(OrganismGame g, GameBoard b) {
 
         game = g;
-        current_game = b;
+        currentGame = b;
         render_params_set = false;
 
         // initialize relationships
@@ -63,14 +63,14 @@ public class DiplomacyGraph {
     public void update_diplomacy(HashMap<Point, Integer> all_player_moves) {
 
         // check for all extract moves.
-        handle_extracting_players(all_player_moves);
+        handleExtractingPlayers(all_player_moves);
 
         // check for expand moves
-        handle_expanding_players(all_player_moves);
+        handleExpandingPlayers(all_player_moves);
     }
 
 
-    public void handle_extracting_players(HashMap<Point, Integer> all_player_moves) {
+    public void handleExtractingPlayers(HashMap<Point, Integer> all_player_moves) {
 
         // - if one player extracts, previous relationships are kept (overwritten if attacked)
         // - if two players extract they form an alliance
@@ -100,12 +100,12 @@ public class DiplomacyGraph {
             relationships.get(p).put(q, Relationship.ALLY);
             relationships.get(q).put(p, Relationship.ALLY);
 
-            current_game.players.get(p).set_ally_id(q);
-            current_game.players.get(q).set_ally_id(p);
+            currentGame.players.get(p).set_ally_id(q);
+            currentGame.players.get(q).set_ally_id(p);
 
             if (other_players.size() == 1) {
                 Point e = other_players.get(0);
-                current_game.players.get(e).set_ally_id(null);
+                currentGame.players.get(e).set_ally_id(null);
 
                 if (relationships.get(e).get(p) != Relationship.ENEMY) {
                     relationships.get(e).put(p, Relationship.NEUTRAL);
@@ -118,36 +118,41 @@ public class DiplomacyGraph {
         }
     }
 
-    private void handle_expanding_players(HashMap<Point, Integer> all_player_moves) {
+    private void handleExpandingPlayers(HashMap<Point, Integer> allPlayerMoves) {
 
         // if a player attacks another player they become enemies.
         // if they were allies, alliance is canceled
 
         for (int i=0; i<3; i++) {
 
-            Point p = current_game.allPlayerIds.get(i);
-            Integer move = all_player_moves.get(p);
+            Point p = currentGame.allPlayerIds.get(i);
+            Integer move = allPlayerMoves.get(p);
 
             if (move != null) {
                 if (move == 0 | move == 2) {
                     Point q = null;
                     // attacking clockwise (left)
                     if (move == 0) {
-                        q = current_game.allPlayerIds.get((i + 2) % 3);
+                        q = currentGame.allPlayerIds.get((i + 2) % 3);
                     }
                     // attacking counter-clockwise (right)
                     if (move == 2) {
-                        q = current_game.allPlayerIds.get((i + 1) % 3);
+                        q = currentGame.allPlayerIds.get((i + 1) % 3);
                     }
 
-                    relationships.get(p).put(q, Relationship.ENEMY);
-                    relationships.get(q).put(p, Relationship.ENEMY);
-
-                    if (current_game.players.get(p).get_ally_id() == q) {
-                        current_game.players.get(p).set_ally_id(null);
+                    if (relationships.get(p) != null) {
+                        relationships.get(p).put(q, Relationship.ENEMY);
                     }
-                    if (current_game.players.get(q).get_ally_id() == p) {
-                        current_game.players.get(q).set_ally_id(null);
+
+                    if (relationships.get(q) != null) {
+                        relationships.get(q).put(p, Relationship.ENEMY);
+                    }
+
+                    if (currentGame.players.get(p).get_ally_id() == q) {
+                        currentGame.players.get(p).set_ally_id(null);
+                    }
+                    if (currentGame.players.get(q).get_ally_id() == p) {
+                        currentGame.players.get(q).set_ally_id(null);
                     }
                 }
             }
@@ -175,8 +180,8 @@ public class DiplomacyGraph {
             player_coords[i] = coords;
 
             // record the player colors in order
-            Point p = current_game.allPlayerIds.get(i);
-            Player player = current_game.players.get(p);
+            Point p = currentGame.allPlayerIds.get(i);
+            Player player = currentGame.players.get(p);
             player_colors[i] = player.get_color();
 
             // record the vertices of each player's arc
@@ -194,9 +199,9 @@ public class DiplomacyGraph {
     }
 
     public void set_all_neutral() {
-        for (Point p : current_game.players.keySet()) {
+        for (Point p : currentGame.players.keySet()) {
             relationships.put(p, new HashMap<>());
-            for (Point q : current_game.players.keySet()) {
+            for (Point q : currentGame.players.keySet()) {
                 if (p != q) {
                     relationships.get(p).put(q, Relationship.NEUTRAL);
                 }
@@ -212,15 +217,15 @@ public class DiplomacyGraph {
         }
 
         if (Objects.equals(relationships.get(vertex_owner.getTournamentId()).get(player), Relationship.ENEMY)){
-            return current_game.config.gameplaySettings.get("attack enemy cost");
+            return currentGame.config.gameplaySettings.get("attack enemy cost");
         }
 
         if (Objects.equals(relationships.get(vertex_owner.getTournamentId()).get(player), Relationship.NEUTRAL)){
-            return current_game.config.gameplaySettings.get("attack neutral cost");
+            return currentGame.config.gameplaySettings.get("attack neutral cost");
         }
 
         if (Objects.equals(relationships.get(vertex_owner.getTournamentId()).get(player), Relationship.ALLY)){
-            return current_game.config.gameplaySettings.get("attack ally cost");
+            return currentGame.config.gameplaySettings.get("attack ally cost");
         }
 
         return null;
@@ -262,8 +267,8 @@ public class DiplomacyGraph {
             // Draw the arc as a polyline
             color = Color.DARK_GRAY;
 
-            Point p = current_game.allPlayerIds.get(i);
-            Point q = current_game.allPlayerIds.get((i + 1) % 3);
+            Point p = currentGame.allPlayerIds.get(i);
+            Point q = currentGame.allPlayerIds.get((i + 1) % 3);
 
             Relationship r = relationships.get(p).get(q);
             if (r == Relationship.ALLY) {
@@ -281,8 +286,8 @@ public class DiplomacyGraph {
             // Draw the arc as a polyline
             color = Color.DARK_GRAY;
 
-            Point p = current_game.allPlayerIds.get(i);
-            Point q = current_game.allPlayerIds.get((i + 2) % 3);
+            Point p = currentGame.allPlayerIds.get(i);
+            Point q = currentGame.allPlayerIds.get((i + 2) % 3);
 
             Relationship r = relationships.get(p).get(q);
             if (r == Relationship.ENEMY) {

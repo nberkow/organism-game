@@ -78,7 +78,7 @@ public class BotPlayer implements Player{
 
             Point player_id = game_board.allPlayerIds.get(p);
             Player player = game_board.players.get(player_id);
-            Organism organism = player.get_organism();
+            Organism organism = player.getOrganism();
 
             // player's energy
             hmm_inputs[register_index] = (float) organism.energy / organism.MAX_ENERGY;
@@ -156,7 +156,7 @@ public class BotPlayer implements Player{
         return player_name;
     }
 
-    public Organism get_organism(){
+    public Organism getOrganism(){
         return organism;
     }
 
