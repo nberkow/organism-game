@@ -112,13 +112,13 @@ public class MapSettingsInputProcessor implements InputProcessor {
 
         if (button_click_trackers.get("save")) {
             map_screen.render_file_buttons = true;
-            map_screen.game.file_handler.write_mode = true;
+            map_screen.game.fileHandler.write_mode = true;
             button_click_trackers.put("save",false);
         }
 
         if (button_click_trackers.get("load")) {
             map_screen.render_file_buttons = true;
-            map_screen.game.file_handler.write_mode = false;
+            map_screen.game.fileHandler.write_mode = false;
             button_click_trackers.put("load",false);
         }
 
@@ -126,9 +126,9 @@ public class MapSettingsInputProcessor implements InputProcessor {
             for (int i=3; i<6; i++){
                 String label = button_labels.get(i);
                 if (button_click_trackers.get(label)) {
-                    GameConfig config = map_screen.game.file_handler.read_cfg(
+                    GameConfig config = map_screen.game.fileHandler.read_cfg(
                         label, "map");
-                    if (!map_screen.game.file_handler.write_mode) {
+                    if (!map_screen.game.fileHandler.write_mode) {
                         map_screen.set_new_game_board(config);
                     }
 

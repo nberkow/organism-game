@@ -16,31 +16,31 @@ import java.util.Random;
 
 public class OrganismGame extends Game {
 
-    ShapeRenderer shape_renderer;
+    ShapeRenderer shapeRenderer;
+    GameScreen gameScreen;
+    MenuScreen menuScreen;
+    LabScreen labScreen;
 
-    ArcadeLoop main_arcade_loop;
-    GameScreen game_screen;
-    MenuScreen menu_screen;
-    LabScreen lab_screen;
+    TutorialScreen tutorialScreen;
 
-    FileHandler file_handler;
+    FileHandler fileHandler;
 
-    MapSettingsScreen map_edit_screen;
+    MapSettingsScreen mapSettingsScreen;
     SpriteBatch batch;
-    GameBoard game_board;
+    GameBoard gameBoard;
     OrthographicCamera camera;
     FitViewport viewport;
     Random rng;
 
     // Game colors
-    Color background_color = Color.BLACK;
+    Color backgroundColor = Color.BLACK;
     Color foreground_color = Color.CYAN;
 
     Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
 
     HashMap<Integer, BitmapFont> fonts;
 
-    Color [] player_colors = {
+    Color [] playerColors = {
         new Color(0xB91372FF),
         new Color(0xD497A7FF),
         new Color(0x6EEB83FF),
@@ -50,16 +50,16 @@ public class OrganismGame extends Game {
     };
 
 
-    Color [] resource_colors_dark = {
+    Color [] resourceColorsDark = {
         new Color(0f, 0f, 0.3f, 0f),
         new Color(0f, 0.2f, 0f, 0f),
         new Color(0.2f, 0f, 0.2f, 0f)};
-    Color [] resource_colors_bright = {
+    Color [] resourceColorsBright = {
         new Color(0f, 0f, 0.5f, 0f),
         new Color(0f, 0.4f, 0f, 0f),
         new Color(0.4f, 0f, 0.2f, 0f)};
-    public final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
-    public final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
+    public static final int VIRTUAL_WIDTH = 1920/2;  // Virtual resolution width
+    public static final int VIRTUAL_HEIGHT = 1080/2; // Virtual resolution height
 
     @Override
     public void create() {
@@ -74,12 +74,12 @@ public class OrganismGame extends Game {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.setProjectionMatrix(this.viewport.getCamera().combined);
 
-        shape_renderer = new ShapeRenderer();
-        shape_renderer.setProjectionMatrix(this.viewport.getCamera().combined);
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setProjectionMatrix(this.viewport.getCamera().combined);
 
         Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
-        file_handler = new FileHandler(this);
+        fileHandler = new FileHandler(this);
 
         rng = new Random();
         rng.setSeed(10);
@@ -90,36 +90,42 @@ public class OrganismGame extends Game {
             fonts.put(size, new BitmapFont(Gdx.files.internal("fonts/dubai" + size + ".fnt")));
         }
 
-        main_arcade_loop = new ArcadeLoop(this);
+        menuScreen = new MenuScreen(this);
+        menuScreen.inputProcessor = new MenuInputProcessor(menuScreen);
 
-        menu_screen = new MenuScreen(this);
-        menu_screen.input_processor = new MenuInputProcessor(menu_screen);
+        gameScreen = new GameScreen(this);
+        gameScreen.inputProcessor = new GameInputProcessor(gameScreen);
+        gameScreen.overlay.input_processor = new SettingsOverlayInputProcessor(gameScreen.overlay);
 
-        game_screen = new GameScreen(this);
-        game_screen.input_processor = new GameInputProcessor(game_screen);
-        game_screen.overlay.input_processor = new SettingsOverlayInputProcessor(game_screen.overlay);
+        mapSettingsScreen = new MapSettingsScreen(this);
+        mapSettingsScreen.inputProcessor = new MapSettingsInputProcessor(mapSettingsScreen);
 
-        map_edit_screen = new MapSettingsScreen(this);
-        map_edit_screen.input_processor = new MapSettingsInputProcessor(map_edit_screen);
+        labScreen = new LabScreen(this);
+        labScreen.inputProcessor = new LabScreenInputProcessor(labScreen);
+        labScreen.overlay.input_processor = new SettingsOverlayInputProcessor(labScreen.overlay);
 
-        lab_screen = new LabScreen(this);
-        lab_screen.input_processor = new LabScreenInputProcessor(lab_screen);
-        lab_screen.overlay.input_processor = new SettingsOverlayInputProcessor(lab_screen.overlay);
+        tutorialScreen = new TutorialScreen(this);
+        tutorialScreen.inputProcessor = new TutorialInputProcessor(tutorialScreen);
+
+        /*
+        Gdx.input.setInputProcessor(mapSettingsScreen.inputProcessor);
+        this.setScreen(mapSettingsScreen);
+
+        Gdx.input.setInputProcessor(gameScreen.inputProcessor);
+        this.setScreen(gameScreen);
 
 
-        //Gdx.input.setInputProcessor(map_input_processor);
-        //this.setScreen(map_edit_screen);
 
-        //Gdx.input.setInputProcessor(game_screen.input_processor);
-        //main_arcade_loop.setup_for_arcade(1);
-        //this.setScreen(game_screen);
+        Gdx.input.setInputProcessor(menuScreen.inputProcessor);
+        this.setScreen(menuScreen);
+         */
 
-        Gdx.input.setInputProcessor(lab_screen.input_processor);
-        this.setScreen(lab_screen);
+        //Gdx.input.setInputProcessor(labScreen.inputProcessor);
+        //this.setScreen(labScreen);
 
-        //Gdx.input.setInputProcessor(menu_screen.input_processor);
-        //main_arcade_loop.setup_for_menu();
-        //this.setScreen(menu_screen);
+        Gdx.input.setInputProcessor(tutorialScreen.inputProcessor);
+        this.setScreen(tutorialScreen);
+        tutorialScreen.setup(); // this can fire from clicking the intro prompt
 
     }
 
@@ -138,8 +144,8 @@ public class OrganismGame extends Game {
     @Override
     public void dispose() {
         // Handle disposing of game resources
-        if (!(game_board == null)){
-            game_board.dispose();
+        if (!(gameBoard == null)){
+            gameBoard.dispose();
         }
     }
 

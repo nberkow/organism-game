@@ -69,8 +69,8 @@ public class MapHex implements MapElement{
     public void render_players() {
 
         Color c;
-        pos.grid.game_board.game.shape_renderer.end();
-        pos.grid.game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        pos.grid.game_board.game.shapeRenderer.end();
+        pos.grid.game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
         for (int v=0; v<6; v++){
             MapVertex v1 = vertex_list[v];
@@ -82,7 +82,7 @@ public class MapHex implements MapElement{
                 float x2 = (float) ((v2.pos.j * Math.pow(3f, 0.5f) / 2f) - (v2.pos.k * Math.pow(3f, 0.5f) / 2f));
                 float y2 = v2.pos.i - v2.pos.j / 2f - v2.pos.k / 2f;
 
-                c = pos.grid.game_board.game.background_color;
+                c = pos.grid.game_board.game.backgroundColor;
                 if (v1.player != null && v2.player == v1.player) {
                     c = v2.player.get_color();
                 } else {
@@ -91,16 +91,16 @@ public class MapHex implements MapElement{
                     }
                 }
 
-                pos.grid.game_board.game.shape_renderer.setColor(c);
+                pos.grid.game_board.game.shapeRenderer.setColor(c);
 
-                pos.grid.game_board.game.shape_renderer.line(
+                pos.grid.game_board.game.shapeRenderer.line(
                     x1 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
                     y1 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
                     x2 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
                     y2 * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y);
             }
         }
-        pos.grid.game_board.game.shape_renderer.end();
+        pos.grid.game_board.game.shapeRenderer.end();
     }
 
     private boolean is_common_hex_masked(MapVertex v1, MapVertex v2) {
@@ -127,10 +127,10 @@ public class MapHex implements MapElement{
         float [] j = {0f, 0f, RESOURCE_JITTER};
 
         int n=0;
-        pos.grid.game_board.game.shape_renderer.end();
+        pos.grid.game_board.game.shapeRenderer.end();
 
         for (int r=0; r<total_resources; r++){
-            pos.grid.game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+            pos.grid.game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             float i_f = pos.i + j[n];
             float j_f = pos.j + j[(n + 1) % 3];
             float k_f = pos.k + j[(n + 2) % 3];
@@ -138,24 +138,24 @@ public class MapHex implements MapElement{
             float x = (float) ((j_f * Math.pow(3f, 0.5f) / 2f) - (k_f * Math.pow(3f, 0.5f) / 2f));
             float y = i_f - j_f/2f - k_f/2f;
 
-            Color c1 = pos.grid.game_board.game.resource_colors_dark[resources[r]];
-            Color c2 = pos.grid.game_board.game.resource_colors_bright[resources[r]];
+            Color c1 = pos.grid.game_board.game.resourceColorsDark[resources[r]];
+            Color c2 = pos.grid.game_board.game.resourceColorsBright[resources[r]];
 
-            pos.grid.game_board.game.shape_renderer.setColor(c1);
-            pos.grid.game_board.game.shape_renderer.circle(
+            pos.grid.game_board.game.shapeRenderer.setColor(c1);
+            pos.grid.game_board.game.shapeRenderer.circle(
                 x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
                 y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
                 RESOURCE_RADIUS * pos.grid.game_board.hex_side_len);
 
-            pos.grid.game_board.game.shape_renderer.end();
-            pos.grid.game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-            pos.grid.game_board.game.shape_renderer.setColor(c2);
-            pos.grid.game_board.game.shape_renderer.circle(
+            pos.grid.game_board.game.shapeRenderer.end();
+            pos.grid.game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            pos.grid.game_board.game.shapeRenderer.setColor(c2);
+            pos.grid.game_board.game.shapeRenderer.circle(
                 x * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_x,
                 y * pos.grid.game_board.hex_side_len + pos.grid.game_board.center_y,
                 RESOURCE_RADIUS * pos.grid.game_board.hex_side_len);
 
-            pos.grid.game_board.game.shape_renderer.end();
+            pos.grid.game_board.game.shapeRenderer.end();
             n++;
         }
 

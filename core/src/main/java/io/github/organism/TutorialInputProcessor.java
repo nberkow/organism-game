@@ -7,16 +7,16 @@ import com.badlogic.gdx.math.Vector2;
 import java.awt.Point;
 import java.util.HashMap;
 
-public class GameInputProcessor implements InputProcessor {
-    GameBoard game_board;
+public class TutorialInputProcessor implements InputProcessor {
+    GameBoard gameBoard;
     final double BUTTON_HOLD_ACTIVATION_TIME = .2d;
     final double MIN_BETWEEN_PRESS_TIME = .1d;
-    GameScreen screen;
+    TutorialScreen screen;
     double held_button_base_freq;
 
     HashMap<Point, PlayerGameInputData> player_input_data;
 
-    public GameInputProcessor(GameScreen scr){
+    public TutorialInputProcessor(TutorialScreen scr){
         screen = scr;
         held_button_base_freq = .2;
         player_input_data = new HashMap<>();
@@ -55,7 +55,7 @@ public class GameInputProcessor implements InputProcessor {
         if (keycode == Input.Keys.K || keycode == Input.Keys.L || keycode == Input.Keys.SEMICOLON) {
             p = 1;
         }
-        Point player_id = game_board.humanPlayerIds.get(p);
+        Point player_id = gameBoard.humanPlayerIds.get(p);
         PlayerGameInputData input_data = player_input_data.get(player_id);
 
         int key_val = -1;
@@ -85,7 +85,7 @@ public class GameInputProcessor implements InputProcessor {
             p = 1;
         }
 
-        Point player_id = game_board.humanPlayerIds.get(p);
+        Point player_id = gameBoard.humanPlayerIds.get(p);
         PlayerGameInputData input_data = player_input_data.get(player_id);
 
         int key_val = -1;
@@ -118,12 +118,12 @@ public class GameInputProcessor implements InputProcessor {
         // Convert screen coordinates to game world coordinates
 
         Vector2 touchPos = new Vector2(screenX, screenY);
-        game_board.game.viewport.unproject(touchPos);
+        screen.game.viewport.unproject(touchPos);
         GameplayButtons.StepButton button_data = screen.player1Hud.gameButtons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null){
 
-            Point player_id = game_board.humanPlayerIds.get(button_data.player - 1);
+            Point player_id = gameBoard.humanPlayerIds.get(button_data.player - 1);
             PlayerGameInputData input_data = player_input_data.get(player_id);
 
             if (input_data.time_not_held > MIN_BETWEEN_PRESS_TIME) {
@@ -137,7 +137,6 @@ public class GameInputProcessor implements InputProcessor {
                 }
             }
         }
-
         return false;
     }
 
@@ -145,11 +144,11 @@ public class GameInputProcessor implements InputProcessor {
 
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
-        game_board.game.viewport.unproject(touchPos);
+        gameBoard.game.viewport.unproject(touchPos);
         GameplayButtons.StepButton button_data = screen.player1Hud.gameButtons.check_buttons(touchPos.x, touchPos.y);
 
         if (button_data != null) {
-            Point player_id = game_board.humanPlayerIds.get(button_data.player - 1);
+            Point player_id = gameBoard.humanPlayerIds.get(button_data.player - 1);
             PlayerGameInputData input_data = player_input_data.get(player_id);
             if (input_data.touched_button){
                 input_data.time_held = 0d;
@@ -181,7 +180,7 @@ public class GameInputProcessor implements InputProcessor {
     }
 
     public void updateTimers(double time_delta){
-        for (Point p : game_board.humanPlayerIds){
+        for (Point p : gameBoard.humanPlayerIds){
             PlayerGameInputData input_data = player_input_data.get(p);
 
             input_data.time_held += time_delta;
@@ -195,9 +194,9 @@ public class GameInputProcessor implements InputProcessor {
     }
 
     public void updateQueuesWithInput(){
-        for (Point p : game_board.humanPlayerIds){
+        for (Point p : gameBoard.humanPlayerIds){
 
-            Player player = game_board.players.get(p);
+            Player player = gameBoard.players.get(p);
             PlayerGameInputData input_data = player_input_data.get(p);
 
             // if the button is being held

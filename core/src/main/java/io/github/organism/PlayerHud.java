@@ -1,5 +1,7 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Screen;
+
 public class PlayerHud {
 
     final float BUTTON_SIDE_DIST = 50;
@@ -15,8 +17,8 @@ public class PlayerHud {
 
     OrganismGame game;
 
-    GameScreen game_screen;
-    GameplayButtons game_buttons;
+    Screen screen;
+    GameplayButtons gameButtons;
     EnergyBar energy_bar;
 
     ActionQueueBar action_queue_bar;
@@ -25,10 +27,10 @@ public class PlayerHud {
     float side;
     int parity;
 
-    public PlayerHud(OrganismGame g, GameScreen scr, Player p, boolean player2){
+    public PlayerHud(OrganismGame g, Screen scr, Player p, boolean player2){
 
         game = g;
-        game_screen = scr;
+        screen = scr;
         player = p;
 
         parity = 1;
@@ -36,13 +38,13 @@ public class PlayerHud {
 
         if (player2) {
             parity = -1;
-            side = game.VIRTUAL_WIDTH - HUD_WIDTH;
+            side = OrganismGame.VIRTUAL_WIDTH - HUD_WIDTH;
         }
 
         x = side + SIDE_BUFFER * parity;
         y = HUD_Y + SIDE_BUFFER;
 
-        game_buttons = new GameplayButtons(game, this);
+        gameButtons = new GameplayButtons(game, this);
         energy_bar = new EnergyBar(game, this, player, HUD_WIDTH * 1.1f, HUD_HEIGHT / 10);
         action_queue_bar = new ActionQueueBar(game, this);
         resource_bars = new ResourceBars(game, this, player);
@@ -68,7 +70,7 @@ public class PlayerHud {
         player.get_organism().update_income();
 
         energy_bar.render();
-        game_buttons.render();
+        gameButtons.render();
         resource_bars.render();
         action_queue_bar.render();
     }

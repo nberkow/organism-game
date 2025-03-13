@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 
 import java.util.Objects;
@@ -8,7 +7,10 @@ import java.util.Objects;
 public class MenuScreen implements Screen {
 
     OrganismGame game;
-    MenuInputProcessor input_processor;
+    MenuInputProcessor inputProcessor;
+
+    GameConfig cfg;
+    Simulation menu_simulation;
 
     MenuScreenButtons buttons;
     String [] button_names;
@@ -16,19 +18,21 @@ public class MenuScreen implements Screen {
 
     public MenuScreen(OrganismGame g){
         game = g;
+        cfg = new GameConfig();
+        menu_simulation = new Simulation(game,this, cfg, 10);
+
         button_names = new String[] {
             "single player",
             "two player",
             "simulation",
-            "settings",
-            "exit"
+            "tutorial",
+            "exit to desktop"
         };
         buttons = new MenuScreenButtons(game, this);
         buttons.setup_buttons(button_names);
     }
 
     public void handle_button_click(String button_label){
-        System.out.println(button_label);
 
         if (Objects.equals(button_label, "single player")){
 
@@ -39,10 +43,10 @@ public class MenuScreen implements Screen {
         if (Objects.equals(button_label, "simulation")){
 
         }
-        if (Objects.equals(button_label, "settings")){
+        if (Objects.equals(button_label, "tutorial")){
 
         }
-        if (Objects.equals(button_label, "exit")){
+        if (Objects.equals(button_label, "exit to desktop")){
 
         }
 
@@ -67,22 +71,22 @@ public class MenuScreen implements Screen {
     }
 
     private void input() {
-        if (game.main_arcade_loop.current_game_orchestrator != null) {
-            game.main_arcade_loop.current_game_orchestrator.update_timers_and_flags();
+        if (menu_simulation.currentGameOrchestrator != null) {
+            menu_simulation.currentGameOrchestrator.updateTimersAndFlags();
         }
     }
 
     private void logic() {
-        if (game.main_arcade_loop.current_game_orchestrator != null) {
-            game.main_arcade_loop.current_game_orchestrator.update_players();
+        if (menu_simulation.currentGameOrchestrator != null) {
+            menu_simulation.currentGameOrchestrator.updatePlayers();
         }
     }
 
     private void draw() {
         // Ensure the camera is updated before drawing
-        if (game.main_arcade_loop.current_game != null) {
+        if (menu_simulation.currentGame != null) {
             game.camera.update();
-            game.main_arcade_loop.current_game.render();
+            menu_simulation.currentGame.render();
         }
         buttons.render();
     }

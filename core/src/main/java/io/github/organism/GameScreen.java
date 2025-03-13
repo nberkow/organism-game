@@ -11,67 +11,68 @@ public class GameScreen implements Screen {
 
     public SettingsManager settings_manager;
     public SettingsOverlay overlay;
+
+    public ArcadeLoop arcadeLoop;
     OrganismGame game;
-    GameInputProcessor input_processor;
-    GameConfig cfg;
-    PlayerHud player1_hud;
-    PlayerHud player2_hud;
-    ArrayList<String> io_player_names;
-    ArrayList<Point> io_player_ids;
+    GameInputProcessor inputProcessor;
+    PlayerHud player1Hud;
+    PlayerHud player2Hud;
+    ArrayList<String> ioPlayerNames;
+    ArrayList<Point> ioPlayerIds;
 
     public GameScreen(OrganismGame g){
         game = g;
-        setup_overlay();
-        overlay.setup_sliders();
+        setupOverlay();
+        overlay.setupSliders();
 
-        io_player_names = new ArrayList<>();
-        io_player_ids = new ArrayList<>();
+        ioPlayerNames = new ArrayList<>();
+        ioPlayerIds = new ArrayList<>();
     }
-
-    public void clear_players(){
-        io_player_names = new ArrayList<>();
-        io_player_ids = new ArrayList<>();
-        input_processor.clear_players();
-    }
-
-    public ArrayList<Player> get_io_players(){
+    public ArrayList<Player> getIoPlayers() {
         ArrayList<Player> players = new ArrayList<>();
+        if (arcadeLoop.currentGame == null){
+            return players;
+        }
+        for (Point p : ioPlayerIds) {
+            players.add(arcadeLoop.currentGame.players.get(p));
+        }
         return players;
     }
 
+
     public void add_player(Player player, boolean player2){
 
-        io_player_names.add(player.get_player_name());
-        Point player_id = player.get_tournament_id();
-        io_player_ids.add(player_id);
+        ioPlayerNames.add(player.getPlayerName());
+        Point player_id = player.getTournamentId();
+        ioPlayerIds.add(player_id);
 
         if (!player2) {
-            player1_hud = new PlayerHud(game, this, player, false);
+            player1Hud = new PlayerHud(game, this, player, false);
         }
 
         else {
-            player2_hud = new PlayerHud(game, this, player, true);
+            player2Hud = new PlayerHud(game, this, player, true);
         }
-        input_processor.add_player(player_id);
+        inputProcessor.add_player(player_id);
 
     }
 
-    private void setup_overlay(){
+    private void setupOverlay(){
 
-        float overlay_w = this.game.VIRTUAL_WIDTH / 1.8f;
-        float overlay_x = (this.game.VIRTUAL_WIDTH - overlay_w) / 2;
-        float overlay_h = this.game.VIRTUAL_HEIGHT * 0.9f;
-        float overlay_y = (this.game.VIRTUAL_HEIGHT - overlay_h) / 2f;
+        float overlay_w = OrganismGame.VIRTUAL_WIDTH / 1.8f;
+        float overlay_x = (OrganismGame.VIRTUAL_WIDTH - overlay_w) / 2;
+        float overlay_h = OrganismGame.VIRTUAL_HEIGHT * 0.9f;
+        float overlay_y = (OrganismGame.VIRTUAL_HEIGHT - overlay_h) / 2f;
 
         overlay = new SettingsOverlay(game, this, overlay_x, overlay_y, overlay_w, overlay_h);
     }
 
     private void input() {
-        if (!game.main_arcade_loop.current_game_orchestrator.paused) {
-            input_processor.update_timers(Gdx.graphics.getDeltaTime());
-            input_processor.update_queues_with_input();
-            game.main_arcade_loop.current_game_orchestrator.update_players();
-            game.main_arcade_loop.current_game_orchestrator.update_timers_and_flags();
+        if (!arcadeLoop.currentGameOrchestrator.paused) {
+            inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
+            inputProcessor.updateQueuesWithInput();
+            arcadeLoop.currentGameOrchestrator.updatePlayers();
+            arcadeLoop.currentGameOrchestrator.updateTimersAndFlags();
         }
     }
 
@@ -96,22 +97,22 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         input();
 
-        ScreenUtils.clear(game.background_color);
+        ScreenUtils.clear(game.backgroundColor);
 
-        if (game.main_arcade_loop != null) {
-            game.main_arcade_loop.render();
+        if (arcadeLoop != null) {
+            arcadeLoop.render();
         }
 
-        if (player1_hud != null) {
-            player1_hud.render();
+        if (player1Hud != null) {
+            player1Hud.render();
         }
 
 
-        if (player2_hud != null) {
-            player2_hud.render();
+        if (player2Hud != null) {
+            player2Hud.render();
         }
 
-        if (overlay.show_control_overlay) {
+        if (overlay.showControlOverlay) {
             overlay.render();
         }
     }
@@ -147,4 +148,6 @@ public class GameScreen implements Screen {
     public void dispose() {
 
     }
+
+
 }

@@ -222,30 +222,30 @@ public class SliderGroup {
         */
 
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (String p : slider_label_order){
 
-            game.shape_renderer.setColor(Color.DARK_GRAY);
+            game.shapeRenderer.setColor(Color.DARK_GRAY);
             float[] bar_coord = bar_coords.get(p);
-            game.shape_renderer.rect(
+            game.shapeRenderer.rect(
                 bar_coord[0],
                 bar_coord[1],
                 bar_coord[2],
                 bar_coord[3]
             );
 
-            game.shape_renderer.setColor(Color.GRAY);
+            game.shapeRenderer.setColor(Color.GRAY);
             float[] slider_coord = slider_coords.get(p);
 
-            game.shape_renderer.rect(
+            game.shapeRenderer.rect(
                 slider_coord[0],
                 slider_coord[1],
                 slider_coord[2],
                 slider_coord[3]
             );
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         game.batch.begin();
 

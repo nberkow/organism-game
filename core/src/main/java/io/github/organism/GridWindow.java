@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class GridWindow {
@@ -15,11 +14,11 @@ public class GridWindow {
 
     public void render(){
 
-        if (game_board.game.shape_renderer == null) {
+        if (game_board.game.shapeRenderer == null) {
             return;
         }
 
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (GridPosition pos : game_board.universe_map.hex_grid) {
             if (pos.content != null) pos.content.render();
@@ -28,7 +27,7 @@ public class GridWindow {
             if (pos.content != null) pos.content.render();
         }
 
-        game_board.game.shape_renderer.end();
+        game_board.game.shapeRenderer.end();
     }
 
 

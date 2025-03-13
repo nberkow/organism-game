@@ -49,15 +49,15 @@ public class WinRecordGraph {
 
          */
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(game.foreground_color);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.rect(
             graph_x,
             graph_y,
             graph_w,
             graph_h
         );
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         float margin = game.VIRTUAL_WIDTH * .02f;
         float plot_area_w = graph_w - (margin * 2);
@@ -65,9 +65,9 @@ public class WinRecordGraph {
         float plot_area_x = graph_x + margin;
         float plot_area_y = graph_y + margin;
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(game.background_color);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(game.backgroundColor);
+        game.shapeRenderer.rect(
             plot_area_x,
             plot_area_y,
             plot_area_w,
@@ -82,24 +82,23 @@ public class WinRecordGraph {
 
         HashMap<Integer, ArrayList<Point>> living_players = new HashMap<>();
 
-        for (Point p : simulation.win_records.keySet()){
+        for (Point p : simulation.winRecords.keySet()){
             Color color = simulation.tournament_player_colors.get(p);
-            ArrayList<Point> recs = simulation.win_records.get(p);
-
+            ArrayList<Point> recs = simulation.winRecords.get(p);
 
             for (int i=recs.size()-1; i>=1; i--) {
                 Point start_rec = recs.get(i);
                 Point end_rec = recs.get(i-1);
 
-                int start_x = simulation.win_record_turns.get(p).get(i-1);
+                int start_x = simulation.winRecordTurns.get(p).get(i-1);
                 int start_y = start_rec.x - start_rec.y;
 
                 int end_x = start_x + 1;
                 int end_y = end_rec.x - end_rec.y;
 
                 if (end_y >= 0) {
-                    game.shape_renderer.setColor(color);
-                    game.shape_renderer.line(
+                    game.shapeRenderer.setColor(color);
+                    game.shapeRenderer.line(
                         (start_x * x_step) + plot_area_x,
                         (start_y * y_step) + plot_area_y,
                         (end_x * x_step) + plot_area_x,
@@ -115,7 +114,36 @@ public class WinRecordGraph {
                 }
             }
         }
-        game.shape_renderer.end();
+
+        for (ArrayList<Point> redraw_list : living_players.values()){
+            for (Point p : redraw_list) {
+                Color color = simulation.tournament_player_colors.get(p);
+                ArrayList<Point> recs = simulation.winRecords.get(p);
+                for (int i=recs.size()-1; i>=1; i--) {
+                    Point start_rec = recs.get(i);
+                    Point end_rec = recs.get(i-1);
+
+                    int start_x = simulation.winRecordTurns.get(p).get(i-1);
+                    int start_y = start_rec.x - start_rec.y;
+
+                    int end_x = start_x + 1;
+                    int end_y = end_rec.x - end_rec.y;
+
+                    if (end_y >= 0) {
+                        game.shapeRenderer.setColor(color);
+                        game.shapeRenderer.line(
+                            (start_x * x_step) + plot_area_x,
+                            (start_y * y_step) + plot_area_y,
+                            (end_x * x_step) + plot_area_x,
+                            (end_y * y_step) + plot_area_y
+                        );
+                    }
+                }
+            }
+        }
+
+
+        game.shapeRenderer.end();
 
         ArrayList<Integer> win_margins = new ArrayList<>(living_players.keySet());
         win_margins.sort(Comparator.reverseOrder());
@@ -124,13 +152,14 @@ public class WinRecordGraph {
         float text_y = plot_area_y + plot_area_h;
 
         game.batch.begin();
+
         for (Integer i : win_margins) {
             for (Point p : living_players.get(i)){
                 Color color = simulation.tournament_player_colors.get(p);
                 font.setColor(color);
                 String player_name = simulation.player_names.get(p);
-                Point rec = simulation.win_records.get(p).get(0);
-                GlyphLayout layout = new GlyphLayout(font, player_name + "(" + rec.x + " - " + rec.y + ")");
+                Point rec = simulation.winRecords.get(p).get(0);
+                GlyphLayout layout = new GlyphLayout(font, player_name + "  (" + rec.x + " - " + rec.y + ")");
                 text_y -= (layout.height + name_spacing);
                 font.draw(game.batch, layout, text_x, text_y);
             }

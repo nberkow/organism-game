@@ -53,15 +53,15 @@ public class EnergyBar {
 
     public void render(){
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shape_renderer.setColor(game.foreground_color);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.rect(
             x,
             y,
             x_width,
             y_height);
-        game.shape_renderer.setColor(game.background_color);
-        game.shape_renderer.rect(
+        game.shapeRenderer.setColor(game.backgroundColor);
+        game.shapeRenderer.rect(
             x + GAP_WIDTH,
             y + GAP_WIDTH,
             x_width - (GAP_WIDTH * 2),
@@ -73,15 +73,15 @@ public class EnergyBar {
             first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
         }
 
-        game.shape_renderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foreground_color);
         for (int i=0; i<player.get_organism().energy; i++) {
-            game.shape_renderer.rect(
+            game.shapeRenderer.rect(
                 first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),
                 y + GAP_WIDTH * 2,
                 small_bar_width,
                 y_height - (GAP_WIDTH * 4));
         }
 
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
     }
 }

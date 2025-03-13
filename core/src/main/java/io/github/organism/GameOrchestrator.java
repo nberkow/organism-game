@@ -45,7 +45,7 @@ public class GameOrchestrator {
         action_time = base_action_time / speed;
     }
 
-    public void update_timers_and_flags() {
+    public void updateTimersAndFlags() {
 
         if (turn >= turn_max) {
             return;
@@ -61,7 +61,7 @@ public class GameOrchestrator {
 
     }
 
-    public void update_players() {
+    public void updatePlayers() {
         for (Player p : game_board.players.values()) {
             p.get_organism().update_resources();
         }
@@ -86,7 +86,7 @@ public class GameOrchestrator {
         }
     }
 
-    public Point test_victory_conditions() {
+    public Point testVictoryConditions() {
 
         Point leader = null;
         float leader_territory = 0;
@@ -150,16 +150,16 @@ public class GameOrchestrator {
 
         // move execution rotates order
 
-        for (int i=0; i<game_board.all_player_ids.size(); i++){
+        for (int i = 0; i<game_board.allPlayerIds.size(); i++){
             int p = (i + turn) % 3;
-            Player player = game_board.players.get(game_board.all_player_ids.get(p));
+            Player player = game_board.players.get(game_board.allPlayerIds.get(p));
             player.get_organism().update_income();
 
-            Player left_player = game_board.players.get(game_board.all_player_ids.get((p+2) % 3));
-            Player right_player = game_board.players.get(game_board.all_player_ids.get((p+1) % 3));
+            Player left_player = game_board.players.get(game_board.allPlayerIds.get((p+2) % 3));
+            Player right_player = game_board.players.get(game_board.allPlayerIds.get((p+1) % 3));
 
             Player target;
-            Integer move = all_player_moves.get(player.get_tournament_id());
+            Integer move = all_player_moves.get(player.getTournamentId());
             if (move != null) {
                 if (move == 0 || move == 2) {
 
@@ -177,17 +177,18 @@ public class GameOrchestrator {
     }
 
     private void dequeue_and_execute(){
+
         HashMap<Point, Integer> all_player_moves = new HashMap<>();
-        for (int p=0; p<game_board.all_player_ids.size(); p++){
-            Player player = game_board.players.get(game_board.all_player_ids.get(p));
+        for (int p = 0; p<game_board.allPlayerIds.size(); p++){
+            Player player = game_board.players.get(game_board.allPlayerIds.get(p));
             Integer move = player.get_move();
-            all_player_moves.put(player.get_tournament_id(), move);
+            all_player_moves.put(player.getTournamentId(), move);
         }
 
         resolve_moves(all_player_moves);
 
         // this turn's moves set the diplomacy for the next turn
-        game_board.diplomacy_graph.update_diplomacy(all_player_moves);
+        game_board.diplomacyGraph.update_diplomacy(all_player_moves);
     }
 
     public void run(){
@@ -203,7 +204,7 @@ public class GameOrchestrator {
         most_recent_move_stats.put("turn", String.valueOf(turn));
 
         int i = 1;
-        for (Point p : game_board.all_player_ids) {
+        for (Point p : game_board.allPlayerIds) {
             int move = game_board.players.get(p).get_most_recent_move();
             int territory = game_board.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             most_recent_move_stats.put("player" + i + "_move", String.valueOf(move));

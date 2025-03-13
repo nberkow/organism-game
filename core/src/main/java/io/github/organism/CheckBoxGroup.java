@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 
 public class CheckBoxGroup {
 
@@ -79,22 +78,22 @@ public class CheckBoxGroup {
         for (String s : labels){
             float y = box_y_coords.get(s) + box_y;
             boolean state = checkbox_states.get(s);
-            game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-            game.shape_renderer.rect(
+            game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            game.shapeRenderer.rect(
                 box_x,
                 y,
                 box_side_length, box_side_length
             );
-            game.shape_renderer.end();
+            game.shapeRenderer.end();
 
             if (state) {
-                game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-                game.shape_renderer.rect(
+                game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                game.shapeRenderer.rect(
                     box_x + (box_side_length * (1-inset)/2),
                     y + (box_side_length * (1-inset)/2),
                     box_side_length * inset, box_side_length * inset
                 );
-                game.shape_renderer.end();
+                game.shapeRenderer.end();
             }
 
             game.batch.begin();

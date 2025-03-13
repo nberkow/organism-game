@@ -125,7 +125,7 @@ public class DiplomacyGraph {
 
         for (int i=0; i<3; i++) {
 
-            Point p = current_game.all_player_ids.get(i);
+            Point p = current_game.allPlayerIds.get(i);
             Integer move = all_player_moves.get(p);
 
             if (move != null) {
@@ -133,11 +133,11 @@ public class DiplomacyGraph {
                     Point q = null;
                     // attacking clockwise (left)
                     if (move == 0) {
-                        q = current_game.all_player_ids.get((i + 2) % 3);
+                        q = current_game.allPlayerIds.get((i + 2) % 3);
                     }
                     // attacking counter-clockwise (right)
                     if (move == 2) {
-                        q = current_game.all_player_ids.get((i + 1) % 3);
+                        q = current_game.allPlayerIds.get((i + 1) % 3);
                     }
 
                     relationships.get(p).put(q, Relationship.ENEMY);
@@ -175,7 +175,7 @@ public class DiplomacyGraph {
             player_coords[i] = coords;
 
             // record the player colors in order
-            Point p = current_game.all_player_ids.get(i);
+            Point p = current_game.allPlayerIds.get(i);
             Player player = current_game.players.get(p);
             player_colors[i] = player.get_color();
 
@@ -211,16 +211,16 @@ public class DiplomacyGraph {
             return 0f;
         }
 
-        if (Objects.equals(relationships.get(vertex_owner.get_tournament_id()).get(player), Relationship.ENEMY)){
-            return current_game.config.gameplay_settings.get("attack enemy cost");
+        if (Objects.equals(relationships.get(vertex_owner.getTournamentId()).get(player), Relationship.ENEMY)){
+            return current_game.config.gameplaySettings.get("attack enemy cost");
         }
 
-        if (Objects.equals(relationships.get(vertex_owner.get_tournament_id()).get(player), Relationship.NEUTRAL)){
-            return current_game.config.gameplay_settings.get("attack neutral cost");
+        if (Objects.equals(relationships.get(vertex_owner.getTournamentId()).get(player), Relationship.NEUTRAL)){
+            return current_game.config.gameplaySettings.get("attack neutral cost");
         }
 
-        if (Objects.equals(relationships.get(vertex_owner.get_tournament_id()).get(player), Relationship.ALLY)){
-            return current_game.config.gameplay_settings.get("attack ally cost");
+        if (Objects.equals(relationships.get(vertex_owner.getTournamentId()).get(player), Relationship.ALLY)){
+            return current_game.config.gameplaySettings.get("attack ally cost");
         }
 
         return null;
@@ -245,7 +245,7 @@ public class DiplomacyGraph {
 
     public void render(){
 
-        if (game.shape_renderer == null) {
+        if (game.shapeRenderer == null) {
             return;
         }
 
@@ -255,23 +255,23 @@ public class DiplomacyGraph {
         }
 
         // outer relationship arcs
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         Color color;
 
         for (int i=0; i<3; i++) {
             // Draw the arc as a polyline
             color = Color.DARK_GRAY;
 
-            Point p = current_game.all_player_ids.get(i);
-            Point q = current_game.all_player_ids.get((i + 1) % 3);
+            Point p = current_game.allPlayerIds.get(i);
+            Point q = current_game.allPlayerIds.get((i + 1) % 3);
 
             Relationship r = relationships.get(p).get(q);
             if (r == Relationship.ALLY) {
                 color = game.action_colors[1];
             }
 
-            game.shape_renderer.setColor(color);
-            game.shape_renderer.polyline(player_outer_arc_vertices[i]);
+            game.shapeRenderer.setColor(color);
+            game.shapeRenderer.polyline(player_outer_arc_vertices[i]);
 
         }
 
@@ -281,33 +281,33 @@ public class DiplomacyGraph {
             // Draw the arc as a polyline
             color = Color.DARK_GRAY;
 
-            Point p = current_game.all_player_ids.get(i);
-            Point q = current_game.all_player_ids.get((i + 2) % 3);
+            Point p = current_game.allPlayerIds.get(i);
+            Point q = current_game.allPlayerIds.get((i + 2) % 3);
 
             Relationship r = relationships.get(p).get(q);
             if (r == Relationship.ENEMY) {
                 color = game.action_colors[0];
             }
 
-            game.shape_renderer.setColor(color);
+            game.shapeRenderer.setColor(color);
             double end_x =  player_coords[(i+2) % 3][0];
             double end_y =  player_coords[(i+2) % 3][1];
-            game.shape_renderer.line((float) player_coords[i][0], (float) player_coords[i][1], (float) end_x, (float) end_y);
+            game.shapeRenderer.line((float) player_coords[i][0], (float) player_coords[i][1], (float) end_x, (float) end_y);
 
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         // player circles
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i=0; i<3; i++) {
 
-            game.shape_renderer.setColor(player_colors[i]);
-            game.shape_renderer.circle(
+            game.shapeRenderer.setColor(player_colors[i]);
+            game.shapeRenderer.circle(
                 (float) player_coords[i][0],
                 (float) player_coords[i][1],
                 player_radius);
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
     }
 
     public void dispose() {

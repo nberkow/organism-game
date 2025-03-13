@@ -16,8 +16,8 @@ public class GameBoard implements Disposable {
     public static final float DEFAULT_SPEED = 2f;
     // Visualization Settings
     final float GRID_WINDOW_HEIGHT = 1.7f;
-    public boolean show_diplomacy;
-    public boolean show_player_summary;
+    public boolean showDiplomacy;
+    public boolean showPlayerSummary;
     float hex_side_len;
     float center_x;
     float center_y;
@@ -34,7 +34,7 @@ public class GameBoard implements Disposable {
 
     GameOrchestrator orchestrator;
 
-    DiplomacyGraph diplomacy_graph;
+    DiplomacyGraph diplomacyGraph;
 
     // Gameplay parameters
     public static final int DEFAULT_STARTING_ENERGY = 6;
@@ -45,12 +45,12 @@ public class GameBoard implements Disposable {
     GridWindow grid_window;
     UniverseMap universe_map;
     ArrayList<PlayerSummaryDisplay> player_summary_displays;
-    ArrayList<Point> human_player_ids;
+    ArrayList<Point> humanPlayerIds;
     ArrayList<Point> bot_player_ids;
-    ArrayList<Point> all_player_ids;
+    ArrayList<Point> allPlayerIds;
     PlayerStartAssigner player_start_assigner;
-    ResourceDistributor resource_distributor;
-    VoidDistributor void_distributor;
+    ResourceDistributor resourceDistributor;
+    VoidDistributor voidDistributor;
     GameConfig config;
     int radius;
     Random rng;
@@ -61,11 +61,11 @@ public class GameBoard implements Disposable {
         game = g;
         config = cfg;
         screen = scr;
-        show_diplomacy = false;
-        show_player_summary = false;
+        showDiplomacy = false;
+        showPlayerSummary = false;
 
         if (screen instanceof LabScreen){
-            settings_manager = ((LabScreen) screen).settings_manager;
+            settings_manager = ((LabScreen) screen).settingsManager;
         }
         if (screen instanceof GameScreen){
             settings_manager = ((GameScreen) screen).settings_manager;
@@ -86,17 +86,17 @@ public class GameBoard implements Disposable {
         // Initialize other game objects here
         universe_map = new UniverseMap(this, radius);
 
-        diplomacy_graph = new DiplomacyGraph(this.game, this);
+        diplomacyGraph = new DiplomacyGraph(this.game, this);
 
         player_start_assigner = new PlayerStartAssigner(this);
-        resource_distributor = new ResourceDistributor(this);
-        void_distributor = new VoidDistributor(this);
+        resourceDistributor = new ResourceDistributor(this);
+        voidDistributor = new VoidDistributor(this);
         grid_window = new GridWindow(this, 2);
 
         player_summary_displays = new ArrayList<>();
-        human_player_ids = new ArrayList<>();
+        humanPlayerIds = new ArrayList<>();
         bot_player_ids = new ArrayList<>();
-        all_player_ids = new ArrayList<>();
+        allPlayerIds = new ArrayList<>();
 
     }
 
@@ -105,9 +105,9 @@ public class GameBoard implements Disposable {
     }
 
 
-    public void create_bot_player(String name, Point player_id, Color color, HMM model){
+    public void create_bot_player(String name, Point player_id, Color color, Model model){
 
-        int index = all_player_ids.size();
+        int index = allPlayerIds.size();
 
         Organism organism = new Organism(this);
         BotPlayer player = new BotPlayer(
@@ -123,11 +123,11 @@ public class GameBoard implements Disposable {
         organism.player = player;
         players.put(player_id, player);
         bot_player_ids.add(player_id);
-        all_player_ids.add(player_id);
+        allPlayerIds.add(player_id);
 
     }
 
-    public void create_player_summary_displays(){
+    public void createPlayerSummaryDisplays(){
 
         float y = PLAYER_SUMMARY_Y;
         for (Player p : players.values()){
@@ -151,17 +151,17 @@ public class GameBoard implements Disposable {
 
         logic();
 
-        ScreenUtils.clear(game.background_color);
+        ScreenUtils.clear(game.backgroundColor);
 
         grid_window.render();
-        if (show_player_summary) {
+        if (showPlayerSummary) {
             for (PlayerSummaryDisplay p : player_summary_displays) {
                 p.render();
             }
         }
 
-        if (show_diplomacy) {
-            diplomacy_graph.render();
+        if (showDiplomacy) {
+            diplomacyGraph.render();
         }
     }
 
@@ -170,13 +170,13 @@ public class GameBoard implements Disposable {
         grid_window.dispose();
         universe_map.dispose();
         orchestrator.dispose();
-        diplomacy_graph.dispose();
+        diplomacyGraph.dispose();
         players.clear();
-        human_player_ids.clear();
+        humanPlayerIds.clear();
         bot_player_ids.clear();
-        all_player_ids.clear();
+        allPlayerIds.clear();
         player_start_assigner = null;
-        resource_distributor = null;
-        void_distributor = null;
+        resourceDistributor = null;
+        voidDistributor = null;
     }
 }

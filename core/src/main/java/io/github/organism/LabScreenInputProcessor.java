@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
@@ -24,6 +25,16 @@ public class LabScreenInputProcessor implements InputProcessor {
      */
     @Override
     public boolean keyDown(int keycode) {
+
+        if (lab_screen.current_sim.show_histograms) {
+            if (keycode == Input.Keys.D | keycode == Input.Keys.RIGHT | keycode == Input.Keys.SPACE) {
+                lab_screen.current_sim.inputHistogram.next();
+            }
+            if (keycode == Input.Keys.D | keycode == Input.Keys.LEFT) {
+                lab_screen.current_sim.inputHistogram.last();
+            }
+        }
+
         return false;
     }
 
@@ -80,7 +91,7 @@ public class LabScreenInputProcessor implements InputProcessor {
             String button_up = lab_screen.buttons.poll_buttons(touchPos.x, touchPos.y);
 
             if (Objects.equals(button_up, button_clicked)) {
-                lab_screen.handle_button_click(button_clicked);
+                lab_screen.handleButtonClick(button_clicked);
             }
         }
 
@@ -88,7 +99,7 @@ public class LabScreenInputProcessor implements InputProcessor {
             String box_up = lab_screen.checkboxes.poll_boxes(touchPos.x, touchPos.y);
 
             if (Objects.equals(box_up, box_clicked)) {
-                lab_screen.handle_checkbox_click(box_clicked);
+                lab_screen.handleCheckboxClick(box_clicked);
             }
         }
 

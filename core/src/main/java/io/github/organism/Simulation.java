@@ -1,5 +1,6 @@
 package io.github.organism;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
@@ -9,31 +10,32 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class Simulation implements GameMode{
-    LabScreen lab_screen;
-    GameBoard current_game;
-    GameOrchestrator current_game_orchestrator;
-    ModelPoolDisplay model_pool_display;
-    RoundSummary round_summary;
 
-    float map_center_x;
-    float map_center_y;
+    OrganismGame game;
+    Screen screen;
+    GameBoard currentGame;
+    GameOrchestrator currentGameOrchestrator;
+    ModelPoolDisplay modelPoolDisplay;
+    RoundSummary roundSummary;
+    WinRecordGraph winRecordGraph;
+    float mapCenterX;
+    float mapCenterY;
     GameConfig cfg;
     int iterations;
     static int MODEL_STATES = 36;
 
     // 3 players * ((3 indicator variable per move * 6 moves) + energy + territory)
     static int MODEL_INPUTS = 3 * ((3 * 6) + 2);
-
     float mutation_rate;
     boolean show_summary_screen;
     boolean next_round_begin;
-    boolean write_files;
+    boolean writeFiles;
 
     int max_models_to_save = 3;
 
     boolean kill = false;
 
-    boolean silent = true;
+    boolean silent = false;
 
     float between_round_pause = 2f;
     float between_round_pause_timer;
@@ -41,14 +43,12 @@ public class Simulation implements GameMode{
     HashMap<Point, String> player_names;
     HashMap<Point, Color> tournament_player_colors;
 
-    ArrayList<Color> available_colors;
-    int player_primary_index;
+    ArrayList<Color> availableColors;
+    int playerPrimaryIndex;
     String[] numerals = {"I", "II", "III", "IV", "V",
                         "VI", "VII", "VIII", "IX", "X",
                         "XI", "XII", "XIII", "XIV", "XV",
                         "XVI", "XVII", "XVIII", "XIX", "XX"};
-
-    int min_wins = 2;
 
     String[]  player_names_array = {
         "Serpula lacrymans",
@@ -78,11 +78,14 @@ public class Simulation implements GameMode{
         "Bondarzewia berkeleyi"
     };
 
-    HashMap<Point, HMM> model_pool;
-    HashMap<Point, ArrayList<Point>> win_records;
-    HashMap<Point, ArrayList<Integer>> win_record_turns;
+    HashMap<Point, Model> modelPool;
+    HashMap<Point, ArrayList<Point>> winRecords;
 
-    WinRecordGraph win_record_graph;
+    HashMap<Point, ArrayList<Integer>> winRecordTurns;
+
+
+    public boolean show_histograms = false;
+    InputHistogram inputHistogram;
     int pool_size = 9;
 
 
@@ -90,92 +93,107 @@ public class Simulation implements GameMode{
     //boolean log_written = false;
 
 
-    int current_iteration;
+    int currentIteration;
 
-    public Simulation(LabScreen screen, GameConfig c, int n) {
+    public Simulation(OrganismGame g, Screen scr, GameConfig c, int n) {
 
-        lab_screen = screen;
+        game = g;
+        screen = scr;
         cfg = c;
         iterations = n;
-        current_iteration = 1;
-        player_primary_index = 0;
-        map_center_x = lab_screen.game.VIRTUAL_WIDTH / 2f;
-        map_center_y = lab_screen.game.VIRTUAL_HEIGHT / 2f;
+        currentIteration = 1;
+        playerPrimaryIndex = 0;
+        mapCenterX = OrganismGame.VIRTUAL_WIDTH / 2f;
+        mapCenterY = OrganismGame.VIRTUAL_HEIGHT / 2f;
 
-        model_pool = new HashMap<>();
-        win_records = new HashMap<>();
-        win_record_turns = new HashMap<>();
+        modelPool = new HashMap<>();
+        winRecords = new HashMap<>();
+        winRecordTurns = new HashMap<>();
 
-        model_pool_display = new ModelPoolDisplay(lab_screen.game, this);
-        round_summary = new RoundSummary(lab_screen.game, this);
-        available_colors = new ArrayList<>();
-        available_colors.addAll(Arrays.asList(lab_screen.game.player_colors));
+        modelPoolDisplay = new ModelPoolDisplay(game, this);
+        roundSummary = new RoundSummary(game, this);
+        availableColors = new ArrayList<>();
+        availableColors.addAll(Arrays.asList(game.playerColors));
 
         tournament_player_colors = new HashMap<>();
         player_names = new HashMap<>();
-        //move_logger = new MoveLogger(lab_screen.game);
+        //move_logger = new MoveLogger(screen.game);
 
         show_summary_screen = false;
         next_round_begin = true;
         between_round_pause_timer = 0;
         mutation_rate = (float) Math.pow(1f/MODEL_STATES, 3);
 
-        write_files = screen.write_files;
+        if (screen.getClass() == LabScreen.class){
+            LabScreen ls =  (LabScreen) screen;
+            writeFiles = ls.getWriteFiles();
+        }
 
-        float graph_width = (float) lab_screen.game.VIRTUAL_WIDTH / 2;
-        float graph_height = graph_width * .9f;
 
-        win_record_graph = new WinRecordGraph(
-            lab_screen.game, this,
-        (lab_screen.game.VIRTUAL_WIDTH - graph_width)/2,
-        (lab_screen.game.VIRTUAL_HEIGHT - graph_height)/2,
-                graph_width,
-                graph_height
+        float graphWidth = (float) OrganismGame.VIRTUAL_WIDTH / 2;
+        float graphHeight = graphWidth * .9f;
+
+        winRecordGraph = new WinRecordGraph(
+            game, this,
+        (OrganismGame.VIRTUAL_WIDTH - graphWidth)/2,
+        (OrganismGame.VIRTUAL_HEIGHT - graphHeight)/2,
+                graphWidth,
+                graphHeight
+        );
+
+        inputHistogram = new InputHistogram(
+                game, this,
+                MODEL_INPUTS,
+                (OrganismGame.VIRTUAL_WIDTH - graphWidth)/2,
+                (OrganismGame.VIRTUAL_HEIGHT - graphHeight)/2,
+                graphWidth,
+                graphHeight
         );
     }
 
     public void run_silent(){
 
         // setup and run one game until victory
-        create_game_board();
-        create_players_from_model_pool();
-        create_player_starts();
-        current_game.create_player_summary_displays();
-        current_game_orchestrator.run();
-        while (!current_game_orchestrator.finished) {
+        silent = true;
+        createGameBoard();
+        createPlayersFromModelPool();
+        createPlayerStarts();
+        currentGame.createPlayerSummaryDisplays();
+        currentGameOrchestrator.run();
+        while (!currentGameOrchestrator.finished) {
             logic();
         }
-        Point winner_id = current_game_orchestrator.test_victory_conditions();
+        Point winner_id = currentGameOrchestrator.testVictoryConditions();
 
-        finish_this_round(winner_id);
-        setup_next_round_models(winner_id);
+        finishThisRound(winner_id);
+        setupNextRoundModels(winner_id);
 
     }
 
-    public void create_game_board() {
+    public void createGameBoard() {
 
-        if (available_colors.size() < 3){
-            available_colors.addAll(Arrays.asList(lab_screen.game.player_colors));
+        if (availableColors.size() < 3){
+            availableColors.addAll(Arrays.asList(game.playerColors));
         }
 
-        current_game = new GameBoard(lab_screen.game, cfg, lab_screen);
-        current_game.void_distributor.distribute();
-        current_game.resource_distributor.distribute();
+        currentGame = new GameBoard(game, cfg, screen);
+        currentGame.voidDistributor.distribute();
+        currentGame.resourceDistributor.distribute();
 
-        current_game_orchestrator = new GameOrchestrator(current_game);
-        current_game.set_orchestrator(current_game_orchestrator);
+        currentGameOrchestrator = new GameOrchestrator(currentGame);
+        currentGame.set_orchestrator(currentGameOrchestrator);
 
-        current_game.center_x = map_center_x;
-        current_game.center_y = map_center_y;
-        current_game.show_player_summary = true;
-        current_game.show_diplomacy = true;
+        currentGame.center_x = mapCenterX;
+        currentGame.center_y = mapCenterY;
+        currentGame.showPlayerSummary = true;
+        currentGame.showDiplomacy = true;
     }
 
-    public void create_player_starts() {
-        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.player_start_positions));
+    public void createPlayerStarts() {
+        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = current_game.player_start_assigner.randomize_starting_coords();
-            current_game.player_start_assigner.assign_starting_hexes(starting_coords);
+            ArrayList<int[]> starting_coords = currentGame.player_start_assigner.randomizeStartingCoords();
+            currentGame.player_start_assigner.assignStartingHexes(starting_coords);
         }
     }
 
@@ -185,13 +203,13 @@ public class Simulation implements GameMode{
          */
 
         for (int i=0; i<pool_size; i++){
-            HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
+            Model model = new ReinforcementHMM(game, MODEL_STATES, MODEL_INPUTS);
+
             model.init_random_weights();
-            model.ablate();
-            player_primary_index += 1;
-            Point player_id  = new Point(player_primary_index, 0);
-            model.player_tournament_id = player_id;
-            model_pool.put(player_id, model);
+            playerPrimaryIndex += 1;
+            Point player_id  = new Point(playerPrimaryIndex, 0);
+            model.setPlayerTournamentId(player_id);
+            modelPool.put(player_id, model);
 
             ArrayList<Point> wins = new ArrayList<>();
             ArrayList<Integer> turns = new ArrayList<>();
@@ -199,31 +217,32 @@ public class Simulation implements GameMode{
             wins.add(new Point(0, 0));
             turns.add(0);
 
-            win_records.put(player_id, wins);
-            win_record_turns.put(player_id, turns);
+            winRecords.put(player_id, wins);
+            winRecordTurns.put(player_id, turns);
         }
     }
 
     public void run_simulation() {
 
         System.out.println("first iteration");
+        silent = false;
         initialize_model_pool();
-
         // setup the first game
-        create_game_board();
-        create_players_from_model_pool();
-        create_player_starts();
-        current_game.create_player_summary_displays();
-        current_game_orchestrator.update_speed(cfg.gameplay_settings.get("speed"));
-        current_game_orchestrator.run();
+        createGameBoard();
+        createPlayersFromModelPool();
+        createPlayerStarts();
+        currentGame.createPlayerSummaryDisplays();
+        currentGameOrchestrator.update_speed(cfg.gameplaySettings.get("speed"));
+        currentGameOrchestrator.run();
+
     }
 
-    private void finish_this_round(Point winner_id) {
+    private void finishThisRound(Point winner_id) {
 
-        System.out.println("iteration: " + current_iteration + "/" + iterations);
+        System.out.println("iteration: " + currentIteration + "/" + iterations);
 
-        for (Point p : current_game.players.keySet()) {
-            Point prev_rec = win_records.get(p).get(0);
+        for (Point p : currentGame.players.keySet()) {
+            Point prev_rec = winRecords.get(p).get(0);
             Point rec = new Point(prev_rec.x, prev_rec.y);
             if (p == winner_id){
                 rec.x += 1;
@@ -231,59 +250,59 @@ public class Simulation implements GameMode{
             else {
                 rec.y += 1;
             }
-            win_records.get(p).add(0, rec);
-            win_record_turns.get(p).add(0, current_iteration);
+            winRecords.get(p).add(0, rec);
+            winRecordTurns.get(p).add(0, currentIteration);
         }
 
-        round_summary.set_winner(winner_id);
+        roundSummary.set_winner(winner_id);
         show_summary_screen = true;
 
     }
 
     private void setup_next_round(Point winner_id) {
 
-        setup_next_round_models(winner_id);
+        setupNextRoundModels(winner_id);
 
-        current_game.dispose();
-        current_game_orchestrator.dispose();
+        currentGame.dispose();
+        currentGameOrchestrator.dispose();
 
-        create_game_board();
-        create_players_from_model_pool();
-        create_player_starts();
-        current_game.create_player_summary_displays();
-        current_game_orchestrator.update_speed(cfg.gameplay_settings.get("speed"));
-        current_game_orchestrator.run();
+        createGameBoard();
+        createPlayersFromModelPool();
+        createPlayerStarts();
+        currentGame.createPlayerSummaryDisplays();
+        currentGameOrchestrator.update_speed(cfg.gameplaySettings.get("speed"));
+        currentGameOrchestrator.run();
     }
 
-    private void create_players_from_model_pool() {
+    private void createPlayersFromModelPool() {
         /*
         randomly select 3 models from the pool
 
         use these to create 3 players on the current game board
          */
 
-        ArrayList<Point> player_ids = new ArrayList<>(model_pool.keySet());
-        Collections.shuffle(player_ids, lab_screen.game.rng);
+        ArrayList<Point> player_ids = new ArrayList<>(modelPool.keySet());
+        Collections.shuffle(player_ids, game.rng);
 
         for (int i=0; i<3; i++) {
             Point player_id = player_ids.get(i);
-            HMM model = model_pool.get(player_id);
+            Model model = modelPool.get(player_id);
             String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
 
             Color color;
             if (tournament_player_colors.containsKey(player_id)){
                 color = tournament_player_colors.get(player_id);
             } else {
-                color = available_colors.remove(0);
+                color = availableColors.remove(0);
             }
 
-            current_game.create_bot_player(name, player_id, color, model);
+            currentGame.create_bot_player(name, player_id, color, model);
             player_names.put(player_id, name);
             tournament_player_colors.put(player_id, color);
         }
 
         // reset diplomacy with newly created players
-        current_game.diplomacy_graph = new DiplomacyGraph(this.lab_screen.game, current_game);
+        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
     }
 
     public void prune_model_pool(){
@@ -291,15 +310,15 @@ public class Simulation implements GameMode{
         ArrayList<Point> to_remove = new ArrayList<>();
         HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
 
-        for (Point p : model_pool.keySet()) {
-            Point rec = win_records.get(p).get(0);
+        for (Point p : modelPool.keySet()) {
+            Point rec = winRecords.get(p).get(0);
             float margin = (rec.x - rec.y);
             if (margin < 1 & rec.y > 0) {
                 // recycle colors and mark eliminated players in gray
                 to_remove.add(p);
                 Color player_color = tournament_player_colors.get(p);
                 if (player_color != null && !player_color.equals(Color.DARK_GRAY)) {
-                    available_colors.add(player_color); // Recycle color
+                    availableColors.add(player_color); // Recycle color
                 }
                 tournament_player_colors.put(p, Color.DARK_GRAY); // Mark eliminated players
             }
@@ -308,55 +327,52 @@ public class Simulation implements GameMode{
             }
         }
 
-        System.out.println("removing " + to_remove.size());
+        //System.out.println("removing " + to_remove.size());
         for (Point p : to_remove){
-            model_pool.remove(p);
+            modelPool.remove(p);
         }
-        System.out.println("new size: " + model_pool.size());
+        //System.out.println("new size: " + model_pool.size());
 
     }
 
     public void add_new_random_models(int n){
         // add new random models
 
-        System.out.println("adding random " + n);
+        //System.out.println("adding random " + n);
         for (int i=0; i<n; i++) {
-            HMM model = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
+            Model model = new ReinforcementHMM(game, MODEL_STATES, MODEL_INPUTS);
             model.init_random_weights();
-            player_primary_index++;
-            Point player_id = new Point(player_primary_index, 0);
-            model.player_tournament_id = player_id;
-            model_pool.put(player_id, model);
+            playerPrimaryIndex++;
+            Point player_id = new Point(playerPrimaryIndex, 0);
+            model.setPlayerTournamentId(player_id);
+            modelPool.put(player_id, model);
             ArrayList<Point> rec = new ArrayList<>();
             rec.add(new Point(0, 0));
-            win_records.put(player_id, rec);
+            winRecords.put(player_id, rec);
             ArrayList<Integer> turn = new ArrayList<>();
-            turn.add(current_iteration);
-            win_record_turns.put(player_id, turn);
+            turn.add(currentIteration);
+            winRecordTurns.put(player_id, turn);
         }
-        System.out.println("new size: " + model_pool.size());
+        //System.out.println("new size: " + model_pool.size());
     }
 
-    public void setup_next_round_models(Point winner_id) {
+    public void setupNextRoundModels(Point winner_id) {
 
         //System.out.println("next round models");
-        BotPlayer winner = (BotPlayer) current_game.players.get(winner_id);
+        BotPlayer winner = (BotPlayer) currentGame.players.get(winner_id);
 
         // add a model by averaging the last round models
-        HMM offspring = get_last_round_offspring();
-        offspring.transition_bit_mask = winner.model.transition_bit_mask;
-        for (int i=0; i<offspring.transition_bit_mask.size(); i++) {
-            if (lab_screen.game.rng.nextFloat() < mutation_rate) {
-                offspring.transition_bit_mask.flip(i);
-            }
-        }
+        Model offspring = get_last_round_offspring();
+        offspring.set_transition_bit_mask(winner.model.get_transition_bit_mask());
+        offspring.mutate_bitmask();
+
 
         offspring.apply_transition_mask();
         Point offspring_player_id = new Point(
             winner_id.x,
             winner_id.y + 1
         );
-        System.out.println(offspring_player_id);
+
 
         // avoid collisions from different inheritance paths
         while (tournament_player_colors.containsKey(offspring_player_id)){
@@ -367,26 +383,26 @@ public class Simulation implements GameMode{
             );
         }
 
-        offspring.player_tournament_id = offspring_player_id;
-        model_pool.put(offspring_player_id, offspring);
+        offspring.setPlayerTournamentId(offspring_player_id);
+        modelPool.put(offspring_player_id, offspring);
         ArrayList<Point> rec = new ArrayList<>();
         rec.add(new Point(0, 0));
-        win_records.put(offspring_player_id, rec);
+        winRecords.put(offspring_player_id, rec);
 
         ArrayList<Integer> turn = new ArrayList<>();
-        turn.add(current_iteration);
-        win_record_turns.put(offspring_player_id, turn);
+        turn.add(currentIteration);
+        winRecordTurns.put(offspring_player_id, turn);
 
         prune_model_pool();
 
-        int n = pool_size - model_pool.size();
+        int n = pool_size - modelPool.size();
         if (n > 0) {
             add_new_random_models(n);
         }
 
     }
 
-    public HMM get_last_round_offspring() {
+    public Model get_last_round_offspring() {
 
         /*
         in the future this can have more behaviors
@@ -397,8 +413,8 @@ public class Simulation implements GameMode{
          */
 
         // parse params and init datastructures
-        int states = HMM.states;
-        int inputs = HMM.inputs;
+        int states = MODEL_STATES;
+        int inputs = MODEL_INPUTS;
 
         double [][][] avg_transition_weights = new double[states][states][inputs];
         double [][][] avg_emission_weights = new double[states][4][inputs];
@@ -407,13 +423,13 @@ public class Simulation implements GameMode{
         HashMap<Point, Double> weights = new HashMap<>();
 
         double total_territory = 0;
-        for (Point player_id : current_game.players.keySet()) {
-            double territory = current_game.players.get(player_id).get_organism().territory_vertex.get_unmasked_vertices();
+        for (Point player_id : currentGame.players.keySet()) {
+            double territory = currentGame.players.get(player_id).get_organism().territory_vertex.get_unmasked_vertices();
             total_territory += territory;
         }
 
-        for (Point player_id  : current_game.players.keySet()) {
-            double territory = current_game.players.get(player_id).get_organism().territory_vertex.get_unmasked_vertices();
+        for (Point player_id  : currentGame.players.keySet()) {
+            double territory = currentGame.players.get(player_id).get_organism().territory_vertex.get_unmasked_vertices();
             weights.put(player_id, territory / total_territory);
         }
 
@@ -421,9 +437,9 @@ public class Simulation implements GameMode{
         for (int i=0; i<states; i++){
             for (int j=0; j<states; j++){
                 for (int k=0; k<inputs; k++){
-                    for (Point p : current_game.players.keySet()) {
-                        BotPlayer player = (BotPlayer) current_game.players.get(p);
-                        double s = player.model.transition_weights[i][j][k];
+                    for (Point p : currentGame.players.keySet()) {
+                        BotPlayer player = (BotPlayer) currentGame.players.get(p);
+                        double s = player.model.get_transition_weights()[i][j][k];
                         double w = weights.get(p);
                         avg_transition_weights[i][j][k] += s * w;
                     }
@@ -435,9 +451,9 @@ public class Simulation implements GameMode{
         for (int i=0; i<states; i++){
             for (int j=0; j<4; j++){
                 for (int k=0; k<inputs; k++){
-                    for (Point p: current_game.players.keySet()) {
-                        BotPlayer player = (BotPlayer) current_game.players.get(p);
-                        double s = player.model.emission_weights[i][j][k];
+                    for (Point p: currentGame.players.keySet()) {
+                        BotPlayer player = (BotPlayer) currentGame.players.get(p);
+                        double s = player.model.get_emission_weights()[i][j][k];
                         double w = weights.get(p);
                         avg_emission_weights[i][j][k] += s * w;
                     }
@@ -445,44 +461,49 @@ public class Simulation implements GameMode{
             }
         }
 
-        HMM offspring = new HMM(lab_screen.game, MODEL_STATES, MODEL_INPUTS);
+        Model offspring = new ReinforcementHMM(game, MODEL_STATES, MODEL_INPUTS);
         offspring.set_weights(avg_transition_weights, avg_emission_weights);
         return offspring;
     }
 
     public void silent_logic(){
-        int iterations = Math.round(lab_screen.overlay.saved_settings.get("iterations"));
-        if (current_iteration < iterations){
-            run_silent();
-            current_iteration ++;
+        if (screen.getClass() == LabScreen.class) {
+            LabScreen ls = (LabScreen) screen;
+            int iterations = Math.round(ls.overlay.savedSettings.get("iterations"));
+            if (currentIteration < iterations){
+                run_silent();
+                currentIteration++;
+            }
+
         }
     }
 
 
     public void logic(){
-        Point winner_id = current_game_orchestrator.test_victory_conditions();
-        if (!current_game_orchestrator.paused) {
+        Point winner_id = currentGameOrchestrator.testVictoryConditions();
+        if (!currentGameOrchestrator.paused) {
             // if victory conditions were met, finish up the last round and start the timer for the next one
             if (winner_id != null) {
-                current_game_orchestrator.pause();
-                current_game_orchestrator.finished = true;
+                currentGameOrchestrator.pause();
+                currentGameOrchestrator.finished = true;
 
                 if (!show_summary_screen) {
                     // end of round housekeeping
-                    finish_this_round(winner_id);
+                    finishThisRound(winner_id);
                     show_summary_screen = true;
                     next_round_begin = false;
                     between_round_pause_timer = 0f;
 
-                    if (current_iteration == iterations & write_files) {
+                    if (currentIteration == iterations & writeFiles) {
                         write_champions_to_file();
                     }
                 }
             }
 
             else {
-                current_game_orchestrator.update_players();
-                current_game_orchestrator.update_timers_and_flags();
+                inputHistogram.update_inputs();
+                currentGameOrchestrator.updatePlayers();
+                currentGameOrchestrator.updateTimersAndFlags();
             }
         }
 
@@ -493,8 +514,8 @@ public class Simulation implements GameMode{
                 next_round_begin = true;
             }
 
-            if (current_iteration < iterations & next_round_begin) {
-                current_iteration ++;
+            if (currentIteration < iterations & next_round_begin) {
+                currentIteration++;
                 setup_next_round(winner_id); // this will set winner id back to null
 
                 next_round_begin = false;
@@ -506,17 +527,22 @@ public class Simulation implements GameMode{
 
 
     public void draw(){
-        current_game.game.camera.update();
-        current_game.render();
-        model_pool_display.render();
+        currentGame.game.camera.update();
+        currentGame.render();
+        modelPoolDisplay.render();
         if (show_summary_screen & between_round_pause > 0 ) {
-            round_summary.render();
+            roundSummary.render();
         }
     }
 
     public void silent_draw(){
-        model_pool_display.render();
-        win_record_graph.render();
+        modelPoolDisplay.render();
+
+        if (show_histograms) {
+            inputHistogram.render();
+        } else {
+            winRecordGraph.render();
+        }
     }
 
 
@@ -540,9 +566,9 @@ public class Simulation implements GameMode{
     }
 
     public void dispose() {
-        model_pool.clear();
-        win_records.clear();
-        current_game.dispose();
+        modelPool.clear();
+        winRecords.clear();
+        currentGame.dispose();
     }
 
 
@@ -551,8 +577,8 @@ public class Simulation implements GameMode{
 
         HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
 
-        for (Point p : model_pool.keySet()){
-            Point rec = win_records.get(p).get(0);
+        for (Point p : modelPool.keySet()){
+            Point rec = winRecords.get(p).get(0);
             float margin = rec.x - rec.y;
             if (!models_by_win_margin.containsKey(margin)){
                 models_by_win_margin.put(margin, new ArrayList<>());
@@ -566,7 +592,7 @@ public class Simulation implements GameMode{
         for (Float m : models_by_win_margin.keySet()) {
             for (Point p : models_by_win_margin.get(m)){
                 if (s < max_models_to_save){
-                    lab_screen.game.file_handler.save_model(model_pool.get(p), player_names.get(p));
+                    game.fileHandler.save_model(modelPool.get(p), player_names.get(p));
                     s++;
                 }
             }

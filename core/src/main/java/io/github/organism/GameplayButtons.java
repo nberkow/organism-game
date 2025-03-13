@@ -60,7 +60,7 @@ public class GameplayButtons {
         }
     }
 
-    public void set_button_colors(Color left_color, Color right_color){
+    public void setButtonColors(Color left_color, Color right_color){
         buttons.get(0).c = left_color;
         buttons.get(2).c = right_color;
     }
@@ -78,21 +78,21 @@ public class GameplayButtons {
     }
 
     public void render() {
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (StepButton b : buttons) {
-            game.shape_renderer.setColor(game.foreground_color);
-            game.shape_renderer.circle(b.x, b.y, b.radius * 1.2f);
+            game.shapeRenderer.setColor(game.foreground_color);
+            game.shapeRenderer.circle(b.x, b.y, b.radius * 1.2f);
         }
 
-        game.shape_renderer.end();
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.end();
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (StepButton b : buttons) {
-            game.shape_renderer.setColor(b.c);
-            game.shape_renderer.circle(b.x, b.y, b.radius);
+            game.shapeRenderer.setColor(b.c);
+            game.shapeRenderer.circle(b.x, b.y, b.radius);
         }
 
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
     }
 }

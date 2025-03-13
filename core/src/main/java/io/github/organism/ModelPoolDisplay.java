@@ -40,7 +40,7 @@ public class ModelPoolDisplay {
 
     public void render() {
 
-        if (game.shape_renderer == null) {
+        if (game.shapeRenderer == null) {
             return;
         }
 
@@ -50,8 +50,8 @@ public class ModelPoolDisplay {
         int max_count = 0;
         HashMap<Integer, Integer> wins_hist = new HashMap<>();
 
-        for (Point p : simulation.win_records.keySet()) {
-            Point rec = simulation.win_records.get(p).get(0);
+        for (Point p : simulation.winRecords.keySet()) {
+            Point rec = simulation.winRecords.get(p).get(0);
             int win_margin = (rec.x - rec.y);
 
             if (win_margin > max_win_margin){
@@ -77,12 +77,12 @@ public class ModelPoolDisplay {
 
         bar_height = ((box_height - (padding * 2)) / (1 + max_win_margin - min_win_margin)) - padding;
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(Color.DARK_GRAY);
-        game.shape_renderer.rect(x_pos, y_pos, box_width, box_height);
-        game.shape_renderer.end();
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(Color.DARK_GRAY);
+        game.shapeRenderer.rect(x_pos, y_pos, box_width, box_height);
+        game.shapeRenderer.end();
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         float bar_width;
         for (int w=min_win_margin; w<=max_win_margin; w++) {
 
@@ -91,7 +91,7 @@ public class ModelPoolDisplay {
                 bar_width = bar_max_width * ((float) wins_hist.get(w) / max_count);
             }
 
-            game.shape_renderer.rect(
+            game.shapeRenderer.rect(
                 x_pos + padding,
                 y_pos + padding + ((bar_height + padding) * (w - min_win_margin)),
                 bar_width,
@@ -99,7 +99,7 @@ public class ModelPoolDisplay {
             );
 
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
     }
 
     public void dispose() {

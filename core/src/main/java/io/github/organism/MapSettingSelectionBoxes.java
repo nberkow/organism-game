@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -8,7 +7,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class MapSettingSelectionBoxes {
 
@@ -151,25 +149,25 @@ public class MapSettingSelectionBoxes {
         }
         game.batch.end();
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (String k : ordered_keys) {
             for (String p : button_coords.get(k).keySet()){
                 float [] xy = button_coords.get(k).get(p);
                 String selected = selected_vals.get(k);
 
-                game.shape_renderer.setColor(game_board.game.foreground_color);
-                game.shape_renderer.circle(xy[0], xy[1], BUTTON_RADIUS);
+                game.shapeRenderer.setColor(game_board.game.foreground_color);
+                game.shapeRenderer.circle(xy[0], xy[1], BUTTON_RADIUS);
 
-                game.shape_renderer.setColor(game_board.game.background_color);
-                game.shape_renderer.circle(xy[0], xy[1], BUTTON_RADIUS - 1);
+                game.shapeRenderer.setColor(game_board.game.backgroundColor);
+                game.shapeRenderer.circle(xy[0], xy[1], BUTTON_RADIUS - 1);
 
                 if (selected.equals(p)) {
-                    game.shape_renderer.setColor(game_board.game.foreground_color);
-                    game.shape_renderer.circle(xy[0], xy[1], BUTTON_RADIUS - 2);
+                    game.shapeRenderer.setColor(game_board.game.foreground_color);
+                    game.shapeRenderer.circle(xy[0], xy[1], BUTTON_RADIUS - 2);
                 }
             }
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
     }
 
     public String [] poll_selection_boxes(float screenX, float screenY){

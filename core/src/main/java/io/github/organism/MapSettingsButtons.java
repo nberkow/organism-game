@@ -84,32 +84,32 @@ public class MapSettingsButtons {
 
     public void render() {
 
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         /*game_board.shape_renderer.rect(
             buttons_x, buttons_y, map_settings_screen.controls_w, button_height
         */;
-        game_board.game.shape_renderer.end();
+        game_board.game.shapeRenderer.end();
 
         for (String b : buttons.keySet()) {
-            game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-            game_board.game.shape_renderer.setColor(Color.LIGHT_GRAY);
+            game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            game_board.game.shapeRenderer.setColor(Color.LIGHT_GRAY);
             float[] button_coords = buttons.get(b);
-            game_board.game.shape_renderer.rect(
+            game_board.game.shapeRenderer.rect(
                 button_coords[0],
                 button_coords[1],
                 button_coords[2],
                 button_coords[3]
             );
 
-            game_board.game.shape_renderer.setColor(game_board.game.background_color);
-            game_board.game.shape_renderer.rect(
+            game_board.game.shapeRenderer.setColor(game_board.game.backgroundColor);
+            game_board.game.shapeRenderer.rect(
                 button_coords[0] + 2,
                 button_coords[1] + 2,
                 button_coords[2] - 4,
                 button_coords[3] - 4
             );
 
-            game_board.game.shape_renderer.end();
+            game_board.game.shapeRenderer.end();
             game_board.game.batch.begin();
             GlyphLayout layout = button_text_layouts.get(b);
             float b_x = button_coords[0] + button_coords[2]/2 - layout.width/2;

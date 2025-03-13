@@ -79,7 +79,7 @@ public class RoundSummary {
         standings_ids = new ArrayList<>();
 
         for (Point p : simulation.player_names.keySet()){
-            Point rec = simulation.win_records.get(p).get(0);
+            Point rec = simulation.winRecords.get(p).get(0);
             int win_margin = (rec.x - rec.y) * (rec.x + rec.y);
             if (!players_by_win.containsKey(win_margin)) {
                 players_by_win.put(win_margin, new ArrayList<>());
@@ -99,7 +99,7 @@ public class RoundSummary {
                 for (Point  p : tied_players) {
                     standings_ids.add(p);
                     String name = simulation.player_names.get(p);
-                    Point rec = simulation.win_records.get(p).get(0);
+                    Point rec = simulation.winRecords.get(p).get(0);
                     standings_players.add(name);
                     standings_wins.add(rec.x + " - " + rec.y);
                     lines_to_print--;
@@ -110,19 +110,19 @@ public class RoundSummary {
     }
 
     public void render(){
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shape_renderer.setColor(game.background_color);
-        game.shape_renderer.rect(box_x, box_y, box_width, box_height);
-        game.shape_renderer.end();
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.setColor(game.backgroundColor);
+        game.shapeRenderer.rect(box_x, box_y, box_width, box_height);
+        game.shapeRenderer.end();
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(Color.DARK_GRAY);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(Color.DARK_GRAY);
+        game.shapeRenderer.rect(
             box_x + margin,
             box_y + margin,
             box_width - (margin * 2),
             box_height - (margin * 2));
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         game.batch.begin();
         font32.setColor(simulation.tournament_player_colors.get(winner_id));

@@ -4,23 +4,22 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class LabScreen implements Screen {
     Simulation current_sim;
 
-    float buttons_box_w;
-    float buttons_box_h;
-    float buttons_box_x;
-    float buttons_box_y;
+    float buttonsBoxW;
+    float buttonsBoxH;
+    float buttonsBoxX;
+    float buttonsBoxY;
 
-    float checkbox_area_w;
-    float checkbox_area_h;
-    float checkbox_area_x;
-    float checkbox_area_y;
-    boolean write_files;
-    TerritoryBar territory_bar;
+    float checkboxAreaW;
+    float checkboxAreaH;
+    float checkboxAreaX;
+    float checkboxAreaY;
+    boolean writeFiles;
+    TerritoryBar territoryBar;
     OrganismGame game;
 
     SettingsOverlay overlay;
@@ -29,106 +28,113 @@ public class LabScreen implements Screen {
 
     CheckBoxGroup checkboxes;
 
-    SettingsManager settings_manager;
+    SettingsManager settingsManager;
 
-    LabScreenInputProcessor input_processor;
+    LabScreenInputProcessor inputProcessor;
 
-    String [] button_names;
+    String [] buttonNames;
 
     boolean silent = false;
-    public LabScreen(OrganismGame organism_game) {
+    public LabScreen(OrganismGame organismGame) {
 
-        game = organism_game;
-        territory_bar = new TerritoryBar(game);
+        game = organismGame;
+        territoryBar = new TerritoryBar(game);
 
-        setup_overlay();
-        setup_buttons();
-        setup_checkboxes();
+        setupOverlay();
+        setupButtons();
+        setupCheckboxes();
 
     }
 
-    public void setup_sim(){
-        GameConfig cfg = game.file_handler.read_cfg("kingdoms", "map");
-        cfg.human_players = 0;
-        cfg.bot_players = 3;
-        cfg.gameplay_settings = overlay.saved_settings;
-        int iterations = Math.round(overlay.saved_settings.get("iterations"));
-        current_sim = new Simulation(this, cfg, iterations);
-
+    public void setupSim(){
+        GameConfig cfg = game.fileHandler.read_cfg("kingdoms", "map");
+        cfg.humanPlayers = 0;
+        cfg.botPlayers = 3;
+        cfg.gameplaySettings = overlay.savedSettings;
+        int iterations = Math.round(overlay.savedSettings.get("iterations"));
+        current_sim = new Simulation(game, this, cfg, iterations);
         current_sim.run_simulation();
     }
 
-    public void setup_silent_sim(){
-        GameConfig cfg = game.file_handler.read_cfg("kingdoms", "map");
-        cfg.human_players = 0;
-        cfg.bot_players = 3;
-        cfg.gameplay_settings = overlay.saved_settings;
-        int iterations = Math.round(overlay.saved_settings.get("iterations"));
-        current_sim = new Simulation(this, cfg, iterations);
+    public void setupSilentSim(){
+        GameConfig cfg = game.fileHandler.read_cfg("kingdoms", "map");
+        cfg.humanPlayers = 0;
+        cfg.botPlayers = 3;
+        cfg.gameplaySettings = overlay.savedSettings;
+        int iterations = Math.round(overlay.savedSettings.get("iterations"));
+        current_sim = new Simulation(game,this, cfg, iterations);
         current_sim.initialize_model_pool();
         current_sim.run_silent();
     }
-    private void setup_overlay(){
+    private void setupOverlay(){
 
-        float overlay_w = this.game.VIRTUAL_WIDTH / 1.8f;
-        float overlay_x = (this.game.VIRTUAL_WIDTH - overlay_w) / 2;
-        float overlay_h = this.game.VIRTUAL_HEIGHT * 0.9f;
-        float overlay_y = (this.game.VIRTUAL_HEIGHT - overlay_h) / 2f;
+        float overlay_w = OrganismGame.VIRTUAL_WIDTH / 1.8f;
+        float overlay_x = (OrganismGame.VIRTUAL_WIDTH - overlay_w) / 2;
+        float overlay_h = OrganismGame.VIRTUAL_HEIGHT * 0.9f;
+        float overlay_y = (OrganismGame.VIRTUAL_HEIGHT - overlay_h) / 2f;
 
         overlay = new SettingsOverlay(game, this, overlay_x, overlay_y, overlay_w, overlay_h);
-        overlay.setup_sliders();
-        overlay.setup_buttons();
+        overlay.setupSliders();
+        overlay.setupButtons();
     }
 
 
-    public void setup_buttons() {
-        buttons_box_w = this.game.VIRTUAL_WIDTH / 6.5f;
-        buttons_box_h = this.game.VIRTUAL_HEIGHT / 5f;
-        buttons_box_x = GameBoard.PLAYER_SUMMARY_X * 0.9f;
-        buttons_box_y = GameBoard.PLAYER_SUMMARY_Y - (buttons_box_h * 1.75f);
+    public void setupButtons() {
+        buttonsBoxW = OrganismGame.VIRTUAL_WIDTH / 6.5f;
+        buttonsBoxH = OrganismGame.VIRTUAL_HEIGHT / 5f;
+        buttonsBoxX = GameBoard.PLAYER_SUMMARY_X * 0.9f;
+        buttonsBoxY = GameBoard.PLAYER_SUMMARY_Y - (buttonsBoxH * 1.75f);
         buttons = new LabScreenButtons(game, this);
 
-        button_names = new String[]{
+        buttonNames = new String[]{
             "run", "kill", "setup"
         };
 
-        float combined_button_height = buttons.base_button_height * button_names.length;
-        float spacing = (buttons_box_h - combined_button_height) / (button_names.length + 1);
+        float combined_button_height = buttons.base_button_height * buttonNames.length;
+        float spacing = (buttonsBoxH - combined_button_height) / (buttonNames.length + 1);
 
-        for (int i=0; i<button_names.length; i++) {
-            buttons.side_button_coords.put(button_names[i],
+        for (int i = 0; i< buttonNames.length; i++) {
+            buttons.side_button_coords.put(buttonNames[i],
                 new float[]{
-                    buttons_box_x,
-                    buttons_box_y + (spacing + buttons.base_button_height) * i,
+                    buttonsBoxX,
+                    buttonsBoxY + (spacing + buttons.base_button_height) * i,
                     buttons.base_button_width,
                     buttons.base_button_height
                 });
         }
     }
 
-    private void setup_checkboxes() {
-        checkbox_area_w = this.game.VIRTUAL_WIDTH / 6.5f;
-        checkbox_area_h = this.game.VIRTUAL_HEIGHT / 5f;
-        checkbox_area_x = GameBoard.PLAYER_SUMMARY_X * 0.9f;
-        checkbox_area_y = buttons_box_y + buttons_box_h;
-        checkboxes = new CheckBoxGroup(game, checkbox_area_x, checkbox_area_y, checkbox_area_w, checkbox_area_h);
+    private void setupCheckboxes() {
+        checkboxAreaW = OrganismGame.VIRTUAL_WIDTH / 6.5f;
+        checkboxAreaH = OrganismGame.VIRTUAL_HEIGHT / 5f;
+        checkboxAreaX = GameBoard.PLAYER_SUMMARY_X * 0.9f;
+        checkboxAreaY = buttonsBoxY + buttonsBoxH;
+        checkboxes = new CheckBoxGroup(game, checkboxAreaX, checkboxAreaY, checkboxAreaW, checkboxAreaH);
 
-        checkboxes.add_checkbox("save winners", false);
-        checkboxes.add_checkbox("show leaderboard", true);
+        checkboxes.add_checkbox("histograms", false);
+        checkboxes.add_checkbox("save winners", true);
+        checkboxes.add_checkbox("skip leaderboard", false);
 
         checkboxes.calculate_coords();
     }
 
-    public void handle_button_click(String button_clicked) {
+    public void handleButtonClick(String button_clicked) {
 
         if (Objects.equals(button_clicked, "setup")) {
-            overlay.show_control_overlay = true;
+            overlay.showControlOverlay = true;
             Gdx.input.setInputProcessor(overlay.input_processor);
         }
 
         if (Objects.equals(button_clicked, "run")) {
-            silent = true;
-            setup_silent_sim();
+            int iterations = Math.round(overlay.savedSettings.get("iterations"));
+            if (iterations > 1000) {
+                silent = true;
+                setupSilentSim();
+            }
+            else {
+                silent = false;
+                setupSim();
+            }
 
         }
 
@@ -136,23 +142,33 @@ public class LabScreen implements Screen {
             current_sim.kill = true;
         }
     }
-    public void handle_checkbox_click(String box_clicked) {
+    public void handleCheckboxClick(String box_clicked) {
         boolean state = checkboxes.checkbox_states.get(box_clicked);
 
-        if (Objects.equals(box_clicked, "show leaderboard")){
-            if (!state) {
-                current_sim.between_round_pause = 2;
+        if (current_sim != null) {
+            if (Objects.equals(box_clicked, "skip leaderboard")) {
+                if (!state) {
+                    current_sim.between_round_pause = 0;
+                } else {
+                    current_sim.between_round_pause = 2;
+                }
             }
-            else {
-                current_sim.between_round_pause = 0;
+
+            if (Objects.equals(box_clicked, "histograms")){
+                current_sim.show_histograms = !state;
             }
+
+            checkboxes.checkbox_states.put(box_clicked, !state);
         }
 
         if (Objects.equals(box_clicked, "save winners")){
-            write_files = !state;
+            writeFiles = !state;
+            checkboxes.checkbox_states.put(box_clicked, !state);
         }
+    }
 
-        checkboxes.checkbox_states.put(box_clicked, !state);
+    public boolean getWriteFiles(){
+        return writeFiles;
     }
 
     /**
@@ -168,14 +184,14 @@ public class LabScreen implements Screen {
      */
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(game.background_color);
+        ScreenUtils.clear(game.backgroundColor);
 
         if (current_sim != null) {
             current_sim.render();
-            territory_bar.render(current_sim.current_game);
+            territoryBar.render(current_sim.currentGame);
         }
 
-        if (overlay.show_control_overlay) {
+        if (overlay.showControlOverlay) {
             overlay.render();
         }
 

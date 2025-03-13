@@ -7,53 +7,107 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
-public class HMM implements Model {
+public class ReinforcementHMM  implements Model {
 
-    public final Random rng;
+    /*
+    Increases weights of transitions in real time
+
+     */
+
+    private final Random rng;
+
     public Point player_tournament_id;
     public static Integer states;
     public static Integer inputs;
-    private Integer current_state;
-    private double [][][] transition_weights;
-    private double [][][] emission_weights;
+    public Integer current_state;
+    public double [][][] transition_weights;
+    public double [][][] emission_weights;
     public String name;
-
     BitSet transition_bit_mask;
+    ArrayList<Float> territory_history;
+    ArrayList<ArrayList<Point>> transition_history;
+    ArrayList<ArrayList<Point>> emission_history;
+    ArrayList<Point> current_transitions;
+    ArrayList<Point> current_emissions;
+    int max_history_length = 20;
 
-    String model_type = "hmm";
+    String model_type = "re";
 
     OrganismGame game;
-    public HMM(OrganismGame g, int s, int n) {
+    public ReinforcementHMM(OrganismGame g, int s, int n) {
         game = g;
         states = Math.max(3, s);
         inputs = n;
         name = "bot";
-
         rng = game.rng;
         current_state = rng.nextInt(states);
 
+        transition_history = new ArrayList<>();
+        territory_history = new ArrayList<>();
+        emission_history = new ArrayList<>();
+
+        current_transitions = new ArrayList<>();
+        current_emissions = new ArrayList<>();
     }
 
-    public void set_weights(double [][][] tr, double [][][] em) {
-        transition_weights = tr;
-        emission_weights = em;
+    @Override
+    public void notify_move_completed(int turn, float territory) {
+
+        if (territory < 1) {
+            return;
+        }
+
+        territory_history.add(0, territory);
+        transition_history.add(0, current_transitions);
+        emission_history.add(0, current_emissions);
+
+        if (territory_history.size() > max_history_length){
+            territory_history.remove(territory_history.size() - 1);
+            transition_history.remove(transition_history.size() - 1);
+            emission_history.remove(emission_history.size() - 1);
+        }
+
+        current_transitions = new ArrayList<>();
+        current_emissions = new ArrayList<>();
+
+        for (int i=1; i<territory_history.size(); i++){
+            float prev_territory = territory_history.get(i);
+            float territory_delta = territory - prev_territory;
+
+            // update the vector of weights corresponding to the transitions that were made
+            for (Point t : transition_history.get(i)) {
+                double [] weights = transition_weights[t.x][t.y];
+                for (int w=0; w<weights.length; w++){
+                    double weight = weights[w];
+                    weights[w] = weight + Math.pow(territory_delta/territory, 0.5);
+                }
+                transition_weights[t.x][t.y] = weights;
+            }
+
+            // update the vector of weights corresponding to the emission that were made
+            for (Point t : emission_history.get(i)) {
+                double [] weights = emission_weights[t.x][t.y];
+                for (int w=0; w<weights.length; w++){
+                    double weight = weights[w];
+                    weights[w] = weight + (territory_delta/territory);
+                }
+                emission_weights[t.x][t.y] = weights;
+            }
+
+        }
     }
 
-
-    /**
-     *
-     */
     public void warmup() {
 
         int [] counts = new int [states];
 
-        for (int j=0; j<1000; j++) {
+        for (int j=0; j<100; j++) {
             float[] random_inputs = new float[inputs];
             for (int i = 0; i < inputs; i++) {
                 random_inputs[i] = rng.nextFloat();
             }
 
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < 100; i++) {
                 transition(random_inputs);
                 counts[current_state] ++;
             }
@@ -68,11 +122,26 @@ public class HMM implements Model {
             }
         }
     }
+
+    /**
+     * @param tr
+     * @param em
+     */
+    @Override
+    public void set_weights(double [][][] tr, double [][][] em) {
+        transition_weights = tr;
+        emission_weights = em;
+        warmup();
+    }
+
     public void init_random_weights() {
+
         init_random_transition_mask();
         init_random_transition_weights();
-        apply_transition_mask();
+        //apply_transition_mask();
         init_random_emission_weights();
+        warmup();
+
     }
 
     public BitSet get_transition_bit_mask(){
@@ -84,7 +153,7 @@ public class HMM implements Model {
     }
 
     public double [][][] get_transition_weights(){
-        return emission_weights;
+        return transition_weights;
     }
 
     /**
@@ -127,17 +196,7 @@ public class HMM implements Model {
         player_tournament_id = p;
     }
 
-    private void init_random_transition_mask() {
-        int totalBits = states * states * inputs;
-        transition_bit_mask = new BitSet(totalBits);
-
-        // Randomly set bits in the BitSet
-        for (int i = 0; i < totalBits; i++) {
-            if (rng.nextBoolean()) {
-                transition_bit_mask.set(i); // Set the bit at position i
-            }
-        }
-    }
+    private void init_random_transition_mask() {}
 
     private void init_random_transition_weights() {
         // the number of possible transitions is the number of states squared
@@ -167,18 +226,6 @@ public class HMM implements Model {
     }
 
     public void apply_transition_mask() {
-        int n = 0; // Bit position counter
-        for (int i = 0; i < states; i++) {
-            for (int j = 0; j < states; j++) {
-                for (int k = 0; k < inputs; k++) {
-                    // Check if the bit at position n is not set
-                    if (!transition_bit_mask.get(n)) {
-                        transition_weights[i][j][k] = 0;
-                    }
-                    n++; // Move to the next bit position
-                }
-            }
-        }
     }
 
     /**
@@ -225,10 +272,13 @@ public class HMM implements Model {
         return s;
     }
 
+
+
     public Integer emit(float [] input_vals) {
         /*
         Emit a move based on the current state
         */
+        int s = current_state;
         ArrayList<Double> scores = new ArrayList<>();
         double [] weights = {};
         for (int emission=0; emission<4; emission++){
@@ -236,8 +286,9 @@ public class HMM implements Model {
             scores.add(calculate_score(input_vals, weights));
         }
         ArrayList<Double> norm_scores = normalize_scores(scores);
-
-        return weighted_random_choice(norm_scores);
+        int n = weighted_random_choice(norm_scores);
+        current_emissions.add(new Point(s, n));
+        return n;
 
     }
 
@@ -245,6 +296,8 @@ public class HMM implements Model {
         /*
         Transition to a new state
         */
+
+        int s = current_state;
         ArrayList<Double> scores = new ArrayList<>();
         double [] weights = {};
         for (int state_to=0; state_to<states; state_to++){
@@ -253,15 +306,7 @@ public class HMM implements Model {
         }
         ArrayList<Double> norm_scores = normalize_scores(scores);
         current_state = weighted_random_choice(norm_scores);
-
-    }
-
-    /**
-     * @param turn, territory
-     */
-    @Override
-    public void notify_move_completed(int turn, float territory) {
-
+        current_transitions.add(new Point(s, current_state));
     }
 
     /**
@@ -272,10 +317,12 @@ public class HMM implements Model {
         return null;
     }
 
+    /**
+     *
+     */
+    @Override
     public void dispose() {
-        transition_weights = null;
-        emission_weights = null;
-        game = null;
+
     }
 
     /**
@@ -293,7 +340,5 @@ public class HMM implements Model {
     public void save(FileHandler fh) {
 
     }
-
-
 
 }

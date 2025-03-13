@@ -26,7 +26,7 @@ public class PlayerStartAssigner {
         cfg = game_board.config;
     }
 
-    public void assign_starting_hexes(ArrayList<int []> starting_coords) {
+    public void assignStartingHexes(ArrayList<int []> starting_coords) {
         int i = 0;
         for (Point p : players.keySet()) {
             Organism organism = players.get(p).get_organism();
@@ -38,7 +38,7 @@ public class PlayerStartAssigner {
         }
     }
 
-    public ArrayList<int []> randomize_starting_coords(){
+    public ArrayList<int []> randomizeStartingCoords(){
         if (Objects.equals(cfg.layout, "radial")) {
             return radial_starts();
         }
@@ -72,7 +72,7 @@ public class PlayerStartAssigner {
                     starting_coords.add(new int []{b, c, a});
                     starting_coords.add(new int []{c, a, b});
 
-                    if (cfg.human_players + cfg.bot_players == 6) {
+                    if (cfg.humanPlayers + cfg.botPlayers == 6) {
                         starting_coords.add(new int []{-a, -b, -c});
                         starting_coords.add(new int []{-b, -c, -a});
                         starting_coords.add(new int []{-c, -a, -b});
@@ -86,9 +86,9 @@ public class PlayerStartAssigner {
     }
 
     public ArrayList<int []>  random_starts(){
-        int total_players = cfg.bot_players + cfg.human_players;
+        int total_players = cfg.botPlayers + cfg.humanPlayers;
         ArrayList<int []> starting_coords = new ArrayList<>();
-        float min_dist = (float) Math.max(cfg.radius / (cfg.human_players + cfg.bot_players), 2);
+        float min_dist = (float) Math.max(cfg.radius / (cfg.humanPlayers + cfg.botPlayers), 2);
 
         ArrayList<MapHex> map_hexes = new ArrayList<>();
         for (GridPosition pos : game_board.universe_map.hex_grid){

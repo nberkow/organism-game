@@ -4,34 +4,34 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Random;
 
-public class HMM implements Model {
+public class HMM_pair_score implements Model  {
+
+    /*
+    uses a pair score per node to make transition/emission choices
+
+    the bit mask is used to determine which scores are used.
+     */
 
     public final Random rng;
+
     public Point player_tournament_id;
     public static Integer states;
     public static Integer inputs;
-    private Integer current_state;
-    private double [][][] transition_weights;
-    private double [][][] emission_weights;
+    public Integer current_state;
+    public double [][][] transition_weights;
+    public double [][][] emission_weights;
     public String name;
 
     BitSet transition_bit_mask;
 
-    String model_type = "hmm";
-
+    String model_type = "pair";
     OrganismGame game;
-    public HMM(OrganismGame g, int s, int n) {
-        game = g;
-        states = Math.max(3, s);
-        inputs = n;
+    public HMM_pair_score(OrganismGame g, int s, int n) {
         name = "bot";
-
         rng = game.rng;
         current_state = rng.nextInt(states);
-
     }
 
     public void set_weights(double [][][] tr, double [][][] em) {
@@ -39,35 +39,6 @@ public class HMM implements Model {
         emission_weights = em;
     }
 
-
-    /**
-     *
-     */
-    public void warmup() {
-
-        int [] counts = new int [states];
-
-        for (int j=0; j<1000; j++) {
-            float[] random_inputs = new float[inputs];
-            for (int i = 0; i < inputs; i++) {
-                random_inputs[i] = rng.nextFloat();
-            }
-
-            for (int i = 0; i < 1000; i++) {
-                transition(random_inputs);
-                counts[current_state] ++;
-            }
-        }
-
-        int max = 0;
-
-        for (int c=0; c<states; c++) {
-            if (counts[c] > max){
-                max = counts[c];
-                current_state = c;
-            }
-        }
-    }
     public void init_random_weights() {
         init_random_transition_mask();
         init_random_transition_weights();
@@ -75,56 +46,12 @@ public class HMM implements Model {
         init_random_emission_weights();
     }
 
-    public BitSet get_transition_bit_mask(){
-        return transition_bit_mask;
-    }
-
-    public double [][][] get_emission_weights(){
-        return emission_weights;
-    }
-
-    public double [][][] get_transition_weights(){
-        return emission_weights;
-    }
-
     /**
-     * @param m
+     *
      */
     @Override
-    public void set_transition_bit_mask(BitSet m) {
-        transition_bit_mask = m;
-    }
+    public void warmup() {
 
-    /**
-     * @param w
-     */
-    @Override
-    public void set_emission_weights(double[][][] w) {
-        emission_weights = w;
-    }
-
-    /**
-     * @param w
-     */
-    @Override
-    public void set_transition_weights(double[][][] w) {
-        transition_weights = w;
-    }
-
-    /**
-     * @param name
-     */
-    @Override
-    public void set_name(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @param p
-     */
-    @Override
-    public void setPlayerTournamentId(Point p) {
-        player_tournament_id = p;
     }
 
     private void init_random_transition_mask() {
@@ -190,11 +117,14 @@ public class HMM implements Model {
     }
 
     private double calculate_score(float [] input_vals, double [] weights){
+        // sum the products of all the scores with their weights
+        // and take the mod1 remainder
+
         double score = 0;
         for (int i=0; i<input_vals.length; i++){
-            score += (weights[i] * Math.log(input_vals[i]));
+            score += weights[i] * input_vals[i];
         }
-        return score;
+        return score % 1;
     }
 
     private ArrayList<Double> normalize_scores(ArrayList<Double> scores) {
@@ -257,14 +187,6 @@ public class HMM implements Model {
     }
 
     /**
-     * @param turn, territory
-     */
-    @Override
-    public void notify_move_completed(int turn, float territory) {
-
-    }
-
-    /**
      * @return
      */
     @Override
@@ -279,11 +201,11 @@ public class HMM implements Model {
     }
 
     /**
-     *
+     * @return
      */
     @Override
     public String get_model_type() {
-        return model_type;
+        return "";
     }
 
     /**
@@ -294,6 +216,77 @@ public class HMM implements Model {
 
     }
 
+    /**
+     * @param turn
+     * @param territory
+     */
+    @Override
+    public void notify_move_completed(int turn, float territory) {
 
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public BitSet get_transition_bit_mask() {
+        return null;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public double[][][] get_emission_weights() {
+        return new double[0][][];
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public double[][][] get_transition_weights() {
+        return new double[0][][];
+    }
+
+    /**
+     * @param m
+     */
+    @Override
+    public void set_transition_bit_mask(BitSet m) {
+
+    }
+
+    /**
+     * @param w
+     */
+    @Override
+    public void set_emission_weights(double[][][] w) {
+
+    }
+
+    /**
+     * @param w
+     */
+    @Override
+    public void set_transition_weights(double[][][] w) {
+
+    }
+
+    /**
+     * @param name
+     */
+    @Override
+    public void set_name(String name) {
+
+    }
+
+    /**
+     * @param p
+     */
+    @Override
+    public void setPlayerTournamentId(Point p) {
+
+    }
 
 }

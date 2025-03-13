@@ -34,8 +34,8 @@ public class SettingsOverlay {
     SliderGroup sliders;
     SettingsOverlayButtons buttons;
     String [] button_names;
-    boolean show_control_overlay;
-    HashMap<String, Float> saved_settings;
+    boolean showControlOverlay;
+    HashMap<String, Float> savedSettings;
     public SettingsOverlay(OrganismGame g, Screen scr, float x, float y, float w, float h) {
         game = g;
         screen = scr;
@@ -44,10 +44,10 @@ public class SettingsOverlay {
         overlay_y = y;
         overlay_h = h;
         overlay_w = w;
-        saved_settings = new HashMap<>();
+        savedSettings = new HashMap<>();
     }
 
-    public void setup_sliders() {
+    public void setupSliders() {
 
         slider_box_w = overlay_w * .75f;
         slider_box_h = overlay_h * .55f;
@@ -68,7 +68,7 @@ public class SettingsOverlay {
         save_slider_settings(); // populates the data structure with defaults
     }
 
-    public void setup_buttons() {
+    public void setupButtons() {
 
         buttons = new SettingsOverlayButtons(game, screen, this);
         button_names = new String [] {
@@ -97,23 +97,23 @@ public class SettingsOverlay {
 
     public void render(){
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shape_renderer.setColor(Color.BLACK);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.setColor(Color.BLACK);
+        game.shapeRenderer.rect(
             overlay_x, overlay_y, overlay_w, overlay_h
         );
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         float margin = overlay_w * 0.05f;
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(Color.DARK_GRAY);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(Color.DARK_GRAY);
+        game.shapeRenderer.rect(
             overlay_x + margin,
             overlay_y + margin,
             overlay_w - (margin * 2),
             overlay_h - (margin * 2)
         );
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         sliders.render();
         buttons.render();
@@ -129,19 +129,19 @@ public class SettingsOverlay {
             if (Objects.equals(p, "speed")) {
                 val = (float) Math.pow(2, val);
             }
-            saved_settings.put(p, val);
+            savedSettings.put(p, val);
         }
     }
 
     public void handle_button_click(String button_clicked) {
         System.out.println(button_clicked);
         if (Objects.equals(button_clicked, "back")) {
-            show_control_overlay = false;
+            showControlOverlay = false;
             if (screen instanceof LabScreen){
-                Gdx.input.setInputProcessor(((LabScreen) screen).input_processor);
+                Gdx.input.setInputProcessor(((LabScreen) screen).inputProcessor);
             }
             if (screen instanceof GameScreen){
-                Gdx.input.setInputProcessor(((GameScreen) screen).input_processor);
+                Gdx.input.setInputProcessor(((GameScreen) screen).inputProcessor);
             }
         }
         if (Objects.equals(button_clicked, "reset")) {
@@ -149,12 +149,12 @@ public class SettingsOverlay {
         }
         if (Objects.equals(button_clicked, "save")) {
             save_slider_settings();
-            show_control_overlay = false;
+            showControlOverlay = false;
             if (screen instanceof LabScreen){
-                Gdx.input.setInputProcessor(((LabScreen) screen).input_processor);
+                Gdx.input.setInputProcessor(((LabScreen) screen).inputProcessor);
             }
             if (screen instanceof GameScreen){
-                Gdx.input.setInputProcessor(((GameScreen) screen).input_processor);
+                Gdx.input.setInputProcessor(((GameScreen) screen).inputProcessor);
             }
         }
     }

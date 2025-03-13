@@ -32,11 +32,11 @@ public class MenuScreenButtons {
 
     public void render() {
 
-        if (game.shape_renderer == null){
+        if (game.shapeRenderer == null){
             return;
         }
 
-        game.shape_renderer.setColor(Color.CYAN);
+        game.shapeRenderer.setColor(Color.CYAN);
         for (String b : button_coords.keySet()) {
             draw_button(b, button_coords.get(b));
         }
@@ -78,14 +78,14 @@ public class MenuScreenButtons {
             return;
         }
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.rect(
             button_coords[0],
             button_coords[1],
             button_coords[2],
             button_coords[3]
         );
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         game.batch.begin();
 

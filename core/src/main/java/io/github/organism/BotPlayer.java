@@ -17,7 +17,7 @@ public class BotPlayer implements Player{
     public Color color;
     public String player_name;
 
-    public HMM model;
+    public Model model;
 
     public Organism organism;
 
@@ -25,7 +25,7 @@ public class BotPlayer implements Player{
 
     Point ally_id;
 
-    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, HMM mod, Color c){
+    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, Model mod, Color c){
 
         game_board = gb;
         color = c;
@@ -65,18 +65,18 @@ public class BotPlayer implements Player{
         // how many moves to consider from each players queue
         int move_queue_depth = 6;
 
-        // move queue depth plus two states for each player's energy and territory
-        int register_size = move_queue_depth + 2;
-
         // expand targets are not visible in player queues, so this can be expand, extract or null
         int option_per_move = 3;
+
+        // move queue depth plus two states for each player's energy and territory
+        int register_size = (move_queue_depth * option_per_move) + 2;
 
         // add player stats in order, starting with self
         for (int i=0; i<3; i++) {
             int p = ((i + game_index) % 3);
             int register_index = p * (register_size);
 
-            Point player_id = game_board.all_player_ids.get(p);
+            Point player_id = game_board.allPlayerIds.get(p);
             Player player = game_board.players.get(player_id);
             Organism organism = player.get_organism();
 
@@ -113,6 +113,12 @@ public class BotPlayer implements Player{
     }
 
     public Integer get_move() {
+
+        // update the model that at turn has taken place
+        float territory_ratio = (float) organism.territory_vertex.get_unmasked_vertices() / +
+            game_board.universe_map.vertex_grid.get_unmasked_vertices();
+        model.notify_move_completed(game_board.orchestrator.turn, territory_ratio);
+
         if (!move_queue.isEmpty()) {
             int m = move_queue.remove();
             most_recent_move = m;
@@ -133,7 +139,7 @@ public class BotPlayer implements Player{
      * @return
      */
     @Override
-    public int get_index() {
+    public int getIndex() {
         return game_index;
     }
 
@@ -146,7 +152,7 @@ public class BotPlayer implements Player{
     }
 
     @Override
-    public String get_player_name() {
+    public String getPlayerName() {
         return player_name;
     }
 
@@ -161,7 +167,7 @@ public class BotPlayer implements Player{
 
     @Override
     public void generate_and_queue() {
-        float prob = (float) Math.pow(1-((float) move_queue.size() / game_board.MAX_QUEUED_ACTIONS), 2);
+        float prob = (float) Math.pow(1-((float) move_queue.size() / GameBoard.MAX_QUEUED_ACTIONS), 2);
         float t = game_board.rng.nextFloat() * 10;
 
         if (t < prob){
@@ -192,7 +198,7 @@ public class BotPlayer implements Player{
      * @return
      */
     @Override
-    public Point get_tournament_id() {
+    public Point getTournamentId() {
        return tournament_id;
     }
 

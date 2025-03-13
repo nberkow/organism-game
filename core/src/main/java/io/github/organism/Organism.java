@@ -2,11 +2,8 @@ package io.github.organism;
 
 import static java.util.Collections.sort;
 
-import com.badlogic.gdx.graphics.Color;
-
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Organism {
 
@@ -51,7 +48,7 @@ public class Organism {
 
     public void update_income(){
         float new_income = 1;
-        float base_resource_val = game_board.config.gameplay_settings.get("resource value");
+        float base_resource_val = game_board.config.gameplaySettings.get("resource value");
 
         for (int r=0; r<3; r++){
             int resource_count = resources[r];
@@ -140,14 +137,14 @@ public class Organism {
             ExpandSortWrapper w = new ExpandSortWrapper(v, player);
             compute_adjacent_hex_value(w);
             compute_vertex_enemy_distance(w, enemy_adjacent_vertexes);
-            w.remove_player_cost = game_board.diplomacy_graph.get_remove_cost(v, player.get_tournament_id());
+            w.remove_player_cost = game_board.diplomacyGraph.get_remove_cost(v, player.getTournamentId());
             vertex_priority.add(w);
         }
         sort(vertex_priority);
 
         for (ExpandSortWrapper w : vertex_priority) {
 
-            float cost = w.remove_player_cost + game_board.config.gameplay_settings.get("claim vertex cost");
+            float cost = w.remove_player_cost + game_board.config.gameplaySettings.get("claim vertex cost");
             if (cost <= budget) {
                 claim_vertex(w.vertex);
                 budget -= cost;

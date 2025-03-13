@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -32,7 +31,7 @@ public class TerritoryBar {
 
     public void logic(GameBoard gb){
         float total_territory = gb.universe_map.vertex_grid.get_unmasked_vertices();
-        for (Point p : gb.all_player_ids) {
+        for (Point p : gb.allPlayerIds) {
             float player_territory = gb.players.get(p).get_organism().territory_vertex.get_unmasked_vertices();
             heights.put(p, max_height * player_territory / total_territory);
         }
@@ -40,25 +39,25 @@ public class TerritoryBar {
 
     public void draw(GameBoard gb) {
 
-        if (game.shape_renderer == null){
+        if (game.shapeRenderer == null){
             return;
         }
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shape_renderer.setColor(Color.GREEN);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.setColor(Color.GREEN);
         float t_width = bar_width * 3 + bar_spacing * 5;
-        game.shape_renderer.rect(x_pos-bar_spacing, y_pos + (victory_threshold * max_height), t_width, 2);
+        game.shapeRenderer.rect(x_pos-bar_spacing, y_pos + (victory_threshold * max_height), t_width, 2);
 
 
         float x = x_pos;
-        for (Point p : gb.all_player_ids) {
+        for (Point p : gb.allPlayerIds) {
             Player player = gb.players.get(p);
-            game.shape_renderer.setColor(player.get_color());
-            game.shape_renderer.rect(x, y_pos, bar_width, heights.get(p));
+            game.shapeRenderer.setColor(player.get_color());
+            game.shapeRenderer.rect(x, y_pos, bar_width, heights.get(p));
             x += bar_width + bar_spacing;
         }
-        game.shape_renderer.end();
-        game.shape_renderer.setColor(game.foreground_color);
+        game.shapeRenderer.end();
+        game.shapeRenderer.setColor(game.foreground_color);
 
     }
 

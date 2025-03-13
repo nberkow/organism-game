@@ -1,12 +1,10 @@
 package io.github.organism;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MapSettingsScreen implements Screen {
 
@@ -18,7 +16,7 @@ public class MapSettingsScreen implements Screen {
     OrganismGame game;
     GameBoard game_board;
     GameConfig cfg;
-    MapSettingsInputProcessor input_processor;
+    MapSettingsInputProcessor inputProcessor;
     MapSettingsSliders sliders;
     MapSettingSelectionBoxes selection_boxes;
     MapSettingsButtons buttons;
@@ -63,8 +61,8 @@ public class MapSettingsScreen implements Screen {
     @Override
     public void render(float delta) {
 
-        ScreenUtils.clear(game_board.game.background_color);
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        ScreenUtils.clear(game_board.game.backgroundColor);
+        game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (GridPosition pos : game_board.universe_map.hex_grid) {
             if (pos.content != null) pos.content.render();
@@ -86,13 +84,13 @@ public class MapSettingsScreen implements Screen {
         cfg.radius = (int) Math.floor(sliders.slider_selected_vals.get("radius"));
 
         game_board = new GameBoard(game, cfg, this);
-        game_board.void_distributor.distribute();
-        game_board.resource_distributor.distribute();
+        game_board.voidDistributor.distribute();
+        game_board.resourceDistributor.distribute();
 
-        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.player_start_positions));
+        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomize_starting_coords();
-            game_board.player_start_assigner.assign_starting_hexes(starting_coords);
+            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomizeStartingCoords();
+            game_board.player_start_assigner.assignStartingHexes(starting_coords);
         }
 
         game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
@@ -106,10 +104,10 @@ public class MapSettingsScreen implements Screen {
         cfg.radius = (int) Math.ceil(sliders.slider_selected_vals.get("radius"));
         cfg.resources = sliders.slider_selected_vals.get("resources");
         cfg.vertex_density = sliders.slider_selected_vals.get("density");
-        cfg.player_start_positions = sliders.slider_selected_vals.get("starts");
+        cfg.playerStartPositions = sliders.slider_selected_vals.get("starts");
 
-        cfg.human_players = Integer.parseInt(selection_boxes.selected_vals.get("human players"));
-        cfg.bot_players = Integer.parseInt(selection_boxes.selected_vals.get("players")) - cfg.human_players;
+        cfg.humanPlayers = Integer.parseInt(selection_boxes.selected_vals.get("human players"));
+        cfg.botPlayers = Integer.parseInt(selection_boxes.selected_vals.get("players")) - cfg.humanPlayers;
         cfg.layout = selection_boxes.selected_vals.get("layout");
         cfg.difficulty = selection_boxes.selected_vals.get("opponents");
 
@@ -119,13 +117,13 @@ public class MapSettingsScreen implements Screen {
 
     public void set_new_game_board(GameConfig config) {
         game_board = new GameBoard(this.game, config, this);
-        game_board.void_distributor.distribute();
-        game_board.resource_distributor.distribute();
+        game_board.voidDistributor.distribute();
+        game_board.resourceDistributor.distribute();
 
-        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.player_start_positions));
+        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomize_starting_coords();
-            game_board.player_start_assigner.assign_starting_hexes(starting_coords);
+            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomizeStartingCoords();
+            game_board.player_start_assigner.assignStartingHexes(starting_coords);
         }
 
         game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;

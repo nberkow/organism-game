@@ -69,7 +69,7 @@ public class IO_Player  implements Player {
      * @return
      */
     @Override
-    public int get_index() {
+    public int getIndex() {
         return game_index;
     }
 
@@ -84,7 +84,7 @@ public class IO_Player  implements Player {
 
 
     @Override
-    public String get_player_name() {
+    public String getPlayerName() {
         return player_name;
     }
 
@@ -92,6 +92,14 @@ public class IO_Player  implements Player {
     @Override
     public Organism get_organism() {
         return organism;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public float[] gather_inputs() {
+        return new float[0];
     }
 
     @Override
@@ -132,7 +140,7 @@ public class IO_Player  implements Player {
      * @return
      */
     @Override
-    public Point get_tournament_id() {
+    public Point getTournamentId() {
         return tournament_id;
     }
 

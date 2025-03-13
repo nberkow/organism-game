@@ -53,37 +53,37 @@ public class PlayerSummaryDisplay {
         font.setColor(player.get_color());
 
         game_board.game.batch.begin();
-        font.draw(game_board.game.batch, player.get_player_name(), x, NAME_HEIGHT + y);
+        font.draw(game_board.game.batch, player.getPlayerName(), x, NAME_HEIGHT + y);
         game_board.game.batch.end();
         font.setColor(game_board.game.foreground_color);
     }
     public void draw_energy_bar(){
-        if (game_board.game.shape_renderer == null) {
+        if (game_board.game.shapeRenderer == null) {
             return;
         }
 
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
-        game_board.game.shape_renderer.rect(
+        game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shapeRenderer.setColor(game_board.game.foreground_color);
+        game_board.game.shapeRenderer.rect(
             x, y + ENERGY_BAR_Y,
             (float) (energy_bar_width * (player.get_organism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
-        game_board.game.shape_renderer.end();
+        game_board.game.shapeRenderer.end();
     }
 
     public void draw_income_bar(){
-        game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.game.shape_renderer.setColor(game_board.game.foreground_color);
-        game_board.game.shape_renderer.rect(
+        game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game_board.game.shapeRenderer.setColor(game_board.game.foreground_color);
+        game_board.game.shapeRenderer.rect(
             x, y + INCOME_BAR_Y,
             (float) (energy_bar_width * (player.get_organism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
-        game_board.game.shape_renderer.end();
+        game_board.game.shapeRenderer.end();
     }
 
     public void draw_action_queue(){
 
-        if (game_board.game.shape_renderer == null){
+        if (game_board.game.shapeRenderer == null){
             return;
         }
 
@@ -92,13 +92,13 @@ public class PlayerSummaryDisplay {
             Integer state = player.get_move_queue().get(i);
             color = game_board.game.action_colors[state];
 
-            game_board.game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
-            game_board.game.shape_renderer.setColor(color);
-            game_board.game.shape_renderer.circle(
+            game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            game_board.game.shapeRenderer.setColor(color);
+            game_board.game.shapeRenderer.circle(
                 x + ACTION_RADIUS * (i) * 2 + (ACTION_RADIUS / 2),
                 y + ACTION_BAR_Y,
                 ACTION_RADIUS * 0.9f);
-            game_board.game.shape_renderer.end();
+            game_board.game.shapeRenderer.end();
         }
 
     }

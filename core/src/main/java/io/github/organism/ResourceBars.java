@@ -33,7 +33,7 @@ public class ResourceBars {
     }
 
     public void render(){
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         int res;
         for (int r=0; r<3; r++){
@@ -41,8 +41,8 @@ public class ResourceBars {
             if (hud.parity == -1){
                 res = 2-r;
             }
-            game.shape_renderer.setColor(game.resource_colors_dark[res]);
-            game.shape_renderer.rect(
+            game.shapeRenderer.setColor(game.resourceColorsDark[res]);
+            game.shapeRenderer.rect(
                 x + inset,
                 y + inset + BAR_HEIGHT * res,
                 BAR_WIDTH,
@@ -51,24 +51,24 @@ public class ResourceBars {
 
             float spacing = BAR_WIDTH / (7);
 
-            game.shape_renderer.setColor(game.background_color);
+            game.shapeRenderer.setColor(game.backgroundColor);
             int space_n;
             for (int s=0; s<6; s++){
                 space_n = s;
                 if (hud.parity == -1){
                     space_n = 5-s;
                 }
-                game.shape_renderer.circle(
+                game.shapeRenderer.circle(
                     x + inset + (RADIUS * 2) + spacing * space_n,
                     y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
                     RADIUS
                 );
             }
 
-            game.shape_renderer.setColor(game.resource_colors_bright[res]);
+            game.shapeRenderer.setColor(game.resourceColorsBright[res]);
             int val = Math.min(6, player.get_organism().resources[res]);
 
-            game.shape_renderer.circle(
+            game.shapeRenderer.circle(
                 x + inset + (RADIUS * 2),
                 y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
                 RADIUS / 2
@@ -80,22 +80,22 @@ public class ResourceBars {
                 if (hud.parity == -1){
                     space_n = 5-s;
                 }
-                game.shape_renderer.circle(
+                game.shapeRenderer.circle(
                     x + inset + (RADIUS * 2) + spacing * space_n,
                     y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
                     RADIUS
                 );
             }
         }
-        game.shape_renderer.end();
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.setColor(game.foreground_color);
+        game.shapeRenderer.end();
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(game.foreground_color);
 
         float border_x = x;
         if (hud.parity == -1){
             border_x = x - BAR_WIDTH - inset * 2;
         }
-        game.shape_renderer.rect(
+        game.shapeRenderer.rect(
             border_x,
             y,
             BAR_WIDTH * 2 + inset * 2,
@@ -105,7 +105,7 @@ public class ResourceBars {
         if (hud.parity == -1){
             font_x = border_x + hud.HUD_WIDTH - (BAR_WIDTH * 1.3f);
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
         game.batch.begin();
         font.draw(
             game.batch,

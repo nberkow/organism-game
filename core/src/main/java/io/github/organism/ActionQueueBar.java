@@ -2,8 +2,6 @@ package io.github.organism;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-import java.util.LinkedList;
-
 public class ActionQueueBar {
 
     OrganismGame game;
@@ -32,7 +30,7 @@ public class ActionQueueBar {
 
     public void render(){
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         float [] action_x_pos = new float [GameBoard.MAX_QUEUED_ACTIONS];
 
         float first_x = x + margin;
@@ -40,26 +38,26 @@ public class ActionQueueBar {
             first_x = x + hud.HUD_WIDTH - margin;
         }
         for (int i=0; i<GameBoard.MAX_QUEUED_ACTIONS-1; i++){
-            game.shape_renderer.setColor(game.foreground_color);
+            game.shapeRenderer.setColor(game.foreground_color);
             action_x_pos[i] = first_x + ((i) * spacing * hud.parity);
-            game.shape_renderer.circle(action_x_pos[i], y, RADIUS);
+            game.shapeRenderer.circle(action_x_pos[i], y, RADIUS);
             if (i == 10 || i == 0){
-                game.shape_renderer.circle(action_x_pos[i], y, RADIUS + 2);
+                game.shapeRenderer.circle(action_x_pos[i], y, RADIUS + 2);
             }
             if (i == 0){
-                game.shape_renderer.circle(action_x_pos[i], y, RADIUS + 3);
+                game.shapeRenderer.circle(action_x_pos[i], y, RADIUS + 3);
             }
 
         }
         // make the last circle larger
         action_x_pos[GameBoard.MAX_QUEUED_ACTIONS-1] = first_x + (hud.parity * ((GameBoard.MAX_QUEUED_ACTIONS-1) * spacing + RADIUS));
-        game.shape_renderer.circle(
+        game.shapeRenderer.circle(
             action_x_pos[GameBoard.MAX_QUEUED_ACTIONS-1],
             y,
             RADIUS * 1.5f);
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // end circle
         int i = GameBoard.MAX_QUEUED_ACTIONS-1;
@@ -74,12 +72,12 @@ public class ActionQueueBar {
                     r = RADIUS * 1.5f - 1;
                     first = false;
                 }
-                game.shape_renderer.setColor(game.action_colors[v]);
-                game.shape_renderer.circle(action_x_pos[i], y, r);
+                game.shapeRenderer.setColor(game.action_colors[v]);
+                game.shapeRenderer.circle(action_x_pos[i], y, r);
 
                 i -= 1;
             }
         }
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
     }
 }

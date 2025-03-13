@@ -1,7 +1,6 @@
 package io.github.organism;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -56,14 +55,14 @@ public class SettingsOverlayButtons {
 
     private void draw_button(String b, float[] button_coords) {
 
-        game.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shape_renderer.rect(
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.rect(
             button_coords[0],
             button_coords[1],
             button_coords[2],
             button_coords[3]
         );
-        game.shape_renderer.end();
+        game.shapeRenderer.end();
 
         game.batch.begin();
 

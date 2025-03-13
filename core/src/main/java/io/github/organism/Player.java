@@ -2,7 +2,6 @@
 package io.github.organism;
 
 import java.awt.Point;
-import java.util.HashMap;
 import java.util.LinkedList;
 import com.badlogic.gdx.graphics.Color;
 public interface Player {
@@ -12,13 +11,15 @@ public interface Player {
 
     public Color get_color();
 
-    public int get_index();
+    public int getIndex();
 
     public Integer on_empty_queue();
 
-    String get_player_name();
+    String getPlayerName();
 
     Organism get_organism();
+
+    public float [] gather_inputs();
 
     LinkedList<Integer> get_move_queue();
 
@@ -30,7 +31,7 @@ public interface Player {
 
     void dispose();
 
-    Point get_tournament_id();
+    Point getTournamentId();
 
     Point get_ally_id();
 
