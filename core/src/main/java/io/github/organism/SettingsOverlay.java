@@ -57,14 +57,14 @@ public class SettingsOverlay {
 
         sliders = new SliderGroup(game, screen, slider_box_x, slider_box_y, slider_box_w, slider_box_h);
 
-        sliders.add_slider("resource value", 1, 6, 0.1f, SettingsManager.BASE_RESOURCE_VALUE);
-        sliders.add_slider("attack enemy cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ENEMY);
-        sliders.add_slider("attack ally cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY);
-        sliders.add_slider("attack neutral cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL);
-        sliders.add_slider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
-        sliders.add_slider("speed", 1, 7, 1, 7f);
-        sliders.add_slider("iterations", 1, 9, 1, 1f);
-        sliders.load_initial_positions();
+        sliders.addSlider("resource value", 1, 6, 0.1f, SettingsManager.BASE_RESOURCE_VALUE);
+        sliders.addSlider("attack enemy cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ENEMY);
+        sliders.addSlider("attack ally cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY);
+        sliders.addSlider("attack neutral cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL);
+        sliders.addSlider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
+        sliders.addSlider("speed", 1, 7, 1, 7f);
+        sliders.addSlider("iterations", 1, 9, 1, 1f);
+        sliders.loadInitialPositions();
         save_slider_settings(); // populates the data structure with defaults
     }
 
@@ -121,8 +121,8 @@ public class SettingsOverlay {
     }
 
     public void save_slider_settings(){
-        for (String p : sliders.slider_label_order){
-            float val = sliders.slider_selected_values.get(p);
+        for (String p : sliders.sliderLabelOrder){
+            float val = sliders.sliderSelectedValues.get(p);
             if (Objects.equals(p, "iterations")) {
                 val = (float) Math.pow(10, val);
             }
@@ -145,7 +145,7 @@ public class SettingsOverlay {
             }
         }
         if (Objects.equals(button_clicked, "reset")) {
-            sliders.reset_sliders();
+            sliders.resetSliders();
         }
         if (Objects.equals(button_clicked, "save")) {
             save_slider_settings();

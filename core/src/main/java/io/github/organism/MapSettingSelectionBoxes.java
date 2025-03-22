@@ -155,14 +155,14 @@ public class MapSettingSelectionBoxes {
                 float [] xy = button_coords.get(k).get(p);
                 String selected = selected_vals.get(k);
 
-                game.shapeRenderer.setColor(game_board.game.foreground_color);
+                game.shapeRenderer.setColor(game_board.game.foregroundColor);
                 game.shapeRenderer.circle(xy[0], xy[1], BUTTON_RADIUS);
 
                 game.shapeRenderer.setColor(game_board.game.backgroundColor);
                 game.shapeRenderer.circle(xy[0], xy[1], BUTTON_RADIUS - 1);
 
                 if (selected.equals(p)) {
-                    game.shapeRenderer.setColor(game_board.game.foreground_color);
+                    game.shapeRenderer.setColor(game_board.game.foregroundColor);
                     game.shapeRenderer.circle(xy[0], xy[1], BUTTON_RADIUS - 2);
                 }
             }

@@ -35,7 +35,7 @@ public class EnergyBar {
         y_height =  height;
         x_width = width;
 
-        y = hud.ENERGYBAR_Y;
+        y = hud.ENERGY_BAR_Y;
         x = hud.x;
         if (hud.parity == -1){
             x = hud.x - (x_width - hud.HUD_WIDTH);
@@ -54,7 +54,7 @@ public class EnergyBar {
     public void render(){
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foregroundColor);
         game.shapeRenderer.rect(
             x,
             y,
@@ -73,7 +73,7 @@ public class EnergyBar {
             first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
         }
 
-        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foregroundColor);
         for (int i = 0; i<player.getOrganism().energy; i++) {
             game.shapeRenderer.rect(
                 first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),

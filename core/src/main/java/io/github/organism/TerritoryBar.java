@@ -57,7 +57,7 @@ public class TerritoryBar {
             x += bar_width + bar_spacing;
         }
         game.shapeRenderer.end();
-        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foregroundColor);
 
     }
 

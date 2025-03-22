@@ -50,7 +50,7 @@ public class WinRecordGraph {
          */
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foregroundColor);
         game.shapeRenderer.rect(
             graph_x,
             graph_y,

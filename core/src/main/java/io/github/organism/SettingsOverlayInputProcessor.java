@@ -92,11 +92,11 @@ public class SettingsOverlayInputProcessor implements InputProcessor {
             return false;
         }
 
-        float[][] tick_coords = overlay.sliders.bar_tick_coords.get(dragging_slider);
+        float[][] tick_coords = overlay.sliders.barTickCoords.get(dragging_slider);
         float [] slider_coords = overlay.sliders.slider_coords.get(dragging_slider);
-        float [] slider_vals = overlay.sliders.slider_tick_values.get(dragging_slider);
+        float [] slider_vals = overlay.sliders.sliderTickValues.get(dragging_slider);
 
-        float min_dist = overlay.sliders.bar_width;
+        float min_dist = overlay.sliders.barWidth;
         float min_dist_x = 0;
         float slider_val = 0;
 
@@ -110,7 +110,7 @@ public class SettingsOverlayInputProcessor implements InputProcessor {
             }
             t++;
         }
-        overlay.sliders.slider_selected_values.put(dragging_slider, slider_val);
+        overlay.sliders.sliderSelectedValues.put(dragging_slider, slider_val);
         slider_coords[0] = min_dist_x;
 
         dragging_slider = null;

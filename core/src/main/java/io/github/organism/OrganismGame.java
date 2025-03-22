@@ -34,7 +34,7 @@ public class OrganismGame extends Game {
 
     // Game colors
     Color backgroundColor = Color.BLACK;
-    Color foreground_color = Color.CYAN;
+    Color foregroundColor = Color.CYAN;
 
     Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
 

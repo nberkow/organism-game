@@ -1,7 +1,6 @@
 package io.github.organism;
 
 import com.badlogic.gdx.graphics.Color;
-
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -10,16 +9,17 @@ public class Tutorial implements GameMode {
     OrganismGame game;
     TutorialScreen screen;
     GameConfig currentConfig;
-
     GameBoard currentGame;
     public GameOrchestrator currentGameOrchestrator;
+
+    public TutorialOverlayHandler overlayHandler;
 
     public Tutorial(OrganismGame g, TutorialScreen tut, GameConfig cfg) {
         game = g;
         screen = tut;
         currentConfig = cfg;
+        overlayHandler = new TutorialOverlayHandler(game, this);
     }
-
 
     public void setupBasicMovesTutorial() {
         /*

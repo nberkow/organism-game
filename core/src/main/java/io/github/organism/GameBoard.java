@@ -77,8 +77,8 @@ public class GameBoard implements Disposable {
         move_logger = null;
 
         hex_side_len = config.map_view_size_param/radius; // starting default
-        center_x = this.game.VIRTUAL_WIDTH / 2f;
-        center_y = this.game.VIRTUAL_HEIGHT / grid_window_y;
+        center_x = OrganismGame.VIRTUAL_WIDTH / 2f;
+        center_y = OrganismGame.VIRTUAL_HEIGHT / grid_window_y;
 
         rng = new Random();
         rng.setSeed(seed);

@@ -80,7 +80,7 @@ public class GameplayButtons {
     public void render() {
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (StepButton b : buttons) {
-            game.shapeRenderer.setColor(game.foreground_color);
+            game.shapeRenderer.setColor(game.foregroundColor);
             game.shapeRenderer.circle(b.x, b.y, b.radius * 1.2f);
         }
 

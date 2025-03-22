@@ -74,6 +74,7 @@ public class TutorialScreen  implements Screen {
         input();
         tutorial.render();
         player1Hud.render();
+        tutorial.overlayHandler.render();
     }
 
     /**

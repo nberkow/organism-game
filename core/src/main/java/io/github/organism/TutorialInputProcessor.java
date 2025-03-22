@@ -15,7 +15,12 @@ public class TutorialInputProcessor implements InputProcessor {
     double held_button_base_freq;
 
     HashMap<Point, PlayerGameInputData> player_input_data;
+    public boolean tutorialAdvance;
 
+    public int currentTurns = 0;
+    public int currentMoves = 0;
+    public int testGameTurns = 10;
+    public int testGameMoves = 25;
     public TutorialInputProcessor(TutorialScreen scr){
         screen = scr;
         held_button_base_freq = .2;
@@ -41,15 +46,17 @@ public class TutorialInputProcessor implements InputProcessor {
         }
     }
 
-    public void clearPlayers() {
-        player_input_data = new HashMap<>();
-    }
 
     public void add_player(Point player_id) {
         player_input_data.put(player_id, new PlayerGameInputData());
     }
 
     public boolean keyDown (int keycode) {
+
+        if (!handleTutorial(true)){
+            return false;
+        }
+
 
         int p = 0;
         if (keycode == Input.Keys.K || keycode == Input.Keys.L || keycode == Input.Keys.SEMICOLON) {
@@ -79,6 +86,10 @@ public class TutorialInputProcessor implements InputProcessor {
     }
 
     public boolean keyUp (int keycode) {
+
+        if (!handleTutorial(false)){
+            return false;
+        }
 
         int p = 0;
         if (keycode == Input.Keys.K || keycode == Input.Keys.L || keycode == Input.Keys.SEMICOLON) {
@@ -115,6 +126,10 @@ public class TutorialInputProcessor implements InputProcessor {
 
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
 
+        if (!handleTutorial(false)){
+            return false;
+        }
+
         // Convert screen coordinates to game world coordinates
 
         Vector2 touchPos = new Vector2(screenX, screenY);
@@ -142,6 +157,10 @@ public class TutorialInputProcessor implements InputProcessor {
 
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
+        if (!handleTutorial(true)){
+            return false;
+        }
+
         // Convert screen coordinates to game world coordinates
         Vector2 touchPos = new Vector2(screenX, screenY);
         gameBoard.game.viewport.unproject(touchPos);
@@ -160,6 +179,16 @@ public class TutorialInputProcessor implements InputProcessor {
         }
 
         return true;
+    }
+
+    private boolean handleTutorial(boolean action) {
+        /*
+        - decide if it's time to advance popups
+        - decide if a key press should be sent to the current game
+        - actions can trigger after a certain number of in game key presses or turns
+         */
+
+        return false;
     }
 
     @Override

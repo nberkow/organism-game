@@ -8,11 +8,11 @@ public class PlayerHud {
     float x, y;
     float HUD_Y = 0;
     float SIDE_BUFFER = 10;
-    final float HUD_WIDTH = 400;
-    final float HUD_HEIGHT = 180;
+    static final float HUD_WIDTH = 400;
+    static final float HUD_HEIGHT = 180;
     final float BUTTONS_X  = 60;
     final float BUTTONS_Y  = 25;
-    final float ENERGYBAR_Y  = y + HUD_HEIGHT * .4f;
+    final float ENERGY_BAR_Y = y + HUD_HEIGHT * .4f;
     Player player;
 
     OrganismGame game;

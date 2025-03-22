@@ -14,27 +14,27 @@ import java.util.Objects;
 public class SliderGroup {
     OrganismGame game;
     Screen screen;
-    float bar_x;
-    float bar_width;
+    float barX;
+    float barWidth;
     float bar_height;
     float slider_width;
-    float slider_height;
+    float sliderHeight;
     float bar_spacing;
 
-    HashMap<String, float[]> slider_parameters;
+    HashMap<String, float[]> sliderParameters;
     HashMap<String, float[]> slider_coords;
     HashMap<String, float[]> bar_coords;
-    HashMap<String, float[][]> bar_tick_coords;
-    HashMap<String, float[]> label_coords;
+    HashMap<String, float[][]> barTickCoords;
+    HashMap<String, float[]> labelCoords;
     HashMap<String, float[]> value_coords;
-    ArrayList<String> slider_label_order;
-    HashMap<String, float[]> slider_tick_values;
-    HashMap<String, Float> slider_selected_values;
+    ArrayList<String> sliderLabelOrder;
+    HashMap<String, float[]> sliderTickValues;
+    HashMap<String, Float> sliderSelectedValues;
 
-    float slider_box_w;
+    float sliderBoxW;
     float slider_box_h;
 
-    float slider_box_x;
+    float sliderBoxX;
     float slider_box_y;
 
     BitmapFont font;
@@ -43,59 +43,59 @@ public class SliderGroup {
         game = g;
         screen = s;
 
-        slider_box_x = x;
+        sliderBoxX = x;
         slider_box_y = y;
-        slider_box_w = w;
+        sliderBoxW = w;
         slider_box_h = h;
 
-        bar_width = slider_box_w * .8f;
+        barWidth = sliderBoxW * .8f;
         bar_height = 4;
-        bar_x = slider_box_x + (slider_box_w - bar_width)/2;
+        barX = sliderBoxX + (sliderBoxW - barWidth)/2;
 
-        slider_width = bar_width * .1f;
-        slider_height = bar_height * 3;
+        slider_width = barWidth * .1f;
+        sliderHeight = bar_height * 3;
 
         font = game.fonts.get(16);
 
         bar_coords = new HashMap<>();
-        label_coords = new HashMap<>();
+        labelCoords = new HashMap<>();
         value_coords = new HashMap<>();
         slider_coords = new HashMap<>();
-        bar_tick_coords = new HashMap<>();
-        slider_tick_values = new HashMap<>();
-        slider_selected_values = new HashMap<>();
-        slider_parameters = new HashMap<>();
-        slider_label_order = new ArrayList<>();
+        barTickCoords = new HashMap<>();
+        sliderTickValues = new HashMap<>();
+        sliderSelectedValues = new HashMap<>();
+        sliderParameters = new HashMap<>();
+        sliderLabelOrder = new ArrayList<>();
     }
 
-    public void add_slider(String label, float range_min, float range_max, float increment, float starting_val){
-        slider_label_order.add(label);
-        slider_parameters.put(label, new float[]{range_min, range_max, increment, starting_val});
-        slider_selected_values.put(label, starting_val);
+    public void addSlider(String label, float range_min, float range_max, float increment, float starting_val){
+        sliderLabelOrder.add(label);
+        sliderParameters.put(label, new float[]{range_min, range_max, increment, starting_val});
+        sliderSelectedValues.put(label, starting_val);
     }
 
-    public void reset_sliders() {
+    public void resetSliders() {
         float slider_x;
-        for (String s : slider_label_order) {
-            float [] values = slider_parameters.get(s);
-            slider_x = (values[3] - values[0]) / (values[1] - values[0]) * bar_width;
+        for (String s : sliderLabelOrder) {
+            float [] values = sliderParameters.get(s);
+            slider_x = (values[3] - values[0]) / (values[1] - values[0]) * barWidth;
 
             float[] coords = slider_coords.get(s);
             float[] new_coords = new float [] {
-                bar_x + slider_x - slider_width/2,
+                barX + slider_x - slider_width/2,
                 coords[1],
                 slider_width,
-                slider_height
+                sliderHeight
             };
 
             slider_coords.put(s, new_coords);
-            slider_selected_values.put(s, values[3]);
+            sliderSelectedValues.put(s, values[3]);
         }
     }
 
-    public void load_initial_positions() {
+    public void loadInitialPositions() {
 
-        bar_spacing = slider_box_h / (.7f + slider_parameters.size());
+        bar_spacing = slider_box_h / (.7f + sliderParameters.size());
         float y = slider_box_y + slider_box_h - bar_spacing;
         float slider_x;
         int ticks;
@@ -103,55 +103,55 @@ public class SliderGroup {
 
         // rect coordinates in order
         float [] bar_coord;
-        float [] label_coord;
+        float [] labelCoord;
         float [] value_coord;
         float [] slider_coord;
 
         // rect coordinates in order, per tick
         float [][] bar_tick_coord;
 
-        for (String p : slider_label_order){
+        for (String p : sliderLabelOrder){
 
-            label_coord = new float[] {slider_box_x, y + slider_height * 2};
-            label_coords.put(p, label_coord);
+            labelCoord = new float[] {sliderBoxX, y + sliderHeight * 2};
+            labelCoords.put(p, labelCoord);
 
-            value_coord = new float[] {slider_box_x + slider_box_w, y + slider_height * 2};
+            value_coord = new float[] {sliderBoxX + sliderBoxW, y + sliderHeight * 2};
             value_coords.put(p, value_coord);
 
             // lower bound, upper bound, step size, current value
-            float [] values = slider_parameters.get(p);
+            float [] values = sliderParameters.get(p);
 
             ticks = (int) ((values[1] - values[0]) / values[2]);
             bar_tick_coord = new float [ticks+1][4];
             float [] tick_vals = new float [ticks+1];
 
-            tick_spacing = bar_width / ticks;
+            tick_spacing = barWidth / ticks;
             for (int i=0; i<=ticks; i++){
-                bar_tick_coord[i][0] = bar_x + tick_spacing * i - 1;
-                bar_tick_coord[i][1] = y - slider_height * .6f;
+                bar_tick_coord[i][0] = barX + tick_spacing * i - 1;
+                bar_tick_coord[i][1] = y - sliderHeight * .6f;
                 bar_tick_coord[i][2] = 0;
-                bar_tick_coord[i][3] = slider_height * 1.2f;
+                bar_tick_coord[i][3] = sliderHeight * 1.2f;
                 tick_vals[i] = i * values[2] + values[0];
             }
-            bar_tick_coords.put(p, bar_tick_coord);
-            slider_tick_values.put(p, tick_vals);
-            slider_selected_values.put(p, values[3]);
+            barTickCoords.put(p, bar_tick_coord);
+            sliderTickValues.put(p, tick_vals);
+            sliderSelectedValues.put(p, values[3]);
 
 
             bar_coord = new float []{
-                bar_x,
+                barX,
                 y - bar_height / 2,
-                bar_width,
+                barWidth,
                 bar_height
             };
             bar_coords.put(p, bar_coord);
 
-            slider_x = (values[3] - values[0]) / (values[1] - values[0]) * bar_width;
+            slider_x = (values[3] - values[0]) / (values[1] - values[0]) * barWidth;
             slider_coord = new float [] {
-                bar_x + slider_x - slider_width/2,
-                y - slider_height/2,
+                barX + slider_x - slider_width/2,
+                y - sliderHeight /2,
                 slider_width,
-                slider_height
+                sliderHeight
             };
             slider_coords.put(p, slider_coord);
 
@@ -162,7 +162,7 @@ public class SliderGroup {
     public String poll_sliders(float screenX, float screenY) {
 
         String r = null;
-        for (String p : slider_label_order){
+        for (String p : sliderLabelOrder){
             float [] coord = slider_coords.get(p);
             if (screenX > coord[0] && screenX < coord[0] + coord[2]){
                 if (screenY > coord[1] && screenY < coord[1] + coord[3]){
@@ -185,9 +185,9 @@ public class SliderGroup {
 
             float [] coord = bar_coords.get(n);
             if (x > coord[0] && x < coord[0] + coord[2] &&
-                y > coord[1] - slider_height && y < coord[1] + coord[3] + slider_height){
-                float[][] tick_coord = bar_tick_coords.get(n);
-                float [] values = slider_tick_values.get(n);
+                y > coord[1] - sliderHeight && y < coord[1] + coord[3] + sliderHeight){
+                float[][] tick_coord = barTickCoords.get(n);
+                float [] values = sliderTickValues.get(n);
 
                 for (int i=0; i<tick_coord.length; i++) {
                     float[] rect_coords = tick_coord[i];
@@ -201,7 +201,7 @@ public class SliderGroup {
             }
 
             if (best_dist < Float.MAX_VALUE) {
-                slider_selected_values.put(n, best_dist_val);
+                sliderSelectedValues.put(n, best_dist_val);
                 float [] s_coord = slider_coords.get(n);
                 s_coord[0] = best_dist_pos - slider_width/2;
                 slider_coords.put(n, s_coord);
@@ -224,7 +224,7 @@ public class SliderGroup {
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        for (String p : slider_label_order){
+        for (String p : sliderLabelOrder){
 
             game.shapeRenderer.setColor(Color.DARK_GRAY);
             float[] bar_coord = bar_coords.get(p);
@@ -249,8 +249,8 @@ public class SliderGroup {
 
         game.batch.begin();
 
-        for (String p : slider_label_order){
-            float[] label_coord = label_coords.get(p);
+        for (String p : sliderLabelOrder){
+            float[] label_coord = labelCoords.get(p);
             font.draw(
                 game.batch,
                 p,
@@ -258,9 +258,9 @@ public class SliderGroup {
                 label_coord[1]);
         }
 
-        for (String p : slider_label_order){
+        for (String p : sliderLabelOrder){
             float[] value_coord = value_coords.get(p);
-            float val = slider_selected_values.get(p);
+            float val = sliderSelectedValues.get(p);
             if (Objects.equals(p, "iterations")) {
                 val = (float) Math.pow(10, val);
             }

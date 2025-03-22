@@ -25,7 +25,7 @@ public class ResourceBars {
         hud = ph;
         player = p;
         inset = 2;
-        y = hud.ENERGYBAR_Y * 1.4f;
+        y = hud.ENERGY_BAR_Y * 1.4f;
         x = hud.x;
         if (hud.parity == -1){
             x = hud.x + hud.HUD_WIDTH - BAR_WIDTH;
@@ -89,7 +89,7 @@ public class ResourceBars {
         }
         game.shapeRenderer.end();
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foregroundColor);
 
         float border_x = x;
         if (hud.parity == -1){

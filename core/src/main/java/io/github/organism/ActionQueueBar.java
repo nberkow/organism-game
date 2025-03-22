@@ -19,9 +19,9 @@ public class ActionQueueBar {
     public ActionQueueBar(OrganismGame g, PlayerHud ph){
         game = g;
         hud = ph;
-        y = hud.HUD_HEIGHT * 0.315f;
+        y = PlayerHud.HUD_HEIGHT * 0.315f;
         x = hud.x;
-        x_width = hud.HUD_WIDTH * 1.1f;
+        x_width = PlayerHud.HUD_WIDTH * 1.1f;
         margin = hud.BUTTONS_X;
 
         spacing = (x_width - (margin)) / (GameBoard.MAX_QUEUED_ACTIONS);
@@ -35,10 +35,10 @@ public class ActionQueueBar {
 
         float first_x = x + margin;
         if (hud.parity == -1){
-            first_x = x + hud.HUD_WIDTH - margin;
+            first_x = x + PlayerHud.HUD_WIDTH - margin;
         }
         for (int i=0; i<GameBoard.MAX_QUEUED_ACTIONS-1; i++){
-            game.shapeRenderer.setColor(game.foreground_color);
+            game.shapeRenderer.setColor(game.foregroundColor);
             action_x_pos[i] = first_x + ((i) * spacing * hud.parity);
             game.shapeRenderer.circle(action_x_pos[i], y, RADIUS);
             if (i == 10 || i == 0){
