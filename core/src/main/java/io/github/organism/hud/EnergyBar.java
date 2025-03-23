@@ -1,7 +1,10 @@
-package io.github.organism;
+package io.github.organism.hud;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
+import io.github.organism.OrganismGame;
+import io.github.organism.Player;
 
 public class EnergyBar {
 
@@ -35,9 +38,9 @@ public class EnergyBar {
         y_height =  height;
         x_width = width;
 
-        y = hud.ENERGYBAR_Y;
+        y = hud.ENERGY_BAR_Y;
         x = hud.x;
-        if (hud.parity == -1){
+        if (hud.player2){
             x = hud.x - (x_width - hud.HUD_WIDTH);
         }
 
@@ -69,14 +72,19 @@ public class EnergyBar {
 
 
         float first_x = x + GAP_WIDTH * 2;
-        if (hud.parity == -1){
+        if (hud.player2){
             first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
+        }
+
+        int parity = 1;
+        if (hud.player2){
+            parity = -1;
         }
 
         game.shapeRenderer.setColor(game.foreground_color);
         for (int i = 0; i<player.getOrganism().energy; i++) {
             game.shapeRenderer.rect(
-                first_x + ((small_bar_width + TICK_SPACING) * i * hud.parity),
+                first_x + ((small_bar_width + TICK_SPACING) * i * parity),
                 y + GAP_WIDTH * 2,
                 small_bar_width,
                 y_height - (GAP_WIDTH * 4));

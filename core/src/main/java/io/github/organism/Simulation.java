@@ -1,5 +1,6 @@
 package io.github.organism;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 
@@ -9,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class Simulation implements GameMode{
+public class Simulation implements GameSession {
 
     OrganismGame game;
     Screen screen;
@@ -597,5 +598,14 @@ public class Simulation implements GameMode{
                 }
             }
         }
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public InputProcessor getInputProcessor() {
+        LabScreen lb = (LabScreen) screen;
+        return lb.inputProcessor;
     }
 }

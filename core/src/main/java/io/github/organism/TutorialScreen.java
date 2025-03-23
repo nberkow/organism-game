@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-import java.awt.Point;
-import java.util.ArrayList;
+import io.github.organism.hud.HudInputProcessor;
+import io.github.organism.hud.PlayerHud;
 
 public class TutorialScreen  implements Screen {
     float mapCenterX;
     float mapCenterY;
-    public TutorialInputProcessor inputProcessor;
+    public HudInputProcessor inputProcessor;
     OrganismGame game;
     PlayerHud player1Hud;
 
@@ -49,8 +49,8 @@ public class TutorialScreen  implements Screen {
 
     private void input() {
         if (!tutorial.currentGameOrchestrator.paused) {
-            inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
-            inputProcessor.updateQueuesWithInput();
+            //inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
+            //inputProcessor.updateQueuesWithInput();
             tutorial.currentGameOrchestrator.updatePlayers();
             tutorial.currentGameOrchestrator.updateTimersAndFlags();
         }

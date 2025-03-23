@@ -1,9 +1,12 @@
-package io.github.organism;
+package io.github.organism.hud;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-public class ResourceBars {
+import io.github.organism.OrganismGame;
+import io.github.organism.Player;
+
+public class ResourceBar {
 
     final float MARGIN = 5;
     final float BAR_HEIGHT = 15 + MARGIN * 2;
@@ -19,15 +22,15 @@ public class ResourceBars {
 
     BitmapFont font;
 
-    public  ResourceBars(OrganismGame g, PlayerHud ph, Player p){
+    public ResourceBar(OrganismGame g, PlayerHud ph, Player p){
         game = g;
         font = game.fonts.get(32);
         hud = ph;
         player = p;
         inset = 2;
-        y = hud.ENERGYBAR_Y * 1.4f;
+        y = hud.ENERGY_BAR_Y * 1.4f;
         x = hud.x;
-        if (hud.parity == -1){
+        if (hud.player2){
             x = hud.x + hud.HUD_WIDTH - BAR_WIDTH;
         }
     }
@@ -38,7 +41,7 @@ public class ResourceBars {
         int res;
         for (int r=0; r<3; r++){
             res = r;
-            if (hud.parity == -1){
+            if (hud.player2){
                 res = 2-r;
             }
             game.shapeRenderer.setColor(game.resourceColorsDark[res]);
@@ -55,7 +58,7 @@ public class ResourceBars {
             int space_n;
             for (int s=0; s<6; s++){
                 space_n = s;
-                if (hud.parity == -1){
+                if (hud.player2){
                     space_n = 5-s;
                 }
                 game.shapeRenderer.circle(
@@ -77,7 +80,7 @@ public class ResourceBars {
 
             for (int s=0; s<val; s++){
                 space_n = s;
-                if (hud.parity == -1){
+                if (hud.player2){
                     space_n = 5-s;
                 }
                 game.shapeRenderer.circle(
@@ -92,7 +95,7 @@ public class ResourceBars {
         game.shapeRenderer.setColor(game.foreground_color);
 
         float border_x = x;
-        if (hud.parity == -1){
+        if (hud.player2){
             border_x = x - BAR_WIDTH - inset * 2;
         }
         game.shapeRenderer.rect(
@@ -102,7 +105,7 @@ public class ResourceBars {
             BAR_HEIGHT * 3 + inset * 3
         );
         float font_x = border_x + (BAR_WIDTH * 1.3f);
-        if (hud.parity == -1){
+        if (hud.player2){
             font_x = border_x + hud.HUD_WIDTH - (BAR_WIDTH * 1.3f);
         }
         game.shapeRenderer.end();

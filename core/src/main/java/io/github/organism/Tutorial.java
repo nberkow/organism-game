@@ -1,11 +1,14 @@
 package io.github.organism;
 
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
 import java.util.ArrayList;
 
-public class Tutorial implements GameMode {
+import io.github.organism.hud.PlayerHud;
+
+public class Tutorial implements GameSession {
 
     OrganismGame game;
     TutorialScreen screen;
@@ -121,8 +124,8 @@ public class Tutorial implements GameMode {
         currentGame.humanPlayerIds.add(playerId);
         currentGame.allPlayerIds.add(playerId);
 
-        screen.player1Hud = new PlayerHud(game, screen, player, false);
-        screen.inputProcessor.add_player(playerId);
+        screen.player1Hud = new PlayerHud(game, this, screen, false);
+        //screen.inputProcessor.add_player(playerId);
 
     }
 
@@ -143,7 +146,7 @@ public class Tutorial implements GameMode {
         currentGameOrchestrator = new GameOrchestrator(currentGame);
         currentGame.set_orchestrator(currentGameOrchestrator);
 
-        screen.inputProcessor.gameBoard = currentGame;
+        //screen.inputProcessor.gameBoard = currentGame;
 
     }
 
@@ -159,4 +162,11 @@ public class Tutorial implements GameMode {
 
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public InputProcessor getInputProcessor() {
+        return screen.inputProcessor;
+    }
 }

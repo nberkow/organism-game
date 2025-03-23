@@ -14,9 +14,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import java.util.HashMap;
 import java.util.Random;
 
+import io.github.organism.hud.HudInputProcessor;
+
 public class OrganismGame extends Game {
 
-    ShapeRenderer shapeRenderer;
+    public HudTestScreen hudTestScreen;
+
+    public ShapeRenderer shapeRenderer;
     GameScreen gameScreen;
     MenuScreen menuScreen;
     LabScreen labScreen;
@@ -26,19 +30,18 @@ public class OrganismGame extends Game {
     FileHandler fileHandler;
 
     MapSettingsScreen mapSettingsScreen;
-    SpriteBatch batch;
+    public SpriteBatch batch;
     GameBoard gameBoard;
     OrthographicCamera camera;
     FitViewport viewport;
     Random rng;
 
     // Game colors
-    Color backgroundColor = Color.BLACK;
-    Color foreground_color = Color.CYAN;
+    public Color backgroundColor = Color.BLACK;
+    public Color foreground_color = Color.CYAN;
 
-    Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
-
-    HashMap<Integer, BitmapFont> fonts;
+    public Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
+    public HashMap<Integer, BitmapFont> fonts;
 
     Color [] playerColors = {
         new Color(0xB91372FF),
@@ -50,11 +53,11 @@ public class OrganismGame extends Game {
     };
 
 
-    Color [] resourceColorsDark = {
+    public Color [] resourceColorsDark = {
         new Color(0f, 0f, 0.3f, 0f),
         new Color(0f, 0.2f, 0f, 0f),
         new Color(0.2f, 0f, 0.2f, 0f)};
-    Color [] resourceColorsBright = {
+    public Color [] resourceColorsBright = {
         new Color(0f, 0f, 0.5f, 0f),
         new Color(0f, 0.4f, 0f, 0f),
         new Color(0.4f, 0f, 0.2f, 0f)};
@@ -90,6 +93,11 @@ public class OrganismGame extends Game {
             fonts.put(size, new BitmapFont(Gdx.files.internal("fonts/dubai" + size + ".fnt")));
         }
 
+
+        hudTestScreen = new HudTestScreen(this);
+        hudTestScreen.inputProcessor = new HudInputProcessor(hudTestScreen);
+
+        /*
         menuScreen = new MenuScreen(this);
         menuScreen.inputProcessor = new MenuInputProcessor(menuScreen);
 
@@ -107,7 +115,7 @@ public class OrganismGame extends Game {
         tutorialScreen = new TutorialScreen(this);
         tutorialScreen.inputProcessor = new TutorialInputProcessor(tutorialScreen);
 
-        /*
+
         Gdx.input.setInputProcessor(mapSettingsScreen.inputProcessor);
         this.setScreen(mapSettingsScreen);
 
@@ -123,9 +131,8 @@ public class OrganismGame extends Game {
         //Gdx.input.setInputProcessor(labScreen.inputProcessor);
         //this.setScreen(labScreen);
 
-        Gdx.input.setInputProcessor(tutorialScreen.inputProcessor);
-        this.setScreen(tutorialScreen);
-        tutorialScreen.setup(); // this can fire from clicking the intro prompt
+        Gdx.input.setInputProcessor(hudTestScreen.inputProcessor);
+        this.setScreen(hudTestScreen);
 
     }
 

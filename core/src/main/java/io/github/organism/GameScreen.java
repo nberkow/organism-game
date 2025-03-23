@@ -7,6 +7,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import io.github.organism.hud.HudInputProcessor;
+import io.github.organism.hud.PlayerHud;
+
 public class GameScreen implements Screen {
 
     public SettingsManager settings_manager;
@@ -14,7 +17,7 @@ public class GameScreen implements Screen {
 
     public ArcadeLoop arcadeLoop;
     OrganismGame game;
-    GameInputProcessor inputProcessor;
+    HudInputProcessor inputProcessor;
     PlayerHud player1Hud;
     PlayerHud player2Hud;
     ArrayList<String> ioPlayerNames;
@@ -47,13 +50,12 @@ public class GameScreen implements Screen {
         ioPlayerIds.add(player_id);
 
         if (!player2) {
-            player1Hud = new PlayerHud(game, this, player, false);
+            //player1Hud = new PlayerHud(game, this, player, false);
         }
 
         else {
-            player2Hud = new PlayerHud(game, this, player, true);
+            //player2Hud = new PlayerHud(game, this, player, true);
         }
-        inputProcessor.add_player(player_id);
 
     }
 
@@ -69,8 +71,8 @@ public class GameScreen implements Screen {
 
     private void input() {
         if (!arcadeLoop.currentGameOrchestrator.paused) {
-            inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
-            inputProcessor.updateQueuesWithInput();
+            //inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
+            //inputProcessor.updateQueuesWithInput();
             arcadeLoop.currentGameOrchestrator.updatePlayers();
             arcadeLoop.currentGameOrchestrator.updateTimersAndFlags();
         }

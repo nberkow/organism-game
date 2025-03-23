@@ -7,10 +7,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
 
+import io.github.organism.hud.PlayerHud;
+
 public class GameplayButtons {
     /*
     A temp class for input handling.
-     */
+
 
     public static class StepButton {
         float x;
@@ -94,7 +96,7 @@ public class GameplayButtons {
 
         game.shapeRenderer.end();
 
-    }
+    }*/
 }
 
 

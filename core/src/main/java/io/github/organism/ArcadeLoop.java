@@ -1,4 +1,5 @@
 package io.github.organism;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 
@@ -8,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class ArcadeLoop implements GameMode{
+public class ArcadeLoop implements GameSession {
 
     float mapCenterX;
     float mapCenterY;
@@ -151,7 +152,6 @@ public class ArcadeLoop implements GameMode{
         create_players_from_model_pool(gameCfg.botPlayers);
         create_human_players();
         createPlayerStarts();
-        setPlayerButtonColors();
 
         currentGame.createPlayerSummaryDisplays();
         currentGame.showPlayerSummary = true;
@@ -171,7 +171,6 @@ public class ArcadeLoop implements GameMode{
         }
 
         currentGame = new GameBoard(game, gameCfg, currentScreen);
-        game.gameScreen.inputProcessor.game_board = currentGame;
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
 
@@ -234,41 +233,11 @@ public class ArcadeLoop implements GameMode{
         create_human_players();
         create_bot_players();
         createPlayerStarts();
-        setPlayerButtonColors();
         currentGame.createPlayerSummaryDisplays();
         currentGameOrchestrator.update_speed(gameCfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
     }
 
-    private void setPlayerButtonColors() {
-        GameScreen gameScreen = (GameScreen) currentScreen;
-        ArrayList<Player> players = gameScreen.getIoPlayers();
-
-        // player 1
-        Player p = players.get(0);
-        int idx = p.getIndex();
-
-        Point left_p = currentGame.allPlayerIds.get((idx + 2) % 3);
-        Color left_c = tournamentPlayerColors.get(left_p);
-
-        Point right_p = currentGame.allPlayerIds.get((idx + 1) % 3);
-        Color right_c = tournamentPlayerColors.get(right_p);
-
-        gameScreen.player1Hud.gameButtons.setButtonColors(left_c, right_c);
-
-        if (players.size() == 2) {
-            p = players.get(1);
-            idx = p.getIndex();
-
-            left_p = currentGame.allPlayerIds.get((idx + 2) % 3);
-            left_c = tournamentPlayerColors.get(left_p);
-
-            right_p = currentGame.allPlayerIds.get((idx + 1) % 3);
-            right_c = tournamentPlayerColors.get(right_p);
-
-            gameScreen.player2Hud.gameButtons.setButtonColors(left_c, right_c);
-        }
-    }
 
     public void create_human_players(){
 
@@ -369,4 +338,12 @@ public class ArcadeLoop implements GameMode{
         currentGame.dispose();
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public InputProcessor getInputProcessor() {
+        GameScreen g = (GameScreen) currentScreen;
+        return g.inputProcessor;
+    }
 }

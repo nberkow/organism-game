@@ -11,10 +11,10 @@ public class Organism {
     public float income;
     TriangularGrid territory_hex;
     TriangularGrid territory_vertex;
-    Integer [] resources;
+    public Integer [] resources;
 
     Integer [] ally_resources;
-    float energy;
+    public float energy;
     GameBoard game_board;
     Player player;
 
