@@ -244,7 +244,7 @@ public class InputHistogram {
 
         game.batch.begin();
 
-        Color color = game.foreground_color;
+        Color color = game.foregroundColor;
         font.setColor(color);
         String info =
             "input: " + current_visible_hist + "\n" +

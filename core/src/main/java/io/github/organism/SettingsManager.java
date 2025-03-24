@@ -11,4 +11,6 @@ public class SettingsManager {
     public static float VERTEX_COST_TAKE_VERTEX = 3f;
     public static float BASE_RESOURCE_VALUE = 3f;
 
+    public static float MAX_ENERGY = 100;
+
 }

@@ -14,9 +14,15 @@ public class Util {
         return new FloatPair<>(x, y);
     }
 
-    public static Pair<Double, Double> xyToPoloar(Double x, Double y){
+    public static DoublePair<Double> xyToPolarDouble(Double x, Double y){
         double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        double theta = Math.atan(y/x);
-        return new Pair<>(r, theta);
+        double theta = Math.atan2(y, x);
+        return new DoublePair<>(r, theta);
+    }
+
+    public static FloatPair<Float> xyToPolarFloat(Float x, Float y){
+        float r = (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        float theta = (float) Math.atan2(y, x);
+        return new FloatPair<>(r, theta);
     }
 }

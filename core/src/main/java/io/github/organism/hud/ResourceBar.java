@@ -1,120 +1,131 @@
 package io.github.organism.hud;
 
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import java.util.ArrayList;
+
+import io.github.organism.FloatPair;
 import io.github.organism.OrganismGame;
-import io.github.organism.Player;
 
 public class ResourceBar {
 
-    final float MARGIN = 5;
-    final float BAR_HEIGHT = 15 + MARGIN * 2;
-    final float BAR_WIDTH = 90 + MARGIN * 2;
+    final float BASE_DOT_RADIUS = 4;
+    float dotScale = 1;
 
-    final float RADIUS = 7;
     OrganismGame game;
     PlayerHud hud;
-    Player player;
 
-    float inset;
-    float x, y;
+    float x;
+    float y;
 
-    BitmapFont font;
+    float barHeight;
+    float barWidth;
 
-    public ResourceBar(OrganismGame g, PlayerHud ph, Player p){
+    int defaultMaxCols = 25;
+
+    float [] dotHeights;
+
+    float trioBoxWidth;
+
+    ArrayList<ArrayList<FloatPair<Float>>> coords;
+    private int trioCols;
+
+    public ResourceBar(OrganismGame g, PlayerHud ph, float width, float height, float y){
         game = g;
-        font = game.fonts.get(32);
         hud = ph;
-        player = p;
-        inset = 2;
-        y = hud.ENERGY_BAR_Y * 1.4f;
-        x = hud.x;
+        barWidth = width;
+        barHeight = height;
+        trioCols = 0;
+
+        // there will be three rows of dots, on for each resource
+        this.y = y;
+        dotHeights = new float[3];
+        float spacing = height/4;
+        for (int i=0; i<3; i++){
+            dotHeights[i] = y + spacing * (i + 1);
+        }
+
+        // x depends on the player's side
+        x = hud.x + hud.moveSpaceDisplay.radius * 1.7f + spacing * 2;
         if (hud.player2){
-            x = hud.x + hud.HUD_WIDTH - BAR_WIDTH;
+            x = OrganismGame.VIRTUAL_WIDTH - x;
+        }
+
+        calculateResourceDisplayCoords();
+    }
+
+    public void calculateResourceDisplayCoords(){
+
+        int allCols = 0;
+        trioCols = Integer.MAX_VALUE;
+        coords = new ArrayList<>();
+
+        for (int i=0; i<3; i++){
+            int res = hud.resourceCounts[i] + hud.allyResourceCounts[i];
+            if (res < trioCols){
+                trioCols = res;
+            }
+            if (res > allCols) {
+                allCols = res;
+            }
+        }
+
+        // calculate column spacing
+        int cols = Math.max(allCols, defaultMaxCols);
+        float spacing = barWidth / (cols + 1);
+        if (hud.player2){
+            spacing = -spacing;
+        }
+
+        for (int i=0; i<3; i++) {
+            ArrayList<FloatPair<Float>> row = new ArrayList<>();
+            int dots = hud.resourceCounts[i] + hud.allyResourceCounts[i];
+            for (int j=0; j<dots; j++){
+                float dotX = x + spacing * (j+1);
+                row.add(new FloatPair<>(
+                    dotX,
+                    dotHeights[i]
+                ));
+            }
+            coords.add(row);
         }
     }
 
+
     public void render(){
+
+
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (int i=0; i < 3; i++) {
 
-        int res;
-        for (int r=0; r<3; r++){
-            res = r;
-            if (hud.player2){
-                res = 2-r;
-            }
-            game.shapeRenderer.setColor(game.resourceColorsDark[res]);
-            game.shapeRenderer.rect(
-                x + inset,
-                y + inset + BAR_HEIGHT * res,
-                BAR_WIDTH,
-                BAR_HEIGHT
-            );
+            ArrayList<FloatPair<Float>> row = coords.get(i);
 
-            float spacing = BAR_WIDTH / (7);
-
-            game.shapeRenderer.setColor(game.backgroundColor);
-            int space_n;
-            for (int s=0; s<6; s++){
-                space_n = s;
-                if (hud.player2){
-                    space_n = 5-s;
-                }
+            game.shapeRenderer.setColor(game.resourceColorsDark[i]);
+            for (int j=0; j<hud.resourceCounts[i]; j++){
+                FloatPair<Float> c = row.get(j);
                 game.shapeRenderer.circle(
-                    x + inset + (RADIUS * 2) + spacing * space_n,
-                    y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
-                    RADIUS
+                    c.x, c.y, BASE_DOT_RADIUS * dotScale
                 );
             }
 
-            game.shapeRenderer.setColor(game.resourceColorsBright[res]);
-            int val = Math.min(6, player.getOrganism().resources[res]);
-
-            game.shapeRenderer.circle(
-                x + inset + (RADIUS * 2),
-                y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
-                RADIUS / 2
-            );
-
-
-            for (int s=0; s<val; s++){
-                space_n = s;
-                if (hud.player2){
-                    space_n = 5-s;
-                }
-                game.shapeRenderer.circle(
-                    x + inset + (RADIUS * 2) + spacing * space_n,
-                    y + inset + BAR_HEIGHT * res + BAR_HEIGHT/2,
-                    RADIUS
-                );
-            }
         }
+
         game.shapeRenderer.end();
+
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shapeRenderer.setColor(game.foreground_color);
 
-        float border_x = x;
-        if (hud.player2){
-            border_x = x - BAR_WIDTH - inset * 2;
+        for (int i=0; i < 3; i++) {
+            game.shapeRenderer.setColor(game.resourceColorsBright[i]);
+            ArrayList<FloatPair<Float>> row = coords.get(i);
+            for (int j=0; j<hud.allyResourceCounts[i] + hud.resourceCounts[i]; j++){
+                FloatPair<Float> c = row.get(j);
+                game.shapeRenderer.circle(
+                    c.x, c.y, BASE_DOT_RADIUS * dotScale
+                );
+            }
         }
-        game.shapeRenderer.rect(
-            border_x,
-            y,
-            BAR_WIDTH * 2 + inset * 2,
-            BAR_HEIGHT * 3 + inset * 3
-        );
-        float font_x = border_x + (BAR_WIDTH * 1.3f);
-        if (hud.player2){
-            font_x = border_x + hud.HUD_WIDTH - (BAR_WIDTH * 1.3f);
-        }
+
         game.shapeRenderer.end();
-        game.batch.begin();
-        font.draw(
-            game.batch,
-            "" + player.getOrganism().income,
-            font_x,
-            y + BAR_HEIGHT * 2.5f);
-        game.batch.end();
     }
 }

@@ -5,22 +5,20 @@ import com.badlogic.gdx.Screen;
 import io.github.organism.DoublePair;
 import io.github.organism.GameSession;
 import io.github.organism.OrganismGame;
-import io.github.organism.Pair;
 
 public class PlayerHud {
 
-    float x, y;
-    float HUD_Y = 0;
-    float SIDE_BUFFER = 10;
+    float x;
     final float HUD_WIDTH = .45f;
     final float HUD_HEIGHT = .2f;
-    final float ENERGY_BAR_Y = y + HUD_HEIGHT * .4f;
     OrganismGame game;
     GameSession gameSession;
-    EnergyBar energy_bar;
-    ResourceBar resource_bars;
+    EnergyBar energyBar;
+    ResourceBar resourceBar;
     MoveSpaceDisplay moveSpaceDisplay;
     boolean player2;
+
+    Screen screen;
 
     float energyBarValue;
     int [] resourceCounts;
@@ -31,29 +29,42 @@ public class PlayerHud {
         game = g;
         gameSession = sec;
         player2 = p2;
+        screen = scr;
 
-        energyBarValue = 50;
-        resourceCounts = new int[]{10, 2, 5};
-        allyResourceCounts = new int[]{2, 5, 5};
+        energyBarValue = 0;
+        resourceCounts = new int[3];
+        allyResourceCounts = new int[3];
 
-        setupEnergyBar();
-        setupMoveSpaceDisplay();
-        setupResourceBar();
+        float moveSpaceRadius = OrganismGame.VIRTUAL_WIDTH * 0.075f;
+        float barWidth = (OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius)/2 * .7f;
+        float barHeight = moveSpaceRadius/1.5f;
+
+        setupMoveSpaceDisplay(moveSpaceRadius);
+        setupEnergyBar(barWidth, barHeight, barHeight/2);
+        setupResourceBar(barWidth, barHeight, barHeight/2 + barHeight);
         setupIncomeDisplay();
+
+        x = 0;
+        if (player2) {
+            x = OrganismGame.VIRTUAL_WIDTH;
+        }
 
     }
 
     private void setupIncomeDisplay() {
     }
 
-    private void setupResourceBar() {
+    private void setupResourceBar(float w, float h, float y) {
+        resourceBar = new ResourceBar(game, this, w, h, y);
     }
 
-    private void setupMoveSpaceDisplay() {
-        moveSpaceDisplay = new MoveSpaceDisplay(this);
+    private void setupMoveSpaceDisplay(float radius) {
+
+        moveSpaceDisplay = new MoveSpaceDisplay(this, radius);
     }
 
-    private void setupEnergyBar() {
+    private void setupEnergyBar(float w, float h, float y) {
+        energyBar = new EnergyBar(game, this, w, h, y);
     }
 
 
@@ -70,8 +81,10 @@ public class PlayerHud {
             HUD_HEIGHT);
         game_board.shape_renderer.end();
         */
-
+        resourceBar.render();
+        energyBar.render();
         moveSpaceDisplay.render();
+
 
     }
 

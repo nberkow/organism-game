@@ -75,7 +75,7 @@ public class LabScreenButtons {
 
         game.batch.begin();
 
-        font.setColor(game.foreground_color);
+        font.setColor(game.foregroundColor);
         GlyphLayout layout = new GlyphLayout(font, b);
 
         float b_x = Math.round(button_coords[0] + button_coords[2] / 2 - layout.width / 2);

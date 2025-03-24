@@ -33,6 +33,7 @@ public class HudTestScreen implements Screen {
     public HudTestScreen(OrganismGame g) {
         game = g;
         p1Hud = new PlayerHud(game, new HudTester(this), this, false);
+        p2Hud = new PlayerHud(game, new HudTester(this), this, true);
     }
 
 
@@ -50,7 +51,13 @@ public class HudTestScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(game.backgroundColor);
-        p1Hud.render();
+        if (p1Hud != null){
+            p1Hud.render();
+        }
+
+        if (p2Hud != null){
+            p2Hud.render();
+        }
     }
 
     /**

@@ -2,93 +2,73 @@ package io.github.organism.hud;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.sun.org.apache.xpath.internal.operations.Or;
 
 import io.github.organism.OrganismGame;
-import io.github.organism.Player;
+import io.github.organism.SettingsManager;
 
 public class EnergyBar {
 
-
-    final int MAX_ENERGY = 100;
-    final float BORDER_WIDTH = 2f;
-
-    final float TICK_SPACING = 1f;
-    final float GAP_WIDTH = 2f;
-
     OrganismGame game;
-    Player player;
-
     PlayerHud hud;
 
     float x;
     float y;
 
-    float y_height;
-    float x_width;
-
-    float small_bar_x;
-    float small_bar_y;
-    float small_bar_width;
-    float small_bar_height;
-    BitmapFont font;
-    public EnergyBar(OrganismGame g, PlayerHud ph, Player p, float width, float height){
+    float barHeight;
+    float barWidth;
+    float gapWidth;
+    public EnergyBar(OrganismGame g, PlayerHud ph, float width, float height, float y){
         game = g;
-        player = p;
         hud = ph;
-        y_height =  height;
-        x_width = width;
+        barWidth = width;
+        barHeight = height;
+        gapWidth = barHeight * .05f;
 
-        y = hud.ENERGY_BAR_Y;
-        x = hud.x;
+        this.y = y;
+        x = hud.x + hud.moveSpaceDisplay.radius * 1.7f;
+
         if (hud.player2){
-            x = hud.x - (x_width - hud.HUD_WIDTH);
+            x = OrganismGame.VIRTUAL_WIDTH - x;
         }
-
-        small_bar_x = width + GAP_WIDTH + BORDER_WIDTH;
-        small_bar_y = height + GAP_WIDTH + BORDER_WIDTH;
-        small_bar_width = (width - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2) + TICK_SPACING) / MAX_ENERGY - TICK_SPACING;
-        small_bar_height = height - (GAP_WIDTH * 2) - (BORDER_WIDTH * 2);
-
-        font = game.fonts.get(32);
-
     }
 
 
     public void render(){
 
+        float shift = 0;
+        if (hud.player2) {
+            shift = -barWidth;
+        }
+
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shapeRenderer.setColor(game.foreground_color);
+        game.shapeRenderer.setColor(game.foregroundColor);
         game.shapeRenderer.rect(
-            x,
+            x + shift,
             y,
-            x_width,
-            y_height);
+            barWidth,
+            barHeight);
+
         game.shapeRenderer.setColor(game.backgroundColor);
         game.shapeRenderer.rect(
-            x + GAP_WIDTH,
-            y + GAP_WIDTH,
-            x_width - (GAP_WIDTH * 2),
-            y_height - (GAP_WIDTH * 2));
+            x + gapWidth + shift,
+            y + gapWidth,
+            barWidth - (gapWidth * 2),
+            barHeight - (gapWidth * 2));
 
+        float percentFilled = hud.energyBarValue / SettingsManager.MAX_ENERGY;
+        float fillWidth = (barWidth - (gapWidth * 4)) * percentFilled;
 
-        float first_x = x + GAP_WIDTH * 2;
-        if (hud.player2){
-            first_x = x_width + (x - GAP_WIDTH * 2) - small_bar_width;
+        if (hud.player2) {
+            shift = -barWidth + (barWidth - fillWidth);
         }
 
-        int parity = 1;
-        if (hud.player2){
-            parity = -1;
-        }
-
-        game.shapeRenderer.setColor(game.foreground_color);
-        for (int i = 0; i<player.getOrganism().energy; i++) {
-            game.shapeRenderer.rect(
-                first_x + ((small_bar_width + TICK_SPACING) * i * parity),
-                y + GAP_WIDTH * 2,
-                small_bar_width,
-                y_height - (GAP_WIDTH * 4));
-        }
+        game.shapeRenderer.setColor(game.foregroundColor);
+        game.shapeRenderer.rect(
+            x + gapWidth * 2 + shift,
+            y + gapWidth * 2,
+            fillWidth,
+            barHeight - (gapWidth * 4));
 
         game.shapeRenderer.end();
     }

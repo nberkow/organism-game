@@ -55,7 +55,7 @@ public class PlayerSummaryDisplay {
         game_board.game.batch.begin();
         font.draw(game_board.game.batch, player.getPlayerName(), x, NAME_HEIGHT + y);
         game_board.game.batch.end();
-        font.setColor(game_board.game.foreground_color);
+        font.setColor(game_board.game.foregroundColor);
     }
     public void draw_energy_bar(){
         if (game_board.game.shapeRenderer == null) {
@@ -63,7 +63,7 @@ public class PlayerSummaryDisplay {
         }
 
         game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.game.shapeRenderer.setColor(game_board.game.foreground_color);
+        game_board.game.shapeRenderer.setColor(game_board.game.foregroundColor);
         game_board.game.shapeRenderer.rect(
             x, y + ENERGY_BAR_Y,
             (float) (energy_bar_width * (player.getOrganism().energy / 100f)),
@@ -73,7 +73,7 @@ public class PlayerSummaryDisplay {
 
     public void draw_income_bar(){
         game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        game_board.game.shapeRenderer.setColor(game_board.game.foreground_color);
+        game_board.game.shapeRenderer.setColor(game_board.game.foregroundColor);
         game_board.game.shapeRenderer.rect(
             x, y + INCOME_BAR_Y,
             (float) (energy_bar_width * (player.getOrganism().energy / 100f)),
