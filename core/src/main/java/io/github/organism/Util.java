@@ -25,4 +25,8 @@ public class Util {
         float theta = (float) Math.atan2(y, x);
         return new FloatPair<>(r, theta);
     }
+
+    public static FloatPair<Float> sumVectors(FloatPair<Float> vector1, FloatPair<Float> vector2) {
+        return new FloatPair<Float>(0f, 0f);
+    }
 }

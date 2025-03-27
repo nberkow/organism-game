@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.sql.Time;
+
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
 
@@ -17,6 +19,7 @@ public class TutorialScreen  implements Screen {
     SettingsOverlay overlay;
     Tutorial tutorial;
     GameConfig currentConfig;
+
     public TutorialScreen(OrganismGame g) {
 
         game = g;
@@ -28,6 +31,11 @@ public class TutorialScreen  implements Screen {
         mapCenterX = OrganismGame.VIRTUAL_WIDTH / 2f;
         mapCenterY = OrganismGame.VIRTUAL_HEIGHT / 2f;
 
+        tutorial = new Tutorial(game, this, currentConfig);
+        tutorial.setupBasicMovesTutorial();
+
+        tutorial.currentGameOrchestrator.run();
+        setupTimeIndicator();
     }
 
     private void setup_overlay(){
@@ -42,20 +50,20 @@ public class TutorialScreen  implements Screen {
         overlay.setupButtons();
     }
 
-    public void setup(){
-        tutorial = new Tutorial(game, this, currentConfig);
-        tutorial.setupBasicMovesTutorial();
+    private void setupTimeIndicator(){
+        float sideLen = OrganismGame.VIRTUAL_WIDTH / 20f;
+        float x = OrganismGame.VIRTUAL_WIDTH / 4f;
+        float y = OrganismGame.VIRTUAL_HEIGHT - sideLen * 1.5f;
+        tutorial.timeIndicator = new TimeIndicator(game, tutorial, x, y, sideLen);
     }
+
 
     private void input() {
         if (!tutorial.currentGameOrchestrator.paused) {
-            //inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
-            //inputProcessor.updateQueuesWithInput();
             tutorial.currentGameOrchestrator.updatePlayers();
             tutorial.currentGameOrchestrator.updateTimersAndFlags();
         }
     }
-
 
     /**
      *
@@ -74,6 +82,7 @@ public class TutorialScreen  implements Screen {
         input();
         tutorial.render();
         player1Hud.render();
+
     }
 
     /**

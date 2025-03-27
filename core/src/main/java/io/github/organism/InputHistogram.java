@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import io.github.organism.player.Player;
+
 public class InputHistogram {
     OrganismGame game;
     Simulation simulation;
@@ -67,7 +69,7 @@ public class InputHistogram {
 
     public void update_inputs(){
         for (Player p : simulation.currentGame.players.values()){
-            add_inputs(p.gather_inputs());
+            add_inputs(p.gatherInputs());
         }
 
         update_counter++;

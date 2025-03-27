@@ -28,6 +28,18 @@ public class HudTestScreen implements Screen {
         public InputProcessor getInputProcessor() {
             return scr.inputProcessor;
         }
+
+        public void advanceTurnCount(){
+
+        }
+
+        /**
+         * @return
+         */
+        @Override
+        public Screen getScreen() {
+            return scr;
+        }
     }
 
     public HudTestScreen(OrganismGame g) {
@@ -35,6 +47,8 @@ public class HudTestScreen implements Screen {
         p1Hud = new PlayerHud(game, new HudTester(this), this, false);
         p2Hud = new PlayerHud(game, new HudTester(this), this, true);
     }
+
+
 
 
     /**

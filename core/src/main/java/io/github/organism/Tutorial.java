@@ -5,24 +5,29 @@ import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import io.github.organism.hud.PlayerHud;
+import io.github.organism.player.DummyPlayer;
+import io.github.organism.player.IO_Player;
+import io.github.organism.player.Player;
 
 public class Tutorial implements GameSession {
 
+    public TimeIndicator timeIndicator;
     OrganismGame game;
     TutorialScreen screen;
     GameConfig currentConfig;
-
     GameBoard currentGame;
     public GameOrchestrator currentGameOrchestrator;
+    HashMap<Point, PlayerHud> playerIdToHud;
 
     public Tutorial(OrganismGame g, TutorialScreen tut, GameConfig cfg) {
         game = g;
         screen = tut;
         currentConfig = cfg;
+        playerIdToHud = new HashMap<>();
     }
-
 
     public void setupBasicMovesTutorial() {
         /*
@@ -33,11 +38,8 @@ public class Tutorial implements GameSession {
          */
 
         createGameBoard();
-
         createHumanPlayer();
-
         createDummyPlayers();
-
         createPlayerStarts();
 
         currentGameOrchestrator.run();
@@ -61,11 +63,8 @@ public class Tutorial implements GameSession {
 
          */
 
-
         createGameBoard();
-
         createBotPlayer();
-
         createHumanPlayer();
         createPlayerStarts();
 
@@ -95,9 +94,21 @@ public class Tutorial implements GameSession {
     private void createPlayerStarts() {
         int sc = (int) Math.floor(Math.pow(currentConfig.radius, currentConfig.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = currentGame.player_start_assigner.randomizeStartingCoords();
-            currentGame.player_start_assigner.assignStartingHexes(starting_coords);
+            ArrayList<int[]> starting_coords = currentGame.playerStartAssigner.randomizeStartingCoords();
+            currentGame.playerStartAssigner.assignStartingHexes(starting_coords);
         }
+    }
+
+    public void advanceTurnCount(){
+        timeIndicator.advanceTurn();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Object getScreen() {
+        return screen;
     }
 
     private void createBotPlayer() {
@@ -105,6 +116,8 @@ public class Tutorial implements GameSession {
 
     private void createHumanPlayer() {
         Point playerId = new Point(-1, 0);
+        screen.player1Hud = new PlayerHud(game, this, screen, false);
+        playerIdToHud.put(playerId, screen.player1Hud);
 
         Color color = Color.RED;
         String name = "Player " + (1);
@@ -115,7 +128,7 @@ public class Tutorial implements GameSession {
             0,
             playerId,
             organism,
-            false,
+            screen.player1Hud,
             color
         );
         organism.player = player;
@@ -123,10 +136,6 @@ public class Tutorial implements GameSession {
 
         currentGame.humanPlayerIds.add(playerId);
         currentGame.allPlayerIds.add(playerId);
-
-        screen.player1Hud = new PlayerHud(game, this, screen, false);
-        //screen.inputProcessor.add_player(playerId);
-
     }
 
     public void createDummyPlayers(){
@@ -139,7 +148,7 @@ public class Tutorial implements GameSession {
     }
 
     private void createGameBoard() {
-        currentGame = new GameBoard(game, currentConfig, screen);
+        currentGame = new GameBoard(game, currentConfig, this);
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
 
@@ -152,6 +161,7 @@ public class Tutorial implements GameSession {
 
     public void render() {
         currentGame.render();
+        //timeIndicator.render();
     }
 
     public void logic() {

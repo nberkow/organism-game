@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Disposable;
@@ -10,25 +9,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import io.github.organism.map.UniverseMap;
+import io.github.organism.player.BotPlayer;
+import io.github.organism.player.Player;
+
 public class GameBoard implements Disposable {
 
 
     public static final float DEFAULT_SPEED = 2f;
     // Visualization Settings
-    final float GRID_WINDOW_HEIGHT = 1.7f;
+    public final float GRID_WINDOW_HEIGHT = 1.7f;
     public boolean showDiplomacy;
     public boolean showPlayerSummary;
-    float hex_side_len;
-    float center_x;
-    float center_y;
+    public float hexSideLen;
+    public float centerX;
+    public float centerY;
     float grid_window_y;
-    static final int MAX_QUEUED_ACTIONS = 12;
     static final float PLAYER_SUMMARY_X = 30;
     static final float PLAYER_SUMMARY_Y = 400;
     final float PLAYER_SUMMARY_HEIGHT = 40;
     public long seed;
 
-    public Screen screen;
+    public GameSession session;
 
     SettingsManager settings_manager;
 
@@ -42,33 +44,33 @@ public class GameBoard implements Disposable {
     // Gameplay
     HashMap<Point, Player> players = new HashMap<>();
 
-    GridWindow grid_window;
-    UniverseMap universe_map;
-    ArrayList<PlayerSummaryDisplay> player_summary_displays;
-    ArrayList<Point> humanPlayerIds;
-    ArrayList<Point> bot_player_ids;
-    ArrayList<Point> allPlayerIds;
-    PlayerStartAssigner player_start_assigner;
+    public GridWindow gridWindow;
+    public UniverseMap universeMap;
+    public ArrayList<PlayerSummaryDisplay> playerSummaryDisplays;
+    public ArrayList<Point> humanPlayerIds;
+    public ArrayList<Point> bot_player_ids;
+    public ArrayList<Point> allPlayerIds;
+    PlayerStartAssigner playerStartAssigner;
     ResourceDistributor resourceDistributor;
     VoidDistributor voidDistributor;
-    GameConfig config;
+    public GameConfig config;
     int radius;
-    Random rng;
-    OrganismGame game;
+    public Random rng;
+    public OrganismGame game;
     MoveLogger move_logger;
 
-    public GameBoard(OrganismGame g, GameConfig cfg, Screen scr) {
+    public GameBoard(OrganismGame g, GameConfig cfg, GameSession gs) {
         game = g;
         config = cfg;
-        screen = scr;
+        session = gs;
         showDiplomacy = false;
         showPlayerSummary = false;
 
-        if (screen instanceof LabScreen){
-            settings_manager = ((LabScreen) screen).settingsManager;
+        if (session.getScreen() instanceof LabScreen){
+            settings_manager = ((LabScreen) session.getScreen()).settingsManager;
         }
-        if (screen instanceof GameScreen){
-            settings_manager = ((GameScreen) screen).settings_manager;
+        if (session.getScreen() instanceof GameScreen){
+            settings_manager = ((GameScreen) session.getScreen()).settings_manager;
         }
 
         seed = config.seed;
@@ -76,24 +78,24 @@ public class GameBoard implements Disposable {
         grid_window_y = GRID_WINDOW_HEIGHT;
         move_logger = null;
 
-        hex_side_len = config.map_view_size_param/radius; // starting default
-        center_x = this.game.VIRTUAL_WIDTH / 2f;
-        center_y = this.game.VIRTUAL_HEIGHT / grid_window_y;
+        hexSideLen = config.map_view_size_param/radius; // starting default
+        centerX = OrganismGame.VIRTUAL_WIDTH / 2f;
+        centerY = OrganismGame.VIRTUAL_HEIGHT / grid_window_y;
 
         rng = new Random();
         rng.setSeed(seed);
 
         // Initialize other game objects here
-        universe_map = new UniverseMap(this, radius);
+        universeMap = new UniverseMap(this, radius);
 
         diplomacyGraph = new DiplomacyGraph(this.game, this);
 
-        player_start_assigner = new PlayerStartAssigner(this);
+        playerStartAssigner = new PlayerStartAssigner(this);
         resourceDistributor = new ResourceDistributor(this);
         voidDistributor = new VoidDistributor(this);
-        grid_window = new GridWindow(this, 2);
+        gridWindow = new GridWindow(this, 2);
 
-        player_summary_displays = new ArrayList<>();
+        playerSummaryDisplays = new ArrayList<>();
         humanPlayerIds = new ArrayList<>();
         bot_player_ids = new ArrayList<>();
         allPlayerIds = new ArrayList<>();
@@ -105,7 +107,7 @@ public class GameBoard implements Disposable {
     }
 
 
-    public void create_bot_player(String name, Point player_id, Color color, Model model){
+    public void create_bot_player(String name, Point playerId, Color color, Model model){
 
         int index = allPlayerIds.size();
 
@@ -114,16 +116,16 @@ public class GameBoard implements Disposable {
             this,
             name,
             index,
-            player_id,
+            playerId,
             organism,
             model,
             color
         );
 
         organism.player = player;
-        players.put(player_id, player);
-        bot_player_ids.add(player_id);
-        allPlayerIds.add(player_id);
+        players.put(playerId, player);
+        bot_player_ids.add(playerId);
+        allPlayerIds.add(playerId);
 
     }
 
@@ -135,12 +137,12 @@ public class GameBoard implements Disposable {
                 this, p,
                 PLAYER_SUMMARY_X, y) ;
             y += PLAYER_SUMMARY_HEIGHT;
-            player_summary_displays.add(display);
+            playerSummaryDisplays.add(display);
         }
     }
 
     public int count_resources(){
-        return universe_map.hex_grid.count_resources();
+        return universeMap.hexGrid.countResources();
     }
 
     public void logic() {
@@ -153,9 +155,9 @@ public class GameBoard implements Disposable {
 
         ScreenUtils.clear(game.backgroundColor);
 
-        grid_window.render();
+        gridWindow.render();
         if (showPlayerSummary) {
-            for (PlayerSummaryDisplay p : player_summary_displays) {
+            for (PlayerSummaryDisplay p : playerSummaryDisplays) {
                 p.render();
             }
         }
@@ -167,15 +169,15 @@ public class GameBoard implements Disposable {
 
     @Override
     public void dispose() {
-        grid_window.dispose();
-        universe_map.dispose();
+        gridWindow.dispose();
+        universeMap.dispose();
         orchestrator.dispose();
         diplomacyGraph.dispose();
         players.clear();
         humanPlayerIds.clear();
         bot_player_ids.clear();
         allPlayerIds.clear();
-        player_start_assigner = null;
+        playerStartAssigner = null;
         resourceDistributor = null;
         voidDistributor = null;
     }

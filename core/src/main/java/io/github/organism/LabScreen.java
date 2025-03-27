@@ -53,7 +53,7 @@ public class LabScreen implements Screen {
         cfg.gameplaySettings = overlay.savedSettings;
         int iterations = Math.round(overlay.savedSettings.get("iterations"));
         current_sim = new Simulation(game, this, cfg, iterations);
-        current_sim.run_simulation();
+        current_sim.runSimulation();
     }
 
     public void setupSilentSim(){

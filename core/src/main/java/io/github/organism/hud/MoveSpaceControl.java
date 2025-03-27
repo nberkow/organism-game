@@ -8,7 +8,7 @@ import io.github.organism.FloatPair;
 import io.github.organism.OrganismGame;
 import io.github.organism.Util;
 
-public class MoveSpaceDisplay {
+public class MoveSpaceControl {
 
     public float radius;
     public float aggressionRadius;
@@ -25,7 +25,7 @@ public class MoveSpaceDisplay {
     float availableRadius;
     float aggressionDisplayRadius;
 
-    public MoveSpaceDisplay(PlayerHud ph, float r) {
+    public MoveSpaceControl(PlayerHud ph, float r) {
         hud = ph;
         radius = r;
         setup();

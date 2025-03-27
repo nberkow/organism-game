@@ -1,21 +1,26 @@
-package io.github.organism;
+package io.github.organism.player;
 
 import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
 import java.util.LinkedList;
 
-public class BotPlayer implements Player{
+import io.github.organism.GameBoard;
+import io.github.organism.Model;
+import io.github.organism.Organism;
+import io.github.organism.Simulation;
+
+public class BotPlayer implements Player {
 
     public LinkedList<Integer> move_queue;
     //public ActionHistory move_history;
 
-    public GameBoard game_board;
-    public int game_index; // index within a single game
+    public GameBoard gameBoard;
+    public int gameIndex; // index within a single game
     public Point tournament_id; // id in tournament or other large player collection
 
     public Color color;
-    public String player_name;
+    public String playerName;
 
     public Model model;
 
@@ -23,19 +28,19 @@ public class BotPlayer implements Player{
 
     int most_recent_move;
 
-    Point ally_id;
+    Point allyId;
 
     public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, Model mod, Color c){
 
-        game_board = gb;
+        gameBoard = gb;
         color = c;
-        player_name = name;
+        playerName = name;
         tournament_id = id;
-        game_index = idx;
+        gameIndex = idx;
         organism = org;
         model = mod;
         move_queue = new LinkedList<>();
-        ally_id = null;
+        allyId = null;
 
     }
 
@@ -45,12 +50,12 @@ public class BotPlayer implements Player{
     }
 
     public Integer compute_move() {
-        float [] hmm_inputs = gather_inputs();
+        float [] hmm_inputs = gatherInputs();
         return model.emit(hmm_inputs);
     }
 
     public void transition(){
-        float [] hmm_inputs = gather_inputs();
+        float [] hmm_inputs = gatherInputs();
         model.transition(hmm_inputs);
     }
 
@@ -59,7 +64,8 @@ public class BotPlayer implements Player{
      */
 
 
-    public float [] gather_inputs(){
+    public float [] gatherInputs(){
+        /*
         float [] hmm_inputs = new float [Simulation.MODEL_INPUTS];
 
         // how many moves to consider from each players queue
@@ -73,11 +79,11 @@ public class BotPlayer implements Player{
 
         // add player stats in order, starting with self
         for (int i=0; i<3; i++) {
-            int p = ((i + game_index) % 3);
+            int p = ((i + gameIndex) % 3);
             int register_index = p * (register_size);
 
-            Point player_id = game_board.allPlayerIds.get(p);
-            Player player = game_board.players.get(player_id);
+            Point player_id = gameBoard.allPlayerIds.get(p);
+            Player player = gameBoard.players.get(player_id);
             Organism organism = player.getOrganism();
 
             // player's energy
@@ -110,28 +116,18 @@ public class BotPlayer implements Player{
         }
 
         return hmm_inputs;
+
+         */
+        return new float [3];
     }
 
-    public Integer get_move() {
 
-        // update the model that at turn has taken place
-        float territory_ratio = (float) organism.territory_vertex.get_unmasked_vertices() / +
-            game_board.universe_map.vertex_grid.get_unmasked_vertices();
-        model.notify_move_completed(game_board.orchestrator.turn, territory_ratio);
-
-        if (!move_queue.isEmpty()) {
-            int m = move_queue.remove();
-            most_recent_move = m;
-            return m;
-        }
-        return on_empty_queue();
-    }
 
     /**
      * @return
      */
     @Override
-    public Color get_color() {
+    public Color getColor() {
         return color;
     }
 
@@ -140,56 +136,32 @@ public class BotPlayer implements Player{
      */
     @Override
     public int getIndex() {
-        return game_index;
+        return gameIndex;
     }
 
-    /**
-     * @return
-     */
 
-    public Integer on_empty_queue() {
-        return null;
-    }
 
     @Override
     public String getPlayerName() {
-        return player_name;
+        return playerName;
     }
 
     public Organism getOrganism(){
         return organism;
     }
 
-    @Override
-    public LinkedList<Integer> get_move_queue() {
-        return move_queue;
-    }
-
-    @Override
-    public void generate_and_queue() {
-        float prob = (float) Math.pow(1-((float) move_queue.size() / GameBoard.MAX_QUEUED_ACTIONS), 2);
-        float t = game_board.rng.nextFloat() * 10;
-
-        if (t < prob){
-            Integer move = compute_move();
-            if (move < 3) {
-                queue_move(move);
-            }
-        }
-    }
-
     /**
      * @return
      */
     @Override
-    public int get_most_recent_move() {
+    public int getMostRecentMove() {
         return most_recent_move;
     }
 
     @Override
     public void dispose() {
         move_queue.clear();
-        game_board = null;
+        gameBoard = null;
         model.dispose();
         organism.dispose();
     }
@@ -199,18 +171,26 @@ public class BotPlayer implements Player{
      */
     @Override
     public Point getTournamentId() {
-       return tournament_id;
+        return tournament_id;
     }
 
     /**
      * @return
      */
     @Override
-    public Point get_ally_id() {
-        return ally_id;
+    public Point getAllyId() {
+        return allyId;
     }
 
-    public void set_ally_id(Point p) {
-        ally_id = p;
+    public void setAllyId(Point p) {
+        allyId = p;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void makeMove() {
+
     }
 }

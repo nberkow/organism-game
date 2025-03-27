@@ -1,23 +1,25 @@
-package io.github.organism;
-import static java.lang.System.exit;
+package io.github.organism.map;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import io.github.organism.GameBoard;
+import io.github.organism.player.Player;
+
 public class TriangularGrid implements Iterable<GridPosition> {
     HashMap<Integer, HashMap<Integer, HashMap<Integer, GridPosition>>> grid;
 
     int size = 0;
-    GameBoard game_board;
+    GameBoard gameBoard;
 
-    TriangularGrid(GameBoard gb) {
-        game_board = gb;
+    public TriangularGrid(GameBoard gb) {
+        gameBoard = gb;
         grid = new HashMap<>();
     }
 
-    public void add_pos(GridPosition p) {
+    public void addPos(GridPosition p) {
 
         if (grid.containsKey(p.i) && grid.get(p.i).containsKey(p.j) &&  grid.get(p.i).get(p.j).containsKey(p.k)){
             throw new RuntimeException("grid location " + p.i + " " + p.j + " " + p.k + " is not vacant!");
@@ -35,7 +37,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
         size += 1;
     }
 
-    public GridPosition get_pos(int i, int j, int k) {
+    public GridPosition getPos(int i, int j, int k) {
 
         if (this.contains_position(i, j, k)) {
             return grid.get(i).get(j).get(k);
@@ -43,7 +45,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
         return null;
     }
 
-    public void mask_pos(int i, int j, int k) {
+    public void maskPos(int i, int j, int k) {
         MapElement p = grid.get(i).get(j).get(k).content;
         if (p instanceof MapHex) {
             ((MapHex) p).masked = true;
@@ -85,22 +87,22 @@ public class TriangularGrid implements Iterable<GridPosition> {
 
     public HashSet<MapHex> get_shared_hexes(MapVertex v1, MapVertex v2){
         HashSet<MapHex> shared_hexes = new HashSet<>();
-        for (MapHex h : v1.adjacent_hexes) {
-            if (v2.adjacent_hexes.contains(h) && !h.masked) {
+        for (MapHex h : v1.adjacentHexes) {
+            if (v2.adjacentHexes.contains(h) && !h.masked) {
                 shared_hexes.add(h);
             }
         }
         return shared_hexes;
     }
-    public ArrayList<MapVertex> get_external_vertex_layer(Player player){
+    public ArrayList<MapVertex> getExternalVertexLayer(Player player){
         HashSet<MapVertex> unique_vertices = new HashSet<>();
 
         for (GridPosition pos : this) {
             if (!(pos.content instanceof MapVertex)){
-                throw new RuntimeException("get_external_vertex_layer() can only be used on vertex grids");
+                throw new RuntimeException("getExternalVertexLayer() can only be used on vertex grids");
             }
             MapVertex vertex = (MapVertex) pos.content;
-            for (MapVertex neighbor : vertex.adjacent_vertices){
+            for (MapVertex neighbor : vertex.adjacentVertices){
                 if (neighbor.player != player && !neighbor.masked && !get_shared_hexes(vertex, neighbor).isEmpty()){
                     unique_vertices.add(neighbor);
                 }
@@ -109,7 +111,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
         return new ArrayList<>(unique_vertices);
     }
 
-    public ArrayList<MapHex> get_external_hex_layer(Player player){
+    public ArrayList<MapHex> getExternalHexLayer(Player player){
         HashSet<MapHex> unique_hexes = new HashSet<>();
 
         for (GridPosition pos : this) {
@@ -117,8 +119,8 @@ public class TriangularGrid implements Iterable<GridPosition> {
                 throw new RuntimeException("get_external_hex_layer() can only be used on hex grids");
             }
             MapHex hex = (MapHex) pos.content;
-            for (MapVertex vertex : hex.vertex_list){
-                for (MapHex neighbor : vertex.adjacent_hexes){
+            for (MapVertex vertex : hex.vertexList){
+                for (MapHex neighbor : vertex.adjacentHexes){
                     if (neighbor.player != player && !neighbor.masked){
                         unique_hexes.add(neighbor);
                     }
@@ -128,10 +130,10 @@ public class TriangularGrid implements Iterable<GridPosition> {
         return new ArrayList<>(unique_hexes);
     }
 
-    public int get_unmasked_vertices(){
+    public int getUnmaskedVertices(){
         int c = 0;
         for (GridPosition pos : this) {
-            if (!pos.content.get_masked()) {
+            if (!pos.content.getMasked()) {
                 c++;
             }
         }
@@ -193,15 +195,15 @@ public class TriangularGrid implements Iterable<GridPosition> {
 
     public void dispose() {
         grid.clear();
-        game_board = null;
+        gameBoard = null;
     }
 
-    public int count_resources() {
+    public int countResources() {
         int res = 0;
         for (GridPosition pos : this) {
             if (pos.content instanceof MapHex) {
                 MapHex h = (MapHex) pos.content;
-                res += h.total_resources;
+                res += h.totalResources;
             }
         }
         return res;

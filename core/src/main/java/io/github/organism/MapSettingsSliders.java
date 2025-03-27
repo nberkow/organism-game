@@ -42,7 +42,7 @@ public class MapSettingsSliders {
         font = game.fonts.get(16);
 
         slider_box_x = map_settings_screen.controls_x;
-        slider_box_y = game_board.center_y;
+        slider_box_y = game_board.centerY;
         slider_box_w = map_settings_screen.controls_w;
         slider_box_h = this.game.VIRTUAL_HEIGHT / 1.8f;
 

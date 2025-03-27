@@ -2,15 +2,23 @@ package io.github.organism;
 
 import static java.util.Collections.sort;
 
+import com.badlogic.gdx.graphics.Color;
+
 import java.awt.Point;
 import java.util.ArrayList;
+
+import io.github.organism.map.GridPosition;
+import io.github.organism.map.MapHex;
+import io.github.organism.map.MapVertex;
+import io.github.organism.map.TriangularGrid;
+import io.github.organism.player.Player;
 
 public class Organism {
 
     public final float MAX_ENERGY = 100f;
     public float income;
     TriangularGrid territory_hex;
-    TriangularGrid territory_vertex;
+    TriangularGrid territoryVertex;
     public Integer [] resources;
 
     Integer [] ally_resources;
@@ -23,7 +31,7 @@ public class Organism {
     public Organism(GameBoard gb) {
         game_board = gb;
         territory_hex = new TriangularGrid(game_board);
-        territory_vertex = new TriangularGrid(game_board);
+        territoryVertex = new TriangularGrid(game_board);
         extract_queue = new ArrayList<>();
         resources = new Integer[3];
         ally_resources = new Integer[3];
@@ -37,7 +45,7 @@ public class Organism {
 
         for (GridPosition pos : territory_hex){
             MapHex h = (MapHex) pos.content;
-            for (int i = 0; i < h.total_resources; i++) {
+            for (int i = 0; i < h.totalResources; i++) {
                 if (h.resources[i] != null){
                     resources[h.resources[i]]++;
                 }
@@ -46,30 +54,30 @@ public class Organism {
     }
 
 
-    public void update_income(){
-        float new_income = 1;
-        float base_resource_val = game_board.config.gameplaySettings.get("resource value");
+    public void updateIncome(){
+        float newIncome = 1;
+        float resourceValue = game_board.config.gameplaySettings.get("resource value");
 
         for (int r=0; r<3; r++){
-            int resource_count = resources[r];
-            Point ally_id = player.get_ally_id();
+            int resourceCount = resources[r];
+            Point ally_id = player.getAllyId();
             if (ally_id != null) {
-                int ally_resource_count = game_board.players.get(ally_id).getOrganism().resources[r];
-                resource_count += ally_resource_count;
+                int allyResourceCount = game_board.players.get(ally_id).getOrganism().resources[r];
+                resourceCount += allyResourceCount;
             }
 
-            if (resource_count > 0) {
-                new_income *= Math.min(resource_count, 6f) * base_resource_val;
+            if (resourceCount > 0) {
+                newIncome *= Math.min(resourceCount, 6f) * resourceValue;
             }
         }
 
-        if (new_income < base_resource_val) {
-            new_income = base_resource_val;
-            if (player.get_ally_id() != null) {
-                new_income = (float) Math.floor(1.5f * new_income);
+        if (newIncome < resourceValue) {
+            newIncome = resourceValue;
+            if (player.getAllyId() != null) {
+                newIncome = (float) Math.floor(1.5f * newIncome);
             }
         }
-        income = Math.min(new_income, MAX_ENERGY - energy);
+        income = Math.min(newIncome, MAX_ENERGY - energy);
     }
 
     public void extract() {
@@ -92,18 +100,18 @@ public class Organism {
         while (h < extract_queue.size() && !done) {
 
             hex = extract_queue.get(h);
-            int j = hex.total_resources - 1;
+            int j = hex.totalResources - 1;
 
             while (j >= 0 && !done) {
 
-                if (hex.resources[j] == target_res && hex.total_resources > 0) {
+                if (hex.resources[j] == target_res && hex.totalResources > 0) {
 
                     done = true;
                     hex.resources[j] = 0;
-                    hex.total_resources--;
+                    hex.totalResources--;
 
                     // shift remaining resources up
-                    for (int p = j; p < hex.total_resources - 1; p++) {
+                    for (int p = j; p < hex.totalResources - 1; p++) {
                         hex.resources[p] = hex.resources[p + 1];
                         hex.resources[p + 1] = 0;
                     }
@@ -116,33 +124,30 @@ public class Organism {
     }
 
 
-    public void expand(Player enemy_player) {
+    public void expand(FloatPair<Float> planchettePolar) {
         /*
         - claim adjacent hexes
         - prioritize
-         - direction of enemy
-         - partially owned hexes
+         - fill gaps
+         - direction of planchette
          - hexes with resources
         - claim until out of budget
          */
 
         float budget = energy / 2;
 
-        ArrayList<MapVertex> adjacent_vertexes = territory_vertex.get_external_vertex_layer(player);
-        ArrayList<MapVertex> enemy_adjacent_vertexes = territory_vertex.get_external_vertex_layer(enemy_player);
+        ArrayList<MapVertex> externalVertexLayer = territoryVertex.getExternalVertexLayer(player);
+        //ArrayList<ExpandSortWrapper> vertexPriority = new ArrayList<>();
 
-        ArrayList<ExpandSortWrapper> vertex_priority = new ArrayList<>();
-
-        for (MapVertex v : adjacent_vertexes) {
-            ExpandSortWrapper w = new ExpandSortWrapper(v, player);
-            compute_adjacent_hex_value(w);
-            compute_vertex_enemy_distance(w, enemy_adjacent_vertexes);
-            w.remove_player_cost = game_board.diplomacyGraph.get_remove_cost(v, player.getTournamentId());
-            vertex_priority.add(w);
+        for (MapVertex v : externalVertexLayer) {
+            v.calculateDirectionVectors(player);
+            v.showVectors = true;
+            v.showCircle = true;
+            v.circleColor = Color.PURPLE;
         }
-        sort(vertex_priority);
 
-        for (ExpandSortWrapper w : vertex_priority) {
+        /*
+        for (ExpandSortWrapper w : vertexPriority) {
 
             float cost = w.remove_player_cost + game_board.config.gameplaySettings.get("claim vertex cost");
             if (cost <= budget) {
@@ -150,39 +155,23 @@ public class Organism {
                 budget -= cost;
                 energy -= cost;
             }
-        }
+        }*/
     }
 
-    private void compute_vertex_enemy_distance(ExpandSortWrapper w, ArrayList<MapVertex> enemy_adjacent_vertexes) {
-        w.best_enemy_distance = Double.MAX_VALUE;
-        MapVertex v = w.vertex;
-
-        double distance;
-        for (MapVertex e : enemy_adjacent_vertexes) {
-            distance = Math.pow(
-                Math.pow(v.pos.i - e.pos.i, 2) +
-                    Math.pow(v.pos.j - e.pos.j, 2) +
-                    Math.pow(v.pos.k - e.pos.k, 2), 0.5);
-            if (distance < w.best_enemy_distance) {
-                w.best_enemy_distance = distance;
-            }
-        }
-    }
-
-    public void compute_adjacent_hex_value(ExpandSortWrapper w) {
+    public void computeAdjacentHexValue(ExpandSortWrapper w) {
         w.total_adjacent_hex_value = 0;
         w.adjacent_hex_completeness = 0;
 
         int [] resource_priority = player.getOrganism().get_resource_priority();
-        for (MapHex hex : w.vertex.adjacent_hexes) {
+        for (MapHex hex : w.vertex.adjacentHexes) {
             if (hex.player != player) {
 
-                for (int i = 0; i < hex.total_resources; i++) {
+                for (int i = 0; i < hex.totalResources; i++) {
                     w.total_adjacent_hex_value += resource_priority[hex.resources[i]];
                 }
 
                 int c = 0;
-                for (MapVertex n : hex.vertex_list) {
+                for (MapVertex n : hex.vertexList) {
                     if (n.player == player) {
                         c += 1;
                     }
@@ -216,11 +205,11 @@ public class Organism {
             if (h.player != null) {
                 h.player.getOrganism().territory_hex.remove_pos(h.pos);
             }
-            territory_hex.add_pos(h.pos);
+            territory_hex.addPos(h.pos);
             h.player = player;
             extract_queue.add(h);
 
-            for (MapVertex v : h.vertex_list) {
+            for (MapVertex v : h.vertexList) {
                 if (v.player != player) {
                     claim_vertex(v);
                 }
@@ -229,24 +218,24 @@ public class Organism {
     }
 
     public void claim_hex(int i, int j, int k){
-        MapHex h = (MapHex) game_board.universe_map.hex_grid.get_pos(i, j, k).content;
+        MapHex h = (MapHex) game_board.universeMap.hexGrid.getPos(i, j, k).content;
         claim_hex(h);
     }
 
     public void claim_vertex(MapVertex v){
 
         if (v.player != null){
-            v.player.getOrganism().territory_vertex.remove_pos(v.pos);
+            v.player.getOrganism().territoryVertex.remove_pos(v.pos);
         }
 
         v.player = player;
-        territory_vertex.add_pos(v.pos);
+        territoryVertex.addPos(v.pos);
 
         // check if claiming this vertex completed a hex
         boolean completes_hex;
-        for (MapHex hex : v.adjacent_hexes){
+        for (MapHex hex : v.adjacentHexes){
             completes_hex = true;
-            for (MapVertex x : hex.vertex_list){
+            for (MapVertex x : hex.vertexList){
                 if (x.player != player) {
                     completes_hex = false;
                     break;
@@ -260,7 +249,7 @@ public class Organism {
     }
 
     public void dispose() {
-        territory_vertex = null;
+        territoryVertex = null;
         territory_hex = null;
     }
 

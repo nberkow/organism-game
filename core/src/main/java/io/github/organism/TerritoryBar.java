@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.awt.Point;
 import java.util.HashMap;
 
+import io.github.organism.player.Player;
+
 public class TerritoryBar {
 
     float x_pos = 28;
@@ -30,9 +32,9 @@ public class TerritoryBar {
     }
 
     public void logic(GameBoard gb){
-        float total_territory = gb.universe_map.vertex_grid.get_unmasked_vertices();
+        float total_territory = gb.universeMap.vertexGrid.getUnmaskedVertices();
         for (Point p : gb.allPlayerIds) {
-            float player_territory = gb.players.get(p).getOrganism().territory_vertex.get_unmasked_vertices();
+            float player_territory = gb.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices();
             heights.put(p, max_height * player_territory / total_territory);
         }
     }
@@ -52,7 +54,7 @@ public class TerritoryBar {
         float x = x_pos;
         for (Point p : gb.allPlayerIds) {
             Player player = gb.players.get(p);
-            game.shapeRenderer.setColor(player.get_color());
+            game.shapeRenderer.setColor(player.getColor());
             game.shapeRenderer.rect(x, y_pos, bar_width, heights.get(p));
             x += bar_width + bar_spacing;
         }

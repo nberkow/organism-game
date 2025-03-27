@@ -4,9 +4,12 @@ import static java.util.Collections.shuffle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
+import io.github.organism.map.GridPosition;
+import io.github.organism.map.MapHex;
+import io.github.organism.map.MapVertex;
 
 public class VoidDistributor {
 
@@ -25,7 +28,7 @@ public class VoidDistributor {
         rng.setSeed(cfg.seed);
 
         map_hexes = new ArrayList<>();
-        for (GridPosition pos : game_board.universe_map.hex_grid){
+        for (GridPosition pos : game_board.universeMap.hexGrid){
             MapHex hex = (MapHex) pos.content;
             map_hexes.add(hex);
         }
@@ -62,8 +65,8 @@ public class VoidDistributor {
 
         for (int r = 0; r < max_size; r++) {
             adjacent_hexes = new HashSet<>();
-            for (MapVertex v : hex.vertex_list) {
-                adjacent_hexes.addAll(v.adjacent_hexes);
+            for (MapVertex v : hex.vertexList) {
+                adjacent_hexes.addAll(v.adjacentHexes);
             }
             adj = new ArrayList<>(adjacent_hexes);
             random_index = rng.nextInt(adjacent_hexes.size());
@@ -104,7 +107,7 @@ public class VoidDistributor {
             for (MapHex ofp : one_fold_patch_hexes){
                 int[][] radial_centers = get_symmetrical_hexes(ofp.pos);
                 for (int j = 0; j < 3; j++) {
-                    GridPosition pos = game_board.universe_map.hex_grid.get_pos(
+                    GridPosition pos = game_board.universeMap.hexGrid.getPos(
                         radial_centers[j][0], radial_centers[j][1], radial_centers[j][2]
                     );
                     if (pos.content != null){

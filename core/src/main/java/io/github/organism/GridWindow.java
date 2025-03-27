@@ -2,38 +2,35 @@ package io.github.organism;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import io.github.organism.map.GridPosition;
+
 public class GridWindow {
 
-    GameBoard game_board;
+    GameBoard gameBoard;
     Integer dimension;
 
     GridWindow(GameBoard gb, Integer dim) {
-        game_board = gb;
+        gameBoard = gb;
         dimension = dim;
     }
 
     public void render(){
 
-        if (game_board.game.shapeRenderer == null) {
+        if (gameBoard.game.shapeRenderer == null) {
             return;
         }
 
-        game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        for (GridPosition pos : game_board.universe_map.hex_grid) {
+        for (GridPosition pos : gameBoard.universeMap.hexGrid) {
             if (pos.content != null) pos.content.render();
         }
-        for (GridPosition pos : game_board.universe_map.vertex_grid) {
+        for (GridPosition pos : gameBoard.universeMap.vertexGrid) {
             if (pos.content != null) pos.content.render();
         }
 
-        game_board.game.shapeRenderer.end();
+        gameBoard.game.shapeRenderer.end();
     }
-
-
-
-
-
 
 
     public void dispose() {

@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
+import io.github.organism.player.Player;
 
 public class GameScreen implements Screen {
 

@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import io.github.organism.map.MapHex;
+import io.github.organism.map.MapVertex;
+import io.github.organism.player.Player;
+
 public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
     final int ENERGY_TO_CLAIM_NEUTRAL_VERTEX = 1;
     final int ENERGY_TO_CLAIM_OPPONENT_VERTEX = 1;
@@ -38,10 +42,10 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
         resource_value = 0;
 
         int undiscovered_vertexes;
-        for (MapHex hex : vertex.adjacent_hexes) {
+        for (MapHex hex : vertex.adjacentHexes) {
 
             undiscovered_vertexes = 0;
-            for (MapVertex v : hex.vertex_list) {
+            for (MapVertex v : hex.vertexList) {
                 if (v.player != current_player && !v.masked) {
                     unique_neighbors.add(v);
                     undiscovered_vertexes++;
@@ -49,7 +53,7 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
             }
 
             if (hex.masked) {
-                for (int i = 0; i < hex.total_resources; i++) {
+                for (int i = 0; i < hex.totalResources; i++) {
                     resource_value += (int) Math.pow(resource_priority[hex.resources[i]], undiscovered_vertexes);
                 }
             }
@@ -63,7 +67,7 @@ public class ExploreSortWrapper implements Comparable<ExploreSortWrapper> {
             cost += ENERGY_TO_CLAIM_OPPONENT_VERTEX;
         }
 
-        for (MapHex hex : vertex.adjacent_hexes) {
+        for (MapHex hex : vertex.adjacentHexes) {
             if (hex.player != null) {
                 cost += ENERGY_TO_BREAK_HEX;
             }

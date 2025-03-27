@@ -1,32 +1,19 @@
-package io.github.organism;
+package io.github.organism.player;
 
 import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
 import java.util.LinkedList;
 
-public class DummyPlayer implements Player{
-    /**
-     * @param move
-     */
-    @Override
-    public void queue_move(Integer move) {
+import io.github.organism.Organism;
 
-    }
+public class DummyPlayer implements Player {
 
     /**
      * @return
      */
     @Override
-    public Integer get_move() {
-        return 0;
-    }
-
-    /**
-     * @return
-     */
-    @Override
-    public Color get_color() {
+    public Color getColor() {
         return null;
     }
 
@@ -41,10 +28,6 @@ public class DummyPlayer implements Player{
     /**
      * @return
      */
-    @Override
-    public Integer on_empty_queue() {
-        return 0;
-    }
 
     /**
      * @return
@@ -66,31 +49,17 @@ public class DummyPlayer implements Player{
      * @return
      */
     @Override
-    public float[] gather_inputs() {
+    public float[] gatherInputs() {
         return new float[0];
     }
 
-    /**
-     * @return
-     */
-    @Override
-    public LinkedList<Integer> get_move_queue() {
-        return null;
-    }
 
-    /**
-     *
-     */
-    @Override
-    public void generate_and_queue() {
-
-    }
 
     /**
      * @return
      */
     @Override
-    public int get_most_recent_move() {
+    public int getMostRecentMove() {
         return 0;
     }
 
@@ -122,7 +91,7 @@ public class DummyPlayer implements Player{
      * @return
      */
     @Override
-    public Point get_ally_id() {
+    public Point getAllyId() {
         return null;
     }
 
@@ -130,7 +99,15 @@ public class DummyPlayer implements Player{
      * @param p
      */
     @Override
-    public void set_ally_id(Point p) {
+    public void setAllyId(Point p) {
+
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void makeMove() {
 
     }
 }

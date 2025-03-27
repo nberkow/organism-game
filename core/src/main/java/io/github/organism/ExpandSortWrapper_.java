@@ -1,6 +1,11 @@
 package io.github.organism;
 
 
+import io.github.organism.map.MapElement;
+import io.github.organism.map.MapHex;
+import io.github.organism.map.MapVertex;
+import io.github.organism.player.Player;
+
 public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
     final int ENERGY_TO_CLAIM_NEUTRAL_VERTEX = 1;
     final int ENERGY_TO_CLAIM_OPPONENT_VERTEX = 1;
@@ -24,7 +29,7 @@ public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
             val += resource_priority[hex.resources[i]] * 6;
         }
 
-        for (MapVertex v : hex.vertex_list) {
+        for (MapVertex v : hex.vertexList) {
             val += compute_vertex_value(v);
         }
 
@@ -37,7 +42,7 @@ public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
         if (hex.player != null) {
             cost += ENERGY_TO_BREAK_HEX;
         }
-        for (MapVertex v : hex.vertex_list) {
+        for (MapVertex v : hex.vertexList) {
             if (v.player != current_player) {
                 cost += ENERGY_TO_CLAIM_NEUTRAL_VERTEX;
                 if (v.player != null) {
@@ -52,9 +57,9 @@ public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
         int vertex_val = 0;
 
         int [] resource_priority = current_player.getOrganism().get_resource_priority();
-        for (MapHex hex : vertex.adjacent_hexes) {
+        for (MapHex hex : vertex.adjacentHexes) {
             if (hex.player != current_player) {
-                for (int i = 0; i < hex.total_resources; i++) {
+                for (int i = 0; i < hex.totalResources; i++) {
                     vertex_val += resource_priority[hex.resources[i]];
                 }
             }
@@ -70,7 +75,7 @@ public class ExpandSortWrapper_ implements Comparable<ExpandSortWrapper_> {
             cost += ENERGY_TO_CLAIM_OPPONENT_VERTEX;
         }
 
-        for (MapHex hex : vertex.adjacent_hexes) {
+        for (MapHex hex : vertex.adjacentHexes) {
             if (hex.player != null) {
                 cost += ENERGY_TO_BREAK_HEX;
             }

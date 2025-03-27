@@ -41,7 +41,7 @@ public class MapSettingSelectionBoxes {
         font = game.fonts.get(32);
 
         selection_box_x = map_settings_screen.controls_x * 1.05f;
-        selection_box_y = map_settings_screen.game_board.center_y * .45f;
+        selection_box_y = map_settings_screen.game_board.centerY * .45f;
         selection_box_w = this.game.VIRTUAL_WIDTH / 2.5f;
         selection_box_h = this.game.VIRTUAL_HEIGHT / 3f;
 

@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
 
+import io.github.organism.map.GridPosition;
+import io.github.organism.map.MapHex;
+import io.github.organism.map.UniverseMap;
+import io.github.organism.player.Player;
+
 public class PlayerStartAssigner {
 
     GameBoard game_board;
@@ -21,7 +26,7 @@ public class PlayerStartAssigner {
     PlayerStartAssigner(GameBoard gb){
         game_board = gb;
         players = game_board.players;
-        universe_map = game_board.universe_map;
+        universe_map = game_board.universeMap;
         rng = game_board.rng;
         cfg = game_board.config;
     }
@@ -33,7 +38,7 @@ public class PlayerStartAssigner {
             int [] coords = starting_coords.get(i);
             if (organism!= null) {
                 organism.claim_hex(coords[0], coords[1], coords[2]);
-                MapHex hex = (MapHex) universe_map.hex_grid.get_pos(coords[0], coords[1], coords[2]).content;
+                MapHex hex = (MapHex) universe_map.hexGrid.getPos(coords[0], coords[1], coords[2]).content;
                 hex.add_resource(i % 3, 3);
             }
             i ++;
@@ -64,8 +69,8 @@ public class PlayerStartAssigner {
             if (a != 0 || b != 0) {
                 int c = -a - b;
 
-                MapHex proposed_hex = (MapHex) game_board.universe_map.hex_grid.get_pos(a, b, c).content;
-                MapHex mirror_hex = (MapHex) game_board.universe_map.hex_grid.get_pos(-a, -b, -c).content;
+                MapHex proposed_hex = (MapHex) game_board.universeMap.hexGrid.getPos(a, b, c).content;
+                MapHex mirror_hex = (MapHex) game_board.universeMap.hexGrid.getPos(-a, -b, -c).content;
 
 
                 if (!proposed_hex.masked && !mirror_hex.masked && proposed_hex.player == null && mirror_hex.player == null) {
@@ -93,7 +98,7 @@ public class PlayerStartAssigner {
         float min_dist = (float) Math.max(cfg.radius / (cfg.humanPlayers + cfg.botPlayers), 2);
 
         ArrayList<MapHex> map_hexes = new ArrayList<>();
-        for (GridPosition pos : game_board.universe_map.hex_grid){
+        for (GridPosition pos : game_board.universeMap.hexGrid){
             map_hexes.add((MapHex) pos.content);
         }
         shuffle(map_hexes, rng);

@@ -1,11 +1,11 @@
-package io.github.organism;
+package io.github.organism.map;
 
 public class GridPosition {
 
     public MapElement content;
-    int i;
-    int j;
-    int k;
+    public int i;
+    public int j;
+    public int k;
 
     TriangularGrid grid;
 
@@ -15,4 +15,5 @@ public class GridPosition {
         this.k = k;
         this.grid = grid;
     }
+
 }

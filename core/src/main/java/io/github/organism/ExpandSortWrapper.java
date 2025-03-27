@@ -1,8 +1,8 @@
 package io.github.organism;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Objects;
+
+import io.github.organism.map.MapVertex;
+import io.github.organism.player.Player;
 
 
 public class ExpandSortWrapper implements Comparable<ExpandSortWrapper> {

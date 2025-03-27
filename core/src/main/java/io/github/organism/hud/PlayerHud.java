@@ -3,6 +3,7 @@ package io.github.organism.hud;
 import com.badlogic.gdx.Screen;
 
 import io.github.organism.DoublePair;
+import io.github.organism.FloatPair;
 import io.github.organism.GameSession;
 import io.github.organism.OrganismGame;
 
@@ -15,7 +16,7 @@ public class PlayerHud {
     GameSession gameSession;
     EnergyBar energyBar;
     ResourceBar resourceBar;
-    MoveSpaceDisplay moveSpaceDisplay;
+    MoveSpaceControl moveSpaceDisplay;
     boolean player2;
 
     Screen screen;
@@ -59,37 +60,25 @@ public class PlayerHud {
     }
 
     private void setupMoveSpaceDisplay(float radius) {
-
-        moveSpaceDisplay = new MoveSpaceDisplay(this, radius);
+        moveSpaceDisplay = new MoveSpaceControl(this, radius);
     }
 
     private void setupEnergyBar(float w, float h, float y) {
         energyBar = new EnergyBar(game, this, w, h, y);
     }
 
-
     public void render(){
-
-        /* debug rect
-
-        game_board.shape_renderer.begin(ShapeRenderer.ShapeType.Line);
-        game_board.shape_renderer.setColor(Color.LIGHT_GRAY);
-        game_board.shape_renderer.rect(
-            x,
-            y,
-            HUD_WIDTH,
-            HUD_HEIGHT);
-        game_board.shape_renderer.end();
-        */
         resourceBar.render();
         energyBar.render();
         moveSpaceDisplay.render();
-
-
     }
 
     public DoublePair<Double> getTheta() {
         HudInputProcessor hudInputProcessor = (HudInputProcessor) gameSession.getInputProcessor();
         return hudInputProcessor.getThetaFromKeys(player2);
+    }
+
+    public FloatPair<Float> getPlanchetteCoords() {
+        return moveSpaceDisplay.planchetteCoord;
     }
 }

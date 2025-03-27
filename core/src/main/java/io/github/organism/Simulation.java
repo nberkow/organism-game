@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+import io.github.organism.player.BotPlayer;
+
 public class Simulation implements GameSession {
 
     OrganismGame game;
@@ -177,15 +179,15 @@ public class Simulation implements GameSession {
             availableColors.addAll(Arrays.asList(game.playerColors));
         }
 
-        currentGame = new GameBoard(game, cfg, screen);
+        currentGame = new GameBoard(game, cfg, this);
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
 
         currentGameOrchestrator = new GameOrchestrator(currentGame);
         currentGame.set_orchestrator(currentGameOrchestrator);
 
-        currentGame.center_x = mapCenterX;
-        currentGame.center_y = mapCenterY;
+        currentGame.centerX = mapCenterX;
+        currentGame.centerY = mapCenterY;
         currentGame.showPlayerSummary = true;
         currentGame.showDiplomacy = true;
     }
@@ -193,8 +195,8 @@ public class Simulation implements GameSession {
     public void createPlayerStarts() {
         int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = currentGame.player_start_assigner.randomizeStartingCoords();
-            currentGame.player_start_assigner.assignStartingHexes(starting_coords);
+            ArrayList<int[]> starting_coords = currentGame.playerStartAssigner.randomizeStartingCoords();
+            currentGame.playerStartAssigner.assignStartingHexes(starting_coords);
         }
     }
 
@@ -223,7 +225,19 @@ public class Simulation implements GameSession {
         }
     }
 
-    public void run_simulation() {
+    public void advanceTurnCount(){
+
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Object getScreen() {
+        return screen;
+    }
+
+    public void runSimulation() {
 
         System.out.println("first iteration");
         silent = false;
@@ -425,12 +439,12 @@ public class Simulation implements GameSession {
 
         double total_territory = 0;
         for (Point player_id : currentGame.players.keySet()) {
-            double territory = currentGame.players.get(player_id).getOrganism().territory_vertex.get_unmasked_vertices();
+            double territory = currentGame.players.get(player_id).getOrganism().territoryVertex.getUnmaskedVertices();
             total_territory += territory;
         }
 
         for (Point player_id  : currentGame.players.keySet()) {
-            double territory = currentGame.players.get(player_id).getOrganism().territory_vertex.get_unmasked_vertices();
+            double territory = currentGame.players.get(player_id).getOrganism().territoryVertex.getUnmaskedVertices();
             weights.put(player_id, territory / total_territory);
         }
 

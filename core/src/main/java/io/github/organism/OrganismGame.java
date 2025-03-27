@@ -112,10 +112,6 @@ public class OrganismGame extends Game {
         labScreen.inputProcessor = new LabScreenInputProcessor(labScreen);
         labScreen.overlay.input_processor = new SettingsOverlayInputProcessor(labScreen.overlay);
 
-        tutorialScreen = new TutorialScreen(this);
-        tutorialScreen.inputProcessor = new TutorialInputProcessor(tutorialScreen);
-
-
         Gdx.input.setInputProcessor(mapSettingsScreen.inputProcessor);
         this.setScreen(mapSettingsScreen);
 
@@ -131,14 +127,18 @@ public class OrganismGame extends Game {
         //Gdx.input.setInputProcessor(labScreen.inputProcessor);
         //this.setScreen(labScreen);
 
-        Gdx.input.setInputProcessor(hudTestScreen.inputProcessor);
-        this.setScreen(hudTestScreen);
+        //Gdx.input.setInputProcessor(hudTestScreen.inputProcessor);
+        //this.setScreen(hudTestScreen);
+
+        tutorialScreen = new TutorialScreen(this);
+        tutorialScreen.inputProcessor = new HudInputProcessor(tutorialScreen);
+        Gdx.input.setInputProcessor(tutorialScreen.inputProcessor);
+        this.setScreen(tutorialScreen);
 
     }
 
     @Override
     public void render() {
-        // Clear the screen and render the game board
         super.render();
     }
 

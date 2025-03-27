@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+import io.github.organism.player.IO_Player;
+import io.github.organism.player.Player;
+
 public class ArcadeLoop implements GameSession {
 
     float mapCenterX;
@@ -170,22 +173,22 @@ public class ArcadeLoop implements GameSession {
             availableColors.addAll(Arrays.asList(game.playerColors).subList(2, game.playerColors.length));
         }
 
-        currentGame = new GameBoard(game, gameCfg, currentScreen);
+        currentGame = new GameBoard(game, gameCfg, this);
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
 
         currentGameOrchestrator = new GameOrchestrator(currentGame);
         currentGame.set_orchestrator(currentGameOrchestrator);
 
-        currentGame.center_x = mapCenterX;
-        currentGame.center_y = mapCenterY;
+        currentGame.centerX = mapCenterX;
+        currentGame.centerY = mapCenterY;
     }
 
     public void createPlayerStarts() {
         int sc = (int) Math.floor(Math.pow(gameCfg.radius, gameCfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> startingCoords = currentGame.player_start_assigner.randomizeStartingCoords();
-            currentGame.player_start_assigner.assignStartingHexes(startingCoords);
+            ArrayList<int[]> startingCoords = currentGame.playerStartAssigner.randomizeStartingCoords();
+            currentGame.playerStartAssigner.assignStartingHexes(startingCoords);
         }
     }
 
@@ -196,6 +199,18 @@ public class ArcadeLoop implements GameSession {
             modelPool.put(p, model);
             playerPrimaryIndex++;
         }
+    }
+
+    public void advanceTurnCount(){
+
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Object getScreen() {
+        return currentScreen;
     }
 
     public void run_arcade_loop() {
@@ -260,7 +275,7 @@ public class ArcadeLoop implements GameSession {
                 p,
                 playerId,
                 organism,
-                false,
+                null,
                 color
             );
             organism.player = player;

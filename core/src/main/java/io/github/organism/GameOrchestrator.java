@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import java.awt.Point;
 import java.util.HashMap;
 
+import io.github.organism.player.Player;
+
 public class GameOrchestrator {
 
     final float VICTORY_THRESHOLD = 2/3f;
@@ -13,36 +15,31 @@ public class GameOrchestrator {
 
     int turn = 0;
     GameBoard gameBoard;
-    double base_action_time = 1d;
-    double action_time = base_action_time;
+    double baseActionTime = 1d;
+    double actionTime = baseActionTime;
 
-    double queue_action_frequency = 10;
-
-    double hmm_transition_frequency = 50;
-
-    boolean execute_actions = false;
-    double action_clock = 0d;
+    double actionClock = 0d;
     boolean paused = true;
-    HashMap<Point, Float> player_territory;
-    HashMap<Point, Integer> current_moves;
-    float total_territory;
-    int resource_exhausted_countdown = 36;
+    HashMap<Point, Float> playerTerritory;
+    HashMap<Point, Integer> currentMoves;
+    float totalTerritory;
+    int resourceExhaustedCountdown = 36;
     boolean show_countdown;
 
     public GameOrchestrator(GameBoard gb) {
         gameBoard = gb;
-        total_territory = (float) gameBoard.universe_map.vertex_grid.get_unmasked_vertices();
-        turn_max = total_territory * 3;
-        player_territory = new HashMap<>();
-        current_moves = new HashMap<>();
+        totalTerritory = (float) gameBoard.universeMap.vertexGrid.getUnmaskedVertices();
+        turn_max = totalTerritory * 3;
+        playerTerritory = new HashMap<>();
+        currentMoves = new HashMap<>();
         for (Point p : gameBoard.players.keySet()) {
-            player_territory.put(p, (float) gameBoard.players.get(p).getOrganism().territory_vertex.get_unmasked_vertices());
+            playerTerritory.put(p, (float) gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices());
         }
         finished = false;
     }
 
     public void update_speed(float speed){
-        action_time = base_action_time / speed;
+        actionTime = baseActionTime / speed;
     }
 
     public void updateTimersAndFlags() {
@@ -51,12 +48,11 @@ public class GameOrchestrator {
             return;
         }
 
-        action_clock += Gdx.graphics.getDeltaTime();
-        execute_actions = false;
-        if (action_clock > action_time){
-            execute_actions = true;
+        actionClock += Gdx.graphics.getDeltaTime();
+        if (actionClock > actionTime){
             turn ++;
-            action_clock = action_clock % action_time;
+            gameBoard.session.advanceTurnCount();
+            actionClock = actionClock % actionTime;
         }
 
     }
@@ -67,25 +63,7 @@ public class GameOrchestrator {
             if (organism != null){
                 organism.updateResources();
             }
-        }
-
-        // dequeue an action from each player's queue and execute it
-        if (execute_actions) {
-
-            for (int i=0; i<queue_action_frequency; i++) {
-                for (Point b : gameBoard.bot_player_ids) {
-                    gameBoard.players.get(b).transition();
-                }
-            }
-
-            for (int i=0; i<hmm_transition_frequency; i++) {
-                for (Point b : gameBoard.bot_player_ids) {
-                    gameBoard.players.get(b).generate_and_queue();
-                }
-            }
-
-            dequeue_and_execute();
-
+            p.makeMove();
         }
     }
 
@@ -97,7 +75,7 @@ public class GameOrchestrator {
         int remaining_resources = gameBoard.count_resources();
 
         if (show_countdown) {
-            resource_exhausted_countdown -= 1;
+            resourceExhaustedCountdown -= 1;
         }
 
         if (remaining_resources == 0) {
@@ -105,19 +83,19 @@ public class GameOrchestrator {
         }
 
         for (Point p : gameBoard.players.keySet()) {
-            float p_territory = gameBoard.players.get(p).getOrganism().territory_vertex.get_unmasked_vertices();
-            player_territory.put(p, p_territory);
+            float p_territory = gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices();
+            playerTerritory.put(p, p_territory);
             if (p_territory > leader_territory) {
                 leader = p;
                 leader_territory = p_territory;
             }
 
-            if (p_territory / total_territory >= VICTORY_THRESHOLD) {
+            if (p_territory / totalTerritory >= VICTORY_THRESHOLD) {
                 return p;
             }
         }
 
-        if (resource_exhausted_countdown <= 0) {
+        if (resourceExhaustedCountdown <= 0) {
             return leader;
         }
 
@@ -128,27 +106,10 @@ public class GameOrchestrator {
         return null;
     }
 
-    public void enqueue_action(Point player_id, int button_val) {
-        // run one of the three actions depending on the button val
-        Player player = gameBoard.players.get(player_id);
-        player.queue_move(button_val);
-    }
+    private void makeMoves(HashMap<Point, DoublePair<Double>> allPlayerMoves) {
 
-    private void resolve_moves(HashMap<Point, Integer> allPlayerMoves) {
         /*
-        Resolve moves based on all player responses
-
-        Extract
-        - 1 player chooses extract - energy based on resources
-        - 2 players choose extract - energy based on max(each resource)
-        - 3 players choose extract - energy based on min(each resources)
-
-        Expand - cost to claim vertex
-        - free territory cost: 3
-        - remove enemy player cost 9, take vertex cost 3
-        - remove extracting player cost: 3, take vertex cost 3
-        - remove player attacking other player (flanked player) cost: 1
-
+        DEPRECATED for now. May want a shared queue
          */
 
         // move execution rotates order
@@ -158,45 +119,12 @@ public class GameOrchestrator {
             Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(p));
             Organism organism = player.getOrganism();
             if (organism != null) {
-                organism.update_income();
+                organism.updateIncome();
             }
-
-            Player leftPlayer = gameBoard.players.get(gameBoard.allPlayerIds.get((p+2) % 3));
-            Player rightPlayer = gameBoard.players.get(gameBoard.allPlayerIds.get((p+1) % 3));
-
-            Player target;
-            Integer move = allPlayerMoves.get(player.getTournamentId());
-            
-            if (move != null & organism != null) {
-                if (move == 0 || move == 2) {
-
-                    target = leftPlayer;
-                    if (move == 0) {
-                        target = rightPlayer;
-                    }
-
-                    player.getOrganism().expand(target);
-                } else {
-                    player.getOrganism().extract();
-                }
-            }
+            player.makeMove();
         }
     }
 
-    private void dequeue_and_execute(){
-
-        HashMap<Point, Integer> all_player_moves = new HashMap<>();
-        for (int p = 0; p< gameBoard.allPlayerIds.size(); p++){
-            Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(p));
-            Integer move = player.get_move();
-            all_player_moves.put(player.getTournamentId(), move);
-        }
-
-        resolve_moves(all_player_moves);
-
-        // this turn's moves set the diplomacy for the next turn
-        gameBoard.diplomacyGraph.update_diplomacy(all_player_moves);
-    }
 
     public void run(){
         paused = false;
@@ -212,8 +140,8 @@ public class GameOrchestrator {
 
         int i = 1;
         for (Point p : gameBoard.allPlayerIds) {
-            int move = gameBoard.players.get(p).get_most_recent_move();
-            int territory = gameBoard.players.get(p).getOrganism().territory_vertex.get_unmasked_vertices();
+            int move = gameBoard.players.get(p).getMostRecentMove();
+            int territory = gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices();
             most_recent_move_stats.put("player" + i + "_move", String.valueOf(move));
             most_recent_move_stats.put("player" + i + "_territory", String.valueOf(territory));
             i++;

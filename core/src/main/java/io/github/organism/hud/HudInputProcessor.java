@@ -2,6 +2,7 @@ package io.github.organism.hud;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 
 import java.util.HashMap;
 
@@ -16,10 +17,10 @@ public class HudInputProcessor implements InputProcessor {
     public HashMap<Integer, Double> playerOneKeyAngles;
     public HashMap<Integer, Double> playerTwoKeyAngles;
 
-    public HudTestScreen screen;
+    public Screen screen;
 
 
-    public HudInputProcessor(HudTestScreen scr){
+    public HudInputProcessor(Screen scr){
         screen = scr;
         keysDown = new HashMap<>();
         playerOneKeyAngles = new HashMap<>();

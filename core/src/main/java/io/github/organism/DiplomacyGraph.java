@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 
+import io.github.organism.map.MapVertex;
+import io.github.organism.player.Player;
+
 enum Relationship {NEUTRAL, ENEMY, ALLY};
 
 public class DiplomacyGraph {
@@ -100,12 +103,12 @@ public class DiplomacyGraph {
             relationships.get(p).put(q, Relationship.ALLY);
             relationships.get(q).put(p, Relationship.ALLY);
 
-            currentGame.players.get(p).set_ally_id(q);
-            currentGame.players.get(q).set_ally_id(p);
+            currentGame.players.get(p).setAllyId(q);
+            currentGame.players.get(q).setAllyId(p);
 
             if (other_players.size() == 1) {
                 Point e = other_players.get(0);
-                currentGame.players.get(e).set_ally_id(null);
+                currentGame.players.get(e).setAllyId(null);
 
                 if (relationships.get(e).get(p) != Relationship.ENEMY) {
                     relationships.get(e).put(p, Relationship.NEUTRAL);
@@ -148,11 +151,11 @@ public class DiplomacyGraph {
                         relationships.get(q).put(p, Relationship.ENEMY);
                     }
 
-                    if (currentGame.players.get(p).get_ally_id() == q) {
-                        currentGame.players.get(p).set_ally_id(null);
+                    if (currentGame.players.get(p).getAllyId() == q) {
+                        currentGame.players.get(p).setAllyId(null);
                     }
-                    if (currentGame.players.get(q).get_ally_id() == p) {
-                        currentGame.players.get(q).set_ally_id(null);
+                    if (currentGame.players.get(q).getAllyId() == p) {
+                        currentGame.players.get(q).setAllyId(null);
                     }
                 }
             }
@@ -182,7 +185,7 @@ public class DiplomacyGraph {
             // record the player colors in order
             Point p = currentGame.allPlayerIds.get(i);
             Player player = currentGame.players.get(p);
-            player_colors[i] = player.get_color();
+            player_colors[i] = player.getColor();
 
             // record the vertices of each player's arc
             double start = Math.toDegrees(theta);
@@ -209,9 +212,9 @@ public class DiplomacyGraph {
         }
     }
 
-    public Float get_remove_cost(MapVertex v, Point player) {
+    public Float getRemoveCost(MapVertex v, Point player) {
 
-        Player vertex_owner = v.get_player();
+        Player vertex_owner = v.getPlayer();
         if (vertex_owner == null){
             return 0f;
         }

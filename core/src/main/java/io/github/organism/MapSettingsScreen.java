@@ -6,6 +6,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
 
+import io.github.organism.map.GridPosition;
+
 public class MapSettingsScreen implements Screen {
 
     final int DEFAULT_SIZE = 6;
@@ -29,14 +31,14 @@ public class MapSettingsScreen implements Screen {
         game = g;
         cfg = new GameConfig();
         cfg.radius = DEFAULT_SIZE;
-        controls_x = this.game.VIRTUAL_WIDTH * 9 / 16f;
-        controls_w = this.game.VIRTUAL_WIDTH / 2.5f;
-        buttons_y = this.game.VIRTUAL_HEIGHT * .05f;
+        controls_x = OrganismGame.VIRTUAL_WIDTH * 9 / 16f;
+        controls_w = OrganismGame.VIRTUAL_WIDTH / 2.5f;
+        buttons_y = OrganismGame.VIRTUAL_HEIGHT * .05f;
 
-        game_board = new GameBoard(game, cfg, this);
+        game_board = new GameBoard(game, cfg, null);
         game_board.radius = DEFAULT_SIZE;
-        game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
-        game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
+        game_board.centerX = OrganismGame.VIRTUAL_WIDTH / 3.5f;
+        game_board.centerY = OrganismGame.VIRTUAL_HEIGHT / 2f;
 
         sliders = new MapSettingsSliders(game, this);
         selection_boxes = new MapSettingSelectionBoxes(game, this);
@@ -64,10 +66,10 @@ public class MapSettingsScreen implements Screen {
         ScreenUtils.clear(game_board.game.backgroundColor);
         game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        for (GridPosition pos : game_board.universe_map.hex_grid) {
+        for (GridPosition pos : game_board.universeMap.hexGrid) {
             if (pos.content != null) pos.content.render();
         }
-        for (GridPosition pos : game_board.universe_map.vertex_grid) {
+        for (GridPosition pos : game_board.universeMap.vertexGrid) {
             if (pos.content != null) pos.content.render();
         }
 
@@ -83,18 +85,18 @@ public class MapSettingsScreen implements Screen {
         create_config();
         cfg.radius = (int) Math.floor(sliders.slider_selected_vals.get("radius"));
 
-        game_board = new GameBoard(game, cfg, this);
+        game_board = new GameBoard(game, cfg, null);
         game_board.voidDistributor.distribute();
         game_board.resourceDistributor.distribute();
 
         int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomizeStartingCoords();
-            game_board.player_start_assigner.assignStartingHexes(starting_coords);
+            ArrayList<int[]> starting_coords = game_board.playerStartAssigner.randomizeStartingCoords();
+            game_board.playerStartAssigner.assignStartingHexes(starting_coords);
         }
 
-        game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
-        game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
+        game_board.centerX = OrganismGame.VIRTUAL_WIDTH / 3.5f;
+        game_board.centerY = OrganismGame.VIRTUAL_HEIGHT / 2f;
 
     }
 
@@ -116,18 +118,18 @@ public class MapSettingsScreen implements Screen {
 
 
     public void set_new_game_board(GameConfig config) {
-        game_board = new GameBoard(this.game, config, this);
+        game_board = new GameBoard(this.game, config, null);
         game_board.voidDistributor.distribute();
         game_board.resourceDistributor.distribute();
 
         int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
         for (int i=0; i<sc; i++) {
-            ArrayList<int[]> starting_coords = game_board.player_start_assigner.randomizeStartingCoords();
-            game_board.player_start_assigner.assignStartingHexes(starting_coords);
+            ArrayList<int[]> starting_coords = game_board.playerStartAssigner.randomizeStartingCoords();
+            game_board.playerStartAssigner.assignStartingHexes(starting_coords);
         }
 
-        game_board.center_x = this.game.VIRTUAL_WIDTH / 3.5f;
-        game_board.center_y = this.game.VIRTUAL_HEIGHT / 2f;
+        game_board.centerX = OrganismGame.VIRTUAL_WIDTH / 3.5f;
+        game_board.centerY = OrganismGame.VIRTUAL_HEIGHT / 2f;
     }
 
     /**

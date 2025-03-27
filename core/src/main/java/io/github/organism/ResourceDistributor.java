@@ -4,12 +4,15 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
+import io.github.organism.map.GridPosition;
+import io.github.organism.map.MapHex;
+import io.github.organism.map.MapVertex;
 
 public class ResourceDistributor {
 
@@ -33,7 +36,7 @@ public class ResourceDistributor {
         int usable_hexes = 0;
 
         hexes_to_fill = new ArrayList<>();
-        for (GridPosition pos : game_board.universe_map.hex_grid){
+        for (GridPosition pos : game_board.universeMap.hexGrid){
             MapHex hex = (MapHex) pos.content;
             if (!hex.masked) {
                 hexes_to_fill.add(hex);
@@ -73,8 +76,8 @@ public class ResourceDistributor {
         for (int r = 0; r < 6; r++) {
             hexes_to_add = new HashSet<>();
             for (MapHex hex : current_hexes) {
-                for (MapVertex v : hex.vertex_list) {
-                    for (MapHex n : v.adjacent_hexes) {
+                for (MapVertex v : hex.vertexList) {
+                    for (MapHex n : v.adjacentHexes) {
                         if (n != null && !n.masked) {
                             hexes_to_add.add(n);
                         }
@@ -103,7 +106,7 @@ public class ResourceDistributor {
                 ArrayList<MapHex> patch = patches.get(r);
                 if (!patch.isEmpty()) {
                     MapHex hex = patch.get(idx % patch.size());
-                    if (hex != null && !hex.masked && hex.total_resources < 3) {
+                    if (hex != null && !hex.masked && hex.totalResources < 3) {
                         hex.add_resource(r);
                         added++;
                     } else {
@@ -161,7 +164,7 @@ public class ResourceDistributor {
             for (MapHex ofp : one_fold_patch_hexes){
                 int[][] radial_centers = get_symmetrical_hexes(ofp.pos);
                 for (int j = 0; j < 3; j++) {
-                    GridPosition pos = game_board.universe_map.hex_grid.get_pos(
+                    GridPosition pos = game_board.universeMap.hexGrid.getPos(
                         radial_centers[j][0], radial_centers[j][1], radial_centers[j][2]
                     );
                     if (pos.content != null){
