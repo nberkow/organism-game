@@ -51,10 +51,10 @@ public class TimeIndicator {
         for (int i=0; i<6; i++){
             int j = (i+1) % 6;
             game.shapeRenderer.rectLine(
-                x + points.get(i).x,
-                y + points.get(i).y,
-                x + points.get(j).x,
-                y + points.get(j).y,
+                x + points.get(i).a,
+                y + points.get(i).b,
+                x + points.get(j).a,
+                y + points.get(j).b,
                 1);
         }
 
@@ -70,10 +70,10 @@ public class TimeIndicator {
             for (int i=0; i<6; i++){
                 int j = (i+1) % 6;
                 game.shapeRenderer.rectLine(
-                    x + points.get(i).x * p/6,
-                    y + points.get(i).y * p/6,
-                    x + points.get(j).x * p/6,
-                    y + points.get(j).y * p/6,
+                    x + points.get(i).a * p/6,
+                    y + points.get(i).b * p/6,
+                    x + points.get(j).a * p/6,
+                    y + points.get(j).b * p/6,
                     1f);
             }
         }

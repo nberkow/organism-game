@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import io.github.organism.ExpandEdge;
 import io.github.organism.GameBoard;
 import io.github.organism.player.Player;
 
@@ -12,7 +13,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
     HashMap<Integer, HashMap<Integer, HashMap<Integer, GridPosition>>> grid;
 
     int size = 0;
-    GameBoard gameBoard;
+    public GameBoard gameBoard;
 
     public TriangularGrid(GameBoard gb) {
         gameBoard = gb;
@@ -94,21 +95,22 @@ public class TriangularGrid implements Iterable<GridPosition> {
         }
         return shared_hexes;
     }
-    public ArrayList<MapVertex> getExternalVertexLayer(Player player){
-        HashSet<MapVertex> unique_vertices = new HashSet<>();
+    public ArrayList<ExpandEdge> calculateExpandEdges(Player player){
 
+        // Populate the expand edge list of all vertexes and return a list of them
+        ArrayList<ExpandEdge> expandEdges = new ArrayList<>();
         for (GridPosition pos : this) {
-            if (!(pos.content instanceof MapVertex)){
-                throw new RuntimeException("getExternalVertexLayer() can only be used on vertex grids");
-            }
             MapVertex vertex = (MapVertex) pos.content;
+            vertex.expandEdges.clear();
             for (MapVertex neighbor : vertex.adjacentVertices){
                 if (neighbor.player != player && !neighbor.masked && !get_shared_hexes(vertex, neighbor).isEmpty()){
-                    unique_vertices.add(neighbor);
+                    ExpandEdge e = new ExpandEdge(vertex, neighbor);
+                    vertex.expandEdges.add(e);
+                    expandEdges.add(e);
                 }
             }
         }
-        return new ArrayList<>(unique_vertices);
+        return expandEdges;
     }
 
     public ArrayList<MapHex> getExternalHexLayer(Player player){

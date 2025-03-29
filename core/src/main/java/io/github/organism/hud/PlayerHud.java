@@ -78,7 +78,11 @@ public class PlayerHud {
         return hudInputProcessor.getThetaFromKeys(player2);
     }
 
-    public FloatPair<Float> getPlanchetteCoords() {
-        return moveSpaceDisplay.planchetteCoord;
+    public FloatPair<Float> getPlanchettePolar() {
+        return new FloatPair<>(
+            moveSpaceDisplay.planchettePolar.a / moveSpaceDisplay.radius,
+            moveSpaceDisplay.planchettePolar.b
+        );
+
     }
 }

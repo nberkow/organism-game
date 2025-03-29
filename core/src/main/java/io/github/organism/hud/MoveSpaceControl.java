@@ -51,7 +51,7 @@ public class MoveSpaceControl {
 
         centerCoord = new FloatPair<>(radius, radius);
         if (hud.player2) {
-            centerCoord.x = OrganismGame.VIRTUAL_WIDTH - radius;
+            centerCoord.a = OrganismGame.VIRTUAL_WIDTH - radius;
         }
 
     }
@@ -70,20 +70,20 @@ public class MoveSpaceControl {
 
         // move planchette along current vector
         FloatPair<Float> planchetteMoveXY = Util.polarToVisualXY(planchetteMovementVector.r, planchetteMovementVector.t);
-        planchetteCoord.x += planchetteMoveXY.x;
-        planchetteCoord.y += planchetteMoveXY.y;
-        planchettePolar = Util.xyToPolarFloat(planchetteCoord.x, planchetteCoord.y);
+        planchetteCoord.a += planchetteMoveXY.a;
+        planchetteCoord.b += planchetteMoveXY.b;
+        planchettePolar = Util.xyToPolarFloat(planchetteCoord.a, planchetteCoord.b);
 
         // adjust the vector to point at the cursor
 
         // current distances from cursor
-        float deltaX = cursorCoord.x - planchetteCoord.x;
-        float deltaY = cursorCoord.y - planchetteCoord.y;
+        float deltaX = cursorCoord.a - planchetteCoord.a;
+        float deltaY = cursorCoord.b - planchetteCoord.b;
         FloatPair<Float> cursorDistanceVector = Util.xyToPolarFloat(deltaX, deltaY);
-        FloatPair<Float> adjustedXY = Util.polarToVisualXY(0.1d, (double) cursorDistanceVector.y);
+        FloatPair<Float> adjustedXY = Util.polarToVisualXY(0.1d, (double) cursorDistanceVector.b);
 
-        float newX = (adjustedXY.x * 5 + planchetteMoveXY.x)/2;
-        float newY = (adjustedXY.y * 5 + planchetteMoveXY.y)/2;
+        float newX = (adjustedXY.a * 5 + planchetteMoveXY.a)/2;
+        float newY = (adjustedXY.b * 5 + planchetteMoveXY.b)/2;
 
         planchetteMovementVector = Util.xyToPolarDouble((double) newX, (double) newY);
 
@@ -93,13 +93,13 @@ public class MoveSpaceControl {
     private void updateCursor() {
         DoublePair<Double> polar = hud.getTheta();
         FloatPair<Float> coord = Util.polarToVisualXY(polar.r, polar.t);
-        cursorPolar = Util.xyToPolarFloat(cursorCoord.x + coord.x, cursorCoord.y + coord.y);
+        cursorPolar = Util.xyToPolarFloat(cursorCoord.a + coord.a, cursorCoord.b + coord.b);
 
-        float v = Math.min(cursorPolar.x, availableRadius);
-        if (cursorPolar.x == 0) {
+        float v = Math.min(cursorPolar.a, availableRadius);
+        if (cursorPolar.a == 0) {
             cursorCoord = new FloatPair<>(0f, 0f);
         } else {
-            cursorCoord = Util.polarToVisualXY((double) v, (double) cursorPolar.y);
+            cursorCoord = Util.polarToVisualXY((double) v, (double) cursorPolar.b);
         }
 
     }
@@ -109,37 +109,37 @@ public class MoveSpaceControl {
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         hud.game.shapeRenderer.setColor(hud.game.backgroundColor);
-        hud.game.shapeRenderer.circle(centerCoord.x, centerCoord.y, radius * 1.05f);
+        hud.game.shapeRenderer.circle(centerCoord.a, centerCoord.b, radius * 1.05f);
         hud.game.shapeRenderer.end();
 
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
         hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
-        hud.game.shapeRenderer.circle(centerCoord.x, centerCoord.y, radius);
+        hud.game.shapeRenderer.circle(centerCoord.a, centerCoord.b, radius);
 
         hud.game.shapeRenderer.setColor(Color.RED);
-        hud.game.shapeRenderer.circle(centerCoord.x, centerCoord.y, aggressionDisplayRadius);
+        hud.game.shapeRenderer.circle(centerCoord.a, centerCoord.b, aggressionDisplayRadius);
 
-        if (cursorPolar.x < aggressionRadius) {
+        if (cursorPolar.a < aggressionRadius) {
             hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
         }
         else {
             hud.game.shapeRenderer.setColor(Color.RED);
         }
-        hud.game.shapeRenderer.circle(cursorCoord.x + centerCoord.x, cursorCoord.y + centerCoord.y, cursorRadius);
+        hud.game.shapeRenderer.circle(cursorCoord.a + centerCoord.a, cursorCoord.b + centerCoord.b, cursorRadius);
 
         hud.game.shapeRenderer.end();
 
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        if (planchettePolar.x < aggressionRadius) {
+        if (planchettePolar.a < aggressionRadius) {
             hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
         }
         else {
             hud.game.shapeRenderer.setColor(Color.RED);
         }
 
-        hud.game.shapeRenderer.circle(planchetteCoord.x + centerCoord.x, planchetteCoord.y + centerCoord.y, planchetteRadius);
+        hud.game.shapeRenderer.circle(planchetteCoord.a + centerCoord.a, planchetteCoord.b + centerCoord.b, planchetteRadius);
         hud.game.shapeRenderer.end();
     }
 }

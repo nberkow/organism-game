@@ -7,7 +7,7 @@ public class GridPosition {
     public int j;
     public int k;
 
-    TriangularGrid grid;
+    public TriangularGrid grid;
 
     public GridPosition(int i, int j, int k, TriangularGrid grid) {
         this.i = i;

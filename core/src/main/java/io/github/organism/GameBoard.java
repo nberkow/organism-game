@@ -44,6 +44,8 @@ public class GameBoard implements Disposable {
     // Gameplay
     HashMap<Point, Player> players = new HashMap<>();
 
+    HashMap<Point, ArrayList<ExpandEdge>> expandEdges = new HashMap<>();
+
     public GridWindow gridWindow;
     public UniverseMap universeMap;
     public ArrayList<PlayerSummaryDisplay> playerSummaryDisplays;
@@ -164,6 +166,12 @@ public class GameBoard implements Disposable {
 
         if (showDiplomacy) {
             diplomacyGraph.render();
+        }
+
+        for (Point p : expandEdges.keySet()) {
+            for (ExpandEdge e : expandEdges.get(p)) {
+                e.render();
+            }
         }
     }
 

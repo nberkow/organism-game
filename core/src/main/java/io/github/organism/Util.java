@@ -29,4 +29,10 @@ public class Util {
     public static FloatPair<Float> sumVectors(FloatPair<Float> vector1, FloatPair<Float> vector2) {
         return new FloatPair<Float>(0f, 0f);
     }
+
+    public static FloatPair<Float> polarToXYFloat(FloatPair<Float> polarCoord) {
+        float x = (float) (polarCoord.a * Math.cos(polarCoord.b));
+        float y = (float) (polarCoord.a * Math.sin(polarCoord.b));
+        return new FloatPair<>(x, y);
+    }
 }

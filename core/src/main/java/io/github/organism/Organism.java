@@ -2,8 +2,6 @@ package io.github.organism;
 
 import static java.util.Collections.sort;
 
-import com.badlogic.gdx.graphics.Color;
-
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -21,20 +19,20 @@ public class Organism {
     TriangularGrid territoryVertex;
     public Integer [] resources;
 
-    Integer [] ally_resources;
+    Integer [] allyResources;
     public float energy;
-    GameBoard game_board;
+    GameBoard gameBoard;
     Player player;
 
-    ArrayList<MapHex> extract_queue;
+    ArrayList<MapHex> extractQueue;
 
     public Organism(GameBoard gb) {
-        game_board = gb;
-        territory_hex = new TriangularGrid(game_board);
-        territoryVertex = new TriangularGrid(game_board);
-        extract_queue = new ArrayList<>();
+        gameBoard = gb;
+        territory_hex = new TriangularGrid(gameBoard);
+        territoryVertex = new TriangularGrid(gameBoard);
+        extractQueue = new ArrayList<>();
         resources = new Integer[3];
-        ally_resources = new Integer[3];
+        allyResources = new Integer[3];
         energy = GameBoard.DEFAULT_STARTING_ENERGY;
         income = 1;
 
@@ -56,13 +54,13 @@ public class Organism {
 
     public void updateIncome(){
         float newIncome = 1;
-        float resourceValue = game_board.config.gameplaySettings.get("resource value");
+        float resourceValue = gameBoard.config.gameplaySettings.get("resource value");
 
         for (int r=0; r<3; r++){
             int resourceCount = resources[r];
             Point ally_id = player.getAllyId();
             if (ally_id != null) {
-                int allyResourceCount = game_board.players.get(ally_id).getOrganism().resources[r];
+                int allyResourceCount = gameBoard.players.get(ally_id).getOrganism().resources[r];
                 resourceCount += allyResourceCount;
             }
 
@@ -97,9 +95,9 @@ public class Organism {
         int h = 0;
         boolean done = false;
         MapHex hex;
-        while (h < extract_queue.size() && !done) {
+        while (h < extractQueue.size() && !done) {
 
-            hex = extract_queue.get(h);
+            hex = extractQueue.get(h);
             int j = hex.totalResources - 1;
 
             while (j >= 0 && !done) {
@@ -125,63 +123,34 @@ public class Organism {
 
 
     public void expand(FloatPair<Float> planchettePolar) {
-        /*
-        - claim adjacent hexes
-        - prioritize
-         - fill gaps
-         - direction of planchette
-         - hexes with resources
-        - claim until out of budget
-         */
 
         float budget = energy / 2;
+        FloatPair<Float> planchetteXY = Util.polarToXYFloat(planchettePolar);
 
-        ArrayList<MapVertex> externalVertexLayer = territoryVertex.getExternalVertexLayer(player);
-        //ArrayList<ExpandSortWrapper> vertexPriority = new ArrayList<>();
+        ArrayList<ExpandEdge> expandEdges = territoryVertex.calculateExpandEdges(player);
+        gameBoard.expandEdges.put(player.getTournamentId(), expandEdges);
 
-        for (MapVertex v : externalVertexLayer) {
-            v.calculateDirectionVectors(player);
-            v.showVectors = true;
-            v.showCircle = true;
-            v.circleColor = Color.PURPLE;
+        // get the magnitude of the sum of the planchette vector and the edge
+        ArrayList<Float> planchetteAgreement = new ArrayList<>();
+        float planchetteAgreementSum = 0f;
+
+        for (ExpandEdge e : expandEdges){
+            float a = (float) Math.pow(e.getPlanchetteAgreement(planchetteXY), 2);
+            planchetteAgreement.add(a);
+            planchetteAgreementSum += a;
         }
 
-        /*
-        for (ExpandSortWrapper w : vertexPriority) {
-
-            float cost = w.remove_player_cost + game_board.config.gameplaySettings.get("claim vertex cost");
-            if (cost <= budget) {
-                claim_vertex(w.vertex);
-                budget -= cost;
-                energy -= cost;
-            }
-        }*/
-    }
-
-    public void computeAdjacentHexValue(ExpandSortWrapper w) {
-        w.total_adjacent_hex_value = 0;
-        w.adjacent_hex_completeness = 0;
-
-        int [] resource_priority = player.getOrganism().get_resource_priority();
-        for (MapHex hex : w.vertex.adjacentHexes) {
-            if (hex.player != player) {
-
-                for (int i = 0; i < hex.totalResources; i++) {
-                    w.total_adjacent_hex_value += resource_priority[hex.resources[i]];
-                }
-
-                int c = 0;
-                for (MapVertex n : hex.vertexList) {
-                    if (n.player == player) {
-                        c += 1;
-                    }
-                }
-                if (c > w.adjacent_hex_completeness) {
-                    w.adjacent_hex_completeness = c;
-                }
+        for (int i=0; i<expandEdges.size(); i++) {
+            float m = budget * planchetteAgreement.get(i) / planchetteAgreementSum;
+            ExpandEdge e = expandEdges.get(i);
+            e.percentProgress += Math.min(m, 1-e.percentProgress);
+            if (e.percentProgress >= 1) {
+                System.out.println("ffff");
+                claimVertex(e.target);
             }
         }
     }
+
 
     public int [] get_resource_priority(){
 
@@ -207,22 +176,22 @@ public class Organism {
             }
             territory_hex.addPos(h.pos);
             h.player = player;
-            extract_queue.add(h);
+            extractQueue.add(h);
 
             for (MapVertex v : h.vertexList) {
                 if (v.player != player) {
-                    claim_vertex(v);
+                    claimVertex(v);
                 }
             }
         }
     }
 
     public void claim_hex(int i, int j, int k){
-        MapHex h = (MapHex) game_board.universeMap.hexGrid.getPos(i, j, k).content;
+        MapHex h = (MapHex) gameBoard.universeMap.hexGrid.getPos(i, j, k).content;
         claim_hex(h);
     }
 
-    public void claim_vertex(MapVertex v){
+    public void claimVertex(MapVertex v){
 
         if (v.player != null){
             v.player.getOrganism().territoryVertex.remove_pos(v.pos);

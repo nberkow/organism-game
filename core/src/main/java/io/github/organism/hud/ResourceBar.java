@@ -1,6 +1,5 @@
 package io.github.organism.hud;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
@@ -105,7 +104,7 @@ public class ResourceBar {
             for (int j=0; j<hud.resourceCounts[i]; j++){
                 FloatPair<Float> c = row.get(j);
                 game.shapeRenderer.circle(
-                    c.x, c.y, BASE_DOT_RADIUS * dotScale
+                    c.a, c.b, BASE_DOT_RADIUS * dotScale
                 );
             }
 
@@ -121,7 +120,7 @@ public class ResourceBar {
             for (int j=0; j<hud.allyResourceCounts[i] + hud.resourceCounts[i]; j++){
                 FloatPair<Float> c = row.get(j);
                 game.shapeRenderer.circle(
-                    c.x, c.y, BASE_DOT_RADIUS * dotScale
+                    c.a, c.b, BASE_DOT_RADIUS * dotScale
                 );
             }
         }
