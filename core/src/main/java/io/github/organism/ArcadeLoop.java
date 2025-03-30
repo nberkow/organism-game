@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+import io.github.organism.hud.PlayerHud;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
@@ -17,8 +18,6 @@ public class ArcadeLoop implements GameSession {
     float mapCenterX;
     float mapCenterY;
     GameConfig gameCfg;
-
-    SettingsOverlay menuOverlay;
     SettingsOverlay gameOverlay;
     int iterations;
 
@@ -162,7 +161,7 @@ public class ArcadeLoop implements GameSession {
         currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
         currentGame.showDiplomacy = true;
 
-        currentGameOrchestrator.update_speed(1);
+        currentGameOrchestrator.updateSpeed(1);
         currentGameOrchestrator.run();
     }
 
@@ -201,7 +200,7 @@ public class ArcadeLoop implements GameSession {
         }
     }
 
-    public void advanceTurnCount(){
+    public void advanceFrameCount(){
 
     }
 
@@ -213,9 +212,22 @@ public class ArcadeLoop implements GameSession {
         return currentScreen;
     }
 
+    /**
+     * @param p
+     * @param organism
+     */
+    @Override
+    public void updateHud(Point p, Organism organism) {
+        /*FIXME
+        PlayerHud hud = playerIdToHud.get(p);
+        hud.setIncome(organism.income);
+        hud.setEnergy(organism.energy);
+        hud.setSpend(organism.spend);*/
+    }
+
     public void run_arcade_loop() {
         System.out.println("first iteration");
-        currentGameOrchestrator.update_speed(gameCfg.gameplaySettings.get("speed"));
+        currentGameOrchestrator.updateSpeed(gameCfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
     }
 
@@ -249,7 +261,7 @@ public class ArcadeLoop implements GameSession {
         create_bot_players();
         createPlayerStarts();
         currentGame.createPlayerSummaryDisplays();
-        currentGameOrchestrator.update_speed(gameCfg.gameplaySettings.get("speed"));
+        currentGameOrchestrator.updateSpeed(gameCfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
     }
 

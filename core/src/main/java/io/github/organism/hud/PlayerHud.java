@@ -22,6 +22,8 @@ public class PlayerHud {
     Screen screen;
 
     float energyBarValue;
+    float incomeBarValue;
+    float spendBarValue;
     int [] resourceCounts;
     int [] allyResourceCounts;
 
@@ -32,7 +34,10 @@ public class PlayerHud {
         player2 = p2;
         screen = scr;
 
-        energyBarValue = 0;
+        incomeBarValue = 0f;
+        spendBarValue = 0f;
+        energyBarValue = 0f;
+
         resourceCounts = new int[3];
         allyResourceCounts = new int[3];
 
@@ -84,5 +89,20 @@ public class PlayerHud {
             moveSpaceDisplay.planchettePolar.b
         );
 
+    }
+
+    public void setIncome(float i) {
+        incomeBarValue = i;
+    }
+
+    public void setEnergy(float e) {
+        energyBarValue = e;
+    }
+    public void setSpend(float s) {
+        spendBarValue = s;
+    }
+
+    public void setResources(int[] resources) {
+        resourceCounts = resources;
     }
 }

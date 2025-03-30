@@ -7,7 +7,7 @@ public class GameConfig {
     public long seed = 21;
     public float map_view_size_param = 130;
 
-    public float resources = 3;
+    public float resources = 1;
     public float vertex_density = 4;
     public String layout = "radial";
     public String difficulty = "easy";

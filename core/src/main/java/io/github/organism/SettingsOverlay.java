@@ -52,12 +52,15 @@ public class SettingsOverlay {
         slider_box_w = overlay_w * .75f;
         slider_box_h = overlay_h * .55f;
 
-        slider_box_x = (game.VIRTUAL_WIDTH - slider_box_w) / 2f;
-        slider_box_y = (game.VIRTUAL_HEIGHT - slider_box_h) / 2f + game.VIRTUAL_HEIGHT / 8f;
+        slider_box_x = (OrganismGame.VIRTUAL_WIDTH - slider_box_w) / 2f;
+        slider_box_y = (OrganismGame.VIRTUAL_HEIGHT - slider_box_h) / 2f + OrganismGame.VIRTUAL_HEIGHT / 8f;
 
         sliders = new SliderGroup(game, screen, slider_box_x, slider_box_y, slider_box_w, slider_box_h);
 
-        sliders.add_slider("resource value", 1, 6, 0.1f, SettingsManager.BASE_RESOURCE_VALUE);
+        sliders.add_slider("resource unit value", 1, 6, 0.1f, SettingsManager.RESOURCE_UNIT_VALUE);
+        sliders.add_slider("resource set value", 1, 6, 0.1f, SettingsManager.RESOURCE_SET_VALUE);
+        sliders.add_slider("burn resource value", 1, 6, 0.1f, SettingsManager.BURN_RESOURCE_VALUE);
+        sliders.add_slider("income budget ratio", 1, 6, 0.1f, SettingsManager.INCOME_BUDGET_RATIO);
         sliders.add_slider("attack enemy cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ENEMY);
         sliders.add_slider("attack ally cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY);
         sliders.add_slider("attack neutral cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL);

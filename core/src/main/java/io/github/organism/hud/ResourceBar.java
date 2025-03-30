@@ -79,7 +79,7 @@ public class ResourceBar {
 
         for (int i=0; i<3; i++) {
             ArrayList<FloatPair<Float>> row = new ArrayList<>();
-            int dots = hud.resourceCounts[i] + hud.allyResourceCounts[i];
+            int dots = Math.max(defaultMaxCols, hud.resourceCounts[i] + hud.allyResourceCounts[i]);
             for (int j=0; j<dots; j++){
                 float dotX = x + spacing * (j+1);
                 row.add(new FloatPair<>(
@@ -94,10 +94,8 @@ public class ResourceBar {
 
     public void render(){
 
-
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i=0; i < 3; i++) {
-
             ArrayList<FloatPair<Float>> row = coords.get(i);
 
             game.shapeRenderer.setColor(game.resourceColorsDark[i]);

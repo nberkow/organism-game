@@ -2,8 +2,8 @@ package io.github.organism;
 
 import static java.util.Collections.sort;
 
-import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import io.github.organism.map.GridPosition;
 import io.github.organism.map.MapHex;
@@ -13,37 +13,36 @@ import io.github.organism.player.Player;
 
 public class Organism {
 
-    public final float MAX_ENERGY = 100f;
     public float income;
-    TriangularGrid territory_hex;
-    TriangularGrid territoryVertex;
-    public Integer [] resources;
-
-    Integer [] allyResources;
     public float energy;
+    public float budget;
+    public float spend;
+    TriangularGrid territoryHex;
+    TriangularGrid territoryVertex;
+
+    public int [] resources;
+    Integer [] allyResources;
     GameBoard gameBoard;
     Player player;
-
     ArrayList<MapHex> extractQueue;
 
     public Organism(GameBoard gb) {
         gameBoard = gb;
-        territory_hex = new TriangularGrid(gameBoard);
+        territoryHex = new TriangularGrid(gameBoard);
         territoryVertex = new TriangularGrid(gameBoard);
         extractQueue = new ArrayList<>();
-        resources = new Integer[3];
+        resources = new int[3];
         allyResources = new Integer[3];
-        energy = GameBoard.DEFAULT_STARTING_ENERGY;
-        income = 1;
+        energy = SettingsManager.DEFAULT_STARTING_ENERGY;
 
     }
 
     public void updateResources(){
-        resources = new Integer [] {0, 0, 0};
+        resources = new int [] {0, 0, 0};
 
-        for (GridPosition pos : territory_hex){
+        for (GridPosition pos : territoryHex){
             MapHex h = (MapHex) pos.content;
-            for (int i = 0; i < h.totalResources; i++) {
+            for (int i = 0; i < h.filledResourceSlots; i++) {
                 if (h.resources[i] != null){
                     resources[h.resources[i]]++;
                 }
@@ -51,65 +50,117 @@ public class Organism {
         }
     }
 
-
-    public void updateIncome(){
-        float newIncome = 1;
-        float resourceValue = gameBoard.config.gameplaySettings.get("resource value");
-
-        for (int r=0; r<3; r++){
-            int resourceCount = resources[r];
-            Point ally_id = player.getAllyId();
-            if (ally_id != null) {
-                int allyResourceCount = gameBoard.players.get(ally_id).getOrganism().resources[r];
-                resourceCount += allyResourceCount;
-            }
-
-            if (resourceCount > 0) {
-                newIncome *= Math.min(resourceCount, 6f) * resourceValue;
-            }
-        }
-
-        if (newIncome < resourceValue) {
-            newIncome = resourceValue;
-            if (player.getAllyId() != null) {
-                newIncome = (float) Math.floor(1.5f * newIncome);
-            }
-        }
-        income = Math.min(newIncome, MAX_ENERGY - energy);
+    public void updateBudget(FloatPair<Float> planchettePolar){
+        Float r = gameBoard.config.gameplaySettings.get("income budget ratio");
+        float b = budget +
+            income * (1 - r) +
+            (planchettePolar.a * r);
+        budget = Math.min(b, energy);
     }
 
-    public void extract() {
-        /*
-        permanently consume a resource to gain income
-         */
+    public void updateIncome(){
+        float newIncome = 0;
+        float resourceSetValue = gameBoard.config.gameplaySettings.get("resource set value");
+        float resourceUnitValue = gameBoard.config.gameplaySettings.get("resource unit value");
 
-        // get the most abundant resource
-        int target_res = 0;
-        for (int i = 1; i < resources.length; i++) {
-            if (resources[i] > resources[target_res]) {
-                target_res = i;
+        int sets = Integer.MAX_VALUE;
+        for (int r : resources){
+            if (r < sets){
+                sets = r;
             }
         }
 
+        for (int r : resources){
+            if (r == sets){
+                newIncome += resourceSetValue * r;
+            } else {
+                newIncome += resourceUnitValue * (r - sets);
+            }
+        }
+
+        income = Math.min(newIncome, SettingsManager.MAX_ENERGY - energy);
+    }
+
+    public void extract(FloatPair<Float> planchetteXY) {
+        /*
+        passively get income base on trios. at low energy burn assets
+         */
+        updateResources();
+        energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
+        int totalResources = countResources();
+
+        if (spend > income) {
+            while  (energy < SettingsManager.MAX_ENERGY / 6 & totalResources > 0) {
+                burnResources();
+                totalResources = countResources();
+            }
+
+            while  (energy < SettingsManager.MAX_ENERGY / 6 & territoryVertex.size() > 0) {
+                burnVertexes(planchetteXY);
+            }
+        }
+    }
+
+    private void burnVertexes(FloatPair<Float> planchetteXY) {
+        ArrayList<ExpandEdge> expandEdges = territoryVertex.calculateExpandEdges(player);
+        for (ExpandEdge e : expandEdges){
+            e.calculatePlanchetteAgreement(planchetteXY);
+        }
+        expandEdges.sort(Comparator.naturalOrder());
+        burnVertex(expandEdges.get(0).source);
+    }
+
+    private int countResources() {
+        int r = 0;
+        int i = 0;
+        for (int c : resources) {
+            r += c;
+            i ++;
+        }
+        return r;
+    }
+    
+    public int getMostAbundantResource(){
+        // get the most abundant resource
+        int targetRes = 0;
+        for (int i = 0; i < resources.length; i++) {
+
+            if (resources[i] > resources[targetRes]) {
+                targetRes = i;
+            }
+        }
+        return targetRes;
+    }
+
+    public void burnResources() {
+
         // find the hex to update
+        int targetRes = getMostAbundantResource();
+        updateResources();
+
         int h = 0;
         boolean done = false;
         MapHex hex;
+        ArrayList<MapHex> removeFromQueue = new ArrayList<>();
+
         while (h < extractQueue.size() && !done) {
 
             hex = extractQueue.get(h);
-            int j = hex.totalResources - 1;
+            int j = hex.filledResourceSlots - 1;
+
+            if (hex.filledResourceSlots == 0) {
+                removeFromQueue.add(hex);
+            }
 
             while (j >= 0 && !done) {
-
-                if (hex.resources[j] == target_res && hex.totalResources > 0) {
-
+                if (hex.resources[j] == targetRes && hex.filledResourceSlots > 0) {
                     done = true;
                     hex.resources[j] = 0;
-                    hex.totalResources--;
+                    hex.filledResourceSlots--;
+                    energy += gameBoard.config.gameplaySettings.get("burn resource value");
 
                     // shift remaining resources up
-                    for (int p = j; p < hex.totalResources - 1; p++) {
+                    for (int p = j; p < hex.filledResourceSlots - 1; p++) {
                         hex.resources[p] = hex.resources[p + 1];
                         hex.resources[p + 1] = 0;
                     }
@@ -118,63 +169,59 @@ public class Organism {
             }
             h++;
         }
-        energy = Math.min(energy + income, MAX_ENERGY);
+
+        for (MapHex hx : removeFromQueue){
+            extractQueue.remove(hx);
+        }
+
     }
 
 
     public void expand(FloatPair<Float> planchettePolar) {
 
-        float budget = energy / 2;
+        updateResources();
+        updateBudget(planchettePolar);
+
         FloatPair<Float> planchetteXY = Util.polarToXYFloat(planchettePolar);
 
         ArrayList<ExpandEdge> expandEdges = territoryVertex.calculateExpandEdges(player);
         gameBoard.expandEdges.put(player.getTournamentId(), expandEdges);
 
         // get the magnitude of the sum of the planchette vector and the edge
-        ArrayList<Float> planchetteAgreement = new ArrayList<>();
-        float planchetteAgreementSum = 0f;
-
         for (ExpandEdge e : expandEdges){
-            float a = (float) Math.pow(e.getPlanchetteAgreement(planchetteXY), 2);
-            planchetteAgreement.add(a);
-            planchetteAgreementSum += a;
+            e.calculatePlanchetteAgreement(planchetteXY);
+        }
+        expandEdges.sort(Comparator.reverseOrder());
+        int n = expandEdges.size() / 3;
+
+        float planchetteAgreementSum = 0f;
+        for (int i=0; i<n; i++) {
+            planchetteAgreementSum += (float) expandEdges.get(i).getPlanchetteAgreement();
         }
 
-        for (int i=0; i<expandEdges.size(); i++) {
-            float m = budget * planchetteAgreement.get(i) / planchetteAgreementSum;
+        float sp = 0;
+        for (int i=0; i<n; i++) {
+            float m = (float) (budget * expandEdges.get(i).getPlanchetteAgreement() / planchetteAgreementSum);
             ExpandEdge e = expandEdges.get(i);
             e.percentProgress += Math.min(m, 1-e.percentProgress);
             if (e.percentProgress >= 1) {
-                System.out.println("ffff");
                 claimVertex(e.target);
             }
+            sp += m;
         }
+        spend = sp;
+        energy -= sp;
     }
 
-
-    public int [] get_resource_priority(){
-
-        /*
-        For each resource type find the income gain based on the other two.
-        return the result as an array indexed by resource type
-         */
-
-        int [] priority_by_resource_type = new int[3];
-        for (int i=0; i<3; i++){
-            priority_by_resource_type[i] = Math.max(0, 6 - resources[i]) * Math.min(6, resources[(i+1)%3] + 1) * Math.min(6, resources[(i+2)%3] + 1);
-        }
-        return priority_by_resource_type;
-    }
-
-    public void claim_hex(MapHex h){
+    public void claimHex(MapHex h){
 
         // remove previous player and add self
 
         if (h.player != player) {
             if (h.player != null) {
-                h.player.getOrganism().territory_hex.remove_pos(h.pos);
+                h.player.getOrganism().territoryHex.removePos(h.pos);
             }
-            territory_hex.addPos(h.pos);
+            territoryHex.addPos(h.pos);
             h.player = player;
             extractQueue.add(h);
 
@@ -184,17 +231,19 @@ public class Organism {
                 }
             }
         }
+        updateResources();
     }
 
-    public void claim_hex(int i, int j, int k){
+    public void claimHex(int i, int j, int k){
         MapHex h = (MapHex) gameBoard.universeMap.hexGrid.getPos(i, j, k).content;
-        claim_hex(h);
+        claimHex(h);
     }
 
     public void claimVertex(MapVertex v){
 
+        // remove the player currently claiming this vertex
         if (v.player != null){
-            v.player.getOrganism().territoryVertex.remove_pos(v.pos);
+            v.player.getOrganism().territoryVertex.removePos(v.pos);
         }
 
         v.player = player;
@@ -212,17 +261,34 @@ public class Organism {
             }
 
             if (completes_hex) {
-                claim_hex(hex);
+                claimHex(hex);
             }
         }
     }
 
-    public void dispose() {
-        territoryVertex = null;
-        territory_hex = null;
+    private void burnVertex(MapVertex v) {
+
+        for (MapHex hex : v.adjacentHexes) {
+            if (hex.player == player) {
+                releaseHex(hex);
+            }
+        }
+
+        v.player = null;
+        territoryVertex.removePos(v.pos);
     }
 
+    private void releaseHex(MapHex h) {
+        h.player = null;
+        territoryHex.removePos(h.pos);
+        extractQueue.remove(h);
+        updateResources();
+    }
 
+    public void dispose() {
+        territoryVertex = null;
+        territoryHex = null;
+    }
 }
 
 

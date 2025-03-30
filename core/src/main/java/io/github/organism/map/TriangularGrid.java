@@ -56,7 +56,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
         }
     }
 
-    public void remove_pos(GridPosition p) {
+    public void removePos(GridPosition p) {
         grid.get(p.i).get(p.j).remove(p.k);
         size -= 1;
     }
@@ -111,25 +111,6 @@ public class TriangularGrid implements Iterable<GridPosition> {
             }
         }
         return expandEdges;
-    }
-
-    public ArrayList<MapHex> getExternalHexLayer(Player player){
-        HashSet<MapHex> unique_hexes = new HashSet<>();
-
-        for (GridPosition pos : this) {
-            if (!(pos.content instanceof MapHex)){
-                throw new RuntimeException("get_external_hex_layer() can only be used on hex grids");
-            }
-            MapHex hex = (MapHex) pos.content;
-            for (MapVertex vertex : hex.vertexList){
-                for (MapHex neighbor : vertex.adjacentHexes){
-                    if (neighbor.player != player && !neighbor.masked){
-                        unique_hexes.add(neighbor);
-                    }
-                }
-            }
-        }
-        return new ArrayList<>(unique_hexes);
     }
 
     public int getUnmaskedVertices(){
@@ -205,9 +186,15 @@ public class TriangularGrid implements Iterable<GridPosition> {
         for (GridPosition pos : this) {
             if (pos.content instanceof MapHex) {
                 MapHex h = (MapHex) pos.content;
-                res += h.totalResources;
+                res += h.filledResourceSlots;
             }
         }
         return res;
     }
+
+    public int size() {
+        return size;
+    }
+
+
 }

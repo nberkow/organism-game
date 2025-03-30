@@ -106,8 +106,8 @@ public class ResourceDistributor {
                 ArrayList<MapHex> patch = patches.get(r);
                 if (!patch.isEmpty()) {
                     MapHex hex = patch.get(idx % patch.size());
-                    if (hex != null && !hex.masked && hex.totalResources < 3) {
-                        hex.add_resource(r);
+                    if (hex != null && !hex.masked && hex.filledResourceSlots < 3) {
+                        hex.addResource(r);
                         added++;
                     } else {
 

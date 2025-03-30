@@ -225,7 +225,7 @@ public class Simulation implements GameSession {
         }
     }
 
-    public void advanceTurnCount(){
+    public void advanceFrameCount(){
 
     }
 
@@ -235,6 +235,19 @@ public class Simulation implements GameSession {
     @Override
     public Object getScreen() {
         return screen;
+    }
+
+    /**
+     * @param p
+     * @param organism
+     */
+    @Override
+    public void updateHud(Point p, Organism organism) {
+        /*FIXME
+        PlayerHud hud = playerIdToHud.get(p);
+        hud.setIncome(organism.income);
+        hud.setEnergy(organism.energy);
+        hud.setSpend(organism.spend);*/
     }
 
     public void runSimulation() {
@@ -247,7 +260,7 @@ public class Simulation implements GameSession {
         createPlayersFromModelPool();
         createPlayerStarts();
         currentGame.createPlayerSummaryDisplays();
-        currentGameOrchestrator.update_speed(cfg.gameplaySettings.get("speed"));
+        currentGameOrchestrator.updateSpeed(cfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
 
     }
@@ -285,7 +298,7 @@ public class Simulation implements GameSession {
         createPlayersFromModelPool();
         createPlayerStarts();
         currentGame.createPlayerSummaryDisplays();
-        currentGameOrchestrator.update_speed(cfg.gameplaySettings.get("speed"));
+        currentGameOrchestrator.updateSpeed(cfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
     }
 

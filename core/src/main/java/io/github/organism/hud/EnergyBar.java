@@ -1,8 +1,7 @@
 package io.github.organism.hud;
 
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.sun.org.apache.xpath.internal.operations.Or;
 
 import io.github.organism.OrganismGame;
 import io.github.organism.SettingsManager;
@@ -17,13 +16,18 @@ public class EnergyBar {
 
     float barHeight;
     float barWidth;
+    float individualBarHeight;
     float gapWidth;
+    float [] fillWidth;
     public EnergyBar(OrganismGame g, PlayerHud ph, float width, float height, float y){
         game = g;
         hud = ph;
         barWidth = width;
         barHeight = height;
-        gapWidth = barHeight * .05f;
+        gapWidth = OrganismGame.VIRTUAL_HEIGHT * 0.005f;
+        fillWidth = new float[3];
+
+        individualBarHeight = (barHeight - (gapWidth * 6))/3;
 
         this.y = y;
         x = hud.x + hud.moveSpaceDisplay.radius * 1.7f;
@@ -56,20 +60,22 @@ public class EnergyBar {
             barWidth - (gapWidth * 2),
             barHeight - (gapWidth * 2));
 
-        float percentFilled = hud.energyBarValue / SettingsManager.MAX_ENERGY;
-        float fillWidth = (barWidth - (gapWidth * 4)) * percentFilled;
+        fillWidth[0] = hud.incomeBarValue * (barWidth - (gapWidth * 4));
+        fillWidth[1] = hud.energyBarValue * (barWidth - (gapWidth * 4));
+         fillWidth[2] = hud.spendBarValue * (barWidth - (gapWidth * 4));
 
-        if (hud.player2) {
-            shift = -barWidth + (barWidth - fillWidth);
+        for (int i=0; i<3; i++){
+            if (hud.player2) {
+                shift = -barWidth + (barWidth - fillWidth[i]);
+            }
+
+            game.shapeRenderer.setColor(game.energyBarColors[i]);
+            game.shapeRenderer.rect(
+                x + gapWidth * 2 + shift,
+                y + gapWidth * (2 + i) + (individualBarHeight * i),
+                fillWidth[i],
+                individualBarHeight);
         }
-
-        game.shapeRenderer.setColor(game.foregroundColor);
-        game.shapeRenderer.rect(
-            x + gapWidth * 2 + shift,
-            y + gapWidth * 2,
-            fillWidth,
-            barHeight - (gapWidth * 4));
-
         game.shapeRenderer.end();
     }
 }

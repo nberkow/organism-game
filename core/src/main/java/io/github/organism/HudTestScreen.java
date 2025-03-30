@@ -4,6 +4,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.awt.Point;
+
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
 
@@ -29,7 +31,7 @@ public class HudTestScreen implements Screen {
             return scr.inputProcessor;
         }
 
-        public void advanceTurnCount(){
+        public void advanceFrameCount(){
 
         }
 
@@ -39,6 +41,15 @@ public class HudTestScreen implements Screen {
         @Override
         public Screen getScreen() {
             return scr;
+        }
+
+        /**
+         * @param p
+         * @param organism
+         */
+        @Override
+        public void updateHud(Point p, Organism organism) {
+
         }
     }
 

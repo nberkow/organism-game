@@ -2,12 +2,13 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.github.organism.map.MapVertex;
 
-public class ExpandEdge {
+public class ExpandEdge implements Comparable<ExpandEdge>{
     MapVertex source;
     MapVertex target;
     GameBoard gameBoard;
     Float percentProgress;
     Float circleRadius;
+    public  double planchetteAgreement;
 
     public ExpandEdge(MapVertex s, MapVertex t) {
         source = s;
@@ -43,9 +44,28 @@ public class ExpandEdge {
 
     }
 
-    public float getPlanchetteAgreement(FloatPair<Float> planchetteXY) {
+    public void calculatePlanchetteAgreement(FloatPair<Float> planchetteXY) {
         float a = planchetteXY.a + (target.x - source.x);
         float b = planchetteXY.b + (target.y - source.y);
-        return (float) Math.pow(Math.pow(a, 2) + Math.pow(b, 2), 0.5);
+        planchetteAgreement = Math.pow(Math.pow(a, 2) + Math.pow(b, 2), 0.5);
+    }
+
+    public double getPlanchetteAgreement() {
+        return planchetteAgreement;
+    }
+
+    /**
+     * @param expandEdge
+     * @return
+     */
+    @Override
+    public int compareTo(ExpandEdge expandEdge) {
+        if (this.planchetteAgreement > expandEdge.planchetteAgreement){
+            return 1;
+        }
+        if (this.planchetteAgreement < expandEdge.planchetteAgreement){
+            return -1;
+        }
+        return 0;
     }
 }

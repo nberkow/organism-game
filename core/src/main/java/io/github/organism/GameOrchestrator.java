@@ -11,9 +11,9 @@ public class GameOrchestrator {
 
     final float VICTORY_THRESHOLD = 2/3f;
     public boolean finished;
-    float turn_max;
+    float frameMax;
 
-    int turn = 0;
+    int frame = 0;
     GameBoard gameBoard;
     double baseActionTime = 1d;
     double actionTime = baseActionTime;
@@ -29,7 +29,7 @@ public class GameOrchestrator {
     public GameOrchestrator(GameBoard gb) {
         gameBoard = gb;
         totalTerritory = (float) gameBoard.universeMap.vertexGrid.getUnmaskedVertices();
-        turn_max = totalTerritory * 3;
+        frameMax = totalTerritory * 3;
         playerTerritory = new HashMap<>();
         currentMoves = new HashMap<>();
         for (Point p : gameBoard.players.keySet()) {
@@ -38,32 +38,33 @@ public class GameOrchestrator {
         finished = false;
     }
 
-    public void update_speed(float speed){
+    public void updateSpeed(float speed){
         actionTime = baseActionTime / speed;
     }
 
     public void updateTimersAndFlags() {
 
-        if (turn >= turn_max) {
+        if (frame >= frameMax) {
             return;
         }
 
         actionClock += Gdx.graphics.getDeltaTime();
         if (actionClock > actionTime){
-            turn ++;
-            gameBoard.session.advanceTurnCount();
+            frame++;
+            gameBoard.session.advanceFrameCount();
             actionClock = actionClock % actionTime;
         }
 
     }
 
     public void updatePlayers() {
-        for (Player p : gameBoard.players.values()) {
-            Organism organism = p.getOrganism();
+        for (Point p : gameBoard.players.keySet()) {
+            Player player = gameBoard.players.get(p);
+            Organism organism = player.getOrganism();
             if (organism != null){
                 organism.updateResources();
+                gameBoard.session.updateHud(p, organism);
             }
-            p.makeMove();
         }
     }
 
@@ -99,23 +100,17 @@ public class GameOrchestrator {
             return leader;
         }
 
-        if (turn >= turn_max) {
+        if (frame >= frameMax) {
             return leader;
         }
 
         return null;
     }
 
-    private void makeMoves(HashMap<Point, DoublePair<Double>> allPlayerMoves) {
-
-        /*
-        DEPRECATED for now. May want a shared queue
-         */
-
-        // move execution rotates order
+    private void makeMoves() {
 
         for (int i = 0; i< gameBoard.allPlayerIds.size(); i++){
-            int p = (i + turn) % 3;
+            int p = (i + frame) % 3; // shift the first player each frame
             Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(p));
             Organism organism = player.getOrganism();
             if (organism != null) {
@@ -124,8 +119,6 @@ public class GameOrchestrator {
             player.makeMove();
         }
     }
-
-
     public void run(){
         paused = false;
     }
@@ -134,22 +127,13 @@ public class GameOrchestrator {
         paused = true;
     }
 
-    public HashMap<String, String> get_logger_stats() {
-        HashMap<String, String> most_recent_move_stats = new HashMap<>();
-        most_recent_move_stats.put("turn", String.valueOf(turn));
-
-        int i = 1;
-        for (Point p : gameBoard.allPlayerIds) {
-            int move = gameBoard.players.get(p).getMostRecentMove();
-            int territory = gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices();
-            most_recent_move_stats.put("player" + i + "_move", String.valueOf(move));
-            most_recent_move_stats.put("player" + i + "_territory", String.valueOf(territory));
-            i++;
-        }
-        return most_recent_move_stats;
+    public void advanceFrame() {
+        updatePlayers();
+        updateTimersAndFlags();
+        makeMoves();
     }
-
 
     public void dispose() {
     }
+
 }

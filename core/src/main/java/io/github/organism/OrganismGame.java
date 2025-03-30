@@ -39,6 +39,7 @@ public class OrganismGame extends Game {
     // Game colors
     public Color backgroundColor = Color.BLACK;
     public Color foregroundColor = Color.CYAN;
+    public Color [] energyBarColors = {Color.FOREST, Color.GOLDENROD, Color.FIREBRICK};
 
     public Color [] action_colors = {Color.RED, Color.BLUE, Color.RED};
     public HashMap<Integer, BitmapFont> fonts;

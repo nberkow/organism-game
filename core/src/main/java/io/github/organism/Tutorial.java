@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.HashMap;
 
 import io.github.organism.hud.PlayerHud;
@@ -14,7 +15,7 @@ import io.github.organism.player.Player;
 
 public class Tutorial implements GameSession {
 
-    public TimeIndicator timeIndicator;
+    public GlobalResourceIndicator globalResourceIndicator;
     OrganismGame game;
     TutorialScreen screen;
     GameConfig currentConfig;
@@ -22,19 +23,22 @@ public class Tutorial implements GameSession {
     public GameOrchestrator currentGameOrchestrator;
     HashMap<Point, PlayerHud> playerIdToHud;
 
+    float frameTime;
+    float frameTimer;
+
     public Tutorial(OrganismGame g, TutorialScreen tut, GameConfig cfg) {
         game = g;
         screen = tut;
         currentConfig = cfg;
         playerIdToHud = new HashMap<>();
+        frameTime = .5f;
+        frameTimer = 0;
     }
 
     public void setupBasicMovesTutorial() {
         /*
         Setup to explain energy, extraction and expansion
-
-        hud components, move queue
-
+        hud components
          */
 
         createGameBoard();
@@ -42,54 +46,10 @@ public class Tutorial implements GameSession {
         createDummyPlayers();
         createPlayerStarts();
 
-        currentGameOrchestrator.run();
+        currentGameOrchestrator.pause();
 
-        /*
-        currentGame.createPlayerSummaryDisplays();
-        currentGame.showPlayerSummary = false;
-
-        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
-        currentGame.showDiplomacy = false;
-
-         */
     }
 
-    public void setupEnemyInteraction() {
-
-        /*
-        Setup to explain enemy specific expansion
-
-        enemy summary bar and queue
-
-         */
-
-        createGameBoard();
-        createBotPlayer();
-        createHumanPlayer();
-        createPlayerStarts();
-
-        setPlayerButtonColors();
-
-        currentGame.createPlayerSummaryDisplays();
-        currentGame.showPlayerSummary = false;
-
-        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
-        currentGame.showDiplomacy = false;
-    }
-
-    public void setupDiplomacy(){
-
-        /*
-        explain diplomacy
-
-        diplomacy income bonus
-         */
-
-        setupEnemyInteraction();
-    }
-
-    private void setPlayerButtonColors() {
-    }
 
     private void createPlayerStarts() {
         int sc = (int) Math.floor(Math.pow(currentConfig.radius, currentConfig.playerStartPositions));
@@ -99,8 +59,11 @@ public class Tutorial implements GameSession {
         }
     }
 
-    public void advanceTurnCount(){
-        timeIndicator.advanceTurn();
+    public void advanceFrameCount(){
+        if (!currentGameOrchestrator.paused) {
+            globalResourceIndicator.advanceTurn();
+
+        }
     }
 
     /**
@@ -109,6 +72,20 @@ public class Tutorial implements GameSession {
     @Override
     public Object getScreen() {
         return screen;
+    }
+
+    /**
+     * @param p
+     * @param organism
+     */
+    @Override
+    public void updateHud(Point p, Organism organism) {
+        PlayerHud hud = playerIdToHud.get(p);
+        hud.setEnergy(organism.energy / SettingsManager.MAX_ENERGY);
+        hud.setIncome(organism.income / organism.energy);
+        hud.setSpend(organism.spend / organism.energy);
+
+        hud.setResources(organism.resources);
     }
 
     private void createBotPlayer() {
@@ -154,22 +131,16 @@ public class Tutorial implements GameSession {
 
         currentGameOrchestrator = new GameOrchestrator(currentGame);
         currentGame.set_orchestrator(currentGameOrchestrator);
-
-        //screen.inputProcessor.gameBoard = currentGame;
-
     }
 
     public void render() {
-        currentGame.render();
-        //timeIndicator.render();
+        draw();
     }
 
-    public void logic() {
-
-    }
 
     public void draw() {
-
+        currentGame.render();
+        globalResourceIndicator.render();
     }
 
     /**
@@ -178,5 +149,13 @@ public class Tutorial implements GameSession {
     @Override
     public InputProcessor getInputProcessor() {
         return screen.inputProcessor;
+    }
+
+    public void update(float delta) {
+        frameTimer += delta;
+        if (frameTimer >= frameTime) {
+            currentGameOrchestrator.advanceFrame();
+            frameTimer = frameTimer % frameTime;
+        }
     }
 }

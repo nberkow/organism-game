@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.ArrayList;
 
-public class TimeIndicator {
+public class GlobalResourceIndicator {
 
     OrganismGame game;
     GameSession gameSession;
@@ -17,7 +17,7 @@ public class TimeIndicator {
     float holdColorTime;
     float x;
     float y;
-    public TimeIndicator(OrganismGame g, GameSession session, float x, float y, double s){
+    public GlobalResourceIndicator(OrganismGame g, GameSession session, float x, float y, double s){
         game = g;
         gameSession = session;
         this.x = x;

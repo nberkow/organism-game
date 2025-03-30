@@ -38,8 +38,6 @@ public class GameBoard implements Disposable {
 
     DiplomacyGraph diplomacyGraph;
 
-    // Gameplay parameters
-    public static final int DEFAULT_STARTING_ENERGY = 6;
 
     // Gameplay
     HashMap<Point, Player> players = new HashMap<>();

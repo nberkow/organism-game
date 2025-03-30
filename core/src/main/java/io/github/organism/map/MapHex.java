@@ -17,7 +17,7 @@ public class MapHex implements MapElement{
     public MapVertex [] vertexList;
 
     public Integer [] resources;
-    public int totalResources;;
+    public int filledResourceSlots;
 
     public Player player;
 
@@ -30,21 +30,21 @@ public class MapHex implements MapElement{
         for (int i=0; i<3; i++) {
             resources[i] = 0;
         }
-        totalResources = 0;
+        filledResourceSlots = 0;
     }
 
-    public void add_resource(int res, int amount) {
+    public void addResource(int res, int amount) {
         for (int i=0; i<amount; i++) {
-            if (totalResources < 3) {
-                resources[totalResources] = res;
-                totalResources++;
+            if (filledResourceSlots < 3) {
+                resources[filledResourceSlots] = res;
+                filledResourceSlots++;
             }
         }
     }
 
-    public void add_resource(int resource_type) {
-        resources[totalResources] = resource_type;
-        totalResources += 1;
+    public void addResource(int resourceType) {
+        resources[filledResourceSlots] = resourceType;
+        filledResourceSlots += 1;
     }
 
     @Override
@@ -130,7 +130,7 @@ public class MapHex implements MapElement{
         int n=0;
         pos.grid.gameBoard.game.shapeRenderer.end();
 
-        for (int r = 0; r< totalResources; r++){
+        for (int r = 0; r< filledResourceSlots; r++){
             pos.grid.gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             float i_f = pos.i + j[n];
             float j_f = pos.j + j[(n + 1) % 3];

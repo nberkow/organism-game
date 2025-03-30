@@ -1,10 +1,7 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.ScreenUtils;
-
-import java.sql.Time;
 
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
@@ -12,6 +9,7 @@ import io.github.organism.hud.PlayerHud;
 public class TutorialScreen  implements Screen {
     float mapCenterX;
     float mapCenterY;
+
     public HudInputProcessor inputProcessor;
     OrganismGame game;
     PlayerHud player1Hud;
@@ -54,15 +52,21 @@ public class TutorialScreen  implements Screen {
         float sideLen = OrganismGame.VIRTUAL_WIDTH / 20f;
         float x = OrganismGame.VIRTUAL_WIDTH / 4f;
         float y = OrganismGame.VIRTUAL_HEIGHT - sideLen * 1.5f;
-        tutorial.timeIndicator = new TimeIndicator(game, tutorial, x, y, sideLen);
+        tutorial.globalResourceIndicator = new GlobalResourceIndicator(game, tutorial, x, y, sideLen);
     }
 
 
     private void input() {
-        if (!tutorial.currentGameOrchestrator.paused) {
-            tutorial.currentGameOrchestrator.updatePlayers();
-            tutorial.currentGameOrchestrator.updateTimersAndFlags();
-        }
+
+    }
+
+    private void logic(float delta){
+        tutorial.update(delta);
+    }
+
+    private void draw(){
+        tutorial.render();
+        player1Hud.render();
     }
 
     /**
@@ -80,9 +84,8 @@ public class TutorialScreen  implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(game.backgroundColor);
         input();
-        tutorial.render();
-        player1Hud.render();
-
+        logic(delta);
+        draw();
     }
 
     /**

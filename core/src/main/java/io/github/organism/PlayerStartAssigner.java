@@ -37,9 +37,9 @@ public class PlayerStartAssigner {
             Organism organism = players.get(p).getOrganism();
             int [] coords = starting_coords.get(i);
             if (organism!= null) {
-                organism.claim_hex(coords[0], coords[1], coords[2]);
+                organism.claimHex(coords[0], coords[1], coords[2]);
                 MapHex hex = (MapHex) universe_map.hexGrid.getPos(coords[0], coords[1], coords[2]).content;
-                hex.add_resource(i % 3, 3);
+                hex.addResource(i % 3, 3);
             }
             i ++;
         }
