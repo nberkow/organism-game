@@ -184,7 +184,7 @@ public class Simulation implements GameSession {
         currentGame.resourceDistributor.distribute();
 
         currentGameOrchestrator = new GameOrchestrator(currentGame);
-        currentGame.set_orchestrator(currentGameOrchestrator);
+        currentGame.setOrchestrator(currentGameOrchestrator);
 
         currentGame.centerX = mapCenterX;
         currentGame.centerY = mapCenterY;
@@ -324,7 +324,7 @@ public class Simulation implements GameSession {
                 color = availableColors.remove(0);
             }
 
-            currentGame.create_bot_player(name, player_id, color, model);
+            currentGame.createBotPlayer(name, player_id, color, model);
             player_names.put(player_id, name);
             tournament_player_colors.put(player_id, color);
         }
@@ -554,9 +554,9 @@ public class Simulation implements GameSession {
     }
 
 
-    public void draw(){
+    public void draw(float delta){
         currentGame.game.camera.update();
-        currentGame.render();
+        currentGame.render(delta);
         modelPoolDisplay.render();
         if (show_summary_screen & between_round_pause > 0 ) {
             roundSummary.render();
@@ -575,7 +575,7 @@ public class Simulation implements GameSession {
 
 
 
-    public void render(){
+    public void render(float delta){
 
         if (kill) {
             dispose();
@@ -587,7 +587,7 @@ public class Simulation implements GameSession {
             }
             else{
                 logic();
-                draw();
+                draw(delta);
             }
 
         }

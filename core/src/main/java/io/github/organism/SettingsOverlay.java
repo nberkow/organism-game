@@ -58,12 +58,9 @@ public class SettingsOverlay {
         sliders = new SliderGroup(game, screen, slider_box_x, slider_box_y, slider_box_w, slider_box_h);
 
         sliders.add_slider("resource unit value", 1, 6, 0.1f, SettingsManager.RESOURCE_UNIT_VALUE);
-        sliders.add_slider("resource set value", 1, 6, 0.1f, SettingsManager.RESOURCE_SET_VALUE);
-        sliders.add_slider("burn resource value", 1, 6, 0.1f, SettingsManager.BURN_RESOURCE_VALUE);
-        sliders.add_slider("income budget ratio", 1, 6, 0.1f, SettingsManager.INCOME_BUDGET_RATIO);
-        sliders.add_slider("attack enemy cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ENEMY);
-        sliders.add_slider("attack ally cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_ALLY);
-        sliders.add_slider("attack neutral cost", 0, 24, .2f, SettingsManager.VERTEX_COST_REMOVE_NEUTRAL);
+        sliders.add_slider("resource set value", 100, 600, 0.1f, SettingsManager.RESOURCE_SET_VALUE);
+        sliders.add_slider("burn resource value", 4, 60, 0.1f, SettingsManager.BURN_RESOURCE_VALUE);
+        sliders.add_slider("energy to expand", 1, 6, 0.1f, SettingsManager.ENERGY_TO_EXPAND);
         sliders.add_slider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
         sliders.add_slider("speed", 1, 7, 1, 7f);
         sliders.add_slider("iterations", 1, 9, 1, 1f);

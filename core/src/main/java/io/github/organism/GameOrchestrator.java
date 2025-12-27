@@ -17,7 +17,6 @@ public class GameOrchestrator {
     GameBoard gameBoard;
     double baseActionTime = 1d;
     double actionTime = baseActionTime;
-
     double actionClock = 0d;
     boolean paused = true;
     HashMap<Point, Float> playerTerritory;
@@ -25,6 +24,10 @@ public class GameOrchestrator {
     float totalTerritory;
     int resourceExhaustedCountdown = 36;
     boolean show_countdown;
+
+    int blinkingPlayerIdx = 0;
+    float blinkPeriod = 1f/3;
+    float blinkTime = 0;
 
     public GameOrchestrator(GameBoard gb) {
         gameBoard = gb;
@@ -51,19 +54,19 @@ public class GameOrchestrator {
         actionClock += Gdx.graphics.getDeltaTime();
         if (actionClock > actionTime){
             frame++;
-            gameBoard.session.advanceFrameCount();
+
             actionClock = actionClock % actionTime;
         }
 
     }
 
     public void updatePlayers() {
-        for (Point p : gameBoard.players.keySet()) {
-            Player player = gameBoard.players.get(p);
+        for (Point playerId : gameBoard.players.keySet()) {
+            Player player = gameBoard.players.get(playerId);
             Organism organism = player.getOrganism();
             if (organism != null){
                 organism.updateResources();
-                gameBoard.session.updateHud(p, organism);
+                gameBoard.session.updateHud(playerId, organism);
             }
         }
     }
@@ -73,7 +76,7 @@ public class GameOrchestrator {
         Point leader = null;
         float leader_territory = 0;
 
-        int remaining_resources = gameBoard.count_resources();
+        int remaining_resources = gameBoard.countResources();
 
         if (show_countdown) {
             resourceExhaustedCountdown -= 1;
@@ -112,10 +115,6 @@ public class GameOrchestrator {
         for (int i = 0; i< gameBoard.allPlayerIds.size(); i++){
             int p = (i + frame) % 3; // shift the first player each frame
             Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(p));
-            Organism organism = player.getOrganism();
-            if (organism != null) {
-                organism.updateIncome();
-            }
             player.makeMove();
         }
     }
@@ -127,13 +126,34 @@ public class GameOrchestrator {
         paused = true;
     }
 
-    public void advanceFrame() {
+    public void update(float timeDelta) {
+
+        blinkTime += timeDelta;
+        if (blinkTime > blinkPeriod){
+            blinkingPlayerIdx = (blinkingPlayerIdx + 1) % 3;
+            blinkTime = blinkTime % blinkPeriod;
+        }
+
         updatePlayers();
-        updateTimersAndFlags();
-        makeMoves();
+        actionClock += timeDelta;
+        if (actionClock >= actionTime) {
+            actionClock = actionClock % actionTime;
+            updateTimersAndFlags();
+            makeMoves();
+        }
+
+
     }
 
     public void dispose() {
     }
 
+    public Player getBlinkingPlayer() {
+        Point blinkingPlayerId = gameBoard.allPlayerIds.get(blinkingPlayerIdx);
+        return (gameBoard.players.get(blinkingPlayerId));
+    }
+
+    public void render() {
+
+    }
 }

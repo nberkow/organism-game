@@ -2,8 +2,11 @@ package io.github.organism;
 
 import static java.util.Collections.sort;
 
+import com.badlogic.gdx.math.Vector2;
+
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import io.github.organism.map.GridPosition;
 import io.github.organism.map.MapHex;
@@ -15,16 +18,18 @@ public class Organism {
 
     public float income;
     public float energy;
-    public float budget;
-    public float spend;
+    public float expandRate;
     TriangularGrid territoryHex;
     TriangularGrid territoryVertex;
+    ArrayList<CandidateVertex> candidateVertices;
 
     public int [] resources;
     Integer [] allyResources;
     GameBoard gameBoard;
     Player player;
     ArrayList<MapHex> extractQueue;
+    float resourceUnitValue;
+    float resourceSetValue;
 
     public Organism(GameBoard gb) {
         gameBoard = gb;
@@ -34,7 +39,9 @@ public class Organism {
         resources = new int[3];
         allyResources = new Integer[3];
         energy = SettingsManager.DEFAULT_STARTING_ENERGY;
-
+        candidateVertices = new ArrayList<>();
+        resourceSetValue = gameBoard.config.gameplaySettings.get("resource set value");
+        resourceUnitValue = gameBoard.config.gameplaySettings.get("resource unit value");
     }
 
     public void updateResources(){
@@ -50,64 +57,48 @@ public class Organism {
         }
     }
 
-    public void updateBudget(FloatPair<Float> planchettePolar){
-        Float r = gameBoard.config.gameplaySettings.get("income budget ratio");
-        float b = budget +
-            income * (1 - r) +
-            (planchettePolar.a * r);
-        budget = Math.min(b, energy);
-    }
-
     public void updateIncome(){
         float newIncome = 0;
-        float resourceSetValue = gameBoard.config.gameplaySettings.get("resource set value");
-        float resourceUnitValue = gameBoard.config.gameplaySettings.get("resource unit value");
-
+        //System.out.println(":::::::");
         int sets = Integer.MAX_VALUE;
+        //System.out.println("count sets");
         for (int r : resources){
             if (r < sets){
                 sets = r;
+                //System.out.println(r + "\t" + sets);
             }
         }
-
+        //System.out.println("-- UPDATE INCOME ---");
         for (int r : resources){
+
             if (r == sets){
+
                 newIncome += resourceSetValue * r;
+                //System.out.println("sets:\t" + r + "\t" + resourceSetValue);
             } else {
                 newIncome += resourceUnitValue * (r - sets);
+                //System.out.println("indv:\t" + r + "\t" + resourceUnitValue);
             }
         }
+        //System.out.println("-----");
+        //System.out.println("sets: " + sets);
+        //System.out.println("newIncome: " + newIncome);
 
         income = Math.min(newIncome, SettingsManager.MAX_ENERGY - energy);
+        //System.out.println("max energy:\t" + SettingsManager.MAX_ENERGY );
+        //System.out.println("energy:\t" + energy);
+        //System.out.println("income:\t" + income);
     }
 
-    public void extract(FloatPair<Float> planchetteXY) {
+    public void extract(Vector2 planchetteFromCenter) {
         /*
-        passively get income base on trios. at low energy burn assets
+        get income based on resources
+
+        permanently burn one resource unit to collect
          */
-        updateResources();
-        energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
-        int totalResources = countResources();
 
-        if (spend > income) {
-            while  (energy < SettingsManager.MAX_ENERGY / 6 & totalResources > 0) {
-                burnResources();
-                totalResources = countResources();
-            }
-
-            while  (energy < SettingsManager.MAX_ENERGY / 6 & territoryVertex.size() > 0) {
-                burnVertexes(planchetteXY);
-            }
-        }
-    }
-
-    private void burnVertexes(FloatPair<Float> planchetteXY) {
-        ArrayList<ExpandEdge> expandEdges = territoryVertex.calculateExpandEdges(player);
-        for (ExpandEdge e : expandEdges){
-            e.calculatePlanchetteAgreement(planchetteXY);
-        }
-        expandEdges.sort(Comparator.naturalOrder());
-        burnVertex(expandEdges.get(0).source);
+        //FIXME temporarily setting constant income
+        energy = Math.min(energy + 5, SettingsManager.MAX_ENERGY);
     }
 
     private int countResources() {
@@ -119,7 +110,7 @@ public class Organism {
         }
         return r;
     }
-    
+
     public int getMostAbundantResource(){
         // get the most abundant resource
         int targetRes = 0;
@@ -133,7 +124,6 @@ public class Organism {
     }
 
     public void burnResources() {
-
         // find the hex to update
         int targetRes = getMostAbundantResource();
         updateResources();
@@ -173,44 +163,44 @@ public class Organism {
         for (MapHex hx : removeFromQueue){
             extractQueue.remove(hx);
         }
-
     }
 
 
-    public void expand(FloatPair<Float> planchettePolar) {
+    public void expand(Vector2 planchetteFromCenter) {
 
-        updateResources();
-        updateBudget(planchettePolar);
+        candidateVertices = new ArrayList<>();
 
-        FloatPair<Float> planchetteXY = Util.polarToXYFloat(planchettePolar);
-
-        ArrayList<ExpandEdge> expandEdges = territoryVertex.calculateExpandEdges(player);
-        gameBoard.expandEdges.put(player.getTournamentId(), expandEdges);
-
-        // get the magnitude of the sum of the planchette vector and the edge
-        for (ExpandEdge e : expandEdges){
-            e.calculatePlanchetteAgreement(planchetteXY);
-        }
-        expandEdges.sort(Comparator.reverseOrder());
-        int n = expandEdges.size() / 3;
-
-        float planchetteAgreementSum = 0f;
-        for (int i=0; i<n; i++) {
-            planchetteAgreementSum += (float) expandEdges.get(i).getPlanchetteAgreement();
-        }
-
-        float sp = 0;
-        for (int i=0; i<n; i++) {
-            float m = (float) (budget * expandEdges.get(i).getPlanchetteAgreement() / planchetteAgreementSum);
-            ExpandEdge e = expandEdges.get(i);
-            e.percentProgress += Math.min(m, 1-e.percentProgress);
-            if (e.percentProgress >= 1) {
-                claimVertex(e.target);
+        for (GridPosition pos : territoryVertex) {
+            MapVertex source = (MapVertex) pos.content;
+            for (MapVertex v : source.adjacentVertices) {
+                if (v.getPlayer() == null  && !v.masked) {
+                    CandidateVertex cv = new CandidateVertex(source, v);
+                    cv.calculatePlanchetteAgreement(planchetteFromCenter);
+                    candidateVertices.add(cv);
+                }
             }
-            sp += m;
         }
-        spend = sp;
-        energy -= sp;
+
+        // stochastically sort by probability
+        candidateVertices.sort(CandidateVertex::compareTo);
+
+        float cost = gameBoard.config.gameplaySettings.get("energy to expand");
+        int vertexBudget = (int) Math.floor(energy/cost);
+        int verticesToClaim = Math.min(vertexBudget, candidateVertices.size());
+
+        HashSet<MapVertex> claimedVertices = new HashSet<>();
+
+        // Loop through the list until we have as many as we can afford or we run out of option
+        int i = 0;
+        while (i < candidateVertices.size() && claimedVertices.size() < verticesToClaim){
+            MapVertex candidate = candidateVertices.get(i).target;
+            if (!claimedVertices.contains(candidate)){
+                claimVertex(candidate);
+                claimedVertices.add(candidate);
+                energy -= cost;
+            }
+            i++;
+        }
     }
 
     public void claimHex(MapHex h){
@@ -240,11 +230,6 @@ public class Organism {
     }
 
     public void claimVertex(MapVertex v){
-
-        // remove the player currently claiming this vertex
-        if (v.player != null){
-            v.player.getOrganism().territoryVertex.removePos(v.pos);
-        }
 
         v.player = player;
         territoryVertex.addPos(v.pos);

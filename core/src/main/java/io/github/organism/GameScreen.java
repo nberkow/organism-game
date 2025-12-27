@@ -102,7 +102,7 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(game.backgroundColor);
 
         if (arcadeLoop != null) {
-            arcadeLoop.render();
+            arcadeLoop.render(delta);
         }
 
         if (player1Hud != null) {

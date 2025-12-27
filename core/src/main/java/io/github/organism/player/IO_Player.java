@@ -133,7 +133,7 @@ public class IO_Player  implements Player {
      */
     @Override
     public void makeMove() {
-        organism.expand(hud.getPlanchettePolar());
-        organism.extract(hud.getPlanchettePolar());
+        organism.expand(hud.getPlanchetteVector());
+        organism.extract(hud.getPlanchetteVector());
     }
 }

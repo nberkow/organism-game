@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import io.github.organism.map.MapVertex;
 import io.github.organism.map.UniverseMap;
 import io.github.organism.player.BotPlayer;
 import io.github.organism.player.Player;
@@ -34,16 +35,13 @@ public class GameBoard implements Disposable {
 
     SettingsManager settings_manager;
 
-    GameOrchestrator orchestrator;
+    public GameOrchestrator orchestrator;
 
     DiplomacyGraph diplomacyGraph;
 
-
     // Gameplay
     HashMap<Point, Player> players = new HashMap<>();
-
-    HashMap<Point, ArrayList<ExpandEdge>> expandEdges = new HashMap<>();
-
+    //HashMap<Point, HashMap<MapVertex, ExpandEdge>> expandEdges = new HashMap<>();
     public GridWindow gridWindow;
     public UniverseMap universeMap;
     public ArrayList<PlayerSummaryDisplay> playerSummaryDisplays;
@@ -59,6 +57,7 @@ public class GameBoard implements Disposable {
     public OrganismGame game;
     MoveLogger move_logger;
 
+
     public GameBoard(OrganismGame g, GameConfig cfg, GameSession gs) {
         game = g;
         config = cfg;
@@ -66,11 +65,13 @@ public class GameBoard implements Disposable {
         showDiplomacy = false;
         showPlayerSummary = false;
 
-        if (session.getScreen() instanceof LabScreen){
-            settings_manager = ((LabScreen) session.getScreen()).settingsManager;
-        }
-        if (session.getScreen() instanceof GameScreen){
-            settings_manager = ((GameScreen) session.getScreen()).settings_manager;
+        if (session != null) {
+            if (session.getScreen() instanceof LabScreen) {
+                settings_manager = ((LabScreen) session.getScreen()).settingsManager;
+            }
+            if (session.getScreen() instanceof GameScreen) {
+                settings_manager = ((GameScreen) session.getScreen()).settings_manager;
+            }
         }
 
         seed = config.seed;
@@ -78,7 +79,7 @@ public class GameBoard implements Disposable {
         grid_window_y = GRID_WINDOW_HEIGHT;
         move_logger = null;
 
-        hexSideLen = config.map_view_size_param/radius; // starting default
+        hexSideLen = config.map_view_size_param / radius;
         centerX = OrganismGame.VIRTUAL_WIDTH / 2f;
         centerY = OrganismGame.VIRTUAL_HEIGHT / grid_window_y;
 
@@ -102,12 +103,18 @@ public class GameBoard implements Disposable {
 
     }
 
-    public void set_orchestrator(GameOrchestrator o) {
+    /*public void updateExpandEdges(float timeDelta) {
+        for (Point p : expandEdges.keySet()){
+            players.get(p).getOrganism().updateExpandEdges(timeDelta);
+        }
+    }*/
+
+    public void setOrchestrator(GameOrchestrator o) {
         orchestrator = o;
     }
 
 
-    public void create_bot_player(String name, Point playerId, Color color, Model model){
+    public void createBotPlayer(String name, Point playerId, Color color, Model model){
 
         int index = allPlayerIds.size();
 
@@ -124,6 +131,7 @@ public class GameBoard implements Disposable {
 
         organism.player = player;
         players.put(playerId, player);
+        //expandEdges.put(playerId, new HashMap<>());
         bot_player_ids.add(playerId);
         allPlayerIds.add(playerId);
 
@@ -141,17 +149,17 @@ public class GameBoard implements Disposable {
         }
     }
 
-    public int count_resources(){
+    public int countResources(){
         return universeMap.hexGrid.countResources();
     }
 
-    public void logic() {
-        //
+    public void logic(float timeDelta) {
+        orchestrator.update(timeDelta);
     }
 
-    public void render() {
+    public void render(float timeDelta) {
 
-        logic();
+        logic(timeDelta);
 
         ScreenUtils.clear(game.backgroundColor);
 
@@ -166,11 +174,17 @@ public class GameBoard implements Disposable {
             diplomacyGraph.render();
         }
 
-        for (Point p : expandEdges.keySet()) {
-            for (ExpandEdge e : expandEdges.get(p)) {
-                e.render();
+        /*debug lines
+        for (Player p : players.values()){
+            Organism o = p.getOrganism();
+            if (o != null) {
+                for (CandidateVertex cv : p.getOrganism().candidateVertices) {
+                    cv.render();
+                }
             }
         }
+        */
+
     }
 
     @Override

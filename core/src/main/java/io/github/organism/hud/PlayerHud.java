@@ -1,9 +1,8 @@
 package io.github.organism.hud;
 
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.math.Vector2;
 
-import io.github.organism.DoublePair;
-import io.github.organism.FloatPair;
 import io.github.organism.GameSession;
 import io.github.organism.OrganismGame;
 
@@ -16,8 +15,8 @@ public class PlayerHud {
     GameSession gameSession;
     EnergyBar energyBar;
     ResourceBar resourceBar;
-    MoveSpaceControl moveSpaceDisplay;
-    boolean player2;
+    MoveSpaceControl moveSpaceControl;
+    boolean isPlayerTwo;
 
     Screen screen;
 
@@ -26,12 +25,13 @@ public class PlayerHud {
     float spendBarValue;
     int [] resourceCounts;
     int [] allyResourceCounts;
+    int maxResourceCount;
 
     public PlayerHud(OrganismGame g, GameSession sec, Screen scr, boolean p2){
 
         game = g;
         gameSession = sec;
-        player2 = p2;
+        isPlayerTwo = p2;
         screen = scr;
 
         incomeBarValue = 0f;
@@ -51,7 +51,7 @@ public class PlayerHud {
         setupIncomeDisplay();
 
         x = 0;
-        if (player2) {
+        if (isPlayerTwo) {
             x = OrganismGame.VIRTUAL_WIDTH;
         }
 
@@ -65,7 +65,7 @@ public class PlayerHud {
     }
 
     private void setupMoveSpaceDisplay(float radius) {
-        moveSpaceDisplay = new MoveSpaceControl(this, radius);
+        moveSpaceControl = new MoveSpaceControl(this, radius);
     }
 
     private void setupEnergyBar(float w, float h, float y) {
@@ -75,20 +75,16 @@ public class PlayerHud {
     public void render(){
         resourceBar.render();
         energyBar.render();
-        moveSpaceDisplay.render();
+        moveSpaceControl.render();
     }
 
-    public DoublePair<Double> getTheta() {
+    public Vector2 getInputVector() {
         HudInputProcessor hudInputProcessor = (HudInputProcessor) gameSession.getInputProcessor();
-        return hudInputProcessor.getThetaFromKeys(player2);
+        return hudInputProcessor.getInputVectorFromKeys(isPlayerTwo);
     }
 
-    public FloatPair<Float> getPlanchettePolar() {
-        return new FloatPair<>(
-            moveSpaceDisplay.planchettePolar.a / moveSpaceDisplay.radius,
-            moveSpaceDisplay.planchettePolar.b
-        );
-
+    public Vector2 getPlanchetteVector() {
+        return moveSpaceControl.planchetteFromCenterVector;
     }
 
     public void setIncome(float i) {
@@ -104,5 +100,20 @@ public class PlayerHud {
 
     public void setResources(int[] resources) {
         resourceCounts = resources;
+        maxResourceCount = 0;
+        for (int i=0; i<3; i++){
+            if (resources[i] > maxResourceCount) {
+                maxResourceCount = resources[i];
+            }
+        }
+        if (maxResourceCount > resourceBar.currentMaxCols) {
+            resourceBar.currentMaxCols = resourceBar.currentMaxCols * 2;
+            resourceBar.calculateResourceDisplayCoords();
+        }
+
+        if (maxResourceCount > (2 * resourceBar.currentMaxCols)) {
+            resourceBar.currentMaxCols = resourceBar.currentMaxCols / 2;
+            resourceBar.calculateResourceDisplayCoords();
+        }
     }
 }

@@ -10,6 +10,7 @@ import io.github.organism.OrganismGame;
 public class ResourceBar {
 
     final float BASE_DOT_RADIUS = 4;
+
     float dotScale = 1;
 
     OrganismGame game;
@@ -22,6 +23,8 @@ public class ResourceBar {
     float barWidth;
 
     int defaultMaxCols = 25;
+
+    public int currentMaxCols = defaultMaxCols;
 
     float [] dotHeights;
 
@@ -46,8 +49,8 @@ public class ResourceBar {
         }
 
         // x depends on the player's side
-        x = hud.x + hud.moveSpaceDisplay.radius * 1.7f + spacing * 2;
-        if (hud.player2){
+        x = hud.x + hud.moveSpaceControl.radius * 1.7f + spacing * 2;
+        if (hud.isPlayerTwo){
             x = OrganismGame.VIRTUAL_WIDTH - x;
         }
 
@@ -71,15 +74,15 @@ public class ResourceBar {
         }
 
         // calculate column spacing
-        int cols = Math.max(allCols, defaultMaxCols);
+        int cols = Math.max(allCols, currentMaxCols);
         float spacing = barWidth / (cols + 1);
-        if (hud.player2){
+        if (hud.isPlayerTwo){
             spacing = -spacing;
         }
 
         for (int i=0; i<3; i++) {
             ArrayList<FloatPair<Float>> row = new ArrayList<>();
-            int dots = Math.max(defaultMaxCols, hud.resourceCounts[i] + hud.allyResourceCounts[i]);
+            int dots = Math.max(currentMaxCols, hud.resourceCounts[i] + hud.allyResourceCounts[i]);
             for (int j=0; j<dots; j++){
                 float dotX = x + spacing * (j+1);
                 row.add(new FloatPair<>(

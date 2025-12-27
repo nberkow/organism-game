@@ -1,13 +1,10 @@
 package io.github.organism.map;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import io.github.organism.ExpandEdge;
 import io.github.organism.GameBoard;
-import io.github.organism.player.Player;
 
 public class TriangularGrid implements Iterable<GridPosition> {
     HashMap<Integer, HashMap<Integer, HashMap<Integer, GridPosition>>> grid;
@@ -95,23 +92,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
         }
         return shared_hexes;
     }
-    public ArrayList<ExpandEdge> calculateExpandEdges(Player player){
 
-        // Populate the expand edge list of all vertexes and return a list of them
-        ArrayList<ExpandEdge> expandEdges = new ArrayList<>();
-        for (GridPosition pos : this) {
-            MapVertex vertex = (MapVertex) pos.content;
-            vertex.expandEdges.clear();
-            for (MapVertex neighbor : vertex.adjacentVertices){
-                if (neighbor.player != player && !neighbor.masked && !get_shared_hexes(vertex, neighbor).isEmpty()){
-                    ExpandEdge e = new ExpandEdge(vertex, neighbor);
-                    vertex.expandEdges.add(e);
-                    expandEdges.add(e);
-                }
-            }
-        }
-        return expandEdges;
-    }
 
     public int getUnmaskedVertices(){
         int c = 0;

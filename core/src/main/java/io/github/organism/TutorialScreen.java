@@ -61,11 +61,11 @@ public class TutorialScreen  implements Screen {
     }
 
     private void logic(float delta){
-        tutorial.update(delta);
+
     }
 
-    private void draw(){
-        tutorial.render();
+    private void draw(float delta){
+        tutorial.render(delta);
         player1Hud.render();
     }
 
@@ -85,7 +85,7 @@ public class TutorialScreen  implements Screen {
         ScreenUtils.clear(game.backgroundColor);
         input();
         logic(delta);
-        draw();
+        draw(delta);
     }
 
     /**

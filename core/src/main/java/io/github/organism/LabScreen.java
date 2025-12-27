@@ -187,7 +187,7 @@ public class LabScreen implements Screen {
         ScreenUtils.clear(game.backgroundColor);
 
         if (current_sim != null) {
-            current_sim.render();
+            current_sim.render(delta);
             territoryBar.render(current_sim.currentGame);
         }
 

@@ -3,12 +3,11 @@ package io.github.organism.hud;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.HashMap;
 
 import io.github.organism.DoublePair;
-import io.github.organism.HudTestScreen;
-import io.github.organism.Pair;
 
 @SuppressWarnings("ALL")
 public class HudInputProcessor implements InputProcessor {
@@ -39,7 +38,7 @@ public class HudInputProcessor implements InputProcessor {
         };
 
         float [] angles = {
-            0, .25f, .5f, .75f
+            .25f, 0f, .75f, .5f,
         };
 
         for (int k=0; k<4; k++) {
@@ -51,7 +50,7 @@ public class HudInputProcessor implements InputProcessor {
     }
 
 
-    public DoublePair<Double> getThetaFromKeys(boolean playerTwo){
+    public Vector2 getInputVectorFromKeys(boolean playerTwo){
 
         HashMap<Integer, Double> keyAngles;
 
@@ -73,9 +72,9 @@ public class HudInputProcessor implements InputProcessor {
             }
         }
 
-        double theta = Math.atan2(sumX, sumY);
-        double m = Math.sqrt(Math.pow(sumX, 2) + Math.pow(sumY, 2));
-        return new DoublePair<Double>(m, theta);
+        Vector2 v = new Vector2((float) sumX, (float) sumY);
+        v.clamp(0f, 1f);
+        return v;
     }
 
 

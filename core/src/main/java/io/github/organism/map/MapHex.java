@@ -55,8 +55,8 @@ public class MapHex implements MapElement{
     @Override
     public void render() {
         if (!masked) {
-            render_resources();
-            render_players();
+            renderResources();
+            renderPlayers();
         }
     }
 
@@ -68,7 +68,7 @@ public class MapHex implements MapElement{
         return masked;
     }
 
-    public void render_players() {
+    public void renderPlayers() {
 
         Color c;
         pos.grid.gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -124,7 +124,7 @@ public class MapHex implements MapElement{
         return masked;
     }
 
-    public void render_resources(){
+    public void renderResources(){
         float [] j = {0f, 0f, RESOURCE_JITTER};
 
         int n=0;

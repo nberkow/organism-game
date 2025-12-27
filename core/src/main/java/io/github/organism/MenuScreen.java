@@ -67,7 +67,7 @@ public class MenuScreen implements Screen {
     public void render(float delta) {
         input();
         logic();
-        draw();
+        draw(delta);
     }
 
     private void input() {
@@ -82,11 +82,11 @@ public class MenuScreen implements Screen {
         }
     }
 
-    private void draw() {
+    private void draw(float delta) {
         // Ensure the camera is updated before drawing
         if (menu_simulation.currentGame != null) {
             game.camera.update();
-            menu_simulation.currentGame.render();
+            menu_simulation.currentGame.render(delta);
         }
         buttons.render();
     }

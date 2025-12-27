@@ -1,10 +1,8 @@
 package io.github.organism.hud;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import io.github.organism.OrganismGame;
-import io.github.organism.SettingsManager;
 
 public class EnergyBar {
 
@@ -30,9 +28,9 @@ public class EnergyBar {
         individualBarHeight = (barHeight - (gapWidth * 6))/3;
 
         this.y = y;
-        x = hud.x + hud.moveSpaceDisplay.radius * 1.7f;
+        x = hud.x + hud.moveSpaceControl.radius * 1.7f;
 
-        if (hud.player2){
+        if (hud.isPlayerTwo){
             x = OrganismGame.VIRTUAL_WIDTH - x;
         }
     }
@@ -41,7 +39,7 @@ public class EnergyBar {
     public void render(){
 
         float shift = 0;
-        if (hud.player2) {
+        if (hud.isPlayerTwo) {
             shift = -barWidth;
         }
 
@@ -60,21 +58,22 @@ public class EnergyBar {
             barWidth - (gapWidth * 2),
             barHeight - (gapWidth * 2));
 
-        fillWidth[0] = hud.incomeBarValue * (barWidth - (gapWidth * 4));
-        fillWidth[1] = hud.energyBarValue * (barWidth - (gapWidth * 4));
-         fillWidth[2] = hud.spendBarValue * (barWidth - (gapWidth * 4));
 
-        for (int i=0; i<3; i++){
-            if (hud.player2) {
+        fillWidth[1] = hud.energyBarValue * (barWidth - (gapWidth * 4));
+        fillWidth[0] = fillWidth[1] + hud.incomeBarValue * (barWidth - (gapWidth * 4));
+        //fillWidth[2] = hud.spendBarValue * (barWidth - (gapWidth * 4));
+
+        for (int i=0; i<2; i++){
+            if (hud.isPlayerTwo) {
                 shift = -barWidth + (barWidth - fillWidth[i]);
             }
 
             game.shapeRenderer.setColor(game.energyBarColors[i]);
             game.shapeRenderer.rect(
                 x + gapWidth * 2 + shift,
-                y + gapWidth * (2 + i) + (individualBarHeight * i),
+                y + gapWidth * 2,
                 fillWidth[i],
-                individualBarHeight);
+                barHeight - gapWidth * 4);
         }
         game.shapeRenderer.end();
     }

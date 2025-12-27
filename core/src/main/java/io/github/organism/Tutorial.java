@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.HashMap;
 
 import io.github.organism.hud.PlayerHud;
@@ -23,16 +22,14 @@ public class Tutorial implements GameSession {
     public GameOrchestrator currentGameOrchestrator;
     HashMap<Point, PlayerHud> playerIdToHud;
 
-    float frameTime;
-    float frameTimer;
+
 
     public Tutorial(OrganismGame g, TutorialScreen tut, GameConfig cfg) {
         game = g;
         screen = tut;
         currentConfig = cfg;
         playerIdToHud = new HashMap<>();
-        frameTime = .5f;
-        frameTimer = 0;
+
     }
 
     public void setupBasicMovesTutorial() {
@@ -82,8 +79,8 @@ public class Tutorial implements GameSession {
     public void updateHud(Point p, Organism organism) {
         PlayerHud hud = playerIdToHud.get(p);
         hud.setEnergy(organism.energy / SettingsManager.MAX_ENERGY);
-        hud.setIncome(organism.income / organism.energy);
-        hud.setSpend(organism.spend / organism.energy);
+        hud.setIncome(organism.income / SettingsManager.MAX_ENERGY);
+        hud.setSpend(organism.expandRate / SettingsManager.MAX_ENERGY);
 
         hud.setResources(organism.resources);
     }
@@ -110,7 +107,6 @@ public class Tutorial implements GameSession {
         );
         organism.player = player;
         currentGame.players.put(playerId, player);
-
         currentGame.humanPlayerIds.add(playerId);
         currentGame.allPlayerIds.add(playerId);
     }
@@ -130,18 +126,14 @@ public class Tutorial implements GameSession {
         currentGame.resourceDistributor.distribute();
 
         currentGameOrchestrator = new GameOrchestrator(currentGame);
-        currentGame.set_orchestrator(currentGameOrchestrator);
+        currentGame.setOrchestrator(currentGameOrchestrator);
     }
 
-    public void render() {
-        draw();
-    }
-
-
-    public void draw() {
-        currentGame.render();
+    public void render(float timeDelta) {
+        currentGame.render(timeDelta);
         globalResourceIndicator.render();
     }
+
 
     /**
      * @return
@@ -151,11 +143,4 @@ public class Tutorial implements GameSession {
         return screen.inputProcessor;
     }
 
-    public void update(float delta) {
-        frameTimer += delta;
-        if (frameTimer >= frameTime) {
-            currentGameOrchestrator.advanceFrame();
-            frameTimer = frameTimer % frameTime;
-        }
-    }
 }

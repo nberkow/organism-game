@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-import io.github.organism.hud.PlayerHud;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
@@ -128,7 +127,7 @@ public class ArcadeLoop implements GameSession {
                 color = availableColors.remove(0);
             }
 
-            currentGame.create_bot_player(name, player_id, color, model);
+            currentGame.createBotPlayer(name, player_id, color, model);
             playerNames.put(player_id, name);
             tournamentPlayerColors.put(player_id, color);
         }
@@ -177,7 +176,7 @@ public class ArcadeLoop implements GameSession {
         currentGame.resourceDistributor.distribute();
 
         currentGameOrchestrator = new GameOrchestrator(currentGame);
-        currentGame.set_orchestrator(currentGameOrchestrator);
+        currentGame.setOrchestrator(currentGameOrchestrator);
 
         currentGame.centerX = mapCenterX;
         currentGame.centerY = mapCenterY;
@@ -323,7 +322,7 @@ public class ArcadeLoop implements GameSession {
                 color = availableColors.remove(0);
             }
 
-            currentGame.create_bot_player(name, player_id, color, model);
+            currentGame.createBotPlayer(name, player_id, color, model);
             playerNames.put(player_id, name);
             tournamentPlayerColors.put(player_id, color);
         }
@@ -340,22 +339,22 @@ public class ArcadeLoop implements GameSession {
     private void finish_arcade_loop() {
     }
 
-    public void draw(){
+    public void draw(float delta){
         currentGame.game.camera.update();
-        currentGame.render();
+        currentGame.render(delta);
         if (showSummaryScreen & betweenRoundPause > 0 ) {
             round_summary.render();
         }
     }
 
-    public void render(){
+    public void render(float delta){
 
         if (kill) {
             dispose();
         }
         else {
             logic();
-            draw();
+            draw(delta);
         }
     }
 
