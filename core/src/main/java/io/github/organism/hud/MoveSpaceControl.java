@@ -124,4 +124,8 @@ public class MoveSpaceControl {
             planchetteRadius);
         hud.game.shapeRenderer.end();
     }
+
+    public Vector2 getPlanchetteFromCenterVector() {
+        return planchetteFromCenterVector.cpy().nor();
+    }
 }

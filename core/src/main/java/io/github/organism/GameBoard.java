@@ -174,17 +174,15 @@ public class GameBoard implements Disposable {
             diplomacyGraph.render();
         }
 
-        /*debug lines
+        //debug lines
         for (Player p : players.values()){
             Organism o = p.getOrganism();
             if (o != null) {
-                for (CandidateVertex cv : p.getOrganism().candidateVertices) {
+                for (CandidateVertex cv : p.getOrganism().candidateVertices.keySet()) {
                     cv.render();
                 }
             }
         }
-        */
-
     }
 
     @Override

@@ -1,13 +1,7 @@
 package io.github.organism;
-
-import static java.util.Collections.sort;
-
 import com.badlogic.gdx.math.Vector2;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-
 import io.github.organism.map.GridPosition;
 import io.github.organism.map.MapHex;
 import io.github.organism.map.MapVertex;
@@ -21,7 +15,7 @@ public class Organism {
     public float expandRate;
     TriangularGrid territoryHex;
     TriangularGrid territoryVertex;
-    ArrayList<CandidateVertex> candidateVertices;
+    HashMap<CandidateVertex, Float> candidateVertices;
 
     public int [] resources;
     Integer [] allyResources;
@@ -39,7 +33,7 @@ public class Organism {
         resources = new int[3];
         allyResources = new Integer[3];
         energy = SettingsManager.DEFAULT_STARTING_ENERGY;
-        candidateVertices = new ArrayList<>();
+        candidateVertices = new HashMap<>();
         resourceSetValue = gameBoard.config.gameplaySettings.get("resource set value");
         resourceUnitValue = gameBoard.config.gameplaySettings.get("resource unit value");
     }
@@ -98,7 +92,8 @@ public class Organism {
          */
 
         //FIXME temporarily setting constant income
-        energy = Math.min(energy + 5, SettingsManager.MAX_ENERGY);
+        income = 5;
+        energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
     }
 
     private int countResources() {
@@ -168,38 +163,45 @@ public class Organism {
 
     public void expand(Vector2 planchetteFromCenter) {
 
-        candidateVertices = new ArrayList<>();
+        candidateVertices = new HashMap<>();
+        double scoreSum = 0d;
 
+        // Tally up all the scores and index them
         for (GridPosition pos : territoryVertex) {
             MapVertex source = (MapVertex) pos.content;
             for (MapVertex v : source.adjacentVertices) {
                 if (v.getPlayer() == null  && !v.masked) {
                     CandidateVertex cv = new CandidateVertex(source, v);
                     cv.calculatePlanchetteAgreement(planchetteFromCenter);
-                    candidateVertices.add(cv);
+
+                    if (!candidateVertices.containsKey(cv)) {
+                        candidateVertices.put(cv, cv.planchetteAgreement);
+                    }
+                    else {
+                        candidateVertices.put(cv, candidateVertices.get(cv) + cv.planchetteAgreement);
+                    }
                 }
             }
         }
 
-        // stochastically sort by probability
-        candidateVertices.sort(CandidateVertex::compareTo);
+        // budget depends on planchette magnitude
+        float energyBudget = Math.min(income * (1 + planchetteFromCenter.len()), energy);
+        int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
 
-        float cost = gameBoard.config.gameplaySettings.get("energy to expand");
-        int vertexBudget = (int) Math.floor(energy/cost);
-        int verticesToClaim = Math.min(vertexBudget, candidateVertices.size());
-
-        HashSet<MapVertex> claimedVertices = new HashSet<>();
-
-        // Loop through the list until we have as many as we can afford or we run out of option
-        int i = 0;
-        while (i < candidateVertices.size() && claimedVertices.size() < verticesToClaim){
-            MapVertex candidate = candidateVertices.get(i).target;
-            if (!claimedVertices.contains(candidate)){
-                claimVertex(candidate);
-                claimedVertices.add(candidate);
-                energy -= cost;
+        for (int v = 0; v < verticesToClaim; v++) {
+            double r = gameBoard.rng.nextDouble() * scoreSum;
+            double s = 0d;
+            CandidateVertex remove = null;
+            for (CandidateVertex cv : candidateVertices.keySet()) {
+                s += candidateVertices.get(cv);
+                if (s > r) {
+                    claimVertex(cv.target);
+                    remove = cv;
+                    energy -= gameBoard.config.gameplaySettings.get("energy to expand");
+                    break;
+                }
             }
-            i++;
+            if (remove != null) candidateVertices.remove(remove);
         }
     }
 

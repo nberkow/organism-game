@@ -84,7 +84,7 @@ public class PlayerHud {
     }
 
     public Vector2 getPlanchetteVector() {
-        return moveSpaceControl.planchetteFromCenterVector;
+        return moveSpaceControl.getPlanchetteFromCenterVector();
     }
 
     public void setIncome(float i) {

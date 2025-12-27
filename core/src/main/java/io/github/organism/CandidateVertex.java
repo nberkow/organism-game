@@ -13,8 +13,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     Vector2 vector;
     GameBoard gameBoard;
     Float blinkCircleRadius;
-    public double planchetteAgreement;
-
+    public float planchetteAgreement;
     public Vector2 planchetteFromCenter;
 
 
@@ -27,7 +26,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     }
 
     public void calculatePlanchetteAgreement(Vector2 planchetteFromCenter) {
-        planchetteAgreement = Math.abs(planchetteFromCenter.angleRad(vector));
+        planchetteAgreement = planchetteFromCenter.dot(vector);
         this.planchetteFromCenter = planchetteFromCenter;
     }
 
@@ -35,38 +34,50 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         return planchetteAgreement;
     }
 
+
     /**
      * @param candidateVertex
-     * @return
+     * @returns
      */
     @Override
     public int compareTo(CandidateVertex candidateVertex) {
         /*
-        This powers a stochastic sort by planchetteAgreement (lower = more concordant).
+        This powers a stochastic sort by planchetteAgreement (higher = more concordant).
         Using this comparison operator give list that is roughly sorted, but with some randomness.
          */
 
-        if (this.planchetteAgreement == candidateVertex.planchetteAgreement){
-            return 0;
-        }
+        //FIXME randomness turned off
+        float scale = 0; //(float) ((this.planchetteAgreement + candidateVertex.planchetteAgreement)/2);
 
-        float r = com.badlogic.gdx.math.MathUtils.random();
-        if (this.planchetteAgreement - candidateVertex.planchetteAgreement > r){
-            return 1;
-        } else {
+        float r1 = com.badlogic.gdx.math.MathUtils.random() * scale;
+        float r2 = com.badlogic.gdx.math.MathUtils.random() * scale;
+
+        if (this.planchetteAgreement - candidateVertex.planchetteAgreement > r1) {
             return -1;
         }
+
+        if (candidateVertex.planchetteAgreement - this.planchetteAgreement > r2 ){
+            return 1;
+        }
+
+        return 0;
+
     }
 
     public void render() {
 
+        /*
         target.pos.grid.gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        target.pos.grid.gameBoard.game.shapeRenderer.circle(
-            target.x * target.pos.grid.gameBoard.hexSideLen + target.pos.grid.gameBoard.centerX,
-            target.y * target.pos.grid.gameBoard.hexSideLen + target.pos.grid.gameBoard.centerY,
-            (float) (blinkCircleRadius));
+        target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.MAGENTA);
+        target.pos.grid.gameBoard.game.shapeRenderer.line(
+            (target.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
+            (target.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY,
+            (target.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX + planchetteAgreement.x,
+            (target.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY + planchetteAgreement.y
+        );
 
-        target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.CYAN);
+
+            target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.CYAN);
         target.pos.grid.gameBoard.game.shapeRenderer.line(
             (source.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
             (source.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY,
@@ -82,6 +93,6 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
             (source.y * target.pos.grid.gameBoard.hexSideLen) + planchetteFromCenter.y + target.pos.grid.gameBoard.centerY
         );
 
-        target.pos.grid.gameBoard.game.shapeRenderer.end();
+        target.pos.grid.gameBoard.game.shapeRenderer.end();*/
     }
 }
