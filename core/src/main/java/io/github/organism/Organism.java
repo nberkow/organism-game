@@ -83,7 +83,13 @@ public class Organism {
         gameBoard.updateResourceLeadership();
         updateIncome();
         
+        // Add energy based on calculated income
         energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
+        
+        // Burn one resource after extracting (as per game rules)
+        if (countResources() > 0) {
+            burnResources();
+        }
     }
 
     private int countResources() {
