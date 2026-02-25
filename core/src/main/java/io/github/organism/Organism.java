@@ -71,6 +71,26 @@ public class Organism {
         income = baseIncome + (leadershipBonuses * bonusPerLeadership);
     }
 
+    public void updateIncome() {
+        // Base income
+        float baseIncome = 5f;
+        
+        // Count how many resource types this player leads in
+        int leadershipBonuses = 0;
+        for (int i = 0; i < 3; i++) {
+            if (gameBoard.resourceLeaders[i] == player) {
+                leadershipBonuses++;
+            }
+        }
+        
+        // Each leadership gives a bonus (you can adjust the bonus amount)
+        float bonusPerLeadership = gameBoard.config.gameplaySettings.getOrDefault(
+            "resource leadership bonus", 5f
+        );
+        
+        income = baseIncome + (leadershipBonuses * bonusPerLeadership);
+    }
+
     public void extract(Vector2 planchetteFromCenter) {
         /*
         get income based on resources
