@@ -1,0 +1,977 @@
+Project Overview:
+    This project is a LibGDX game. It's a conceptually simple 4X strategy game for 3 players.
+
+Game Overview:
+    Victory: The organism game is a real time strategy game for three players. The board is a hexagonal grid and players spend energy to claim vertices with the organism they control. When no more moves can be made, the winner is the player with the most vertices captured.
+
+    Energy: Players get a steady income of energy depending on the resources they control. Claiming a vertex has a fixed cost.
+
+    Resources: There are three resource types arranged around the board with radial symmetry. Resources are associated with hexagons. Claiming all the vertexes of a hexagon claims that hex and all resources inside. The total number of resources owned has no direct effect. Being the leader in any one resource gives an energy bonus. If another player overtakes the leader, the bonus transfers to the new leader.
+
+    For example. Let's say the resources look like this:
+
+    player  resource 0  resource 1  resource 2
+    0       5           2           1
+    1       0           5           3
+    2       1           1           1
+
+    Player 0 leads in resource 0 and gets one bonus. Player 1 leads in resource 1 and 2, and gets 2 bonuses. Player 3 leads in nothing and gets base energy income.
+
+    Tournament: The main game mode is a constant semi-random tournament. There is pool of participants greater than 3, let's say 20. 3 players are randomly selected to compete. They get a number of points at the end equivalent to the number of vertexes they captured.
+
+    The overall tournament ranking is based on the sum of all vertexes captured.
+
+    After some number of rounds, the bottom players are eliminated and new players are introduced.
+
+    The main gameplay loop is open and dynamic from the player's perspective: the tournament is always going with AI players competing. A human player can press a button to make controls appear and jump into the next game. Maybe this would hijack a current AI player or maybe just cancel the game in progress.
+
+    The human player will be in the game until they lose, at which point they can just re-enter the tournament with a fresh record.
+
+    Control Interface: The control interface introduces a little bit of delay and momentum. At any given time a player's organism is considering which vertexes to claim next. The selection is biased by the position of a circular planchette in a circular area.
+
+    if the planchette is centered in the circle, growth with be unbiased in all directions. The player, human or AI, can move a cursor around the circular field. The planchette follows the cursor at a slight delay.
+
+    AI: The AI idea is where this project is really interesting. It starts with the biological observation that vision is tightly coupled to cognition. The AI follows this loop:
+
+    - select a hexagon on the map
+    - the map is roughly circular, so the hex has a corresponding position in the control circle. move the cursor to that position
+    - extract local information about the hexagon: position, resources, vertex ownership
+    - use that info to select the next hex and repeat
+
+    I want to implement some simple learning as well as an evolutionary component. The individual organisms should learn. When it's time to create new organisms, use values from the winners.
+
+What's working:
+
+    A lot of things are working piecemeal, or a working but I need to rearrange code to work on them. Running the game in its current state, you get one AI player navigating more or less randomly around the control space. There's a bunch of code for the training but a lot of it is unwired:
+
+    player controls - keyboard controls are working for player 1 and player 2. It's currently unwired, but it's possible to move the cursor, which moves the planchette, which influences the organism
+
+    organism behavior - the organism basically works, it can
+
+    - gain and spend energy
+    - select vertexes based on the planchette position
+
+    tournament behavior - I have the semirandom tournament basically working, although it is currently unwired and needs work. Mostly it needs to be adapted to handle training/evolution. it has some other quirks that will need to be eliminated or incorporated. I am proud of the player naming/id mechanism I came up with
+
+    map generation - currently unwired, there's a map creation screen that let's users design custom parameters for procedural maps.
+
+    menu - menu basics are currently working but unwired.
+
+    hud elements - the map, player energy bars, resource meters, player overview summaries
+
+What's not working:
+
+    the whole thing needs to be wired together and polished, but there are still some individual components that are far from done:
+
+    - AI learning - we want the training unit to be one game and the reward to be something like log vertexes claimed
+    - AI evolution - we need an elimination/breeding phase to the tournament, maybe a way a of tracking and saving the models between games
+    - Info extraction - what comes from the inspected hex? how to collect it and format it for the model
+    - human player swap in start. the idle screen should be a real tournament that the player can just hop into. maybe learning is suspended until they join
+    - resource bonus implementation. this is currently not implemented at all, but it is described above
+    - hud improvements - resource lead status, planchette movement, territory graph (line plot of who's currently winning). I did a lot of experiments with the hud, so there are a lot of useful little pieces as well as deprecated things
+
+What to do next:
+    - implement resource tracking and bonuses
+    - get the tournament up and running with some basic learning implemented (maybe just ~36 params extracted from a hex to start)
+
+What to do after that:
+    - human player controls. let them swap in gracefully
+    - evolution
+    - more sophisticated learning experiments
+
+
+
+
+Project Tree:
+
+.
+├── README.md
+├── android
+│   ├── AndroidManifest.xml
+│   ├── build
+│   │   ├── generated
+│   │   │   ├── ap_generated_sources
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   └── res
+│   │   │       ├── pngs
+│   │   │       │   └── debug
+│   │   │       └── resValues
+│   │   │           └── debug
+│   │   ├── intermediates
+│   │   │   ├── aar_metadata_check
+│   │   │   │   └── debug
+│   │   │   │       └── checkDebugAarMetadata
+│   │   │   ├── annotation_processor_list
+│   │   │   │   └── debug
+│   │   │   │       ├── annotationProcessors.json
+│   │   │   │       └── javaPreCompileDebug
+│   │   │   │           └── annotationProcessors.json
+│   │   │   ├── apk
+│   │   │   │   └── debug
+│   │   │   │       ├── android-debug.apk
+│   │   │   │       └── output-metadata.json
+│   │   │   ├── apk_ide_redirect_file
+│   │   │   │   └── debug
+│   │   │   │       └── redirect.txt
+│   │   │   ├── app_metadata
+│   │   │   │   └── debug
+│   │   │   │       ├── app-metadata.properties
+│   │   │   │       └── writeDebugAppMetadata
+│   │   │   │           └── app-metadata.properties
+│   │   │   ├── assets
+│   │   │   │   └── debug
+│   │   │   │       ├── assets.txt
+│   │   │   │       ├── libgdx.png
+│   │   │   │       └── mergeDebugAssets
+│   │   │   │           ├── assets.txt
+│   │   │   │           ├── fonts
+│   │   │   │           │   ├── dubai16.fnt
+│   │   │   │           │   ├── dubai16.png
+│   │   │   │           │   ├── dubai32.fnt
+│   │   │   │           │   ├── dubai32.png
+│   │   │   │           │   ├── dubai64.fnt
+│   │   │   │           │   ├── dubai64.png
+│   │   │   │           │   ├── dubai8.fnt
+│   │   │   │           │   └── dubai8.png
+│   │   │   │           ├── libgdx.png
+│   │   │   │           └── map_configs
+│   │   │   │               ├── galactic.map
+│   │   │   │               ├── kingdoms.map
+│   │   │   │               └── microbiome.map
+│   │   │   ├── compatible_screen_manifest
+│   │   │   │   └── debug
+│   │   │   │       ├── createDebugCompatibleScreenManifests
+│   │   │   │       │   └── output-metadata.json
+│   │   │   │       └── output-metadata.json
+│   │   │   ├── compile_and_runtime_not_namespaced_r_class_jar
+│   │   │   │   └── debug
+│   │   │   │       ├── R.jar
+│   │   │   │       └── processDebugResources
+│   │   │   │           └── R.jar
+│   │   │   ├── compressed_assets
+│   │   │   │   └── debug
+│   │   │   │       ├── compressDebugAssets
+│   │   │   │       │   └── out
+│   │   │   │       │       └── assets
+│   │   │   │       │           ├── assets.txt.jar
+│   │   │   │       │           ├── fonts
+│   │   │   │       │           │   ├── dubai16.fnt.jar
+│   │   │   │       │           │   ├── dubai16.png.jar
+│   │   │   │       │           │   ├── dubai32.fnt.jar
+│   │   │   │       │           │   ├── dubai32.png.jar
+│   │   │   │       │           │   ├── dubai64.fnt.jar
+│   │   │   │       │           │   ├── dubai64.png.jar
+│   │   │   │       │           │   ├── dubai8.fnt.jar
+│   │   │   │       │           │   └── dubai8.png.jar
+│   │   │   │       │           ├── libgdx.png.jar
+│   │   │   │       │           └── map_configs
+│   │   │   │       │               ├── galactic.map.jar
+│   │   │   │       │               ├── kingdoms.map.jar
+│   │   │   │       │               └── microbiome.map.jar
+│   │   │   │       └── out
+│   │   │   │           └── assets
+│   │   │   │               ├── assets.txt.jar
+│   │   │   │               └── libgdx.png.jar
+│   │   │   ├── data_binding_layout_info_type_merge
+│   │   │   │   └── debug
+│   │   │   │       ├── mergeDebugResources
+│   │   │   │       │   └── out
+│   │   │   │       └── out
+│   │   │   ├── data_binding_layout_info_type_package
+│   │   │   │   └── debug
+│   │   │   │       ├── out
+│   │   │   │       └── packageDebugResources
+│   │   │   │           └── out
+│   │   │   ├── desugar_graph
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   │           ├── currentProject
+│   │   │   │           │   ├── dirs_bucket_0
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   ├── dirs_bucket_1
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   ├── dirs_bucket_2
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   ├── dirs_bucket_3
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   ├── jar_0351d818f7e4e3a0f4297bc6430b405ace5600edccd3cca44bf5a68cd913b4cf_bucket_0
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   ├── jar_0351d818f7e4e3a0f4297bc6430b405ace5600edccd3cca44bf5a68cd913b4cf_bucket_1
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   ├── jar_0351d818f7e4e3a0f4297bc6430b405ace5600edccd3cca44bf5a68cd913b4cf_bucket_2
+│   │   │   │           │   │   └── graph.bin
+│   │   │   │           │   └── jar_0351d818f7e4e3a0f4297bc6430b405ace5600edccd3cca44bf5a68cd913b4cf_bucket_3
+│   │   │   │           │       └── graph.bin
+│   │   │   │           ├── externalLibs
+│   │   │   │           ├── mixedScopes
+│   │   │   │           └── otherProjects
+│   │   │   ├── desugar_lib_dex
+│   │   │   │   └── debug
+│   │   │   │       ├── classes1000.dex
+│   │   │   │       └── l8DexDesugarLibDebug
+│   │   │   │           └── classes1000.dex
+│   │   │   ├── dex
+│   │   │   │   └── debug
+│   │   │   │       ├── mergeExtDexDebug
+│   │   │   │       │   └── classes.dex
+│   │   │   │       ├── mergeLibDexDebug
+│   │   │   │       │   ├── 0
+│   │   │   │       │   ├── 1
+│   │   │   │       │   │   └── classes.dex
+│   │   │   │       │   ├── 10
+│   │   │   │       │   ├── 11
+│   │   │   │       │   ├── 12
+│   │   │   │       │   ├── 13
+│   │   │   │       │   ├── 14
+│   │   │   │       │   ├── 15
+│   │   │   │       │   ├── 2
+│   │   │   │       │   ├── 3
+│   │   │   │       │   ├── 4
+│   │   │   │       │   │   └── classes.dex
+│   │   │   │       │   ├── 5
+│   │   │   │       │   ├── 6
+│   │   │   │       │   ├── 7
+│   │   │   │       │   │   └── classes.dex
+│   │   │   │       │   ├── 8
+│   │   │   │       │   └── 9
+│   │   │   │       └── mergeProjectDexDebug
+│   │   │   │           ├── 0
+│   │   │   │           │   └── classes.dex
+│   │   │   │           ├── 1
+│   │   │   │           ├── 10
+│   │   │   │           ├── 11
+│   │   │   │           ├── 12
+│   │   │   │           ├── 13
+│   │   │   │           ├── 14
+│   │   │   │           ├── 15
+│   │   │   │           ├── 2
+│   │   │   │           ├── 3
+│   │   │   │           ├── 4
+│   │   │   │           ├── 5
+│   │   │   │           ├── 6
+│   │   │   │           ├── 7
+│   │   │   │           ├── 8
+│   │   │   │           └── 9
+│   │   │   │               └── classes.dex
+│   │   │   ├── dex_archive_input_jar_hashes
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   ├── dex_number_of_buckets_file
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   ├── duplicate_classes_check
+│   │   │   │   └── debug
+│   │   │   │       └── checkDebugDuplicateClasses
+│   │   │   ├── external_file_lib_dex_archives
+│   │   │   │   └── debug
+│   │   │   │       └── desugarDebugFileDependencies
+│   │   │   ├── external_libs_dex_archive
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   ├── external_libs_dex_archive_with_artifact_transforms
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   ├── incremental
+│   │   │   │   ├── debug
+│   │   │   │   │   ├── mergeDebugResources
+│   │   │   │   │   │   ├── compile-file-map.properties
+│   │   │   │   │   │   ├── merged.dir
+│   │   │   │   │   │   │   └── values
+│   │   │   │   │   │   │       └── values.xml
+│   │   │   │   │   │   ├── merger.xml
+│   │   │   │   │   │   └── stripped.dir
+│   │   │   │   │   └── packageDebugResources
+│   │   │   │   │       ├── compile-file-map.properties
+│   │   │   │   │       ├── merged.dir
+│   │   │   │   │       │   └── values
+│   │   │   │   │       │       └── values.xml
+│   │   │   │   │       ├── merger.xml
+│   │   │   │   │       └── stripped.dir
+│   │   │   │   ├── debug-mergeJavaRes
+│   │   │   │   │   ├── merge-state
+│   │   │   │   │   └── zip-cache
+│   │   │   │   │       ├── 9si5Mp1merukE1aP7h7pFT7O3r0=
+│   │   │   │   │       ├── Ol0lBXQHRL2SpgHS1FGHCGtc7S4=
+│   │   │   │   │       ├── bBEoF4H3zOLwvCwR+ZN6WkG2QXs=
+│   │   │   │   │       └── qtoTpuZAQ0xxOouucdggHHUUHbY=
+│   │   │   │   ├── mergeDebugAssets
+│   │   │   │   │   └── merger.xml
+│   │   │   │   ├── mergeDebugJniLibFolders
+│   │   │   │   │   └── merger.xml
+│   │   │   │   ├── mergeDebugShaders
+│   │   │   │   │   └── merger.xml
+│   │   │   │   └── packageDebug
+│   │   │   │       └── tmp
+│   │   │   │           └── debug
+│   │   │   │               ├── dex-renamer-state.txt
+│   │   │   │               └── zip-cache
+│   │   │   │                   ├── androidResources
+│   │   │   │                   └── javaResources0
+│   │   │   ├── javac
+│   │   │   │   └── debug
+│   │   │   │       ├── classes
+│   │   │   │       │   └── io
+│   │   │   │       │       └── github
+│   │   │   │       │           └── organism
+│   │   │   │       │               └── android
+│   │   │   │       │                   └── AndroidLauncher.class
+│   │   │   │       └── compileDebugJavaWithJavac
+│   │   │   │           └── classes
+│   │   │   ├── l8_art_profile
+│   │   │   │   └── debug
+│   │   │   │       └── l8DexDesugarLibDebug
+│   │   │   ├── linked_resources_binary_format
+│   │   │   │   └── debug
+│   │   │   │       └── processDebugResources
+│   │   │   │           ├── linked-resources-binary-format-debug.ap_
+│   │   │   │           └── output-metadata.json
+│   │   │   ├── local_only_symbol_list
+│   │   │   │   └── debug
+│   │   │   │       ├── R-def.txt
+│   │   │   │       └── parseDebugLocalResources
+│   │   │   │           └── R-def.txt
+│   │   │   ├── manifest_merge_blame_file
+│   │   │   │   └── debug
+│   │   │   │       ├── manifest-merger-blame-debug-report.txt
+│   │   │   │       └── processDebugMainManifest
+│   │   │   │           └── manifest-merger-blame-debug-report.txt
+│   │   │   ├── merged_java_res
+│   │   │   │   └── debug
+│   │   │   │       ├── base.jar
+│   │   │   │       └── mergeDebugJavaResource
+│   │   │   │           └── base.jar
+│   │   │   ├── merged_jni_libs
+│   │   │   │   └── debug
+│   │   │   │       ├── mergeDebugJniLibFolders
+│   │   │   │       │   └── out
+│   │   │   │       │       ├── arm64-v8a
+│   │   │   │       │       │   └── libgdx.so
+│   │   │   │       │       ├── armeabi-v7a
+│   │   │   │       │       │   └── libgdx.so
+│   │   │   │       │       ├── x86
+│   │   │   │       │       │   └── libgdx.so
+│   │   │   │       │       └── x86_64
+│   │   │   │       │           └── libgdx.so
+│   │   │   │       └── out
+│   │   │   │           ├── arm64-v8a
+│   │   │   │           │   └── libgdx.so
+│   │   │   │           ├── armeabi-v7a
+│   │   │   │           │   └── libgdx.so
+│   │   │   │           ├── x86
+│   │   │   │           │   └── libgdx.so
+│   │   │   │           └── x86_64
+│   │   │   │               └── libgdx.so
+│   │   │   ├── merged_manifest
+│   │   │   │   └── debug
+│   │   │   │       ├── AndroidManifest.xml
+│   │   │   │       └── processDebugMainManifest
+│   │   │   │           └── AndroidManifest.xml
+│   │   │   ├── merged_manifests
+│   │   │   │   └── debug
+│   │   │   │       ├── AndroidManifest.xml
+│   │   │   │       ├── output-metadata.json
+│   │   │   │       └── processDebugManifest
+│   │   │   │           ├── AndroidManifest.xml
+│   │   │   │           └── output-metadata.json
+│   │   │   ├── merged_native_libs
+│   │   │   │   └── debug
+│   │   │   │       ├── mergeDebugNativeLibs
+│   │   │   │       │   └── out
+│   │   │   │       │       └── lib
+│   │   │   │       │           ├── arm64-v8a
+│   │   │   │       │           │   └── libgdx.so
+│   │   │   │       │           ├── armeabi-v7a
+│   │   │   │       │           │   └── libgdx.so
+│   │   │   │       │           ├── x86
+│   │   │   │       │           │   └── libgdx.so
+│   │   │   │       │           └── x86_64
+│   │   │   │       │               └── libgdx.so
+│   │   │   │       └── out
+│   │   │   │           └── lib
+│   │   │   │               ├── arm64-v8a
+│   │   │   │               │   └── libgdx.so
+│   │   │   │               ├── armeabi-v7a
+│   │   │   │               │   └── libgdx.so
+│   │   │   │               ├── x86
+│   │   │   │               │   └── libgdx.so
+│   │   │   │               └── x86_64
+│   │   │   │                   └── libgdx.so
+│   │   │   ├── merged_res
+│   │   │   │   └── debug
+│   │   │   │       ├── drawable-hdpi_ic_launcher.png.flat
+│   │   │   │       ├── drawable-mdpi_ic_launcher.png.flat
+│   │   │   │       ├── drawable-xhdpi_ic_launcher.png.flat
+│   │   │   │       ├── drawable-xxhdpi_ic_launcher.png.flat
+│   │   │   │       ├── drawable-xxxhdpi_ic_launcher.png.flat
+│   │   │   │       ├── mergeDebugResources
+│   │   │   │       │   ├── drawable-hdpi_ic_launcher.png.flat
+│   │   │   │       │   ├── drawable-mdpi_ic_launcher.png.flat
+│   │   │   │       │   ├── drawable-xhdpi_ic_launcher.png.flat
+│   │   │   │       │   ├── drawable-xxhdpi_ic_launcher.png.flat
+│   │   │   │       │   ├── drawable-xxxhdpi_ic_launcher.png.flat
+│   │   │   │       │   └── values_values.arsc.flat
+│   │   │   │       └── values_values.arsc.flat
+│   │   │   ├── merged_res_blame_folder
+│   │   │   │   └── debug
+│   │   │   │       ├── mergeDebugResources
+│   │   │   │       │   └── out
+│   │   │   │       │       ├── multi-v2
+│   │   │   │       │       │   ├── mergeDebugResources.json
+│   │   │   │       │       │   └── values.json
+│   │   │   │       │       └── single
+│   │   │   │       │           └── mergeDebugResources.json
+│   │   │   │       └── out
+│   │   │   │           ├── multi-v2
+│   │   │   │           │   ├── debug.json
+│   │   │   │           │   └── values.json
+│   │   │   │           └── single
+│   │   │   │               └── debug.json
+│   │   │   ├── merged_shaders
+│   │   │   │   └── debug
+│   │   │   │       ├── mergeDebugShaders
+│   │   │   │       │   └── out
+│   │   │   │       └── out
+│   │   │   ├── merged_test_only_native_libs
+│   │   │   │   └── debug
+│   │   │   │       └── mergeDebugNativeLibs
+│   │   │   │           └── out
+│   │   │   ├── mixed_scope_dex_archive
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   ├── navigation_json
+│   │   │   │   └── debug
+│   │   │   │       ├── extractDeepLinksDebug
+│   │   │   │       │   └── navigation.json
+│   │   │   │       └── navigation.json
+│   │   │   ├── nested_resources_validation_report
+│   │   │   │   └── debug
+│   │   │   │       └── generateDebugResources
+│   │   │   │           └── nestedResourcesValidationReport.txt
+│   │   │   ├── packaged_manifests
+│   │   │   │   └── debug
+│   │   │   │       ├── AndroidManifest.xml
+│   │   │   │       ├── output-metadata.json
+│   │   │   │       └── processDebugManifestForPackage
+│   │   │   │           ├── AndroidManifest.xml
+│   │   │   │           └── output-metadata.json
+│   │   │   ├── packaged_res
+│   │   │   │   └── debug
+│   │   │   │       ├── drawable-hdpi-v4
+│   │   │   │       │   └── ic_launcher.png
+│   │   │   │       ├── drawable-mdpi-v4
+│   │   │   │       │   └── ic_launcher.png
+│   │   │   │       ├── drawable-xhdpi-v4
+│   │   │   │       │   └── ic_launcher.png
+│   │   │   │       ├── drawable-xxhdpi-v4
+│   │   │   │       │   └── ic_launcher.png
+│   │   │   │       ├── drawable-xxxhdpi-v4
+│   │   │   │       │   └── ic_launcher.png
+│   │   │   │       ├── packageDebugResources
+│   │   │   │       │   ├── drawable-hdpi-v4
+│   │   │   │       │   │   └── ic_launcher.png
+│   │   │   │       │   ├── drawable-mdpi-v4
+│   │   │   │       │   │   └── ic_launcher.png
+│   │   │   │       │   ├── drawable-xhdpi-v4
+│   │   │   │       │   │   └── ic_launcher.png
+│   │   │   │       │   ├── drawable-xxhdpi-v4
+│   │   │   │       │   │   └── ic_launcher.png
+│   │   │   │       │   ├── drawable-xxxhdpi-v4
+│   │   │   │       │   │   └── ic_launcher.png
+│   │   │   │       │   └── values
+│   │   │   │       │       └── values.xml
+│   │   │   │       └── values
+│   │   │   │           └── values.xml
+│   │   │   ├── processed_res
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   │           ├── output-metadata.json
+│   │   │   │           └── resources-debug.ap_
+│   │   │   ├── project_dex_archive
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   │           ├── bd0c2acee5970c3042d13532c34e594bf54028217d4146ffdced47fac342b8ae_1.jar
+│   │   │   │           ├── bd0c2acee5970c3042d13532c34e594bf54028217d4146ffdced47fac342b8ae_3.jar
+│   │   │   │           └── io
+│   │   │   │               └── github
+│   │   │   │                   └── organism
+│   │   │   │                       └── android
+│   │   │   │                           └── AndroidLauncher.dex
+│   │   │   ├── runtime_symbol_list
+│   │   │   │   └── debug
+│   │   │   │       ├── R.txt
+│   │   │   │       └── processDebugResources
+│   │   │   │           └── R.txt
+│   │   │   ├── signing_config_versions
+│   │   │   │   └── debug
+│   │   │   │       ├── signing-config-versions.json
+│   │   │   │       └── writeDebugSigningConfigVersions
+│   │   │   │           └── signing-config-versions.json
+│   │   │   ├── source_set_path_map
+│   │   │   │   └── debug
+│   │   │   │       ├── file-map.txt
+│   │   │   │       └── mapDebugSourceSetPaths
+│   │   │   │           └── file-map.txt
+│   │   │   ├── stable_resource_ids_file
+│   │   │   │   └── debug
+│   │   │   │       ├── processDebugResources
+│   │   │   │       │   └── stableIds.txt
+│   │   │   │       └── stableIds.txt
+│   │   │   ├── stripped_native_libs
+│   │   │   │   └── debug
+│   │   │   │       ├── out
+│   │   │   │       │   └── lib
+│   │   │   │       │       ├── arm64-v8a
+│   │   │   │       │       │   └── libgdx.so
+│   │   │   │       │       ├── armeabi-v7a
+│   │   │   │       │       │   └── libgdx.so
+│   │   │   │       │       ├── x86
+│   │   │   │       │       │   └── libgdx.so
+│   │   │   │       │       └── x86_64
+│   │   │   │       │           └── libgdx.so
+│   │   │   │       └── stripDebugDebugSymbols
+│   │   │   │           └── out
+│   │   │   │               └── lib
+│   │   │   │                   ├── arm64-v8a
+│   │   │   │                   │   └── libgdx.so
+│   │   │   │                   ├── armeabi-v7a
+│   │   │   │                   │   └── libgdx.so
+│   │   │   │                   ├── x86
+│   │   │   │                   │   └── libgdx.so
+│   │   │   │                   └── x86_64
+│   │   │   │                       └── libgdx.so
+│   │   │   ├── sub_project_dex_archive
+│   │   │   │   └── debug
+│   │   │   │       └── out
+│   │   │   ├── symbol_list_with_package_name
+│   │   │   │   └── debug
+│   │   │   │       ├── package-aware-r.txt
+│   │   │   │       └── processDebugResources
+│   │   │   │           └── package-aware-r.txt
+│   │   │   ├── validate_signing_config
+│   │   │   │   └── debug
+│   │   │   │       └── validateSigningDebug
+│   │   │   └── variant_model
+│   │   │       └── debug
+│   │   │           └── variant_model.json
+│   │   ├── outputs
+│   │   │   └── logs
+│   │   │       └── manifest-merger-debug-report.txt
+│   │   └── tmp
+│   │       └── compileDebugJavaWithJavac
+│   │           └── compileTransaction
+│   │               ├── backup-dir
+│   │               └── stash-dir
+│   │                   └── AndroidLauncher.class.uniqueId0
+│   ├── build.gradle
+│   ├── ic_launcher-web.png
+│   ├── libs
+│   │   ├── arm64-v8a
+│   │   │   └── libgdx.so
+│   │   ├── armeabi-v7a
+│   │   │   └── libgdx.so
+│   │   ├── x86
+│   │   │   └── libgdx.so
+│   │   └── x86_64
+│   │       └── libgdx.so
+│   ├── proguard-rules.pro
+│   ├── project.properties
+│   ├── res
+│   │   ├── drawable-hdpi
+│   │   │   └── ic_launcher.png
+│   │   ├── drawable-mdpi
+│   │   │   └── ic_launcher.png
+│   │   ├── drawable-xhdpi
+│   │   │   └── ic_launcher.png
+│   │   ├── drawable-xxhdpi
+│   │   │   └── ic_launcher.png
+│   │   ├── drawable-xxxhdpi
+│   │   │   └── ic_launcher.png
+│   │   └── values
+│   │       ├── color.xml
+│   │       ├── strings.xml
+│   │       └── styles.xml
+│   └── src
+│       └── main
+│           └── java
+│               └── io
+│                   └── github
+│                       └── organism
+│                           └── android
+│                               └── AndroidLauncher.java
+├── assets
+│   ├── assets.txt
+│   ├── fonts
+│   │   ├── dubai16.fnt
+│   │   ├── dubai16.png
+│   │   ├── dubai32.fnt
+│   │   ├── dubai32.png
+│   │   ├── dubai64.fnt
+│   │   ├── dubai64.png
+│   │   ├── dubai8.fnt
+│   │   └── dubai8.png
+│   ├── libgdx.png
+│   ├── map_configs
+│   │   ├── galactic.map
+│   │   ├── kingdoms.map
+│   │   └── microbiome.map
+│   └── model_configs
+├── build
+│   └── reports
+│       └── problems
+│           └── problems-report.html
+├── build.gradle
+├── core
+│   ├── build
+│   │   ├── classes
+│   │   │   └── java
+│   │   │       └── main
+│   │   │           └── io
+│   │   │               └── github
+│   │   │                   └── organism
+│   │   │                       ├── ActionHistory.class
+│   │   │                       ├── ArcadeLoop.class
+│   │   │                       ├── BarplotDisplay.class
+│   │   │                       ├── CandidateVertex.class
+│   │   │                       ├── CheckBoxGroup.class
+│   │   │                       ├── CountdownWindow.class
+│   │   │                       ├── CycleClock.class
+│   │   │                       ├── DoublePair.class
+│   │   │                       ├── FileHandler.class
+│   │   │                       ├── FloatPair.class
+│   │   │                       ├── GameBoard.class
+│   │   │                       ├── GameConfig.class
+│   │   │                       ├── GameOrchestrator.class
+│   │   │                       ├── GameScreen.class
+│   │   │                       ├── GameSession.class
+│   │   │                       ├── GameplayButtons.class
+│   │   │                       ├── GlobalResourceIndicator.class
+│   │   │                       ├── GridWindow.class
+│   │   │                       ├── HudTestScreen$HudTester.class
+│   │   │                       ├── HudTestScreen.class
+│   │   │                       ├── InputHistogram.class
+│   │   │                       ├── LabScreen.class
+│   │   │                       ├── LabScreenButtons.class
+│   │   │                       ├── LabScreenInputProcessor.class
+│   │   │                       ├── LabSummaryBar.class
+│   │   │                       ├── MapSettingSelectionBoxes.class
+│   │   │                       ├── MapSettingsButtons.class
+│   │   │                       ├── MapSettingsInputProcessor.class
+│   │   │                       ├── MapSettingsScreen.class
+│   │   │                       ├── MapSettingsSliders.class
+│   │   │                       ├── MenuInputProcessor.class
+│   │   │                       ├── MenuScreen.class
+│   │   │                       ├── MenuScreenButtons.class
+│   │   │                       ├── Model.class
+│   │   │                       ├── ModelPoolDisplay.class
+│   │   │                       ├── ModelSpawner.class
+│   │   │                       ├── MoveLogger.class
+│   │   │                       ├── Organism.class
+│   │   │                       ├── OrganismGame.class
+│   │   │                       ├── Pair.class
+│   │   │                       ├── PlayerStartAssigner.class
+│   │   │                       ├── PlayerSummaryDisplay.class
+│   │   │                       ├── ResourceDistributor.class
+│   │   │                       ├── RoundSummary.class
+│   │   │                       ├── SettingsManager.class
+│   │   │                       ├── SettingsOverlay.class
+│   │   │                       ├── SettingsOverlayButtons.class
+│   │   │                       ├── SettingsOverlayInputProcessor.class
+│   │   │                       ├── Simulation.class
+│   │   │                       ├── SliderGroup.class
+│   │   │                       ├── TerritoryBar.class
+│   │   │                       ├── Tutorial.class
+│   │   │                       ├── TutorialScreen.class
+│   │   │                       ├── Util.class
+│   │   │                       ├── VoidDistributor.class
+│   │   │                       ├── WinRecordGraph.class
+│   │   │                       ├── hud
+│   │   │                       │   ├── EnergyBar.class
+│   │   │                       │   ├── HudInputProcessor.class
+│   │   │                       │   ├── MoveSpaceControl.class
+│   │   │                       │   ├── PlayerHud.class
+│   │   │                       │   └── ResourceBar.class
+│   │   │                       ├── learning
+│   │   │                       │   ├── DiscountedRewardTracker.class
+│   │   │                       │   ├── GeneticLayer.class
+│   │   │                       │   ├── PerformanceReporter.class
+│   │   │                       │   ├── ResourceRewardData.class
+│   │   │                       │   ├── SlimeRLAgent$ExperienceBuffer$Batch.class
+│   │   │                       │   ├── SlimeRLAgent$ExperienceBuffer.class
+│   │   │                       │   ├── SlimeRLAgent$GameRLInterface.class
+│   │   │                       │   ├── SlimeRLAgent$PolicyNetwork.class
+│   │   │                       │   └── SlimeRLAgent.class
+│   │   │                       ├── map
+│   │   │                       │   ├── GridPosition.class
+│   │   │                       │   ├── MapElement.class
+│   │   │                       │   ├── MapHex.class
+│   │   │                       │   ├── MapVertex.class
+│   │   │                       │   ├── TriangularGrid$1.class
+│   │   │                       │   ├── TriangularGrid.class
+│   │   │                       │   └── UniverseMap.class
+│   │   │                       └── player
+│   │   │                           ├── BotPlayer.class
+│   │   │                           ├── DummyPlayer.class
+│   │   │                           ├── IO_Player.class
+│   │   │                           └── Player.class
+│   │   ├── generated
+│   │   │   └── sources
+│   │   │       ├── annotationProcessor
+│   │   │       │   └── java
+│   │   │       │       └── main
+│   │   │       └── headers
+│   │   │           └── java
+│   │   │               └── main
+│   │   ├── libs
+│   │   │   └── core-$projectVersion.jar
+│   │   └── tmp
+│   │       ├── compileJava
+│   │       │   ├── compileTransaction
+│   │       │   │   ├── backup-dir
+│   │       │   │   └── stash-dir
+│   │       │   │       ├── BotPlayer.class.uniqueId3
+│   │       │   │       ├── GameBoard.class.uniqueId8
+│   │       │   │       ├── Simulation.class.uniqueId1
+│   │       │   │       ├── SlimeRLAgent$ExperienceBuffer$Batch.class.uniqueId6
+│   │       │   │       ├── SlimeRLAgent$ExperienceBuffer.class.uniqueId5
+│   │       │   │       ├── SlimeRLAgent$GameRLInterface.class.uniqueId0
+│   │       │   │       ├── SlimeRLAgent$PolicyNetwork.class.uniqueId2
+│   │       │   │       ├── SlimeRLAgent.class.uniqueId7
+│   │       │   │       └── Tutorial.class.uniqueId4
+│   │       │   └── previous-compilation-data.bin
+│   │       └── jar
+│   │           └── MANIFEST.MF
+│   ├── build.gradle
+│   └── src
+│       └── main
+│           ├── java
+│           │   └── io
+│           │       └── github
+│           │           └── organism
+│           │               ├── ActionHistory.java
+│           │               ├── ArcadeLoop.java
+│           │               ├── BarplotDisplay.java
+│           │               ├── CandidateVertex.java
+│           │               ├── CheckBoxGroup.java
+│           │               ├── CountdownWindow.java
+│           │               ├── CycleClock.java
+│           │               ├── DoublePair.java
+│           │               ├── FileHandler.java
+│           │               ├── FloatPair.java
+│           │               ├── GameBoard.java
+│           │               ├── GameConfig.java
+│           │               ├── GameOrchestrator.java
+│           │               ├── GameScreen.java
+│           │               ├── GameSession.java
+│           │               ├── GameplayButtons.java
+│           │               ├── GlobalResourceIndicator.java
+│           │               ├── GridWindow.java
+│           │               ├── HudTestScreen.java
+│           │               ├── InputHistogram.java
+│           │               ├── LabScreen.java
+│           │               ├── LabScreenButtons.java
+│           │               ├── LabScreenInputProcessor.java
+│           │               ├── LabSummaryBar.java
+│           │               ├── Main.gwt.xml
+│           │               ├── MapSettingSelectionBoxes.java
+│           │               ├── MapSettingsButtons.java
+│           │               ├── MapSettingsInputProcessor.java
+│           │               ├── MapSettingsScreen.java
+│           │               ├── MapSettingsSliders.java
+│           │               ├── MenuInputProcessor.java
+│           │               ├── MenuScreen.java
+│           │               ├── MenuScreenButtons.java
+│           │               ├── Model.java
+│           │               ├── ModelPoolDisplay.java
+│           │               ├── ModelSpawner.java
+│           │               ├── MoveLogger.java
+│           │               ├── Organism.java
+│           │               ├── OrganismGame.java
+│           │               ├── Pair.java
+│           │               ├── PlayerStartAssigner.java
+│           │               ├── PlayerSummaryDisplay.java
+│           │               ├── ResourceDistributor.java
+│           │               ├── RoundSummary.java
+│           │               ├── SettingsManager.java
+│           │               ├── SettingsOverlay.java
+│           │               ├── SettingsOverlayButtons.java
+│           │               ├── SettingsOverlayInputProcessor.java
+│           │               ├── Simulation.java
+│           │               ├── SliderGroup.java
+│           │               ├── TerritoryBar.java
+│           │               ├── Tutorial.java
+│           │               ├── TutorialScreen.java
+│           │               ├── Util.java
+│           │               ├── VoidDistributor.java
+│           │               ├── WinRecordGraph.java
+│           │               ├── hud
+│           │               │   ├── EnergyBar.java
+│           │               │   ├── HudInputProcessor.java
+│           │               │   ├── MoveSpaceControl.java
+│           │               │   ├── PlayerHud.java
+│           │               │   └── ResourceBar.java
+│           │               ├── learning
+│           │               │   ├── DiscountedRewardTracker.java
+│           │               │   ├── GeneticLayer.java
+│           │               │   ├── PerformanceReporter.java
+│           │               │   ├── ResourceRewardData.java
+│           │               │   └── SlimeRLAgent.java
+│           │               ├── map
+│           │               │   ├── GridPosition.java
+│           │               │   ├── MapElement.java
+│           │               │   ├── MapHex.java
+│           │               │   ├── MapVertex.java
+│           │               │   ├── TriangularGrid.java
+│           │               │   └── UniverseMap.java
+│           │               └── player
+│           │                   ├── BotPlayer.java
+│           │                   ├── DummyPlayer.java
+│           │                   ├── IO_Player.java
+│           │                   └── Player.java
+│           └── overview.txt
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── html
+│   ├── build
+│   │   └── gwt
+│   │       ├── cache
+│   │       └── work
+│   ├── build.gradle
+│   ├── src
+│   │   └── main
+│   │       └── java
+│   │           └── io
+│   │               └── github
+│   │                   └── organism
+│   │                       ├── GdxDefinition.gwt.xml
+│   │                       ├── GdxDefinitionSuperdev.gwt.xml
+│   │                       └── gwt
+│   │                           └── GwtLauncher.java
+│   ├── war
+│   └── webapp
+│       ├── WEB-INF
+│       │   └── web.xml
+│       ├── index.html
+│       ├── refresh.png
+│       └── styles.css
+├── ios
+│   ├── Info.plist.xml
+│   ├── build.gradle
+│   ├── data
+│   │   ├── Base.lproj
+│   │   │   └── LaunchScreen.storyboard
+│   │   ├── Media.xcassets
+│   │   │   ├── AppIcon.appiconset
+│   │   │   │   ├── Contents.json
+│   │   │   │   ├── app-store-icon-1024@1x.png
+│   │   │   │   ├── ipad-app-icon-76@1x.png
+│   │   │   │   ├── ipad-app-icon-76@2x.png
+│   │   │   │   ├── ipad-notifications-icon-20@1x.png
+│   │   │   │   ├── ipad-notifications-icon-20@2x.png
+│   │   │   │   ├── ipad-pro-app-icon-83.5@2x.png
+│   │   │   │   ├── ipad-settings-icon-29@1x.png
+│   │   │   │   ├── ipad-settings-icon-29@2x.png
+│   │   │   │   ├── ipad-spotlight-icon-40@1x.png
+│   │   │   │   ├── ipad-spotlight-icon-40@2x.png
+│   │   │   │   ├── iphone-app-icon-60@2x.png
+│   │   │   │   ├── iphone-app-icon-60@3x.png
+│   │   │   │   ├── iphone-notification-icon-20@2x.png
+│   │   │   │   ├── iphone-notification-icon-20@3x.png
+│   │   │   │   ├── iphone-spotlight-icon-40@2x.png
+│   │   │   │   ├── iphone-spotlight-icon-40@3x.png
+│   │   │   │   ├── iphone-spotlight-settings-icon-29@2x.png
+│   │   │   │   └── iphone-spotlight-settings-icon-29@3x.png
+│   │   │   ├── Contents.json
+│   │   │   └── Logo.imageset
+│   │   │       ├── Contents.json
+│   │   │       ├── libgdx@1x.png
+│   │   │       ├── libgdx@2x.png
+│   │   │       └── libgdx@3x.png
+│   │   └── PrivacyInfo.xcprivacy
+│   ├── robovm.properties
+│   ├── robovm.xml
+│   └── src
+│       └── main
+│           └── java
+│               └── io
+│                   └── github
+│                       └── organism
+│                           └── ios
+│                               └── IOSLauncher.java
+├── local.properties
+├── lwjgl3
+│   ├── build
+│   │   ├── classes
+│   │   │   └── java
+│   │   │       └── main
+│   │   │           └── io
+│   │   │               └── github
+│   │   │                   └── organism
+│   │   │                       └── lwjgl3
+│   │   │                           ├── Lwjgl3Launcher.class
+│   │   │                           └── StartupHelper.class
+│   │   ├── generated
+│   │   │   └── sources
+│   │   │       ├── annotationProcessor
+│   │   │       │   └── java
+│   │   │       │       └── main
+│   │   │       └── headers
+│   │   │           └── java
+│   │   │               └── main
+│   │   ├── resources
+│   │   │   └── main
+│   │   │       ├── assets.txt
+│   │   │       ├── fonts
+│   │   │       │   ├── dubai16.fnt
+│   │   │       │   ├── dubai16.png
+│   │   │       │   ├── dubai32.fnt
+│   │   │       │   ├── dubai32.png
+│   │   │       │   ├── dubai64.fnt
+│   │   │       │   ├── dubai64.png
+│   │   │       │   ├── dubai8.fnt
+│   │   │       │   └── dubai8.png
+│   │   │       ├── libgdx.png
+│   │   │       ├── libgdx128.png
+│   │   │       ├── libgdx16.png
+│   │   │       ├── libgdx32.png
+│   │   │       ├── libgdx64.png
+│   │   │       ├── map_configs
+│   │   │       │   ├── galactic.map
+│   │   │       │   ├── kingdoms.map
+│   │   │       │   └── microbiome.map
+│   │   │       └── model_configs
+│   │   └── tmp
+│   │       └── compileJava
+│   │           ├── compileTransaction
+│   │           │   ├── backup-dir
+│   │           │   └── stash-dir
+│   │           │       └── Lwjgl3Launcher.class.uniqueId0
+│   │           └── previous-compilation-data.bin
+│   ├── build.gradle
+│   ├── icons
+│   │   ├── logo.icns
+│   │   ├── logo.ico
+│   │   └── logo.png
+│   ├── nativeimage.gradle
+│   └── src
+│       └── main
+│           ├── java
+│           │   └── io
+│           │       └── github
+│           │           └── organism
+│           │               └── lwjgl3
+│           │                   ├── Lwjgl3Launcher.java
+│           │                   └── StartupHelper.java
+│           └── resources
+│               ├── libgdx128.png
+│               ├── libgdx16.png
+│               ├── libgdx32.png
+│               └── libgdx64.png
+└── settings.gradle
+
+435 directories, 453 files

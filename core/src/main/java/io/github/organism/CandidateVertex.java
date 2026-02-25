@@ -2,7 +2,6 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import java.util.Random;
 
 import io.github.organism.map.MapVertex;
 
@@ -26,7 +25,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     }
 
     public void calculatePlanchetteAgreement(Vector2 planchetteFromCenter) {
-        planchetteAgreement = planchetteFromCenter.dot(vector);
+        planchetteAgreement = planchetteFromCenter.dot(vector) + Float.MIN_VALUE;
         this.planchetteFromCenter = planchetteFromCenter;
     }
 
@@ -66,16 +65,17 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
 
     public void render() {
 
-        /*
-        target.pos.grid.gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        target.pos.grid.gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.MAGENTA);
-        target.pos.grid.gameBoard.game.shapeRenderer.line(
+        target.pos.grid.gameBoard.game.shapeRenderer.circle(
             (target.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
             (target.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY,
-            (target.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX + planchetteAgreement.x,
-            (target.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY + planchetteAgreement.y
+            (planchetteAgreement) * 5
         );
+        target.pos.grid.gameBoard.game.shapeRenderer.end();
 
+
+        /*
 
             target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.CYAN);
         target.pos.grid.gameBoard.game.shapeRenderer.line(

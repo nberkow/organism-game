@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.Color;
 import java.awt.Point;
 import java.util.LinkedList;
 
+import io.github.organism.GameBoard;
 import io.github.organism.Organism;
+import io.github.organism.hud.PlayerHud;
 
 public class DummyPlayer implements Player {
 
@@ -54,23 +56,6 @@ public class DummyPlayer implements Player {
     }
 
 
-
-    /**
-     * @return
-     */
-    @Override
-    public int getMostRecentMove() {
-        return 0;
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void transition() {
-
-    }
-
     /**
      *
      */
@@ -87,21 +72,6 @@ public class DummyPlayer implements Player {
         return null;
     }
 
-    /**
-     * @return
-     */
-    @Override
-    public Point getAllyId() {
-        return null;
-    }
-
-    /**
-     * @param p
-     */
-    @Override
-    public void setAllyId(Point p) {
-
-    }
 
     /**
      *
@@ -109,5 +79,21 @@ public class DummyPlayer implements Player {
     @Override
     public void makeMove() {
 
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public PlayerHud getHud() {
+        return null;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public GameBoard getGameboard() {
+        return null;
     }
 }

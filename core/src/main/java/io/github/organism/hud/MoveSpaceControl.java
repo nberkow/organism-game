@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 import io.github.organism.OrganismGame;
+import io.github.organism.Util;
 
 public class MoveSpaceControl {
 
@@ -28,11 +29,9 @@ public class MoveSpaceControl {
 
     public void setup(){
 
-
         planchetteRadius = radius / 10;
         cursorRadius = radius / 10;
-        aggressionRadius = radius * .65f;
-        aggressionDisplayRadius = aggressionRadius + planchetteRadius;
+
         availableRadius = radius - planchetteRadius;
 
         centerCoord = new Vector2(radius, radius);
@@ -76,8 +75,7 @@ public class MoveSpaceControl {
 
 
     private void updateCursor() {
-        cursorCoord.add(hud.getInputVector()).clamp(0f, radius-cursorRadius);
-
+        cursorCoord.add(hud.getPlayerInputVector()).clamp(0f, radius-cursorRadius);
     }
 
     public void draw() {
@@ -127,5 +125,13 @@ public class MoveSpaceControl {
 
     public Vector2 getPlanchetteFromCenterVector() {
         return planchetteFromCenterVector.cpy().nor();
+    }
+
+    public Vector2 getCursorAsVector() {
+        return Util.xyToPolarFloat(cursorCoord);
+    }
+
+    public void setCursorVector(Vector2 cursor) {
+        cursorCoord.set(Util.polarToXYFloat(cursor.scl(availableRadius)));
     }
 }

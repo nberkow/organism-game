@@ -113,11 +113,11 @@ public class GameOrchestrator {
     private void makeMoves() {
 
         for (int i = 0; i< gameBoard.allPlayerIds.size(); i++){
-            int p = (i + frame) % 3; // shift the first player each frame
-            Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(p));
+            Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(i));
             player.makeMove();
         }
     }
+
     public void run(){
         paused = false;
     }

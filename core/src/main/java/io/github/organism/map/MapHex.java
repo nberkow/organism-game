@@ -11,7 +11,6 @@ import io.github.organism.player.Player;
 public class MapHex implements MapElement{
 
     public final float RESOURCE_JITTER = 0.4f;
-
     public final float RESOURCE_RADIUS = .15f;
     public GridPosition pos;
     public MapVertex [] vertexList;
@@ -20,7 +19,6 @@ public class MapHex implements MapElement{
     public int filledResourceSlots;
 
     public Player player;
-
     public boolean masked = false;
 
     public MapHex(GridPosition p){
@@ -87,7 +85,7 @@ public class MapHex implements MapElement{
                 if (v1.player != null && v2.player == v1.player) {
                     c = v2.player.getColor();
                 } else {
-                    if (is_common_hex_masked(v1, v2)) {
+                    if (isCommonHexMasked(v1, v2)) {
                         c = Color.DARK_GRAY;
                     }
                 }
@@ -104,7 +102,7 @@ public class MapHex implements MapElement{
         pos.grid.gameBoard.game.shapeRenderer.end();
     }
 
-    private boolean is_common_hex_masked(MapVertex v1, MapVertex v2) {
+    private boolean isCommonHexMasked(MapVertex v1, MapVertex v2) {
 
         boolean masked = false;
         HashSet<MapHex> intersection = new HashSet<>(v1.adjacentHexes);
@@ -162,7 +160,7 @@ public class MapHex implements MapElement{
 
     }
 
-    public Integer [] get_resources() {
+    public Integer [] getResources() {
         return resources;
     }
 

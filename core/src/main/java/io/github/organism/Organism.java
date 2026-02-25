@@ -52,36 +52,7 @@ public class Organism {
     }
 
     public void updateIncome(){
-        float newIncome = 0;
-        //System.out.println(":::::::");
-        int sets = Integer.MAX_VALUE;
-        //System.out.println("count sets");
-        for (int r : resources){
-            if (r < sets){
-                sets = r;
-                //System.out.println(r + "\t" + sets);
-            }
-        }
-        //System.out.println("-- UPDATE INCOME ---");
-        for (int r : resources){
-
-            if (r == sets){
-
-                newIncome += resourceSetValue * r;
-                //System.out.println("sets:\t" + r + "\t" + resourceSetValue);
-            } else {
-                newIncome += resourceUnitValue * (r - sets);
-                //System.out.println("indv:\t" + r + "\t" + resourceUnitValue);
-            }
-        }
-        //System.out.println("-----");
-        //System.out.println("sets: " + sets);
-        //System.out.println("newIncome: " + newIncome);
-
-        income = Math.min(newIncome, SettingsManager.MAX_ENERGY - energy);
-        //System.out.println("max energy:\t" + SettingsManager.MAX_ENERGY );
-        //System.out.println("energy:\t" + energy);
-        //System.out.println("income:\t" + income);
+        //FIXME 2x income for every resource if you have the most
     }
 
     public void extract(Vector2 planchetteFromCenter) {
@@ -165,6 +136,7 @@ public class Organism {
 
         candidateVertices = new HashMap<>();
         double scoreSum = 0d;
+        float baseP = 0.01f;
 
         // Tally up all the scores and index them
         for (GridPosition pos : territoryVertex) {
@@ -174,18 +146,24 @@ public class Organism {
                     CandidateVertex cv = new CandidateVertex(source, v);
                     cv.calculatePlanchetteAgreement(planchetteFromCenter);
 
+                    float p = cv.planchetteAgreement + baseP;
+                    scoreSum += p;
+
                     if (!candidateVertices.containsKey(cv)) {
-                        candidateVertices.put(cv, cv.planchetteAgreement);
+                        candidateVertices.put(cv, p);
                     }
                     else {
-                        candidateVertices.put(cv, candidateVertices.get(cv) + cv.planchetteAgreement);
+                        candidateVertices.put(cv, candidateVertices.get(cv) + p);
                     }
                 }
             }
         }
 
         // budget depends on planchette magnitude
-        float energyBudget = Math.min(income * (1 + planchetteFromCenter.len()), energy);
+        float energyBudget = Math.min((income + energy)/4 * (1 + planchetteFromCenter.len()), energy);
+
+
+
         int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
 
         for (int v = 0; v < verticesToClaim; v++) {
@@ -253,28 +231,21 @@ public class Organism {
         }
     }
 
-    private void burnVertex(MapVertex v) {
-
-        for (MapHex hex : v.adjacentHexes) {
-            if (hex.player == player) {
-                releaseHex(hex);
-            }
-        }
-
-        v.player = null;
-        territoryVertex.removePos(v.pos);
-    }
-
-    private void releaseHex(MapHex h) {
-        h.player = null;
-        territoryHex.removePos(h.pos);
-        extractQueue.remove(h);
-        updateResources();
-    }
-
     public void dispose() {
         territoryVertex = null;
         territoryHex = null;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public TriangularGrid getTerritoryVertex() {
+        return territoryVertex;
+    }
+
+    public TriangularGrid getTerritoryHex() {
+        return territoryHex;
     }
 }
 

@@ -10,6 +10,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
     HashMap<Integer, HashMap<Integer, HashMap<Integer, GridPosition>>> grid;
 
     int size = 0;
+    int radius = 0;
     public GameBoard gameBoard;
 
     public TriangularGrid(GameBoard gb) {
@@ -32,6 +33,10 @@ public class TriangularGrid implements Iterable<GridPosition> {
         }
 
         grid.get(p.i).get(p.j).put(p.k, p);
+        if (p.k > radius) {
+            radius = p.k;
+        }
+
         size += 1;
     }
 
@@ -178,4 +183,7 @@ public class TriangularGrid implements Iterable<GridPosition> {
     }
 
 
+    public int getRadius() {
+        return radius;
+    }
 }

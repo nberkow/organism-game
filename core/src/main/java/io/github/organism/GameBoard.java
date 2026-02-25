@@ -9,13 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import io.github.organism.map.MapVertex;
+import io.github.organism.hud.PlayerHud;
 import io.github.organism.map.UniverseMap;
 import io.github.organism.player.BotPlayer;
 import io.github.organism.player.Player;
 
 public class GameBoard implements Disposable {
-
 
     public static final float DEFAULT_SPEED = 2f;
     // Visualization Settings
@@ -37,7 +36,6 @@ public class GameBoard implements Disposable {
 
     public GameOrchestrator orchestrator;
 
-    DiplomacyGraph diplomacyGraph;
 
     // Gameplay
     HashMap<Point, Player> players = new HashMap<>();
@@ -46,7 +44,7 @@ public class GameBoard implements Disposable {
     public UniverseMap universeMap;
     public ArrayList<PlayerSummaryDisplay> playerSummaryDisplays;
     public ArrayList<Point> humanPlayerIds;
-    public ArrayList<Point> bot_player_ids;
+    public ArrayList<Point> botPlayerIds;
     public ArrayList<Point> allPlayerIds;
     PlayerStartAssigner playerStartAssigner;
     ResourceDistributor resourceDistributor;
@@ -89,8 +87,6 @@ public class GameBoard implements Disposable {
         // Initialize other game objects here
         universeMap = new UniverseMap(this, radius);
 
-        diplomacyGraph = new DiplomacyGraph(this.game, this);
-
         playerStartAssigner = new PlayerStartAssigner(this);
         resourceDistributor = new ResourceDistributor(this);
         voidDistributor = new VoidDistributor(this);
@@ -98,7 +94,7 @@ public class GameBoard implements Disposable {
 
         playerSummaryDisplays = new ArrayList<>();
         humanPlayerIds = new ArrayList<>();
-        bot_player_ids = new ArrayList<>();
+        botPlayerIds = new ArrayList<>();
         allPlayerIds = new ArrayList<>();
 
     }
@@ -114,7 +110,7 @@ public class GameBoard implements Disposable {
     }
 
 
-    public void createBotPlayer(String name, Point playerId, Color color, Model model){
+    public void createBotPlayer(String name, Point playerId, Color color){
 
         int index = allPlayerIds.size();
 
@@ -125,14 +121,14 @@ public class GameBoard implements Disposable {
             index,
             playerId,
             organism,
-            model,
+            new PlayerHud(game, session, session.getScreen(), false),
             color
         );
 
         organism.player = player;
         players.put(playerId, player);
         //expandEdges.put(playerId, new HashMap<>());
-        bot_player_ids.add(playerId);
+        botPlayerIds.add(playerId);
         allPlayerIds.add(playerId);
 
     }
@@ -170,9 +166,6 @@ public class GameBoard implements Disposable {
             }
         }
 
-        if (showDiplomacy) {
-            diplomacyGraph.render();
-        }
 
         //debug lines
         for (Player p : players.values()){
@@ -190,10 +183,9 @@ public class GameBoard implements Disposable {
         gridWindow.dispose();
         universeMap.dispose();
         orchestrator.dispose();
-        diplomacyGraph.dispose();
         players.clear();
         humanPlayerIds.clear();
-        bot_player_ids.clear();
+        botPlayerIds.clear();
         allPlayerIds.clear();
         playerStartAssigner = null;
         resourceDistributor = null;

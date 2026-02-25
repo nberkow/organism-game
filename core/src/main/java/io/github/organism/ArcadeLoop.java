@@ -127,13 +127,11 @@ public class ArcadeLoop implements GameSession {
                 color = availableColors.remove(0);
             }
 
-            currentGame.createBotPlayer(name, player_id, color, model);
+            currentGame.createBotPlayer(name, player_id, color);
             playerNames.put(player_id, name);
             tournamentPlayerColors.put(player_id, color);
         }
 
-        // reset diplomacy with newly created players
-        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
     }
 
     public void setup(int n) {
@@ -157,7 +155,6 @@ public class ArcadeLoop implements GameSession {
         currentGame.createPlayerSummaryDisplays();
         currentGame.showPlayerSummary = true;
 
-        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
         currentGame.showDiplomacy = true;
 
         currentGameOrchestrator.updateSpeed(1);
@@ -207,7 +204,7 @@ public class ArcadeLoop implements GameSession {
      * @return
      */
     @Override
-    public Object getScreen() {
+    public Screen getScreen() {
         return currentScreen;
     }
 
@@ -312,7 +309,6 @@ public class ArcadeLoop implements GameSession {
 
         for (int i=0; i<3; i++) {
             Point player_id = player_ids.get(i);
-            Model model = modelPool.get(player_id);
             String name = playerNamesArray[player_id.x % playerNamesArray.length] + " " + numerals[player_id.y % numerals.length];
 
             Color color;
@@ -322,13 +318,11 @@ public class ArcadeLoop implements GameSession {
                 color = availableColors.remove(0);
             }
 
-            currentGame.createBotPlayer(name, player_id, color, model);
+            currentGame.createBotPlayer(name, player_id, color);
             playerNames.put(player_id, name);
             tournamentPlayerColors.put(player_id, color);
         }
 
-        // reset diplomacy with newly created players
-        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
     }
 
 

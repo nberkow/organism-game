@@ -15,7 +15,7 @@ public class PlayerHud {
     GameSession gameSession;
     EnergyBar energyBar;
     ResourceBar resourceBar;
-    MoveSpaceControl moveSpaceControl;
+    public MoveSpaceControl moveSpaceControl;
     boolean isPlayerTwo;
 
     Screen screen;
@@ -78,9 +78,13 @@ public class PlayerHud {
         moveSpaceControl.render();
     }
 
-    public Vector2 getInputVector() {
+    public Vector2 getPlayerInputVector() {
         HudInputProcessor hudInputProcessor = (HudInputProcessor) gameSession.getInputProcessor();
         return hudInputProcessor.getInputVectorFromKeys(isPlayerTwo);
+    }
+
+    public Vector2 getBotInputVector() {
+        return moveSpaceControl.getCursorAsVector();
     }
 
     public Vector2 getPlanchetteVector() {
@@ -115,5 +119,13 @@ public class PlayerHud {
             resourceBar.currentMaxCols = resourceBar.currentMaxCols / 2;
             resourceBar.calculateResourceDisplayCoords();
         }
+    }
+
+    public void setBotCursorVector(Vector2 cursorVector) {
+        moveSpaceControl.setCursorVector(cursorVector);
+    }
+
+    public void setBotInputVector(Vector2 vector) {
+        moveSpaceControl.setCursorVector(vector);
     }
 }

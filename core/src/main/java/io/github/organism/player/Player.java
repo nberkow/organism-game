@@ -2,11 +2,14 @@
 package io.github.organism.player;
 
 import java.awt.Point;
+import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
 
 import io.github.organism.FloatPair;
+import io.github.organism.GameBoard;
 import io.github.organism.Organism;
+import io.github.organism.hud.PlayerHud;
 
 public interface Player {
 
@@ -21,18 +24,13 @@ public interface Player {
 
     public float [] gatherInputs();
 
-
-    int getMostRecentMove();
-
-    void transition();
-
     void dispose();
 
     Point getTournamentId();
 
-    Point getAllyId();
-
-    void setAllyId(Point p);
-
     void makeMove();
+
+    PlayerHud getHud();
+
+    GameBoard getGameboard();
 }

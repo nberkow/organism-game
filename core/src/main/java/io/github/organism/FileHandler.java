@@ -155,6 +155,8 @@ public class FileHandler {
     }
     public Model load_model(String file_name){
 
+        /*
+
         String dir = "model_configs";
         FileHandle handle = Gdx.files.local( dir + "/" + file_name);
         String [] content = handle.readString().split("\n");
@@ -192,6 +194,7 @@ public class FileHandler {
             index ++;
         }
 
-        return model;
+        return model;*/
+        return null;
     }
 }

@@ -1,127 +1,127 @@
 package io.github.organism.player;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
-import java.util.LinkedList;
 
 import io.github.organism.GameBoard;
-import io.github.organism.Model;
 import io.github.organism.Organism;
-import io.github.organism.Simulation;
+import io.github.organism.hud.PlayerHud;
+import io.github.organism.learning.DiscountedRewardTracker;
+import io.github.organism.learning.PerformanceReporter;
+import io.github.organism.learning.ResourceRewardData;
+import io.github.organism.learning.SlimeRLAgent;
+import io.github.organism.map.GridPosition;
+import io.github.organism.map.MapHex;
+import io.github.organism.map.MapVertex;
 
 public class BotPlayer implements Player {
-
-    public LinkedList<Integer> move_queue;
-    //public ActionHistory move_history;
-
     public GameBoard gameBoard;
     public int gameIndex; // index within a single game
-    public Point tournament_id; // id in tournament or other large player collection
+    public Point tournamentId; // id in tournament or other large player collection
 
     public Color color;
     public String playerName;
-
-    public Model model;
+    public SlimeRLAgent.GameRLInterface modelInterface;
 
     public Organism organism;
 
-    int most_recent_move;
+    public PlayerHud hud;
 
-    Point allyId;
+    private ResourceRewardData previousRewardData;
+    private DiscountedRewardTracker rewardTracker;
+    private PerformanceReporter reporter;
 
-    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, Model mod, Color c){
+    int currentTurn;
+
+    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, PlayerHud h, Color c){
 
         gameBoard = gb;
         color = c;
         playerName = name;
-        tournament_id = id;
+        tournamentId = id;
         gameIndex = idx;
         organism = org;
-        model = mod;
-        move_queue = new LinkedList<>();
-        allyId = null;
+        modelInterface = new SlimeRLAgent.GameRLInterface(this,9);
+        hud = h;
+
+        this.rewardTracker = new DiscountedRewardTracker(0.95f); // gamma = 0.95
+        this.reporter = new PerformanceReporter("logs");
+        currentTurn = 0;
 
     }
 
+    public float [] gatherInputs(){
 
-    public void queue_move(Integer move) {
-        move_queue.add(move);
+        int r = gameBoard.universeMap.hexGrid.getRadius();
+        Vector2 cursor = hud.getBotInputVector();
+        MapHex hex = findHexAtCursor(cursor, r);
+
+        float [] inputs = new float[18];
+        inputs[0] = (float) hex.pos.i / r;
+        inputs[1] = (float) hex.pos.j / r;
+        inputs[2] = (float) hex.pos.k / r;
+
+        for (int i=0; i<hex.filledResourceSlots; i++) {
+            inputs[3 + i] = 1;
+        }
+
+        int i = 6;
+        int m = 0;
+        int n = 0;
+
+        for (MapVertex v : hex.vertexList) {
+            if (v.player != null) {
+                if (v.player == this){
+                    n = 0;
+                }
+                else {
+                    n = 1;
+                }
+            }
+            inputs[i + m + n]  = 1;
+            m += 2;
+        }
+
+        return inputs;
     }
 
-    public Integer compute_move() {
-        float [] hmm_inputs = gatherInputs();
-        return model.emit(hmm_inputs);
+    MapHex findHexAtCursor(Vector2 cursor, int mapRadius) {
+        MapHex closest = null;
+        float minDist = Float.MAX_VALUE;
+
+        for (GridPosition pos : gameBoard.universeMap.hexGrid) {
+            MapHex hex = (MapHex) pos.content;
+            float i = (float) pos.i / mapRadius;
+            float j = (float) pos.j / mapRadius;
+            float k = (float) pos.k / mapRadius;
+
+            Vector2 hexCenter = new Vector2(
+                (float) ((j * Math.pow(3f, 0.5f) / 2f) - (k * Math.pow(3f, 0.5f) / 2f)),
+                i - j / 2f - k / 2f
+            );
+
+            float dist = hexCenter.dst(cursor);
+            if (dist < minDist) {
+                minDist = dist;
+                closest = hex;
+            }
+        }
+        return closest;
     }
 
-    public void transition(){
-        float [] hmm_inputs = gatherInputs();
-        model.transition(hmm_inputs);
+    public PlayerHud getHud() {
+        return hud;
     }
 
     /**
-     *
+     * @return
      */
-
-
-    public float [] gatherInputs(){
-        /*
-        float [] hmm_inputs = new float [Simulation.MODEL_INPUTS];
-
-        // how many moves to consider from each players queue
-        int move_queue_depth = 6;
-
-        // expand targets are not visible in player queues, so this can be expand, extract or null
-        int option_per_move = 3;
-
-        // move queue depth plus two states for each player's energy and territory
-        int register_size = (move_queue_depth * option_per_move) + 2;
-
-        // add player stats in order, starting with self
-        for (int i=0; i<3; i++) {
-            int p = ((i + gameIndex) % 3);
-            int register_index = p * (register_size);
-
-            Point player_id = gameBoard.allPlayerIds.get(p);
-            Player player = gameBoard.players.get(player_id);
-            Organism organism = player.getOrganism();
-
-            // player's energy
-            hmm_inputs[register_index] = (float) organism.energy / organism.MAX_ENERGY;
-
-            // player's territory
-            hmm_inputs[register_index + 1] = organism.territory_vertex.get_unmasked_vertices();
-
-            // indicator variable for each players move queue
-            // 0 or 1 for each possibility (0,1 or Null), for
-            // -- 0 and 2 both mean expand (register 0)
-            // -- 1 means extract
-
-            LinkedList<Integer> move_queue = player.get_move_queue();
-            int pos;
-
-            int move_indicator = 2; // value for null
-            for (int q=0; q<move_queue_depth; q++) {
-                if (q < move_queue.size()) {
-                    move_indicator = move_queue.get(q) % 2; // 0 and 2 both mean expand. 1 means extract
-                }
-                for (int m=0; m<option_per_move; m++) {
-                    pos = register_index + 2 + (q * option_per_move) + m;
-                    hmm_inputs[pos] = 0;
-                    if (move_indicator == m) {
-                        hmm_inputs[pos] = 1;
-                    }
-                }
-            }
-        }
-
-        return hmm_inputs;
-
-         */
-        return new float [3];
+    @Override
+    public GameBoard getGameboard() {
+        return gameBoard;
     }
-
-
 
     /**
      * @return
@@ -139,8 +139,6 @@ public class BotPlayer implements Player {
         return gameIndex;
     }
 
-
-
     @Override
     public String getPlayerName() {
         return playerName;
@@ -150,19 +148,10 @@ public class BotPlayer implements Player {
         return organism;
     }
 
-    /**
-     * @return
-     */
-    @Override
-    public int getMostRecentMove() {
-        return most_recent_move;
-    }
-
     @Override
     public void dispose() {
-        move_queue.clear();
         gameBoard = null;
-        model.dispose();
+        modelInterface.dispose();
         organism.dispose();
     }
 
@@ -171,26 +160,53 @@ public class BotPlayer implements Player {
      */
     @Override
     public Point getTournamentId() {
-        return tournament_id;
-    }
-
-    /**
-     * @return
-     */
-    @Override
-    public Point getAllyId() {
-        return allyId;
-    }
-
-    public void setAllyId(Point p) {
-        allyId = p;
+        return tournamentId;
     }
 
     /**
      *
      */
     @Override
+
     public void makeMove() {
 
+        currentTurn++;
+
+        // 1. Capture state before move
+        ResourceRewardData before = new ResourceRewardData(this);
+
+        // 2. Get and execute move
+        Vector2 newCursor = modelInterface.nextMove();
+        hud.setBotCursorVector(newCursor);
+        organism.expand(hud.getPlanchetteVector());
+        organism.extract(hud.getPlanchetteVector());
+
+        // 3. Capture state after move
+        ResourceRewardData after = new ResourceRewardData(this);
+
+        // 4. Calculate discounted reward
+        float immediateReward = ResourceRewardData.calculateDeltaReward(before, after, 1.0f);
+        float discountedReturn = rewardTracker.getDiscountedReturn(currentTurn, 10);
+        float totalReward = immediateReward + 0.3f * discountedReturn; // Blend
+
+        // 5. Record for learning
+        rewardTracker.addReward(totalReward, currentTurn);
+        modelInterface.recordReward(totalReward);
+
+        // 6. Report performance
+        //if (reporter != null) {
+        //    float avgReward = calculateAverageReward(); // You'd implement this
+        //    reporter.recordTurn(this, avgReward);
+        //}
+
+        // 7. Update previous data
+        previousRewardData = after;
+    }
+
+    // Initialize reporter when game starts
+    public void initGame(int totalVertices) {
+        if (reporter != null) {
+            reporter.initGame(totalVertices);
+        }
     }
 }

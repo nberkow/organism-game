@@ -14,6 +14,7 @@ import io.github.organism.player.BotPlayer;
 
 public class Simulation implements GameSession {
 
+
     OrganismGame game;
     Screen screen;
     GameBoard currentGame;
@@ -154,7 +155,7 @@ public class Simulation implements GameSession {
         );
     }
 
-    public void run_silent(){
+    public void runSilent(){
 
         // setup and run one game until victory
         silent = true;
@@ -166,10 +167,10 @@ public class Simulation implements GameSession {
         while (!currentGameOrchestrator.finished) {
             logic();
         }
-        Point winner_id = currentGameOrchestrator.testVictoryConditions();
+        Point winnerId = currentGameOrchestrator.testVictoryConditions();
 
-        finishThisRound(winner_id);
-        setupNextRoundModels(winner_id);
+        finishThisRound(winnerId);
+        setupNextRoundModels(winnerId);
 
     }
 
@@ -206,7 +207,7 @@ public class Simulation implements GameSession {
          */
 
         for (int i=0; i<pool_size; i++){
-            Model model = new ReinforcementHMM(game, MODEL_STATES, MODEL_INPUTS);
+            Model model = null;
 
             model.init_random_weights();
             playerPrimaryIndex += 1;
@@ -233,7 +234,7 @@ public class Simulation implements GameSession {
      * @return
      */
     @Override
-    public Object getScreen() {
+    public Screen getScreen() {
         return screen;
     }
 
@@ -324,13 +325,11 @@ public class Simulation implements GameSession {
                 color = availableColors.remove(0);
             }
 
-            currentGame.createBotPlayer(name, player_id, color, model);
+            currentGame.createBotPlayer(name, player_id, color);
             player_names.put(player_id, name);
             tournament_player_colors.put(player_id, color);
         }
 
-        // reset diplomacy with newly created players
-        currentGame.diplomacyGraph = new DiplomacyGraph(game, currentGame);
     }
 
     public void prune_model_pool(){
@@ -368,7 +367,7 @@ public class Simulation implements GameSession {
 
         //System.out.println("adding random " + n);
         for (int i=0; i<n; i++) {
-            Model model = new ReinforcementHMM(game, MODEL_STATES, MODEL_INPUTS);
+            Model model = null;
             model.init_random_weights();
             playerPrimaryIndex++;
             Point player_id = new Point(playerPrimaryIndex, 0);
@@ -386,12 +385,13 @@ public class Simulation implements GameSession {
 
     public void setupNextRoundModels(Point winner_id) {
 
+        /*
         //System.out.println("next round models");
         BotPlayer winner = (BotPlayer) currentGame.players.get(winner_id);
 
         // add a model by averaging the last round models
         Model offspring = get_last_round_offspring();
-        offspring.set_transition_bit_mask(winner.model.get_transition_bit_mask());
+        offspring.set_transition_bit_mask(winner.modelInterface.extractState());
         offspring.mutate_bitmask();
 
 
@@ -427,6 +427,7 @@ public class Simulation implements GameSession {
         if (n > 0) {
             add_new_random_models(n);
         }
+        */
 
     }
 
@@ -467,9 +468,9 @@ public class Simulation implements GameSession {
                 for (int k=0; k<inputs; k++){
                     for (Point p : currentGame.players.keySet()) {
                         BotPlayer player = (BotPlayer) currentGame.players.get(p);
-                        double s = player.model.get_transition_weights()[i][j][k];
+                        //double s = player.modelInterface.get_transition_weights()[i][j][k];
                         double w = weights.get(p);
-                        avg_transition_weights[i][j][k] += s * w;
+                        //avg_transition_weights[i][j][k] += s * w;
                     }
                 }
             }
@@ -481,16 +482,16 @@ public class Simulation implements GameSession {
                 for (int k=0; k<inputs; k++){
                     for (Point p: currentGame.players.keySet()) {
                         BotPlayer player = (BotPlayer) currentGame.players.get(p);
-                        double s = player.model.get_emission_weights()[i][j][k];
+                        //double s = player.modelInterface.get_emission_weights()[i][j][k];
                         double w = weights.get(p);
-                        avg_emission_weights[i][j][k] += s * w;
+                        //avg_emission_weights[i][j][k] += s * w;
                     }
                 }
             }
         }
 
-        Model offspring = new ReinforcementHMM(game, MODEL_STATES, MODEL_INPUTS);
-        offspring.set_weights(avg_transition_weights, avg_emission_weights);
+        Model offspring = null;
+        //offspring.setWeights(avg_transition_weights, avg_emission_weights);
         return offspring;
     }
 
@@ -499,13 +500,12 @@ public class Simulation implements GameSession {
             LabScreen ls = (LabScreen) screen;
             int iterations = Math.round(ls.overlay.savedSettings.get("iterations"));
             if (currentIteration < iterations){
-                run_silent();
+                runSilent();
                 currentIteration++;
             }
 
         }
     }
-
 
     public void logic(){
         Point winner_id = currentGameOrchestrator.testVictoryConditions();
@@ -553,7 +553,6 @@ public class Simulation implements GameSession {
         }
     }
 
-
     public void draw(float delta){
         currentGame.game.camera.update();
         currentGame.render(delta);
@@ -572,8 +571,6 @@ public class Simulation implements GameSession {
             winRecordGraph.render();
         }
     }
-
-
 
     public void render(float delta){
 

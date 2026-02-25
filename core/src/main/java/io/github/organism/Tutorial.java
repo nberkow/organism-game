@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 
 import java.awt.Point;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import io.github.organism.hud.PlayerHud;
+import io.github.organism.player.BotPlayer;
 import io.github.organism.player.DummyPlayer;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
@@ -39,7 +41,7 @@ public class Tutorial implements GameSession {
          */
 
         createGameBoard();
-        createHumanPlayer();
+        createBotPlayer();
         createDummyPlayers();
         createPlayerStarts();
 
@@ -67,7 +69,7 @@ public class Tutorial implements GameSession {
      * @return
      */
     @Override
-    public Object getScreen() {
+    public Screen getScreen() {
         return screen;
     }
 
@@ -86,6 +88,26 @@ public class Tutorial implements GameSession {
     }
 
     private void createBotPlayer() {
+        Point playerId = new Point(-999, 0);
+        screen.player1Hud = new PlayerHud(game, this, screen, false);
+        playerIdToHud.put(playerId, screen.player1Hud);
+
+        Color color = Color.RED;
+        String name = "Player " + (1);
+        Organism organism = new Organism(currentGame);
+        Player player = new BotPlayer(
+            currentGame,
+            name,
+            0,
+            playerId,
+            organism,
+            screen.player1Hud,
+            color
+        );
+        organism.player = player;
+        currentGame.players.put(playerId, player);
+        currentGame.botPlayerIds.add(playerId);
+        currentGame.allPlayerIds.add(playerId);
     }
 
     private void createHumanPlayer() {

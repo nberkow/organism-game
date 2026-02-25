@@ -27,6 +27,7 @@ public class IO_Player  implements Player {
 
     int most_recent_move;
     ActionHistory moveHistory;
+
     PlayerHud hud;
 
     public IO_Player(GameBoard gb, String name, int idx, Point id, Organism org, PlayerHud h, Color c){
@@ -41,6 +42,17 @@ public class IO_Player  implements Player {
         color = c;
     }
 
+    public PlayerHud getHud() {
+        return hud;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public GameBoard getGameboard() {
+        return gameBoard;
+    }
 
     /**
      * @return
@@ -83,21 +95,6 @@ public class IO_Player  implements Player {
         return new float[0];
     }
 
-    /**
-     * @return
-     */
-    @Override
-    public int getMostRecentMove() {
-        return most_recent_move;
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void transition() {
-        // interface consistency. used for bot players
-    }
 
     /**
      *
@@ -117,16 +114,6 @@ public class IO_Player  implements Player {
         return tournamentId;
     }
 
-    /**
-     * @return
-     */
-    @Override
-    public Point getAllyId() {
-        return allyId;
-    }
-    public void setAllyId(Point p) {
-        allyId = p;
-    }
 
     /**
      *
@@ -136,4 +123,5 @@ public class IO_Player  implements Player {
         organism.expand(hud.getPlanchetteVector());
         organism.extract(hud.getPlanchetteVector());
     }
+
 }

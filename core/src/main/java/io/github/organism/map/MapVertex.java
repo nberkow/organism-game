@@ -22,6 +22,8 @@ public class MapVertex implements MapElement{
     public boolean masked = false;
 
     public ArrayList<CandidateVertex> candidateVertices;
+    public boolean indicate = false;
+
     public MapVertex(GridPosition p) {
         pos = p;
         x = (float) ((pos.j * Math.pow(3f, 0.5f) / 2f) - (pos.k * Math.pow(3f, 0.5f) / 2f));
@@ -40,7 +42,6 @@ public class MapVertex implements MapElement{
     }
 
     public void render(){
-
 
     }
 
