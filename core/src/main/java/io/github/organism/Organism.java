@@ -51,8 +51,24 @@ public class Organism {
         }
     }
 
-    public void updateIncome(){
-        //FIXME 2x income for every resource if you have the most
+    public void updateIncome() {
+        // Base income
+        float baseIncome = 5f;
+        
+        // Count how many resource types this player leads in
+        int leadershipBonuses = 0;
+        for (int i = 0; i < 3; i++) {
+            if (gameBoard.resourceLeaders[i] == player) {
+                leadershipBonuses++;
+            }
+        }
+        
+        // Each leadership gives a bonus (you can adjust the bonus amount)
+        float bonusPerLeadership = gameBoard.config.gameplaySettings.getOrDefault(
+            "resource leadership bonus", 5f
+        );
+        
+        income = baseIncome + (leadershipBonuses * bonusPerLeadership);
     }
 
     public void extract(Vector2 planchetteFromCenter) {
@@ -62,8 +78,11 @@ public class Organism {
         permanently burn one resource unit to collect
          */
 
-        //FIXME temporarily setting constant income
-        income = 5;
+        // Update resource counts and leadership before calculating income
+        updateResources();
+        gameBoard.updateResourceLeadership();
+        updateIncome();
+        
         energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
     }
 
@@ -133,6 +152,11 @@ public class Organism {
 
 
     public void expand(Vector2 planchetteFromCenter) {
+        
+        // Update resources and income before expanding
+        updateResources();
+        gameBoard.updateResourceLeadership();
+        updateIncome();
 
         candidateVertices = new HashMap<>();
         double scoreSum = 0d;

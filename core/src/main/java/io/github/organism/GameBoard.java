@@ -54,6 +54,9 @@ public class GameBoard implements Disposable {
     public Random rng;
     public OrganismGame game;
     MoveLogger move_logger;
+    
+    // Resource leadership tracking
+    public Player[] resourceLeaders = new Player[3]; // One leader per resource type
 
 
     public GameBoard(OrganismGame g, GameConfig cfg, GameSession gs) {
@@ -147,6 +150,28 @@ public class GameBoard implements Disposable {
 
     public int countResources(){
         return universeMap.hexGrid.countResources();
+    }
+    
+    public void updateResourceLeadership() {
+        // Update which player leads in each resource type
+        for (int resourceType = 0; resourceType < 3; resourceType++) {
+            Player currentLeader = null;
+            int maxCount = 0;
+            
+            // Find the player with the most of this resource
+            for (Player player : players.values()) {
+                Organism organism = player.getOrganism();
+                if (organism != null) {
+                    int count = organism.resources[resourceType];
+                    if (count > maxCount) {
+                        maxCount = count;
+                        currentLeader = player;
+                    }
+                }
+            }
+            
+            resourceLeaders[resourceType] = currentLeader;
+        }
     }
 
     public void logic(float timeDelta) {

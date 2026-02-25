@@ -21,6 +21,11 @@ public interface Player {
     String getPlayerName();
 
     Organism getOrganism();
+    
+    default int[] getResourceCounts() {
+        Organism organism = getOrganism();
+        return organism != null ? organism.resources : new int[]{0, 0, 0};
+    }
 
     public float [] gatherInputs();
 
