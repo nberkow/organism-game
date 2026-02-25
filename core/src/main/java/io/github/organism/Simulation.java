@@ -84,8 +84,18 @@ public class Simulation implements GameSession {
 
     HashMap<Point, Model> modelPool;
     HashMap<Point, ArrayList<Point>> winRecords;
-
     HashMap<Point, ArrayList<Integer>> winRecordTurns;
+    
+    // Tournament scoring
+    HashMap<Point, Integer> cumulativeScores;  // Total vertices captured across all games
+    HashMap<Point, Integer> gamesPlayed;       // Number of games each player has participated in
+    
+    // Tournament management
+    int tournamentRound;
+    int roundsPerElimination = 10;  // Eliminate players every N rounds
+    int playersToEliminatePerRound = 2;  // How many to eliminate each time
+    
+    ModelSpawner modelSpawner;
 
 
     public boolean show_histograms = false;
@@ -113,6 +123,11 @@ public class Simulation implements GameSession {
         modelPool = new HashMap<>();
         winRecords = new HashMap<>();
         winRecordTurns = new HashMap<>();
+        cumulativeScores = new HashMap<>();
+        gamesPlayed = new HashMap<>();
+        
+        tournamentRound = 0;
+        modelSpawner = new ModelSpawner(0);
 
         modelPoolDisplay = new ModelPoolDisplay(game, this);
         roundSummary = new RoundSummary(game, this);
@@ -207,12 +222,9 @@ public class Simulation implements GameSession {
          */
 
         for (int i=0; i<pool_size; i++){
-            Model model = null;
-
-            model.init_random_weights();
-            playerPrimaryIndex += 1;
-            Point player_id  = new Point(playerPrimaryIndex, 0);
-            model.setPlayerTournamentId(player_id);
+            Model model = modelSpawner.createRandomModel();
+            Point player_id = model.getPlayerTournamentId();
+            
             modelPool.put(player_id, model);
 
             ArrayList<Point> wins = new ArrayList<>();
@@ -223,7 +235,11 @@ public class Simulation implements GameSession {
 
             winRecords.put(player_id, wins);
             winRecordTurns.put(player_id, turns);
+            cumulativeScores.put(player_id, 0);
+            gamesPlayed.put(player_id, 0);
         }
+        
+        playerPrimaryIndex = modelSpawner.getNextPrimaryIndex();
     }
 
     public void advanceFrameCount(){
@@ -269,7 +285,9 @@ public class Simulation implements GameSession {
     private void finishThisRound(Point winner_id) {
 
         System.out.println("iteration: " + currentIteration + "/" + iterations);
+        tournamentRound++;
 
+        // Update win/loss records and capture scores
         for (Point p : currentGame.players.keySet()) {
             Point prev_rec = winRecords.get(p).get(0);
             Point rec = new Point(prev_rec.x, prev_rec.y);
@@ -281,6 +299,16 @@ public class Simulation implements GameSession {
             }
             winRecords.get(p).add(0, rec);
             winRecordTurns.get(p).add(0, currentIteration);
+            
+            // Capture vertices as score
+            int verticesCaptured = currentGame.players.get(p).getOrganism().territoryVertex.size();
+            int currentScore = cumulativeScores.getOrDefault(p, 0);
+            cumulativeScores.put(p, currentScore + verticesCaptured);
+            
+            int games = gamesPlayed.getOrDefault(p, 0);
+            gamesPlayed.put(p, games + 1);
+            
+            System.out.println("Player " + p + " captured " + verticesCaptured + " vertices. Total: " + cumulativeScores.get(p));
         }
 
         roundSummary.set_winner(winner_id);
@@ -332,168 +360,98 @@ public class Simulation implements GameSession {
 
     }
 
-    public void prune_model_pool(){
-
-        ArrayList<Point> to_remove = new ArrayList<>();
-        HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
-
-        for (Point p : modelPool.keySet()) {
-            Point rec = winRecords.get(p).get(0);
-            float margin = (rec.x - rec.y);
-            if (margin < 1 & rec.y > 0) {
-                // recycle colors and mark eliminated players in gray
-                to_remove.add(p);
-                Color player_color = tournament_player_colors.get(p);
-                if (player_color != null && !player_color.equals(Color.DARK_GRAY)) {
-                    availableColors.add(player_color); // Recycle color
-                }
-                tournament_player_colors.put(p, Color.DARK_GRAY); // Mark eliminated players
-            }
-            if (!models_by_win_margin.containsKey(margin)) {
-                models_by_win_margin.put(margin, new ArrayList<>());
-            }
+    public void eliminateBottomPlayers(){
+        // Only eliminate if we have enough players and it's an elimination round
+        if (modelPool.size() <= 3 || tournamentRound % roundsPerElimination != 0) {
+            return;
         }
 
-        //System.out.println("removing " + to_remove.size());
-        for (Point p : to_remove){
+        System.out.println("=== ELIMINATION ROUND " + tournamentRound + " ===");
+        
+        // Sort players by average score (total score / games played)
+        ArrayList<Point> playerIds = new ArrayList<>(modelPool.keySet());
+        playerIds.sort((p1, p2) -> {
+            double avg1 = cumulativeScores.getOrDefault(p1, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p1, 1));
+            double avg2 = cumulativeScores.getOrDefault(p2, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p2, 1));
+            return Double.compare(avg2, avg1); // Descending order (best first)
+        });
+        
+        // Eliminate bottom N players
+        int toEliminate = Math.min(playersToEliminatePerRound, playerIds.size() - 3); // Keep at least 3
+        ArrayList<Point> eliminated = new ArrayList<>();
+        
+        for (int i = playerIds.size() - 1; i >= playerIds.size() - toEliminate && i >= 0; i--) {
+            Point p = playerIds.get(i);
+            eliminated.add(p);
+            
+            // Recycle color
+            Color player_color = tournament_player_colors.get(p);
+            if (player_color != null && !player_color.equals(Color.DARK_GRAY)) {
+                availableColors.add(player_color);
+            }
+            tournament_player_colors.put(p, Color.DARK_GRAY);
+            
+            double avgScore = cumulativeScores.getOrDefault(p, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p, 1));
+            System.out.println("Eliminated: " + player_names.get(p) + " (avg: " + avgScore + ")");
+        }
+        
+        // Remove from active pool
+        for (Point p : eliminated) {
             modelPool.remove(p);
         }
-        //System.out.println("new size: " + model_pool.size());
-
+        
+        System.out.println("Pool size after elimination: " + modelPool.size());
     }
 
     public void add_new_random_models(int n){
         // add new random models
-
-        //System.out.println("adding random " + n);
+        System.out.println("Adding " + n + " new random organisms");
+        
         for (int i=0; i<n; i++) {
-            Model model = null;
-            model.init_random_weights();
-            playerPrimaryIndex++;
-            Point player_id = new Point(playerPrimaryIndex, 0);
-            model.setPlayerTournamentId(player_id);
+            Model model = modelSpawner.createRandomModel();
+            Point player_id = model.getPlayerTournamentId();
+            
             modelPool.put(player_id, model);
+            
             ArrayList<Point> rec = new ArrayList<>();
             rec.add(new Point(0, 0));
             winRecords.put(player_id, rec);
+            
             ArrayList<Integer> turn = new ArrayList<>();
             turn.add(currentIteration);
             winRecordTurns.put(player_id, turn);
+            
+            cumulativeScores.put(player_id, 0);
+            gamesPlayed.put(player_id, 0);
+            
+            System.out.println("Added new organism: " + player_id);
         }
-        //System.out.println("new size: " + model_pool.size());
+        
+        playerPrimaryIndex = modelSpawner.getNextPrimaryIndex();
+        System.out.println("Pool size after addition: " + modelPool.size());
     }
 
     public void setupNextRoundModels(Point winner_id) {
-
-        /*
-        //System.out.println("next round models");
-        BotPlayer winner = (BotPlayer) currentGame.players.get(winner_id);
-
-        // add a model by averaging the last round models
-        Model offspring = get_last_round_offspring();
-        offspring.set_transition_bit_mask(winner.modelInterface.extractState());
-        offspring.mutate_bitmask();
-
-
-        offspring.apply_transition_mask();
-        Point offspring_player_id = new Point(
-            winner_id.x,
-            winner_id.y + 1
-        );
-
-
-        // avoid collisions from different inheritance paths
-        while (tournament_player_colors.containsKey(offspring_player_id)){
-            int y = offspring_player_id.y;
-            offspring_player_id = new Point(
-                winner_id.x,
-                y + 1
-            );
-        }
-
-        offspring.setPlayerTournamentId(offspring_player_id);
-        modelPool.put(offspring_player_id, offspring);
-        ArrayList<Point> rec = new ArrayList<>();
-        rec.add(new Point(0, 0));
-        winRecords.put(offspring_player_id, rec);
-
-        ArrayList<Integer> turn = new ArrayList<>();
-        turn.add(currentIteration);
-        winRecordTurns.put(offspring_player_id, turn);
-
-        prune_model_pool();
-
+        // Evolution logic disabled for now
+        
+        // Check if it's time to eliminate players
+        eliminateBottomPlayers();
+        
+        // Add new random organisms to maintain pool size
         int n = pool_size - modelPool.size();
         if (n > 0) {
             add_new_random_models(n);
         }
-        */
-
     }
 
+    // Evolution logic commented out - will be re-enabled later
+    /*
     public Model get_last_round_offspring() {
-
-        /*
-        in the future this can have more behaviors
-
-        for now
-        - create a new model by calculating the weighted average of
-        the models from the last round (weighted by final territory)
-         */
-
-        // parse params and init datastructures
-        int states = MODEL_STATES;
-        int inputs = MODEL_INPUTS;
-
-        double [][][] avg_transition_weights = new double[states][states][inputs];
-        double [][][] avg_emission_weights = new double[states][4][inputs];
-
-        // calculate the weights
-        HashMap<Point, Double> weights = new HashMap<>();
-
-        double total_territory = 0;
-        for (Point player_id : currentGame.players.keySet()) {
-            double territory = currentGame.players.get(player_id).getOrganism().territoryVertex.getUnmaskedVertices();
-            total_territory += territory;
-        }
-
-        for (Point player_id  : currentGame.players.keySet()) {
-            double territory = currentGame.players.get(player_id).getOrganism().territoryVertex.getUnmaskedVertices();
-            weights.put(player_id, territory / total_territory);
-        }
-
-        // average the transition weights
-        for (int i=0; i<states; i++){
-            for (int j=0; j<states; j++){
-                for (int k=0; k<inputs; k++){
-                    for (Point p : currentGame.players.keySet()) {
-                        BotPlayer player = (BotPlayer) currentGame.players.get(p);
-                        //double s = player.modelInterface.get_transition_weights()[i][j][k];
-                        double w = weights.get(p);
-                        //avg_transition_weights[i][j][k] += s * w;
-                    }
-                }
-            }
-        }
-
-        // average the emission weights
-        for (int i=0; i<states; i++){
-            for (int j=0; j<4; j++){
-                for (int k=0; k<inputs; k++){
-                    for (Point p: currentGame.players.keySet()) {
-                        BotPlayer player = (BotPlayer) currentGame.players.get(p);
-                        //double s = player.modelInterface.get_emission_weights()[i][j][k];
-                        double w = weights.get(p);
-                        //avg_emission_weights[i][j][k] += s * w;
-                    }
-                }
-            }
-        }
-
-        Model offspring = null;
-        //offspring.setWeights(avg_transition_weights, avg_emission_weights);
-        return offspring;
+        // This method will be used for evolution in the future
+        // For now, we just spawn random organisms
+        return null;
     }
+    */
 
     public void silent_logic(){
         if (screen.getClass() == LabScreen.class) {
@@ -544,6 +502,12 @@ public class Simulation implements GameSession {
 
             if (currentIteration < iterations & next_round_begin) {
                 currentIteration++;
+                
+                // Print standings periodically
+                if (tournamentRound % 5 == 0) {
+                    printTournamentStandings();
+                }
+                
                 setup_next_round(winner_id); // this will set winner id back to null
 
                 next_round_begin = false;
@@ -597,6 +561,28 @@ public class Simulation implements GameSession {
     }
 
 
+    public void printTournamentStandings() {
+        System.out.println("\n=== TOURNAMENT STANDINGS (Round " + tournamentRound + ") ===");
+        
+        ArrayList<Point> playerIds = new ArrayList<>(modelPool.keySet());
+        playerIds.sort((p1, p2) -> {
+            double avg1 = cumulativeScores.getOrDefault(p1, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p1, 1));
+            double avg2 = cumulativeScores.getOrDefault(p2, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p2, 1));
+            return Double.compare(avg2, avg1);
+        });
+        
+        int rank = 1;
+        for (Point p : playerIds) {
+            String name = player_names.getOrDefault(p, "Unknown");
+            int total = cumulativeScores.getOrDefault(p, 0);
+            int games = gamesPlayed.getOrDefault(p, 0);
+            double avg = total / (double) Math.max(1, games);
+            System.out.println(rank + ". " + name + " - Total: " + total + ", Games: " + games + ", Avg: " + String.format("%.2f", avg));
+            rank++;
+        }
+        System.out.println("=====================================\n");
+    }
+    
     public void write_champions_to_file(){
         System.out.println("saving files");
 

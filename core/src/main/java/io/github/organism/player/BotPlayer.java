@@ -49,7 +49,8 @@ public class BotPlayer implements Player {
         this.rewardTracker = new DiscountedRewardTracker(0.95f); // gamma = 0.95
         this.reporter = new PerformanceReporter("logs");
         currentTurn = 0;
-
+        
+        System.out.println("BotPlayer created: " + name + " (ID: " + id + ")");
     }
 
     public float [] gatherInputs(){
