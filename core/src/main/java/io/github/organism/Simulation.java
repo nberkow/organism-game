@@ -82,7 +82,7 @@ public class Simulation implements GameSession {
         "Bondarzewia berkeleyi"
     };
 
-    HashMap<Point, Model> modelPool;
+    HashMap<Point, BotPlayer> modelPool;
     HashMap<Point, ArrayList<Point>> winRecords;
     HashMap<Point, ArrayList<Integer>> winRecordTurns;
 
@@ -127,7 +127,7 @@ public class Simulation implements GameSession {
         gamesPlayed = new HashMap<>();
 
         tournamentRound = 0;
-        modelSpawner = new ModelSpawner(0, currentGame);
+        modelSpawner = new ModelSpawner(0);
 
         modelPoolDisplay = new ModelPoolDisplay(game, this);
         roundSummary = new RoundSummary(game, this);
@@ -222,15 +222,17 @@ public class Simulation implements GameSession {
          */
 
         for (int i=0; i<pool_size; i++){
-            BotPlayer bot = modelSpawner.createRandomBotPlayer(
-                player_names.get(player_id),
-                i,
-                tournament_player_colors.get(player_id)
-            );
-            Model model = bot.getOrganism();
-            Point player_id = model.getPlayerTournamentId();
+            // Generate name and color first
+            Point player_id = new Point(playerPrimaryIndex + i, 0);
+            String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
+            Color color = availableColors.remove(0);
+            
+            BotPlayer bot = modelSpawner.createRandomBotPlayer(name, i, color);
+            player_id = bot.getTournamentId();
 
-            modelPool.put(player_id, model);
+            modelPool.put(player_id, bot);
+            player_names.put(player_id, name);
+            tournament_player_colors.put(player_id, color);
 
             ArrayList<Point> wins = new ArrayList<>();
             ArrayList<Integer> turns = new ArrayList<>();
@@ -348,19 +350,12 @@ public class Simulation implements GameSession {
 
         for (int i=0; i<3; i++) {
             Point player_id = player_ids.get(i);
-            Model model = modelPool.get(player_id);
-            String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
-
-            Color color;
-            if (tournament_player_colors.containsKey(player_id)){
-                color = tournament_player_colors.get(player_id);
-            } else {
-                color = availableColors.remove(0);
-            }
-
-            currentGame.createBotPlayer(name, player_id, color);
-            player_names.put(player_id, name);
-            tournament_player_colors.put(player_id, color);
+            BotPlayer bot = modelPool.get(player_id);
+            
+            // Bot already exists in pool, just add to current game
+            currentGame.players.put(player_id, bot);
+            currentGame.botPlayerIds.add(player_id);
+            currentGame.allPlayerIds.add(player_id);
         }
 
     }
@@ -413,10 +408,16 @@ public class Simulation implements GameSession {
         System.out.println("Adding " + n + " new random organisms");
 
         for (int i=0; i<n; i++) {
-            Model model = modelSpawner.createRandomModel();
-            Point player_id = model.getPlayerTournamentId();
+            Point player_id = new Point(playerPrimaryIndex + i, 0);
+            String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
+            Color color = availableColors.size() > 0 ? availableColors.remove(0) : Color.GRAY;
+            
+            BotPlayer bot = modelSpawner.createRandomBotPlayer(name, modelPool.size(), color);
+            player_id = bot.getTournamentId();
 
-            modelPool.put(player_id, model);
+            modelPool.put(player_id, bot);
+            player_names.put(player_id, name);
+            tournament_player_colors.put(player_id, color);
 
             ArrayList<Point> rec = new ArrayList<>();
             rec.add(new Point(0, 0));
@@ -608,7 +609,10 @@ public class Simulation implements GameSession {
         for (Float m : modelsByWinMargin.keySet()) {
             for (Point p : modelsByWinMargin.get(m)){
                 if (s < max_models_to_save){
-                    game.fileHandler.save_model(modelPool.get(p), player_names.get(p));
+                    BotPlayer bot = modelPool.get(p);
+                    // Save bot's model interface weights
+                    // game.fileHandler.save_model(bot.modelInterface, player_names.get(p));
+                    System.out.println("Would save model for: " + player_names.get(p));
                     s++;
                 }
             }
