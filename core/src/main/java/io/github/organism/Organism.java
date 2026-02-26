@@ -164,7 +164,9 @@ public class Organism {
         gameBoard.updateResourceLeadership();
         updateIncome();
 
-        candidateVertices = new HashMap<>();
+        // Don't clear candidateVertices here - keep them for rendering
+        // candidateVertices = new HashMap<>();
+        candidateVertices.clear(); // Clear but keep the reference
         double scoreSum = 0d;
         float baseP = 0.01f;
 
@@ -211,6 +213,9 @@ public class Organism {
             }
             if (remove != null) candidateVertices.remove(remove);
         }
+        
+        // Keep candidateVertices populated for debug rendering
+        // They will be cleared at the start of next expand() call
     }
 
     public void claimHex(MapHex h){
