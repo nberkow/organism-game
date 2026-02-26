@@ -26,8 +26,8 @@ public class GameBoard implements Disposable {
     public float centerY;
     float grid_window_y;
     static final float PLAYER_SUMMARY_X = 30;
-    static final float PLAYER_SUMMARY_Y = 400;
-    final float PLAYER_SUMMARY_HEIGHT = 40;
+    static final float PLAYER_SUMMARY_Y = 380;
+    final float PLAYER_SUMMARY_HEIGHT = 60;
     public long seed;
 
     public GameSession session;
@@ -160,6 +160,7 @@ public class GameBoard implements Disposable {
         for (int resourceType = 0; resourceType < 3; resourceType++) {
             Player currentLeader = null;
             int maxCount = 0;
+            int playersWithMax = 0;
             
             // Find the player with the most of this resource
             for (Player player : players.values()) {
@@ -169,11 +170,19 @@ public class GameBoard implements Disposable {
                     if (count > maxCount) {
                         maxCount = count;
                         currentLeader = player;
+                        playersWithMax = 1;
+                    } else if (count == maxCount && count > 0) {
+                        playersWithMax++;
                     }
                 }
             }
             
-            resourceLeaders[resourceType] = currentLeader;
+            // If there's a tie, no one is the leader
+            if (playersWithMax > 1) {
+                resourceLeaders[resourceType] = null;
+            } else {
+                resourceLeaders[resourceType] = currentLeader;
+            }
         }
     }
 

@@ -506,7 +506,7 @@ public class Simulation implements GameSession {
                 next_round_begin = true;
             }
 
-            if (currentIteration < iterations & next_round_begin) {
+            if (currentIteration < iterations && next_round_begin) {
                 currentIteration++;
 
                 // Print standings periodically
@@ -518,6 +518,7 @@ public class Simulation implements GameSession {
 
                 next_round_begin = false;
                 show_summary_screen = false;
+                between_round_pause_timer = 0f;
             }
 
         }

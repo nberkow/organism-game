@@ -10,8 +10,8 @@ import io.github.organism.player.Player;
 
 public class TerritoryBar {
 
-    float x_pos = 28;
-    float y_pos = 450;  // Moved down to avoid overlap with player summaries
+    float x_pos = OrganismGame.VIRTUAL_WIDTH / 2 - 80;  // Centered
+    float y_pos = 500;  // Moved down to avoid overlap with player summaries
 
     float victory_threshold = 2/3f;
     float bar_width = 40;

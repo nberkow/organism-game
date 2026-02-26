@@ -13,10 +13,10 @@ public class PlayerSummaryDisplay {
 
     GameBoard gameBoard;
 
-    final float CONTROL_CIRCLE_RADIUS = 25;
-    final float ENERGY_BAR_HEIGHT = 8;
-    final float RESOURCE_BAR_HEIGHT = 6;
-    final float BAR_SPACING = 4;
+    final float CONTROL_CIRCLE_RADIUS = 20;
+    final float ENERGY_BAR_HEIGHT = 6;
+    final float RESOURCE_BAR_HEIGHT = 5;
+    final float BAR_SPACING = 3;
 
     final float INCOME_BAR_Y = 60;
 
@@ -81,19 +81,19 @@ public class PlayerSummaryDisplay {
                 gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
                 // Draw cursor (smaller, lighter)
-                gameBoard.game.shapeRenderer.setColor(player.getColor().r, player.getColor().g, player.getColor().b, 0.5f);
+                gameBoard.game.shapeRenderer.setColor(player.getColor().r, player.getColor().g, player.getColor().b, 0.4f);
                 gameBoard.game.shapeRenderer.circle(
-                    circleX + cursor.x * CONTROL_CIRCLE_RADIUS * 0.8f,
-                    circleY + cursor.y * CONTROL_CIRCLE_RADIUS * 0.8f,
-                    3
+                    circleX + cursor.x * CONTROL_CIRCLE_RADIUS * 0.7f,
+                    circleY + cursor.y * CONTROL_CIRCLE_RADIUS * 0.7f,
+                    2
                 );
 
                 // Draw planchette (larger, solid)
                 gameBoard.game.shapeRenderer.setColor(player.getColor());
                 gameBoard.game.shapeRenderer.circle(
-                    circleX + planchette.x * CONTROL_CIRCLE_RADIUS * 0.8f,
-                    circleY + planchette.y * CONTROL_CIRCLE_RADIUS * 0.8f,
-                    5
+                    circleX + planchette.x * CONTROL_CIRCLE_RADIUS * 0.7f,
+                    circleY + planchette.y * CONTROL_CIRCLE_RADIUS * 0.7f,
+                    4
                 );
 
                 gameBoard.game.shapeRenderer.end();
@@ -111,9 +111,10 @@ public class PlayerSummaryDisplay {
 
         gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         gameBoard.game.shapeRenderer.setColor(gameBoard.game.foregroundColor);
+        float energyFraction = Math.min(1.0f, player.getOrganism().energy / 100f);
         gameBoard.game.shapeRenderer.rect(
             barX, barY,
-            (float) (energyBarWidth * (player.getOrganism().energy / 100f)),
+            energyBarWidth * energyFraction,
             ENERGY_BAR_HEIGHT);
         gameBoard.game.shapeRenderer.end();
 
