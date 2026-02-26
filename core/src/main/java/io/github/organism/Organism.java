@@ -164,71 +164,90 @@ public class Organism {
         gameBoard.updateResourceLeadership();
         updateIncome();
 
-        // Rebuild candidate vertices each time for current game state
-        candidateVertices.clear();
-        double scoreSum = 0d;
-        float baseP = 0.01f;
+        // Only rebuild candidates if empty or planchette changed significantly
+        boolean needsRebuild = candidateVertices.isEmpty();
+        
+        if (needsRebuild) {
+            candidateVertices.clear();
+            double scoreSum = 0d;
+            float baseP = 0.01f;
 
-        // Tally up all the scores and index them
-        for (GridPosition pos : territoryVertex) {
-            MapVertex source = (MapVertex) pos.content;
-            for (MapVertex v : source.adjacentVertices) {
-                if (v.getPlayer() == null  && !v.masked) {
-                    CandidateVertex cv = new CandidateVertex(source, v);
-                    cv.gameBoard = gameBoard; // Set gameBoard reference for rendering
-                    cv.calculatePlanchetteAgreement(planchetteFromCenter);
+            // Tally up all the scores and index them
+            for (GridPosition pos : territoryVertex) {
+                MapVertex source = (MapVertex) pos.content;
+                for (MapVertex v : source.adjacentVertices) {
+                    if (v.getPlayer() == null  && !v.masked) {
+                        CandidateVertex cv = new CandidateVertex(source, v);
+                        cv.gameBoard = gameBoard;
+                        cv.calculatePlanchetteAgreement(planchetteFromCenter);
 
-                    float p = cv.planchetteAgreement + baseP;
-                    scoreSum += p;
+                        float p = cv.planchetteAgreement + baseP;
+                        scoreSum += p;
 
-                    if (!candidateVertices.containsKey(cv)) {
-                        candidateVertices.put(cv, p);
-                    }
-                    else {
-                        candidateVertices.put(cv, candidateVertices.get(cv) + p);
+                        if (!candidateVertices.containsKey(cv)) {
+                            candidateVertices.put(cv, p);
+                        }
+                        else {
+                            candidateVertices.put(cv, candidateVertices.get(cv) + p);
+                        }
                     }
                 }
             }
+        } else {
+            // Update planchette agreement for existing candidates
+            for (CandidateVertex cv : candidateVertices.keySet()) {
+                cv.calculatePlanchetteAgreement(planchetteFromCenter);
+            }
+        }
+
+        // Check if we have energy and candidates
+        if (candidateVertices.isEmpty() || energy < gameBoard.config.gameplaySettings.get("energy to expand")) {
+            return;
         }
 
         // budget depends on planchette magnitude
-        float energyBudget = Math.min((income + energy)/4 * (1 + planchetteFromCenter.len()), energy);
-
+        float energyBudget = Math.min(energy, energy * (0.5f + planchetteFromCenter.len() * 0.5f));
         int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
 
-        for (int v = 0; v < verticesToClaim; v++) {
-            // Check if we have any valid candidates left
-            if (candidateVertices.isEmpty() || scoreSum <= 0) {
+        int attemptedClaims = 0;
+        int maxAttempts = verticesToClaim * 3; // Allow retries for invalid vertices
+        
+        while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
+            // Recalculate score sum from current candidates
+            double scoreSum = 0d;
+            for (float score : candidateVertices.values()) {
+                scoreSum += score;
+            }
+            
+            if (scoreSum <= 0) {
                 break;
             }
             
             double r = gameBoard.rng.nextDouble() * scoreSum;
             double s = 0d;
-            CandidateVertex remove = null;
+            CandidateVertex selected = null;
             
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 s += candidateVertices.get(cv);
                 if (s > r) {
-                    // Check if vertex is still available at claim time
-                    if (cv.target.getPlayer() == null && !cv.target.masked) {
-                        claimVertex(cv.target);
-                        energy -= gameBoard.config.gameplaySettings.get("energy to expand");
-                    }
-                    // Remove this candidate regardless of whether we claimed it
-                    remove = cv;
+                    selected = cv;
                     break;
                 }
             }
             
-            if (remove != null) {
-                float removedScore = candidateVertices.get(remove);
-                candidateVertices.remove(remove);
-                scoreSum -= removedScore;
+            if (selected != null) {
+                // Check if vertex is still available at claim time
+                if (selected.target.getPlayer() == null && !selected.target.masked) {
+                    claimVertex(selected.target);
+                    energy -= gameBoard.config.gameplaySettings.get("energy to expand");
+                    verticesToClaim--;
+                }
+                // Remove this candidate (claimed or invalid)
+                candidateVertices.remove(selected);
             }
+            
+            attemptedClaims++;
         }
-        
-        // candidateVertices now contains remaining expansion candidates
-        // These will be rendered as debug lines showing expansion probabilities
     }
 
     public void claimHex(MapHex h){

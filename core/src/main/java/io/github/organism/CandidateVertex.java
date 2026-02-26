@@ -63,18 +63,20 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
 
     }
 
-    public void render() {
+    public void render(float probability) {
         if (gameBoard == null) {
             return;
         }
         
-        // Draw line from source to target vertex
-        // Color and ShapeRenderer.begin/end are handled by caller
-        gameBoard.game.shapeRenderer.line(
-            (source.x * gameBoard.hexSideLen) + gameBoard.centerX,
-            (source.y * gameBoard.hexSideLen) + gameBoard.centerY,
-            (target.x * gameBoard.hexSideLen) + gameBoard.centerX,
-            (target.y * gameBoard.hexSideLen) + gameBoard.centerY
-        );
+        // Draw circle at target vertex with radius based on probability
+        // Normalize probability to reasonable radius range
+        float normalizedProb = Math.max(0.1f, Math.min(1.0f, probability));
+        float radius = blinkCircleRadius * (0.5f + normalizedProb * 1.5f);
+        
+        float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
+        float targetY = (target.y * gameBoard.hexSideLen) + gameBoard.centerY;
+        
+        // Draw filled circle
+        gameBoard.game.shapeRenderer.circle(targetX, targetY, radius, 16);
     }
 }
