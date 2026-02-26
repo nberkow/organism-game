@@ -35,6 +35,7 @@ public class GameBoard implements Disposable {
     SettingsManager settings_manager;
 
     public GameOrchestrator orchestrator;
+    public TerritoryBar territoryBar;
 
 
     // Gameplay
@@ -99,6 +100,8 @@ public class GameBoard implements Disposable {
         humanPlayerIds = new ArrayList<>();
         botPlayerIds = new ArrayList<>();
         allPlayerIds = new ArrayList<>();
+        
+        territoryBar = new TerritoryBar(game);
 
     }
 
@@ -178,6 +181,7 @@ public class GameBoard implements Disposable {
         if (orchestrator != null) {
             orchestrator.update(timeDelta);
         }
+        updateResourceLeadership();
     }
 
     public void render(float timeDelta) {
@@ -187,6 +191,12 @@ public class GameBoard implements Disposable {
         ScreenUtils.clear(game.backgroundColor);
 
         gridWindow.render();
+        
+        // Render territory bar
+        if (territoryBar != null) {
+            territoryBar.render(this);
+        }
+        
         if (showPlayerSummary) {
             for (PlayerSummaryDisplay p : playerSummaryDisplays) {
                 p.render();

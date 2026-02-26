@@ -13,20 +13,16 @@ public class PlayerSummaryDisplay {
 
     GameBoard gameBoard;
 
+    final float CONTROL_CIRCLE_RADIUS = 25;
     final float ENERGY_BAR_HEIGHT = 8;
-
-    final float INCOME_BAR_HEIGHT = 8;
-
-    final float ACTION_RADIUS = ENERGY_BAR_HEIGHT / 2;
+    final float RESOURCE_BAR_HEIGHT = 6;
+    final float BAR_SPACING = 4;
 
     float energyBarWidth;
+    float resourceBarWidth;
 
     final float NAME_HEIGHT = 50;
 
-    final float ENERGY_BAR_Y = 28;
-    final float INCOME_BAR_Y= 22;
-
-    final float ACTION_BAR_Y= 18;
     BitmapFont font;
 
     PlayerSummaryDisplay(GameBoard gb, Player p, float x, float y){
@@ -34,13 +30,16 @@ public class PlayerSummaryDisplay {
         this.y = y;
         player = p;
         gameBoard = gb;
-        energyBarWidth = OrganismGame.VIRTUAL_WIDTH / 6f;
+        energyBarWidth = OrganismGame.VIRTUAL_WIDTH / 8f;
+        resourceBarWidth = OrganismGame.VIRTUAL_WIDTH / 10f;
         font = gameBoard.game.fonts.get(16);
     }
 
     public void render(){
         drawName();
+        drawControlCircle();
         drawEnergyBar();
+        drawResourceBars();
     }
 
     public void drawName(){
@@ -56,18 +55,115 @@ public class PlayerSummaryDisplay {
         gameBoard.game.batch.end();
         font.setColor(gameBoard.game.foregroundColor);
     }
+    public void drawControlCircle(){
+        if (gameBoard.game.shapeRenderer == null) {
+            return;
+        }
+
+        float circleX = x + CONTROL_CIRCLE_RADIUS + 5;
+        float circleY = y + 15;
+
+        // Draw circle outline
+        gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        gameBoard.game.shapeRenderer.setColor(player.getColor());
+        gameBoard.game.shapeRenderer.circle(circleX, circleY, CONTROL_CIRCLE_RADIUS);
+        gameBoard.game.shapeRenderer.end();
+
+        // Draw planchette and cursor if player has a hud
+        if (player.getClass().getSimpleName().equals("BotPlayer")) {
+            io.github.organism.player.BotPlayer bot = (io.github.organism.player.BotPlayer) player;
+            if (bot.hud != null && bot.hud.moveSpaceControl != null) {
+                com.badlogic.gdx.math.Vector2 planchette = bot.hud.getPlanchetteVector();
+                com.badlogic.gdx.math.Vector2 cursor = bot.hud.getBotInputVector();
+
+                gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                
+                // Draw cursor (smaller, lighter)
+                gameBoard.game.shapeRenderer.setColor(player.getColor().r, player.getColor().g, player.getColor().b, 0.5f);
+                gameBoard.game.shapeRenderer.circle(
+                    circleX + cursor.x * CONTROL_CIRCLE_RADIUS * 0.8f,
+                    circleY + cursor.y * CONTROL_CIRCLE_RADIUS * 0.8f,
+                    3
+                );
+
+                // Draw planchette (larger, solid)
+                gameBoard.game.shapeRenderer.setColor(player.getColor());
+                gameBoard.game.shapeRenderer.circle(
+                    circleX + planchette.x * CONTROL_CIRCLE_RADIUS * 0.8f,
+                    circleY + planchette.y * CONTROL_CIRCLE_RADIUS * 0.8f,
+                    5
+                );
+                
+                gameBoard.game.shapeRenderer.end();
+            }
+        }
+    }
+
     public void drawEnergyBar(){
         if (gameBoard.game.shapeRenderer == null) {
             return;
         }
 
+        float barX = x + (CONTROL_CIRCLE_RADIUS * 2) + 15;
+        float barY = y + 25;
+
         gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         gameBoard.game.shapeRenderer.setColor(gameBoard.game.foregroundColor);
         gameBoard.game.shapeRenderer.rect(
-            x, y + ENERGY_BAR_Y,
+            barX, barY,
             (float) (energyBarWidth * (player.getOrganism().energy / 100f)),
             ENERGY_BAR_HEIGHT);
         gameBoard.game.shapeRenderer.end();
+
+        // Draw outline
+        gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        gameBoard.game.shapeRenderer.setColor(player.getColor());
+        gameBoard.game.shapeRenderer.rect(barX, barY, energyBarWidth, ENERGY_BAR_HEIGHT);
+        gameBoard.game.shapeRenderer.end();
+    }
+
+    public void drawResourceBars(){
+        if (gameBoard.game.shapeRenderer == null) {
+            return;
+        }
+
+        float barX = x + (CONTROL_CIRCLE_RADIUS * 2) + 15;
+        float barY = y + 25 - ENERGY_BAR_HEIGHT - BAR_SPACING;
+
+        int[] resources = player.getOrganism().resources;
+        int maxResources = 0;
+        for (int r : resources) {
+            if (r > maxResources) maxResources = r;
+        }
+        if (maxResources == 0) maxResources = 1; // Avoid division by zero
+
+        for (int i = 0; i < 3; i++) {
+            float currentBarY = barY - (i * (RESOURCE_BAR_HEIGHT + BAR_SPACING));
+            float fillWidth = resourceBarWidth * (resources[i] / (float) maxResources);
+
+            // Draw filled portion
+            gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            gameBoard.game.shapeRenderer.setColor(gameBoard.game.resourceColorsDark[i]);
+            gameBoard.game.shapeRenderer.rect(barX, currentBarY, fillWidth, RESOURCE_BAR_HEIGHT);
+            gameBoard.game.shapeRenderer.end();
+
+            // Draw outline
+            gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            gameBoard.game.shapeRenderer.setColor(gameBoard.game.resourceColorsBright[i]);
+            gameBoard.game.shapeRenderer.rect(barX, currentBarY, resourceBarWidth, RESOURCE_BAR_HEIGHT);
+            gameBoard.game.shapeRenderer.end();
+
+            // Draw leader indicator (gold outline)
+            if (gameBoard.resourceLeaders[i] == player) {
+                gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+                gameBoard.game.shapeRenderer.setColor(com.badlogic.gdx.graphics.Color.GOLD);
+                gameBoard.game.shapeRenderer.rect(
+                    barX - 2, currentBarY - 2,
+                    resourceBarWidth + 4, RESOURCE_BAR_HEIGHT + 4
+                );
+                gameBoard.game.shapeRenderer.end();
+            }
+        }
     }
 
     public void draw_income_bar(){

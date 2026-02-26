@@ -11,12 +11,12 @@ import io.github.organism.player.Player;
 public class TerritoryBar {
 
     float x_pos = 28;
-    float y_pos = 28;
+    float y_pos = 450;  // Moved down to avoid overlap with player summaries
 
     float victory_threshold = 2/3f;
     float bar_width = 40;
     float bar_spacing = 5;
-    float max_height = 200;
+    float max_height = 150;  // Reduced height slightly
 
     HashMap<Point, Float> heights;
 
