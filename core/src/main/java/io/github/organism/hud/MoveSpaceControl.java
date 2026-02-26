@@ -75,7 +75,11 @@ public class MoveSpaceControl {
 
 
     private void updateCursor() {
-        cursorCoord.add(hud.getPlayerInputVector()).clamp(0f, radius-cursorRadius);
+        cursorCoord.add(hud.getPlayerInputVector());
+        // Clamp cursor to stay within the available radius
+        if (cursorCoord.len() > availableRadius) {
+            cursorCoord.setLength(availableRadius);
+        }
     }
 
     public void draw() {
