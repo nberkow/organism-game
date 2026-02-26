@@ -95,7 +95,7 @@ public class Simulation implements GameSession {
     int roundsPerElimination = 10;  // Eliminate players every N rounds
     int playersToEliminatePerRound = 2;  // How many to eliminate each time
 
-    ModelSpawner modelSpawner;
+    PlayerSpawner playerSpawner;
 
 
     public boolean show_histograms = false;
@@ -127,7 +127,7 @@ public class Simulation implements GameSession {
         gamesPlayed = new HashMap<>();
 
         tournamentRound = 0;
-        modelSpawner = new ModelSpawner(0);
+        playerSpawner = new PlayerSpawner(0, currentGame);
 
         modelPoolDisplay = new ModelPoolDisplay(game, this);
         roundSummary = new RoundSummary(game, this);
@@ -227,7 +227,7 @@ public class Simulation implements GameSession {
             String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
             Color color = availableColors.remove(0);
 
-            BotPlayer bot = modelSpawner.createRandomBotPlayer(name, i, color);
+            BotPlayer bot = playerSpawner.createRandomBotPlayer(name, i, color, currentGame);
 
             player_id = bot.getTournamentId();
 
@@ -247,7 +247,7 @@ public class Simulation implements GameSession {
             gamesPlayed.put(player_id, 0);
         }
 
-        playerPrimaryIndex = modelSpawner.getNextPrimaryIndex();
+        playerPrimaryIndex = playerSpawner.getNextPrimaryIndex();
     }
 
     public void advanceFrameCount(){
@@ -413,7 +413,7 @@ public class Simulation implements GameSession {
             String name = player_names_array[player_id.x % player_names_array.length] + " " + numerals[player_id.y % numerals.length];
             Color color = availableColors.size() > 0 ? availableColors.remove(0) : Color.GRAY;
 
-            BotPlayer bot = modelSpawner.createRandomBotPlayer(name, playerPool.size(), color);
+            BotPlayer bot = playerSpawner.createRandomBotPlayer(name, playerPool.size(), color, currentGame);
             player_id = bot.getTournamentId();
 
             playerPool.put(player_id, bot);
@@ -434,7 +434,7 @@ public class Simulation implements GameSession {
             System.out.println("Added new organism: " + player_id);
         }
 
-        playerPrimaryIndex = modelSpawner.getNextPrimaryIndex();
+        playerPrimaryIndex = playerSpawner.getNextPrimaryIndex();
         System.out.println("Pool size after addition: " + playerPool.size());
     }
 
