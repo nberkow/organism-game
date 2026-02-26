@@ -194,12 +194,20 @@ public class GameBoard implements Disposable {
         }
 
 
-        //debug lines
-        for (Player p : players.values()){
-            Organism o = p.getOrganism();
-            if (o != null) {
-                for (CandidateVertex cv : p.getOrganism().candidateVertices.keySet()) {
-                    cv.render();
+        // Render candidate vertices for the current player whose turn it is
+        if (orchestrator != null) {
+            Player currentPlayer = orchestrator.getBlinkingPlayer();
+            if (currentPlayer != null) {
+                Organism o = currentPlayer.getOrganism();
+                if (o != null && o.candidateVertices != null && !o.candidateVertices.isEmpty()) {
+                    game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Line);
+                    game.shapeRenderer.setColor(currentPlayer.getColor());
+                    
+                    for (CandidateVertex cv : o.candidateVertices.keySet()) {
+                        cv.render();
+                    }
+                    
+                    game.shapeRenderer.end();
                 }
             }
         }

@@ -164,9 +164,8 @@ public class Organism {
         gameBoard.updateResourceLeadership();
         updateIncome();
 
-        // Don't clear candidateVertices here - keep them for rendering
-        // candidateVertices = new HashMap<>();
-        candidateVertices.clear(); // Clear but keep the reference
+        // Rebuild candidate vertices each time for current game state
+        candidateVertices.clear();
         double scoreSum = 0d;
         float baseP = 0.01f;
 
@@ -176,6 +175,7 @@ public class Organism {
             for (MapVertex v : source.adjacentVertices) {
                 if (v.getPlayer() == null  && !v.masked) {
                     CandidateVertex cv = new CandidateVertex(source, v);
+                    cv.gameBoard = gameBoard; // Set gameBoard reference for rendering
                     cv.calculatePlanchetteAgreement(planchetteFromCenter);
 
                     float p = cv.planchetteAgreement + baseP;
@@ -194,23 +194,32 @@ public class Organism {
         // budget depends on planchette magnitude
         float energyBudget = Math.min((income + energy)/4 * (1 + planchetteFromCenter.len()), energy);
 
-
-
         int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
 
         for (int v = 0; v < verticesToClaim; v++) {
+            // Check if we have any valid candidates left
+            if (candidateVertices.isEmpty() || scoreSum <= 0) {
+                break;
+            }
+            
             double r = gameBoard.rng.nextDouble() * scoreSum;
             double s = 0d;
             CandidateVertex remove = null;
+            
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 s += candidateVertices.get(cv);
                 if (s > r) {
-                    claimVertex(cv.target);
+                    // Check if vertex is still available at claim time
+                    if (cv.target.getPlayer() == null && !cv.target.masked) {
+                        claimVertex(cv.target);
+                        energy -= gameBoard.config.gameplaySettings.get("energy to expand");
+                    }
+                    // Remove this candidate regardless of whether we claimed it
                     remove = cv;
-                    energy -= gameBoard.config.gameplaySettings.get("energy to expand");
                     break;
                 }
             }
+            
             if (remove != null) {
                 float removedScore = candidateVertices.get(remove);
                 candidateVertices.remove(remove);
@@ -249,6 +258,15 @@ public class Organism {
     }
 
     public void claimVertex(MapVertex v){
+        
+        // Double-check vertex is available before claiming
+        if (v.player != null) {
+            return; // Already claimed by someone
+        }
+        
+        if (territoryVertex.contains_position(v.pos.i, v.pos.j, v.pos.k)) {
+            return; // Already in our territory
+        }
 
         v.player = player;
         territoryVertex.addPos(v.pos);

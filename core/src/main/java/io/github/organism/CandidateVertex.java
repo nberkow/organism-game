@@ -64,35 +64,17 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     }
 
     public void render() {
-
-        target.pos.grid.gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.MAGENTA);
-        target.pos.grid.gameBoard.game.shapeRenderer.circle(
-            (target.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
-            (target.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY,
-            (planchetteAgreement) * 5
+        if (gameBoard == null) {
+            return;
+        }
+        
+        // Draw line from source to target vertex
+        // Color and ShapeRenderer.begin/end are handled by caller
+        gameBoard.game.shapeRenderer.line(
+            (source.x * gameBoard.hexSideLen) + gameBoard.centerX,
+            (source.y * gameBoard.hexSideLen) + gameBoard.centerY,
+            (target.x * gameBoard.hexSideLen) + gameBoard.centerX,
+            (target.y * gameBoard.hexSideLen) + gameBoard.centerY
         );
-        target.pos.grid.gameBoard.game.shapeRenderer.end();
-
-
-        /*
-
-            target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.CYAN);
-        target.pos.grid.gameBoard.game.shapeRenderer.line(
-            (source.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
-            (source.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY,
-            (target.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
-            (target.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY
-        );
-
-        target.pos.grid.gameBoard.game.shapeRenderer.setColor(Color.GREEN);
-        target.pos.grid.gameBoard.game.shapeRenderer.line(
-            (source.x * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerX,
-            (source.y * target.pos.grid.gameBoard.hexSideLen) + target.pos.grid.gameBoard.centerY,
-            (source.x * target.pos.grid.gameBoard.hexSideLen) + planchetteFromCenter.x + target.pos.grid.gameBoard.centerX,
-            (source.y * target.pos.grid.gameBoard.hexSideLen) + planchetteFromCenter.y + target.pos.grid.gameBoard.centerY
-        );
-
-        target.pos.grid.gameBoard.game.shapeRenderer.end();*/
     }
 }
