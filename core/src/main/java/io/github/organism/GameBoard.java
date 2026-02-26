@@ -175,7 +175,9 @@ public class GameBoard implements Disposable {
     }
 
     public void logic(float timeDelta) {
-        orchestrator.update(timeDelta);
+        if (orchestrator != null) {
+            orchestrator.update(timeDelta);
+        }
     }
 
     public void render(float timeDelta) {

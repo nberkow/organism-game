@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
 import java.util.HashMap;
@@ -111,10 +112,11 @@ public class GameOrchestrator {
     }
 
     private void makeMoves() {
-
-        for (int i = 0; i< gameBoard.allPlayerIds.size(); i++){
+        for (int i = 0; i < gameBoard.allPlayerIds.size(); i++){
             Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(i));
-            player.makeMove();
+            if (player != null) {
+                player.makeMove();
+            }
         }
     }
 
@@ -135,14 +137,15 @@ public class GameOrchestrator {
         }
 
         updatePlayers();
-        actionClock += timeDelta;
-        if (actionClock >= actionTime) {
-            actionClock = actionClock % actionTime;
-            updateTimersAndFlags();
-            makeMoves();
+        
+        if (!paused) {
+            actionClock += timeDelta;
+            if (actionClock >= actionTime) {
+                actionClock = actionClock % actionTime;
+                frame++;
+                makeMoves();
+            }
         }
-
-
     }
 
     public void dispose() {

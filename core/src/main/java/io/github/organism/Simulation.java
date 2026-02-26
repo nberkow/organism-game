@@ -495,8 +495,7 @@ public class Simulation implements GameSession {
 
             else {
                 inputHistogram.update_inputs();
-                currentGameOrchestrator.updatePlayers();
-                currentGameOrchestrator.updateTimersAndFlags();
+                // Don't call orchestrator methods directly - they're called via gameBoard.logic()
             }
         }
 

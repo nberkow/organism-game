@@ -211,11 +211,15 @@ public class Organism {
                     break;
                 }
             }
-            if (remove != null) candidateVertices.remove(remove);
+            if (remove != null) {
+                float removedScore = candidateVertices.get(remove);
+                candidateVertices.remove(remove);
+                scoreSum -= removedScore;
+            }
         }
         
-        // Keep candidateVertices populated for debug rendering
-        // They will be cleared at the start of next expand() call
+        // candidateVertices now contains remaining expansion candidates
+        // These will be rendered as debug lines showing expansion probabilities
     }
 
     public void claimHex(MapHex h){
