@@ -65,7 +65,7 @@ public class ArcadeLoop implements GameSession {
         "Bondarzewia berkeleyi"
     };
 
-    HashMap<Point, Model> modelPool;
+    HashMap<Point, Player> playerPool;
     HashMap<Point, Point> winRecords;
     int currentIteration;
     OrganismGame game;
@@ -77,11 +77,11 @@ public class ArcadeLoop implements GameSession {
 
     public ArcadeLoop(OrganismGame g) {
         game = g;
-        modelPool = new HashMap<>();
+        playerPool = new HashMap<>();
         winRecords = new HashMap<>();
 
         setup_overlays();
-        loadModels();
+
 
         availableColors = new ArrayList<>();
 
@@ -111,29 +111,33 @@ public class ArcadeLoop implements GameSession {
 
     }
 
-    private void create_players_from_model_pool(int n) {
-        ArrayList<Point> player_ids = new ArrayList<>(modelPool.keySet());
-        Collections.shuffle(player_ids, game.rng);
+    private void spawnBotPlayers(int n) {
+        for (int i = 0; i < n; i++) {
+            // Generate a fresh tournament ID for this bot
+            Point player_id = new Point(playerPrimaryIndex, 0);
+            playerPrimaryIndex++;
 
-        for (int i=0; i<n; i++) {
-            Point player_id = player_ids.get(i);
-            Model model = modelPool.get(player_id);
-            String name = playerNamesArray[player_id.x % playerNamesArray.length] + " " + numerals[player_id.y % numerals.length];
+            // Generate name from your naming arrays
+            String name = playerNamesArray[player_id.x % playerNamesArray.length]
+                + " " + numerals[player_id.y % numerals.length];
 
+            // Assign a color (reuse or pick new)
             Color color;
-            if (tournamentPlayerColors.containsKey(player_id)){
+            if (tournamentPlayerColors.containsKey(player_id)) {
                 color = tournamentPlayerColors.get(player_id);
             } else {
                 color = availableColors.remove(0);
+                tournamentPlayerColors.put(player_id, color);
             }
 
+            // Create the actual BotPlayer via GameBoard (handles Organism + SlimeRLAgent wiring)
             currentGame.createBotPlayer(name, player_id, color);
+
+            // Register in tracking maps for tournament scoring
             playerNames.put(player_id, name);
-            tournamentPlayerColors.put(player_id, color);
+            winRecords.put(player_id, new Point(0, 0));  // init win/loss record
         }
-
     }
-
     public void setup(int n) {
         game.gameScreen.ioPlayerNames = new ArrayList<>();
         game.gameScreen.ioPlayerIds = new ArrayList<>();
@@ -148,7 +152,7 @@ public class ArcadeLoop implements GameSession {
 
         create_game_board();
 
-        create_players_from_model_pool(gameCfg.botPlayers);
+        spawnBotPlayers(gameCfg.botPlayers);
         create_human_players();
         createPlayerStarts();
 
@@ -184,15 +188,6 @@ public class ArcadeLoop implements GameSession {
         for (int i=0; i<sc; i++) {
             ArrayList<int[]> startingCoords = currentGame.playerStartAssigner.randomizeStartingCoords();
             currentGame.playerStartAssigner.assignStartingHexes(startingCoords);
-        }
-    }
-
-    public void loadModels() {
-        for (Model model : game.fileHandler.load_models()){
-            Point p = new Point(playerPrimaryIndex, 0);
-            model.setPlayerTournamentId(p);
-            modelPool.put(p, model);
-            playerPrimaryIndex++;
         }
     }
 
@@ -295,20 +290,13 @@ public class ArcadeLoop implements GameSession {
         }
     }
     private void create_bot_players() {
-
-        /*
-        randomly select 3 models from the pool
-
-        use these to create 3 players on the current game board
-
-         */
-
-
-        ArrayList<Point> player_ids = new ArrayList<>(modelPool.keySet());
+        ArrayList<Point> player_ids = new ArrayList<>(playerPool.keySet());
         Collections.shuffle(player_ids, game.rng);
 
         for (int i=0; i<3; i++) {
             Point player_id = player_ids.get(i);
+            // REMOVE: Model model = playerPool.get(player_id);
+
             String name = playerNamesArray[player_id.x % playerNamesArray.length] + " " + numerals[player_id.y % numerals.length];
 
             Color color;
@@ -322,7 +310,6 @@ public class ArcadeLoop implements GameSession {
             playerNames.put(player_id, name);
             tournamentPlayerColors.put(player_id, color);
         }
-
     }
 
 
@@ -353,7 +340,7 @@ public class ArcadeLoop implements GameSession {
     }
 
     public void dispose() {
-        modelPool.clear();
+        playerPool.clear();
         winRecords.clear();
         currentGame.dispose();
     }

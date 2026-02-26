@@ -21,6 +21,8 @@ public class OrganismGame extends Game {
     public HudTestScreen hudTestScreen;
 
     public ShapeRenderer shapeRenderer;
+
+    ArcadeLoop arcadeLoop;
     GameScreen gameScreen;
     MenuScreen menuScreen;
     LabScreen labScreen;
@@ -94,9 +96,10 @@ public class OrganismGame extends Game {
             fonts.put(size, new BitmapFont(Gdx.files.internal("fonts/dubai" + size + ".fnt")));
         }
 
-
         hudTestScreen = new HudTestScreen(this);
         hudTestScreen.inputProcessor = new HudInputProcessor(hudTestScreen);
+
+
 
         /*
         menuScreen = new MenuScreen(this);
@@ -131,10 +134,19 @@ public class OrganismGame extends Game {
         //Gdx.input.setInputProcessor(hudTestScreen.inputProcessor);
         //this.setScreen(hudTestScreen);
 
+        /*
         tutorialScreen = new TutorialScreen(this);
         tutorialScreen.inputProcessor = new HudInputProcessor(tutorialScreen);
         Gdx.input.setInputProcessor(tutorialScreen.inputProcessor);
         this.setScreen(tutorialScreen);
+        */
+
+
+        arcadeLoop = new ArcadeLoop(this);
+        gameScreen = new GameScreen(this);
+        arcadeLoop.setup(0);
+        this.setScreen(gameScreen);
+        gameScreen.overlay.input_processor = new SettingsOverlayInputProcessor(gameScreen.overlay);
 
     }
 

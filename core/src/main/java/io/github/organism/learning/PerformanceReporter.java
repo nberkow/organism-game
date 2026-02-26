@@ -4,7 +4,8 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import io.github.organism.Organism;
 import io.github.organism.player.Player;
 
@@ -21,6 +22,12 @@ public class PerformanceReporter {
     private int currentUnclaimedVertices;
 
     public PerformanceReporter(String basePath) {
+
+        FileHandle dir = Gdx.files.local(basePath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
         dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
         String timestamp = dateFormat.format(new Date());
         this.logFile = basePath + "/rl_performance_" + timestamp + ".csv";

@@ -30,6 +30,8 @@ public class GameScreen implements Screen {
 
         ioPlayerNames = new ArrayList<>();
         ioPlayerIds = new ArrayList<>();
+
+        arcadeLoop = game.arcadeLoop;
     }
     public ArrayList<Player> getIoPlayers() {
         ArrayList<Player> players = new ArrayList<>();

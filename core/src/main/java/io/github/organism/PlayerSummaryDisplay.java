@@ -18,6 +18,8 @@ public class PlayerSummaryDisplay {
     final float RESOURCE_BAR_HEIGHT = 6;
     final float BAR_SPACING = 4;
 
+    final float INCOME_BAR_Y = 60;
+
     float energyBarWidth;
     float resourceBarWidth;
 
@@ -77,7 +79,7 @@ public class PlayerSummaryDisplay {
                 com.badlogic.gdx.math.Vector2 cursor = bot.hud.getBotInputVector();
 
                 gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-                
+
                 // Draw cursor (smaller, lighter)
                 gameBoard.game.shapeRenderer.setColor(player.getColor().r, player.getColor().g, player.getColor().b, 0.5f);
                 gameBoard.game.shapeRenderer.circle(
@@ -93,7 +95,7 @@ public class PlayerSummaryDisplay {
                     circleY + planchette.y * CONTROL_CIRCLE_RADIUS * 0.8f,
                     5
                 );
-                
+
                 gameBoard.game.shapeRenderer.end();
             }
         }
