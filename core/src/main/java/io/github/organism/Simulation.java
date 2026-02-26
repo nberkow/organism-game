@@ -85,16 +85,16 @@ public class Simulation implements GameSession {
     HashMap<Point, Model> modelPool;
     HashMap<Point, ArrayList<Point>> winRecords;
     HashMap<Point, ArrayList<Integer>> winRecordTurns;
-    
+
     // Tournament scoring
     HashMap<Point, Integer> cumulativeScores;  // Total vertices captured across all games
     HashMap<Point, Integer> gamesPlayed;       // Number of games each player has participated in
-    
+
     // Tournament management
     int tournamentRound;
     int roundsPerElimination = 10;  // Eliminate players every N rounds
     int playersToEliminatePerRound = 2;  // How many to eliminate each time
-    
+
     ModelSpawner modelSpawner;
 
 
@@ -125,9 +125,9 @@ public class Simulation implements GameSession {
         winRecordTurns = new HashMap<>();
         cumulativeScores = new HashMap<>();
         gamesPlayed = new HashMap<>();
-        
+
         tournamentRound = 0;
-        modelSpawner = new ModelSpawner(0);
+        modelSpawner = new ModelSpawner(0, currentGame);
 
         modelPoolDisplay = new ModelPoolDisplay(game, this);
         roundSummary = new RoundSummary(game, this);
@@ -222,9 +222,14 @@ public class Simulation implements GameSession {
          */
 
         for (int i=0; i<pool_size; i++){
-            Model model = modelSpawner.createRandomModel();
+            BotPlayer bot = modelSpawner.createRandomBotPlayer(
+                player_names.get(player_id),
+                i,
+                tournament_player_colors.get(player_id)
+            );
+            Model model = bot.getOrganism();
             Point player_id = model.getPlayerTournamentId();
-            
+
             modelPool.put(player_id, model);
 
             ArrayList<Point> wins = new ArrayList<>();
@@ -238,7 +243,7 @@ public class Simulation implements GameSession {
             cumulativeScores.put(player_id, 0);
             gamesPlayed.put(player_id, 0);
         }
-        
+
         playerPrimaryIndex = modelSpawner.getNextPrimaryIndex();
     }
 
@@ -299,15 +304,15 @@ public class Simulation implements GameSession {
             }
             winRecords.get(p).add(0, rec);
             winRecordTurns.get(p).add(0, currentIteration);
-            
+
             // Capture vertices as score
             int verticesCaptured = currentGame.players.get(p).getOrganism().territoryVertex.size();
             int currentScore = cumulativeScores.getOrDefault(p, 0);
             cumulativeScores.put(p, currentScore + verticesCaptured);
-            
+
             int games = gamesPlayed.getOrDefault(p, 0);
             gamesPlayed.put(p, games + 1);
-            
+
             System.out.println("Player " + p + " captured " + verticesCaptured + " vertices. Total: " + cumulativeScores.get(p));
         }
 
@@ -367,7 +372,7 @@ public class Simulation implements GameSession {
         }
 
         System.out.println("=== ELIMINATION ROUND " + tournamentRound + " ===");
-        
+
         // Sort players by average score (total score / games played)
         ArrayList<Point> playerIds = new ArrayList<>(modelPool.keySet());
         playerIds.sort((p1, p2) -> {
@@ -375,68 +380,68 @@ public class Simulation implements GameSession {
             double avg2 = cumulativeScores.getOrDefault(p2, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p2, 1));
             return Double.compare(avg2, avg1); // Descending order (best first)
         });
-        
+
         // Eliminate bottom N players
         int toEliminate = Math.min(playersToEliminatePerRound, playerIds.size() - 3); // Keep at least 3
         ArrayList<Point> eliminated = new ArrayList<>();
-        
+
         for (int i = playerIds.size() - 1; i >= playerIds.size() - toEliminate && i >= 0; i--) {
             Point p = playerIds.get(i);
             eliminated.add(p);
-            
+
             // Recycle color
             Color player_color = tournament_player_colors.get(p);
             if (player_color != null && !player_color.equals(Color.DARK_GRAY)) {
                 availableColors.add(player_color);
             }
             tournament_player_colors.put(p, Color.DARK_GRAY);
-            
+
             double avgScore = cumulativeScores.getOrDefault(p, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p, 1));
             System.out.println("Eliminated: " + player_names.get(p) + " (avg: " + avgScore + ")");
         }
-        
+
         // Remove from active pool
         for (Point p : eliminated) {
             modelPool.remove(p);
         }
-        
+
         System.out.println("Pool size after elimination: " + modelPool.size());
     }
 
     public void add_new_random_models(int n){
         // add new random models
         System.out.println("Adding " + n + " new random organisms");
-        
+
         for (int i=0; i<n; i++) {
             Model model = modelSpawner.createRandomModel();
             Point player_id = model.getPlayerTournamentId();
-            
+
             modelPool.put(player_id, model);
-            
+
             ArrayList<Point> rec = new ArrayList<>();
             rec.add(new Point(0, 0));
             winRecords.put(player_id, rec);
-            
+
             ArrayList<Integer> turn = new ArrayList<>();
             turn.add(currentIteration);
             winRecordTurns.put(player_id, turn);
-            
+
             cumulativeScores.put(player_id, 0);
             gamesPlayed.put(player_id, 0);
-            
+
             System.out.println("Added new organism: " + player_id);
         }
-        
+
         playerPrimaryIndex = modelSpawner.getNextPrimaryIndex();
         System.out.println("Pool size after addition: " + modelPool.size());
     }
 
     public void setupNextRoundModels(Point winner_id) {
         // Evolution logic disabled for now
-        
+
         // Check if it's time to eliminate players
         eliminateBottomPlayers();
-        
+
         // Add new random organisms to maintain pool size
         int n = pool_size - modelPool.size();
         if (n > 0) {
@@ -502,12 +507,12 @@ public class Simulation implements GameSession {
 
             if (currentIteration < iterations & next_round_begin) {
                 currentIteration++;
-                
+
                 // Print standings periodically
                 if (tournamentRound % 5 == 0) {
                     printTournamentStandings();
                 }
-                
+
                 setup_next_round(winner_id); // this will set winner id back to null
 
                 next_round_begin = false;
@@ -563,14 +568,14 @@ public class Simulation implements GameSession {
 
     public void printTournamentStandings() {
         System.out.println("\n=== TOURNAMENT STANDINGS (Round " + tournamentRound + ") ===");
-        
+
         ArrayList<Point> playerIds = new ArrayList<>(modelPool.keySet());
         playerIds.sort((p1, p2) -> {
             double avg1 = cumulativeScores.getOrDefault(p1, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p1, 1));
             double avg2 = cumulativeScores.getOrDefault(p2, 0) / (double) Math.max(1, gamesPlayed.getOrDefault(p2, 1));
             return Double.compare(avg2, avg1);
         });
-        
+
         int rank = 1;
         for (Point p : playerIds) {
             String name = player_names.getOrDefault(p, "Unknown");
@@ -582,26 +587,26 @@ public class Simulation implements GameSession {
         }
         System.out.println("=====================================\n");
     }
-    
+
     public void write_champions_to_file(){
         System.out.println("saving files");
 
-        HashMap<Float, ArrayList<Point>> models_by_win_margin = new HashMap<>();
+        HashMap<Float, ArrayList<Point>> modelsByWinMargin = new HashMap<>();
 
         for (Point p : modelPool.keySet()){
             Point rec = winRecords.get(p).get(0);
             float margin = rec.x - rec.y;
-            if (!models_by_win_margin.containsKey(margin)){
-                models_by_win_margin.put(margin, new ArrayList<>());
+            if (!modelsByWinMargin.containsKey(margin)){
+                modelsByWinMargin.put(margin, new ArrayList<>());
             }
-            ArrayList<Point> m = models_by_win_margin.get(margin);
+            ArrayList<Point> m = modelsByWinMargin.get(margin);
             m.add(p);
-            models_by_win_margin.put(margin, m);
+            modelsByWinMargin.put(margin, m);
         }
 
         int s = 0;
-        for (Float m : models_by_win_margin.keySet()) {
-            for (Point p : models_by_win_margin.get(m)){
+        for (Float m : modelsByWinMargin.keySet()) {
+            for (Point p : modelsByWinMargin.get(m)){
                 if (s < max_models_to_save){
                     game.fileHandler.save_model(modelPool.get(p), player_names.get(p));
                     s++;
