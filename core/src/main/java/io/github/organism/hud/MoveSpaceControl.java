@@ -52,7 +52,11 @@ public class MoveSpaceControl {
     // In setCursor() (called at decision time):
     public void setCursor(Vector2 targetXY) {
         decisionStartPlanchette.set(planchetteFromCenterVector);  // Save start position
-        // ... rest of setCursor logic ...
+        if (targetXY.len() > availableRadius) {
+            cursorCoord.set(targetXY).setLength(availableRadius);
+        } else {
+            cursorCoord.set(targetXY);
+        }
     }
 
     // In getLogicalPlanchettePosition():
@@ -137,7 +141,7 @@ public class MoveSpaceControl {
 
     public void render(float delta) {
         update(delta);
-        drawAt(centerCoord.x, centerCoord.y, 1);  // Full scale at main HUD position
+        drawAt(centerCoord.x, centerCoord.y, 1.0f);  // Full scale at main HUD position
     }
     private void updateCursor() {
         if (hud.isPlayerOne || hud.isPlayerTwo) {

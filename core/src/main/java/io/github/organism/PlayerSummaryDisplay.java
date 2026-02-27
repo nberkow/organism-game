@@ -68,12 +68,6 @@ public class PlayerSummaryDisplay {
         float circleY = y + 15;
         float summaryScale = 0.6f;
 
-        // Just the outline (part of summary layout)
-        gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        gameBoard.game.shapeRenderer.setColor(player.getColor());
-        gameBoard.game.shapeRenderer.circle(circleX, circleY, CONTROL_CIRCLE_RADIUS);
-        gameBoard.game.shapeRenderer.end();
-
         // Delegate cursor/planchette to MoveSpaceControl
         MoveSpaceControl msc = player.getMoveSpaceControl();
         if (msc != null) {

@@ -75,10 +75,7 @@ public class GameScreen implements Screen {
     }
 
     private void input() {
-        if (!arcadeLoop.currentGameOrchestrator.paused) {
-            //inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
-            //inputProcessor.updateQueuesWithInput();
-
+        if (arcadeLoop != null && arcadeLoop.currentGameOrchestrator != null && !arcadeLoop.currentGameOrchestrator.paused) {
             arcadeLoop.currentGameOrchestrator.update(Gdx.graphics.getDeltaTime());
             arcadeLoop.currentGameOrchestrator.updatePlayers();
             arcadeLoop.currentGameOrchestrator.updateTimersAndFlags();
@@ -108,7 +105,7 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(game.backgroundColor);
 
         // Update ALL planchettes (visual drift, regardless of turn)
-        if (game.gameBoard != null) {
+        if (game.gameBoard != null && game.gameBoard.allPlayerIds != null) {
             for (Point playerId : game.gameBoard.allPlayerIds) {
                 Player player = game.gameBoard.players.get(playerId);
                 if (player != null && player.getHud() != null) {
