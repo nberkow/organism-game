@@ -1,6 +1,7 @@
 package io.github.organism.player;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
 import java.util.LinkedList;
@@ -72,11 +73,35 @@ public class DummyPlayer implements Player {
         return null;
     }
 
-
     /**
      *
      */
     @Override
+    public void makeDecision() {
+
+    }
+
+    /**
+     * @param precisePlanchette Normalized vector from MoveSpaceControl
+     */
+    @Override
+    public void executeMove(Vector2 precisePlanchette) {
+
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public boolean isDecisionReady() {
+        return false;
+    }
+
+
+    /**
+     *
+     */
+
     public void makeMove() {
 
     }

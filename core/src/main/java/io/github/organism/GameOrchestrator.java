@@ -4,12 +4,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import io.github.organism.player.Player;
 
 public class GameOrchestrator {
 
+    public enum TurnPhase { DECISION, EXECUTION, BUFFER }
+    private ArrayList<Point> playerTurnOrder;  // Set from gameBoard.allPlayerIds
     final float VICTORY_THRESHOLD = 2/3f;
     public boolean finished;
     float frameMax;
@@ -30,8 +33,21 @@ public class GameOrchestrator {
     float blinkPeriod = 1f/3;
     float blinkTime = 0;
 
+
+    private TurnPhase currentPhase = TurnPhase.DECISION;
+    private int currentPlayerIndex = 0;
+    private float phaseTimer = 0f;
+    private float decisionTimestamp = 0f;  // When current player's decision completed
+
+    // Timing constants (eventually configurable)
+    private static final float TURN_DURATION = 1.5f;    // Decision → Execution
+    private static final float BUFFER_DURATION = 0.5f;  // Execution → Next player
+    private static final int MAX_STALL_CYCLES = 3;      // Crash after this many stalls
+    private int stallCycles = 0;
+
     public GameOrchestrator(GameBoard gb) {
         gameBoard = gb;
+        playerTurnOrder = gameBoard.allPlayerIds;
         totalTerritory = (float) gameBoard.universeMap.vertexGrid.getUnmaskedVertices();
         frameMax = totalTerritory * 3;
         playerTerritory = new HashMap<>();
@@ -40,7 +56,95 @@ public class GameOrchestrator {
             playerTerritory.put(p, (float) gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices());
         }
         finished = false;
+
+
     }
+
+    public void update(float delta) {
+        phaseTimer += delta;
+
+        Player currentPlayer = getCurrentPlayer();
+
+        System.out.println("[Orchestrator] phase=" + currentPhase +
+            " player=" + getCurrentPlayer().getPlayerName() +
+            " timer=" + phaseTimer);
+
+        switch (currentPhase) {
+            case DECISION:
+                // Trigger decision at phase start (handled elsewhere on entry)
+                // Check if decision is ready
+                if (currentPlayer.isDecisionReady()) {
+                    decisionTimestamp = phaseTimer;  // Record when decision completed
+                    stallCycles = 0;
+                }
+
+                // Advance to EXECUTION when time is up AND decision is ready
+                if (phaseTimer >= TURN_DURATION) {
+                    if (currentPlayer.isDecisionReady()) {
+                        currentPhase = TurnPhase.EXECUTION;
+                        phaseTimer = 0f;
+                    } else {
+                        // Stall: wait one buffer cycle
+                        stallCycles++;
+                        if (stallCycles > MAX_STALL_CYCLES) {
+                            throw new RuntimeException(
+                                "Player " + currentPlayer.getPlayerName() +
+                                    " decision timed out after " + stallCycles + " stall cycles"
+                            );
+                        }
+                        phaseTimer = 0f;  // Reset timer, wait another cycle
+                    }
+                }
+                break;
+
+            case EXECUTION:
+                // Calculate precise planchette position and execute
+                float elapsedSinceDecision = phaseTimer;  // Time since DECISION phase ended
+                Vector2 precisePlanchette = currentPlayer.getHud()
+                    .getMoveSpaceControl()
+                    .getLogicalPlanchettePosition(elapsedSinceDecision);
+
+                currentPlayer.executeMove(precisePlanchette);
+
+                // Immediately advance to BUFFER
+                currentPhase = TurnPhase.BUFFER;
+                phaseTimer = 0f;
+                break;
+
+            case BUFFER:
+                // Just wait, visual drift continues
+                if (phaseTimer >= BUFFER_DURATION) {
+                    // Advance to next player
+                    currentPlayerIndex = (currentPlayerIndex + 1) % playerTurnOrder.size();
+                    currentPhase = TurnPhase.DECISION;
+                    phaseTimer = 0f;
+
+                    // Trigger next player's decision
+                    getCurrentPlayer().makeDecision();
+                }
+                break;
+        }
+    }
+
+    private Player getCurrentPlayer() {
+        Point playerId = playerTurnOrder.get(currentPlayerIndex);
+        return gameBoard.players.get(playerId);
+    }
+
+    // Call this at game start to initialize turn order
+    public void startGame() {
+        playerTurnOrder = new ArrayList<>(gameBoard.allPlayerIds);
+        currentPlayerIndex = 0;
+        currentPhase = TurnPhase.DECISION;
+        phaseTimer = 0f;
+        getCurrentPlayer().makeDecision();  // Trigger first player's decision
+    }
+
+    // For debugging/UI
+    public TurnPhase getCurrentPhase() { return currentPhase; }
+    public int getCurrentPlayerIndex() { return currentPlayerIndex; }
+    public float getPhaseTimer() { return phaseTimer; }
+
 
     public void updateSpeed(float speed){
         actionTime = baseActionTime / speed;
@@ -111,14 +215,6 @@ public class GameOrchestrator {
         return null;
     }
 
-    private void makeMoves() {
-        for (int i = 0; i < gameBoard.allPlayerIds.size(); i++){
-            Player player = gameBoard.players.get(gameBoard.allPlayerIds.get(i));
-            if (player != null) {
-                player.makeMove();
-            }
-        }
-    }
 
     public void run(){
         paused = false;
@@ -128,25 +224,6 @@ public class GameOrchestrator {
         paused = true;
     }
 
-    public void update(float timeDelta) {
-
-        blinkTime += timeDelta;
-        if (blinkTime > blinkPeriod){
-            blinkingPlayerIdx = (blinkingPlayerIdx + 1) % 3;
-            blinkTime = blinkTime % blinkPeriod;
-        }
-
-        updatePlayers();
-        
-        if (!paused) {
-            actionClock += timeDelta;
-            if (actionClock >= actionTime) {
-                actionClock = actionClock % actionTime;
-                frame++;
-                makeMoves();
-            }
-        }
-    }
 
     public void dispose() {
     }

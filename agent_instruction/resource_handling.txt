@@ -1,0 +1,11 @@
+Read overview.txt for tournament rules.
+
+Current status: Resource bonuses confirmed working. Tournament components exist but are unwired.
+
+Task: Examine GameOrchestrator.java and GameSession.java. Tell me what's missing to run a continuous tournament with 20 AI players where:
+- 3 players randomly selected per game
+- Points = vertices captured at game end
+- Overall ranking = sum of vertices across games
+- Bottom players eliminated after rounds, new players introduced
+
+Show me a plan before writing code. Do not modify files yet. Just analyze and report.

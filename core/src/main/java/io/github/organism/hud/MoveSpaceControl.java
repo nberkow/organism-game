@@ -19,7 +19,9 @@ public class MoveSpaceControl {
     public Vector2 planchetteMovementVector;
     PlayerHud hud;
     float availableRadius;
-    float aggressionDisplayRadius;
+
+    float TURN_DURATION = 1.5f;
+
 
     public MoveSpaceControl(PlayerHud ph, float r) {
         hud = ph;
@@ -45,37 +47,103 @@ public class MoveSpaceControl {
 
     }
 
-    public void render() {
-        logic();
-        draw();
+    private Vector2 decisionStartPlanchette = new Vector2();
+
+    // In setCursor() (called at decision time):
+    public void setCursor(Vector2 targetXY) {
+        decisionStartPlanchette.set(planchetteFromCenterVector);  // Save start position
+        // ... rest of setCursor logic ...
     }
 
-    public void logic() {
-        updateCursor();
-        updatePlanchette();
+    // In getLogicalPlanchettePosition():
+    public Vector2 getLogicalPlanchettePosition(float elapsedSinceDecision) {
+        float t = Math.min(1.0f, elapsedSinceDecision / TURN_DURATION);
+        float x = decisionStartPlanchette.x + (cursorCoord.x - decisionStartPlanchette.x) * t;
+        float y = decisionStartPlanchette.y + (cursorCoord.y - decisionStartPlanchette.y) * t;
+        return new Vector2(x, y);
     }
 
-    private void updatePlanchette() {
+    // In MoveSpaceControl.java:
 
-        // move planchette along current vector
-        planchetteFromCenterVector.add(planchetteMovementVector);
+    /**
+     * Update visual drift. Call every frame before drawing.
+     * @param delta Frame time in seconds
+     */
+    public void update(float delta) {
+        // Drift planchette toward cursor (heuristic, not game-accurate)
+        float driftSpeed = 2.0f;  // Units per second, tune for smoothness
 
-        // adjust the vector to point at the cursor
         float deltaX = cursorCoord.x - planchetteFromCenterVector.x;
         float deltaY = cursorCoord.y - planchetteFromCenterVector.y;
-        Vector2 cursorDistanceVector = new Vector2(deltaX, deltaY);
-        cursorDistanceVector.clamp(0f, radius * .001f);
 
-        float newX = (cursorDistanceVector.x * 5 + planchetteMovementVector.x)/2;
-        float newY = (cursorDistanceVector.y * 5 + planchetteMovementVector.y)/2;
-
-        planchetteMovementVector = new Vector2(newX, newY);
-
+        planchetteFromCenterVector.x += deltaX * driftSpeed * delta;
+        planchetteFromCenterVector.y += deltaY * driftSpeed * delta;
     }
 
+    /**
+     * Get current cursor position (for IO_Player to capture).
+     */
+    public Vector2 getCursorCoord() {
+        return cursorCoord.cpy();
+    }
 
+    /**
+     * Draw at arbitrary position and scale.
+     * Call update(delta) before this.
+     */
+    public void drawAt(float drawX, float drawY, float scale) {
+        float scaledRadius = radius * scale;
+        float scaledCursorRadius = cursorRadius * scale;
+        float scaledPlanchetteRadius = planchetteRadius * scale;
+
+        // Background
+        hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        hud.game.shapeRenderer.setColor(hud.game.backgroundColor);
+        hud.game.shapeRenderer.circle(drawX, drawY, scaledRadius * 1.05f);
+        hud.game.shapeRenderer.end();
+
+        // Control circle outline
+        hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
+        hud.game.shapeRenderer.circle(drawX, drawY, scaledRadius);
+        hud.game.shapeRenderer.end();
+
+        // Cursor (outline)
+        hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        hud.game.shapeRenderer.setColor(
+            cursorCoord.len() < aggressionRadius * scale ?
+                hud.game.foregroundColor : Color.RED
+        );
+        hud.game.shapeRenderer.circle(
+            drawX + cursorCoord.x * scale,
+            drawY + cursorCoord.y * scale,
+            scaledCursorRadius
+        );
+        hud.game.shapeRenderer.end();
+
+        // Planchette (filled)
+        hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        hud.game.shapeRenderer.setColor(
+            planchetteFromCenterVector.len() < aggressionRadius * scale ?
+                hud.game.foregroundColor : Color.RED
+        );
+        hud.game.shapeRenderer.circle(
+            drawX + planchetteFromCenterVector.x * scale,
+            drawY + planchetteFromCenterVector.y * scale,
+            scaledPlanchetteRadius
+        );
+        hud.game.shapeRenderer.end();
+    }
+
+    public void render(float delta) {
+        update(delta);
+        drawAt(centerCoord.x, centerCoord.y, 1);  // Full scale at main HUD position
+    }
     private void updateCursor() {
-        cursorCoord.add(hud.getPlayerInputVector());
+        if (hud.isPlayerOne || hud.isPlayerTwo) {
+            cursorCoord.add(hud.getPlayerInputVector());
+        }
+
         // Clamp cursor to stay within the available radius
         if (cursorCoord.len() > availableRadius) {
             cursorCoord.setLength(availableRadius);
@@ -95,15 +163,6 @@ public class MoveSpaceControl {
         hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
         hud.game.shapeRenderer.circle(centerCoord.x, centerCoord.y, radius);
 
-        hud.game.shapeRenderer.setColor(Color.RED);
-        hud.game.shapeRenderer.circle(centerCoord.x, centerCoord.y, aggressionDisplayRadius);
-
-        if (cursorCoord.len() < aggressionRadius) {
-            hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
-        }
-        else {
-            hud.game.shapeRenderer.setColor(Color.RED);
-        }
         hud.game.shapeRenderer.circle(
             cursorCoord.x + centerCoord.x,
             cursorCoord.y + centerCoord.y,
@@ -136,6 +195,42 @@ public class MoveSpaceControl {
     }
 
     public void setCursorVector(Vector2 cursor) {
-        cursorCoord.set(Util.polarToXYFloat(cursor.scl(availableRadius)));
+        Vector2 xyPos = Util.polarToXYFloat(cursor.scl(availableRadius));
+        cursorCoord.set(xyPos);
     }
+
+
+
+    /**
+     * Set the target cursor position.
+     * Works for both human input and bot decisions.
+     * @param targetXY Local XY coordinates (relative to center, range: -availableRadius to +availableRadius)
+     */
+    public void setTarget(Vector2 targetXY) {
+        if (targetXY.len() > availableRadius) {
+            cursorCoord.set(targetXY).setLength(availableRadius);
+        } else {
+            cursorCoord.set(targetXY);
+        }
+    }
+
+
+    /**
+     * Draw at arbitrary position and scale.
+     * @param drawX Screen X for circle center
+     * @param drawY Screen Y for circle center
+     * @param scale 1.0 = full size, 0.6 = summary display
+     */
+
+    /**
+     * For human players: accumulate continuous input.
+     * Call every frame while human is providing input.
+     */
+    public void accumulateInput(Vector2 inputDelta) {
+        cursorCoord.add(inputDelta);
+        if (cursorCoord.len() > availableRadius) {
+            cursorCoord.setLength(availableRadius);
+        }
+    }
+
 }

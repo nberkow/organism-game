@@ -1,0 +1,7 @@
+The vertex probability animation is not visible. It should highlight vertexes based on their probability of being claimed. The logic is in Organism.
+
+1. Find where candidateVertices rendering code exists
+2. Explain why it is not being shown in the tournament screen (it may be rendered too fast or not rendered at all)
+3. Propose a solution to make it visible
+
+Do not refactor. Just make the debug visualization appear.

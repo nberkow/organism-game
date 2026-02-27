@@ -7,6 +7,7 @@ import java.awt.Point;
 
 import io.github.organism.GameBoard;
 import io.github.organism.Organism;
+import io.github.organism.hud.MoveSpaceControl;
 import io.github.organism.hud.PlayerHud;
 import io.github.organism.learning.DiscountedRewardTracker;
 import io.github.organism.learning.PerformanceReporter;
@@ -33,6 +34,7 @@ public class BotPlayer implements Player {
     private DiscountedRewardTracker rewardTracker;
     private PerformanceReporter reporter;
 
+    private boolean decisionReady;
     int currentTurn;
 
     public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, PlayerHud h, Color c){
@@ -45,11 +47,12 @@ public class BotPlayer implements Player {
         organism = org;
         modelInterface = new SlimeRLAgent.GameRLInterface(this,9);
         hud = h;
+        decisionReady = false;
 
         this.rewardTracker = new DiscountedRewardTracker(0.95f); // gamma = 0.95
         this.reporter = new PerformanceReporter("logs");
         currentTurn = 0;
-        
+
         System.out.println("BotPlayer created: " + name + " (ID: " + id + ")");
     }
 
@@ -165,49 +168,44 @@ public class BotPlayer implements Player {
     }
 
     /**
-     *
+     * depricated for now. contains some learning logic
      */
+
+
+
     @Override
+    public void makeDecision() {
+        decisionReady = false;
 
-    public void makeMove() {
+        // Run AI policy
+        float[] state = gatherInputs();
+        Vector2 aiOutput = modelInterface.nextMove();  // Returns XY coords
 
-        currentTurn++;
+        // Set cursor target
+        if (hud != null) {
+            hud.getMoveSpaceControl().setCursor(aiOutput);
+        }
 
-        // 1. Capture state before move
-        ResourceRewardData before = new ResourceRewardData(this);
-
-        // 2. Get and execute move
-        Vector2 newCursor = modelInterface.nextMove();
-        hud.setBotCursorVector(newCursor);
-        organism.expand(hud.getPlanchetteVector());
-        organism.extract(hud.getPlanchetteVector());
-
-        // 3. Capture state after move
-        ResourceRewardData after = new ResourceRewardData(this);
-
-        // 4. Calculate discounted reward
-        float immediateReward = ResourceRewardData.calculateDeltaReward(before, after, 1.0f);
-        float discountedReturn = rewardTracker.getDiscountedReturn(currentTurn, 10);
-        float totalReward = immediateReward + 0.3f * discountedReturn; // Blend
-
-        // 5. Record for learning
-        rewardTracker.addReward(totalReward, currentTurn);
-        modelInterface.recordReward(totalReward);
-
-        // 6. Report performance
-        //if (reporter != null) {
-        //    float avgReward = calculateAverageReward(); // You'd implement this
-        //    reporter.recordTurn(this, avgReward);
-        //}
-
-        // 7. Update previous data
-        previousRewardData = after;
+        decisionReady = true;
     }
 
-    // Initialize reporter when game starts
-    public void initGame(int totalVertices) {
-        if (reporter != null) {
-            reporter.initGame(totalVertices);
-        }
+    @Override
+    public void executeMove(Vector2 precisePlanchette) {
+        // Use precise position for game logic
+        organism.expand(precisePlanchette);
+        organism.extract(precisePlanchette);
+
+        // Calculate reward (uses stored state from decision time)
+        // ... existing reward calculation logic ...
+    }
+
+    @Override
+    public MoveSpaceControl getMoveSpaceControl() {
+        return hud != null ? hud.moveSpaceControl : null;
+    }
+
+    @Override
+    public boolean isDecisionReady() {
+        return decisionReady;
     }
 }

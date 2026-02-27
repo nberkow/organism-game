@@ -1,0 +1,12 @@
+The tournament is currently not running. Some parts are working
+
+working:
+- 3 player setup
+- one move per player
+
+not working:
+- play stops after one move
+- no vertex probability animation
+
+1. Find the source of the hang
+2. Propose a fix or a further debug

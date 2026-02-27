@@ -89,7 +89,7 @@ public class Tutorial implements GameSession {
 
     private void createBotPlayer() {
         Point playerId = new Point(-999, 0);
-        screen.player1Hud = new PlayerHud(game, this, screen, false);
+        screen.player1Hud = new PlayerHud(game, this, screen, false, false);
         playerIdToHud.put(playerId, screen.player1Hud);
 
         Color color = Color.RED;
@@ -112,7 +112,7 @@ public class Tutorial implements GameSession {
 
     private void createHumanPlayer() {
         Point playerId = new Point(-1, 0);
-        screen.player1Hud = new PlayerHud(game, this, screen, false);
+        screen.player1Hud = new PlayerHud(game, this, screen, true, false);
         playerIdToHud.put(playerId, screen.player1Hud);
 
         Color color = Color.RED;

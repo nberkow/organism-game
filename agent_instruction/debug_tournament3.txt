@@ -1,0 +1,21 @@
+we are debugging a three player game with a tournament system. it's currently hitting a stable loop at an unexpected stop. we are also continuing to debug candidate vertex animation
+
+what is currently working
+- game board and all elements set up
+- game starts to play
+- players move in turn expanding
+
+what is not working
+- vertexes are flashing and disappearing in a loop
+- i suspect this is how candidate vertex animation is being handled, or vertexes are being "unclaimed" somehow
+- candidate vertexes should be animated as a solid circle. the radius should reflect the probability of vertex selection
+- expansion stops before the energy meter hits zero
+- either the energy meter is not reflecting the true eneregy available or it is not being spent for some reason (no candidate vertexes)
+
+what to do
+1. explain the flashing vertexes
+2. explain the missing animation
+3. verify vertex selection logic
+4. explain the stopping of expansion
+5. unify these explanations if they are related
+6. report and recommend a solution

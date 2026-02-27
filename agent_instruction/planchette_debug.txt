@@ -1,0 +1,26 @@
+Add debug logging to trace planchette movement:
+1. In MoveSpaceControl.java: log cursor position each frame
+2. In MoveSpaceControl.java: log planchette position after update
+3. In PlayerHud or GameBoard render: log the final draw coordinates
+
+Keep logs concise. Show me the diffs.
+
+Add debug logging to detect memory leaks:
+1. In Organism constructor: log "Organism created, total: [count]"
+2. In Organism.dispose(): log "Organism disposed, total: [count]"
+3. In BotPlayer constructor/dispose(): same pattern
+4. In GameBoard constructor/dispose(): same pattern
+
+Use a static counter for each class. Show me the diffs.
+
+
+Add debug logging to trace tournament flow:
+1. In GameOrchestrator: log when game end condition is checked
+2. In ArcadeLoop: log when finish_this_round() is called
+3. In ArcadeLoop: log when setup_next_round() is called
+4. In Simulation: log when victory condition is evaluated
+
+Show me the diffs.
+
+
+summarize all results at the end. 

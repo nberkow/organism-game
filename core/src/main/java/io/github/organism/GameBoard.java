@@ -26,8 +26,8 @@ public class GameBoard implements Disposable {
     public float centerY;
     float grid_window_y;
     static final float PLAYER_SUMMARY_X = 30;
-    static final float PLAYER_SUMMARY_Y = 380;
-    final float PLAYER_SUMMARY_HEIGHT = 60;
+    static final float PLAYER_SUMMARY_Y = 350;
+    final float PLAYER_SUMMARY_HEIGHT = 65;
     public long seed;
 
     public GameSession session;
@@ -36,7 +36,6 @@ public class GameBoard implements Disposable {
 
     public GameOrchestrator orchestrator;
     public TerritoryBar territoryBar;
-
 
     // Gameplay
     HashMap<Point, Player> players = new HashMap<>();
@@ -55,7 +54,7 @@ public class GameBoard implements Disposable {
     public Random rng;
     public OrganismGame game;
     MoveLogger move_logger;
-    
+
     // Resource leadership tracking
     public Player[] resourceLeaders = new Player[3]; // One leader per resource type
 
@@ -100,7 +99,7 @@ public class GameBoard implements Disposable {
         humanPlayerIds = new ArrayList<>();
         botPlayerIds = new ArrayList<>();
         allPlayerIds = new ArrayList<>();
-        
+
         territoryBar = new TerritoryBar(game);
 
     }
@@ -116,24 +115,28 @@ public class GameBoard implements Disposable {
     }
 
 
+
+
     public void createBotPlayer(String name, Point playerId, Color color){
 
         int index = allPlayerIds.size();
 
         Organism organism = new Organism(this);
+        PlayerHud botHud = new PlayerHud(game, session, session.getScreen(), false, false);
         BotPlayer player = new BotPlayer(
             this,
             name,
             index,
             playerId,
             organism,
-            new PlayerHud(game, session, session.getScreen(), false),
+            botHud,
             color
         );
+        botHud.setPlayer(player);
 
         organism.player = player;
         players.put(playerId, player);
-        //expandEdges.put(playerId, new HashMap<>());
+
         botPlayerIds.add(playerId);
         allPlayerIds.add(playerId);
 
@@ -154,14 +157,14 @@ public class GameBoard implements Disposable {
     public int countResources(){
         return universeMap.hexGrid.countResources();
     }
-    
+
     public void updateResourceLeadership() {
         // Update which player leads in each resource type
         for (int resourceType = 0; resourceType < 3; resourceType++) {
             Player currentLeader = null;
             int maxCount = 0;
             int playersWithMax = 0;
-            
+
             // Find the player with the most of this resource
             for (Player player : players.values()) {
                 Organism organism = player.getOrganism();
@@ -176,7 +179,7 @@ public class GameBoard implements Disposable {
                     }
                 }
             }
-            
+
             // If there's a tie, no one is the leader
             if (playersWithMax > 1) {
                 resourceLeaders[resourceType] = null;
@@ -193,6 +196,18 @@ public class GameBoard implements Disposable {
         updateResourceLeadership();
     }
 
+    public void renderSummaryDisplays() {
+        int i = 0;
+        for (Point playerId : allPlayerIds) {
+            Player player = players.get(playerId);
+            if (player != null && player.getMoveSpaceControl() != null) {
+                // PlayerSummaryDisplay handles its own positioning
+                playerSummaryDisplays.get(i).render();
+            }
+            i++;
+        }
+    }
+
     public void render(float timeDelta) {
 
         logic(timeDelta);
@@ -200,18 +215,17 @@ public class GameBoard implements Disposable {
         ScreenUtils.clear(game.backgroundColor);
 
         gridWindow.render();
-        
+
         // Render territory bar
         if (territoryBar != null) {
             territoryBar.render(this);
         }
-        
+
         if (showPlayerSummary) {
             for (PlayerSummaryDisplay p : playerSummaryDisplays) {
                 p.render();
             }
         }
-
 
         // Render candidate vertices for the current player whose turn it is
         if (orchestrator != null) {
@@ -224,16 +238,16 @@ public class GameBoard implements Disposable {
                     for (float score : o.candidateVertices.values()) {
                         totalScore += score;
                     }
-                    
+
                     game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
                     Color playerColor = currentPlayer.getColor();
                     game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.6f);
-                    
+
                     for (CandidateVertex cv : o.candidateVertices.keySet()) {
                         float probability = totalScore > 0 ? o.candidateVertices.get(cv) / totalScore : 0f;
                         cv.render(probability);
                     }
-                    
+
                     game.shapeRenderer.end();
                 }
             }

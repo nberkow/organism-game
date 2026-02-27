@@ -3,6 +3,8 @@ package io.github.organism;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
+import io.github.organism.hud.MoveSpaceControl;
+import io.github.organism.player.BotPlayer;
 import io.github.organism.player.Player;
 
 public class PlayerSummaryDisplay {
@@ -57,47 +59,25 @@ public class PlayerSummaryDisplay {
         gameBoard.game.batch.end();
         font.setColor(gameBoard.game.foregroundColor);
     }
-    public void drawControlCircle(){
-        if (gameBoard.game.shapeRenderer == null) {
-            return;
-        }
+// In PlayerSummaryDisplay.java, drawControlCircle():
+
+    public void drawControlCircle() {
+        if (gameBoard.game.shapeRenderer == null) return;
 
         float circleX = x + CONTROL_CIRCLE_RADIUS + 5;
         float circleY = y + 15;
+        float summaryScale = 0.6f;
 
-        // Draw circle outline
+        // Just the outline (part of summary layout)
         gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         gameBoard.game.shapeRenderer.setColor(player.getColor());
         gameBoard.game.shapeRenderer.circle(circleX, circleY, CONTROL_CIRCLE_RADIUS);
         gameBoard.game.shapeRenderer.end();
 
-        // Draw planchette and cursor if player has a hud
-        if (player.getClass().getSimpleName().equals("BotPlayer")) {
-            io.github.organism.player.BotPlayer bot = (io.github.organism.player.BotPlayer) player;
-            if (bot.hud != null && bot.hud.moveSpaceControl != null) {
-                com.badlogic.gdx.math.Vector2 planchette = bot.hud.getPlanchetteVector();
-                com.badlogic.gdx.math.Vector2 cursor = bot.hud.getBotInputVector();
-
-                gameBoard.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-                // Draw cursor (smaller, lighter)
-                gameBoard.game.shapeRenderer.setColor(player.getColor().r, player.getColor().g, player.getColor().b, 0.4f);
-                gameBoard.game.shapeRenderer.circle(
-                    circleX + cursor.x * CONTROL_CIRCLE_RADIUS * 0.7f,
-                    circleY + cursor.y * CONTROL_CIRCLE_RADIUS * 0.7f,
-                    2
-                );
-
-                // Draw planchette (larger, solid)
-                gameBoard.game.shapeRenderer.setColor(player.getColor());
-                gameBoard.game.shapeRenderer.circle(
-                    circleX + planchette.x * CONTROL_CIRCLE_RADIUS * 0.7f,
-                    circleY + planchette.y * CONTROL_CIRCLE_RADIUS * 0.7f,
-                    4
-                );
-
-                gameBoard.game.shapeRenderer.end();
-            }
+        // Delegate cursor/planchette to MoveSpaceControl
+        MoveSpaceControl msc = player.getMoveSpaceControl();
+        if (msc != null) {
+            msc.drawAt(circleX, circleY, summaryScale);  // No update() call here
         }
     }
 

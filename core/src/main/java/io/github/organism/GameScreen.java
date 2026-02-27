@@ -1,6 +1,8 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.awt.Point;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
+import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
 public class GameScreen implements Screen {
@@ -75,6 +78,8 @@ public class GameScreen implements Screen {
         if (!arcadeLoop.currentGameOrchestrator.paused) {
             //inputProcessor.updateTimers(Gdx.graphics.getDeltaTime());
             //inputProcessor.updateQueuesWithInput();
+
+            arcadeLoop.currentGameOrchestrator.update(Gdx.graphics.getDeltaTime());
             arcadeLoop.currentGameOrchestrator.updatePlayers();
             arcadeLoop.currentGameOrchestrator.updateTimersAndFlags();
         }
@@ -94,26 +99,45 @@ public class GameScreen implements Screen {
 
     }
 
-    /**
-     * @param delta The time in seconds since the last render.
-     */
+// In GameScreen.java:
+
     @Override
     public void render(float delta) {
         input();
 
         ScreenUtils.clear(game.backgroundColor);
 
+        // Update ALL planchettes (visual drift, regardless of turn)
+        if (game.gameBoard != null) {
+            for (Point playerId : game.gameBoard.allPlayerIds) {
+                Player player = game.gameBoard.players.get(playerId);
+                if (player != null && player.getHud() != null) {
+                    player.getHud().updateVisuals(delta);
+
+                    // Human players: accumulate continuous input
+                    if (player instanceof IO_Player) {
+                        player.getHud().accumulateHumanInput();
+                    }
+                }
+            }
+        }
+
         if (arcadeLoop != null) {
             arcadeLoop.render(delta);
         }
 
+        // Render full HUDs (human players)
         if (player1Hud != null) {
             player1Hud.render();
         }
-
-
         if (player2Hud != null) {
             player2Hud.render();
+        }
+
+        // Render summary displays (all players, including bots)
+        // This happens in GameBoard.render() or similar
+        if (game.gameBoard != null) {
+            game.gameBoard.renderSummaryDisplays();
         }
 
         if (overlay.showControlOverlay) {

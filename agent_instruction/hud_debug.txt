@@ -1,0 +1,16 @@
+the last update added a number of features. I requested a summary and then edited it to reflect the current state
+
+What's partially Working:
+
+ 1 Enhanced Player Summary Display - Shows for each player:
+    • Player name with their color, however this is vertically crowded. bars are overlapping
+    • Control circle with live planchette is drawn but planchette does not visibly move. no disitinct cursor is shown. 3 circles of about planchette size are bouncing around the top right quadrent, suggesting a possible coord issues
+    • Energy bar is going off the max to the right (should be impossible).
+    • Three resource bars, ties go to whoever is first. ties should mean no one is winning.
+    • Gold outline on resource bars when player is the leader
+ 2 Territory Bar Graph - Shows real-time territory control with:
+    • Colored bars for each player
+    • Victory threshold line (2/3 mark)
+    • Positioned at top-left of screen, but needs to leave room for hud displays. should be center
+ 3 Tournament Features not working.
+    • the first game ends but the second does not begin

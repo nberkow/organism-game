@@ -1,0 +1,34 @@
+We we are currently working getting a tournament running with three bot players.
+
+what's working:
+- players seem to expand in turn
+- multiple turns pass
+
+what's broken:
+- vertex probability rendering is missing
+- after a few turns the program hits an error
+
+error:
+Exception in thread "main" java.lang.RuntimeException: grid location -2 -2 3 is not vacant!
+	at io.github.organism.map.TriangularGrid.addPos(TriangularGrid.java:24)
+	at io.github.organism.Organism.claimVertex(Organism.java:254)
+	at io.github.organism.Organism.expand(Organism.java:208)
+	at io.github.organism.player.BotPlayer.makeMove(BotPlayer.java:182)
+	at io.github.organism.GameOrchestrator.makeMoves(GameOrchestrator.java:118)
+	at io.github.organism.GameOrchestrator.update(GameOrchestrator.java:146)
+	at io.github.organism.GameBoard.logic(GameBoard.java:179)
+	at io.github.organism.GameBoard.render(GameBoard.java:185)
+
+This is happening because each player makes claim decisions independently, and then they're resolved without checking
+
+What should happen: 
+- check ownership at claim time
+- if a preferred vertex is already owned, move down the priority list
+- players should never be "cheated" out of a vertex by this process unless there truly are none to validly claim
+
+1) fix the claim order issue
+2) find the source of the missing vertex animation
+3) fix the animation - what should happen
+- when a player's turn starts, their anination should be visible until the next player's turn starts
+- it should be dynamic as their planchette moves
+- the animation should be the same color as the player color

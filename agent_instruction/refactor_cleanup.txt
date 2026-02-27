@@ -1,0 +1,35 @@
+Post-refactor cleanup: turn system has been majorly re-engineered by the user. This has disrupted a lot of already working functionality. Your task is to search for and fix mechanical wiring issues.
+
+CONTEXT:
+- GameOrchestrator has DECISION/EXECUTION/BUFFER phases
+- Player interface has makeDecision(), executeMove(), isDecisionReady()
+- MoveSpaceControl has update(float delta), setCursor(), getLogicalPlanchettePosition(), drawAt(x,y,scale)
+- Architecture is decided; do not redesign
+
+ISSUES TO FIX:
+1. Planchette fixed at center: ensure MoveSpaceControl.render(float delta) calls update(delta) and that update(float delta) actually drifts planchetteFromCenterVector toward cursorCoord
+2. Only player 0 moves: ensure GameOrchestrator.startGame() is called once at game start, and update(float delta) is called every frame in the render loop. ensure needed start conditions are set
+3. Control circles wrong size in summary display: ensure PlayerSummaryDisplay.drawControlCircle() passes scale=0.6f to msc.drawAt(), and that drawAt() scales radii (cursorRadius, planchetteRadius) not just positions
+
+TASKS:
+1. Search for all MoveSpaceControl.render() calls - ensure signature is render(float delta) and body calls update(delta)
+2. Search for GameOrchestrator.update() calls - ensure it's called every frame with delta in GameScreen.render() or ArcadeLoop.render()
+3. Search for PlayerSummaryDisplay.drawControlCircle() - ensure it calls msc.drawAt(x, y, 0.6f) with no inline cursor/planchette drawing
+4. Search for any remaining player.makeMove() calls - they should be makeDecision() or executeMove() now
+5. Verify BotPlayer.isDecisionReady() and IO_Player.isDecisionReady() return the decisionReady field (not truncated)
+
+CONSTRAINTS:
+- Do not redesign the turn system
+- Do not add new features
+- Do not speculate about root causes
+- Just fix method signatures, call sites, and missing implementations
+- Show me diffs before applying anything
+
+FILES TO ADD TO CONTEXT:
+/add core/src/main/java/io/github/organism/GameOrchestrator.java
+/add core/src/main/java/io/github/organism/player/Player.java
+/add core/src/main/java/io/github/organism/player/BotPlayer.java
+/add core/src/main/java/io/github/organism/player/IO_Player.java
+/add core/src/main/java/io/github/organism/hud/MoveSpaceControl.java
+/add core/src/main/java/io/github/organism/PlayerSummaryDisplay.java
+/add core/src/main/java/io/github/organism/GameScreen.java

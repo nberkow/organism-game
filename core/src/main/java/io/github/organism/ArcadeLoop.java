@@ -82,7 +82,6 @@ public class ArcadeLoop implements GameSession {
 
         setup_overlays();
 
-
         availableColors = new ArrayList<>();
 
         tournamentPlayerColors = new HashMap<>();
@@ -93,6 +92,7 @@ public class ArcadeLoop implements GameSession {
 
         mapCenterX = OrganismGame.VIRTUAL_WIDTH / 2f;
         mapCenterY = OrganismGame.VIRTUAL_HEIGHT / 2f;
+
     }
 
     private void setup_overlays() {
@@ -163,6 +163,7 @@ public class ArcadeLoop implements GameSession {
 
         currentGameOrchestrator.updateSpeed(1);
         currentGameOrchestrator.run();
+        currentGameOrchestrator.startGame();
     }
 
 

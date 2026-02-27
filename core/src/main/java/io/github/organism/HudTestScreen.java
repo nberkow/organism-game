@@ -55,8 +55,8 @@ public class HudTestScreen implements Screen {
 
     public HudTestScreen(OrganismGame g) {
         game = g;
-        p1Hud = new PlayerHud(game, new HudTester(this), this, false);
-        p2Hud = new PlayerHud(game, new HudTester(this), this, true);
+        p1Hud = new PlayerHud(game, new HudTester(this), this, true, false);
+        p2Hud = new PlayerHud(game, new HudTester(this), this, false, true);
     }
 
 

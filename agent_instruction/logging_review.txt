@@ -1,0 +1,24 @@
+Here is the Summary of All Changes from the last set of updates. I just compiled and ran the program. where are the logs?
+
+✅ Planchette Movement Logging (Complete):
+
+ • MoveSpaceControl.java: Added cursor position logging in logic() method
+ • MoveSpaceControl.java: Added planchette position logging after update in logic() method
+ • MoveSpaceControl.java: Added final draw coordinates logging in draw() method
+
+✅ Memory Leak Detection (Complete):
+
+ • Organism.java: Added static counter + logging in constructor ("Organism created, total: X") and dispose ("Organism disposed, total: X")
+ • BotPlayer.java: Added static counter + logging in constructor ("BotPlayer created: [name], total: X") and dispose ("BotPlayer disposed: [name], total: X")
+ • GameBoard.java: Added static counter + logging in constructor ("GameBoard created, total: X") and dispose ("GameBoard disposed, total: X")
+
+✅ Tournament Flow Logging (Complete):
+
+ • GameOrchestrator.java: Added logging when testVictoryConditions() is called with frame count
+ • GameOrchestrator.java: Added logging for each victory condition type (threshold, resource exhaustion, frame limit)
+ • ArcadeLoop.java: Added logging when finish_this_round() is called with winner ID
+ • ArcadeLoop.java: Added logging when setup_next_round() is called with iteration number
+ • Simulation.java: Added logging when finishThisRound() is called with winner ID
+ • Simulation.java: Added logging when victory condition is evaluated in logic()
+
+All logging uses concise format with class name prefix in brackets for easy filtering (e.g., [Organism], [BotPlayer], [GameOrchestrator]).

@@ -1,0 +1,17 @@
+the current hud display has list of players in the top left corner with their energy bar showing. let's make this more sophisticated with inoformation we already have in the hud. let's also add a bar graph showing the total territory for each player
+
+
+add to each player display. 
+- the control circle with planchette and cursor. this should be horizontal to the bars
+- other elements will be vertically stacked in the area right of the circle 
+- add a bar for each resource
+- add an indicator by the resource bar if player is leader (gold outline or something simple) 
+
+add the bar graph
+- find the code for this
+- make any changes and add it
+
+without making changes, comment on some dormant code. can you find code to any or all of these?
+- keep running the tournament?
+- show the leaderboard at the end of the round?
+- declare a winner at the end?

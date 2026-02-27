@@ -10,13 +10,13 @@ import io.github.organism.player.Player;
 
 public class TerritoryBar {
 
-    float x_pos = OrganismGame.VIRTUAL_WIDTH / 2 - 80;  // Centered
-    float y_pos = 500;  // Moved down to avoid overlap with player summaries
+    float x_pos = OrganismGame.VIRTUAL_WIDTH - 160;  // right
+    float y_pos = 400;  // Moved down to avoid overlap with player summaries
 
-    float victory_threshold = 2/3f;
+    float victory_threshold = 1/3f;
     float bar_width = 40;
-    float bar_spacing = 5;
-    float max_height = 150;  // Reduced height slightly
+    float bar_spacing = 8;
+    float max_height = 150;
 
     HashMap<Point, Float> heights;
 

@@ -1,0 +1,11 @@
+The planchette (control cursor) is not moving. there is a fixed solid circle the center of the control circle. the cursor should also be visible but it is missing 
+
+Trace the input → cursor → planchette flow:
+1. Find where mouse/touch input is captured (likely MoveSpaceControl.java or GameScreen.input())
+2. Find where cursor position is updated from input
+3. Find where planchette position is updated from cursor
+4. Find where planchette is rendered
+
+Identify the break point where the position stops being updated or transformed incorrectly.
+
+Show me your analysis first. Do not add logging. Do not modify files yet. Just tell me where the issue is and propose a minimal fix.

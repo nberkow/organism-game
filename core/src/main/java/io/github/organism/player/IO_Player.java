@@ -1,6 +1,7 @@
 package io.github.organism.player;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
 
@@ -23,9 +24,10 @@ public class IO_Player  implements Player {
     Organism organism;
 
     GameBoard gameBoard;
-
+    private boolean decisionReady;
 
     int most_recent_move;
+    private Vector2 lockedInput;
     ActionHistory moveHistory;
 
     PlayerHud hud;
@@ -40,6 +42,9 @@ public class IO_Player  implements Player {
         tournamentId = id;
         organism = org;
         color = c;
+
+        decisionReady = false;
+        lockedInput = new Vector2();
     }
 
     public PlayerHud getHud() {
@@ -115,13 +120,32 @@ public class IO_Player  implements Player {
     }
 
 
-    /**
-     *
-     */
     @Override
-    public void makeMove() {
-        organism.expand(hud.getPlanchetteVector());
-        organism.extract(hud.getPlanchetteVector());
+    public void makeDecision() {
+        decisionReady = false;
+
+        // Capture current input state (cursor position at phase end)
+        if (hud != null) {
+            lockedInput.set(hud.getMoveSpaceControl().getCursorCoord());
+        }
+
+        decisionReady = true;
+    }
+
+    @Override
+    public void executeMove(Vector2 precisePlanchette) {
+        organism.expand(precisePlanchette);
+        organism.extract(precisePlanchette);
+    }
+
+    @Override
+    public boolean isDecisionReady() {
+        return decisionReady;
+    }
+
+    @Override
+    public MoveSpaceControl getMoveSpaceControl() {
+        return hud != null ? hud.moveSpaceControl : null;
     }
 
 }
