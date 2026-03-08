@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import io.github.organism.hud.PlayerHud;
+import io.github.organism.learning.SlimeRLAgent;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
