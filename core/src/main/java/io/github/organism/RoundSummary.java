@@ -19,7 +19,7 @@ public class RoundSummary {
     BitmapFont font32;
     GlyphLayout layout;
 
-    Simulation simulation;
+    GameSession gameSession;
     float font_x;
     float font_y;
     String text;
@@ -36,14 +36,14 @@ public class RoundSummary {
     float standings_width;
     float standings_v_space;
 
-    ArrayList<String> standings_players;
+    ArrayList<String> standingsPlayers;
     ArrayList<String> standings_wins;
 
     ArrayList<Point> standings_ids;
     HashMap<Integer, ArrayList<Point>> players_by_win;
-    public RoundSummary(OrganismGame g, Simulation sim){
+    public RoundSummary(OrganismGame g, GameSession s){
         game = g;
-        simulation = sim;
+        gameSession = s;
         font32 = game.fonts.get(32);
         font16= game.fonts.get(16);
 
@@ -64,22 +64,23 @@ public class RoundSummary {
 
     }
 
-    public void set_winner(Point w) {
+    public void setWinner(Point w) {
         winner_id = w;
-        text = simulation.player_names.get(winner_id) + " wins!";
+        text = gameSession.getPlayerName(winner_id) + " wins!";
 
-        format_standings();
+        formatStandings();
     }
 
-    public void format_standings(){
+
+    public void formatStandings(){
         players_by_win = new HashMap<>();
 
-        standings_players = new ArrayList<>();
+        standingsPlayers = new ArrayList<>();
         standings_wins = new ArrayList<>();
         standings_ids = new ArrayList<>();
 
-        for (Point p : simulation.player_names.keySet()){
-            Point rec = simulation.winRecords.get(p).get(0);
+        for (Point p : gameSession.getPlayerNames().keySet()){
+            Point rec = gameSession.getWinRecord(p);
             int win_margin = (rec.x - rec.y) * (rec.x + rec.y);
             if (!players_by_win.containsKey(win_margin)) {
                 players_by_win.put(win_margin, new ArrayList<>());
@@ -98,9 +99,9 @@ public class RoundSummary {
 
                 for (Point  p : tied_players) {
                     standings_ids.add(p);
-                    String name = simulation.player_names.get(p);
-                    Point rec = simulation.winRecords.get(p).get(0);
-                    standings_players.add(name);
+                    String name = gameSession.getPlayerName(p);
+                    Point rec = gameSession.getWinRecord(p);
+                    standingsPlayers.add(name);
                     standings_wins.add(rec.x + " - " + rec.y);
                     lines_to_print--;
                 }
@@ -125,7 +126,7 @@ public class RoundSummary {
         game.shapeRenderer.end();
 
         game.batch.begin();
-        font32.setColor(simulation.tournament_player_colors.get(winner_id));
+        font32.setColor(gameSession.getPlayerColor(winner_id));
         layout = new GlyphLayout(font32, text);
         font_x = text_center_x - (layout.width / 2);
         font_y = text_center_y;
@@ -133,13 +134,13 @@ public class RoundSummary {
 
         float standings_x = (game.VIRTUAL_WIDTH / 2f) - (standings_width / 2f);
 
-        for (int i=0; i<standings_players.size(); i++){
+        for (int i = 0; i< standingsPlayers.size(); i++){
             Point p = standings_ids.get(i);
 
-            font16.setColor(simulation.tournament_player_colors.get(p));
+            font16.setColor(gameSession.getPlayerColor(p));
 
             font16.draw(game.batch,
-                standings_players.get(i),
+                standingsPlayers.get(i),
                 standings_x,
                 standings_y - (standings_v_space * i));
 

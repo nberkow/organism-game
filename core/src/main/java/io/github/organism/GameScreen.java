@@ -78,7 +78,6 @@ public class GameScreen implements Screen {
         if (arcadeLoop != null && arcadeLoop.currentGameOrchestrator != null && !arcadeLoop.currentGameOrchestrator.paused) {
             arcadeLoop.currentGameOrchestrator.update(Gdx.graphics.getDeltaTime());
             arcadeLoop.currentGameOrchestrator.updatePlayers();
-            arcadeLoop.currentGameOrchestrator.updateTimersAndFlags();
         }
     }
 
@@ -134,7 +133,7 @@ public class GameScreen implements Screen {
         // Render summary displays (all players, including bots)
         // This happens in GameBoard.render() or similar
         if (game.gameBoard != null) {
-            game.gameBoard.renderSummaryDisplays();
+            game.gameBoard.renderSummaryDisplays(delta);
         }
 
         if (overlay.showControlOverlay) {

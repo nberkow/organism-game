@@ -178,7 +178,6 @@ public class BotPlayer implements Player {
         decisionReady = false;
 
         // Run AI policy
-        float[] state = gatherInputs();
         Vector2 aiOutput = modelInterface.nextMove();  // Returns XY coords
 
         // Set cursor target
@@ -194,6 +193,7 @@ public class BotPlayer implements Player {
         // Use precise position for game logic
         organism.expand(precisePlanchette);
         organism.extract(precisePlanchette);
+        gameBoard.orchestrator.updateTerritory(tournamentId, organism.getTerritoryVertex().getUnmaskedVertices());
 
         // Calculate reward (uses stored state from decision time)
         // ... existing reward calculation logic ...

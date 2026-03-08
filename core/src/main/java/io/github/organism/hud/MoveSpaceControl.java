@@ -22,6 +22,8 @@ public class MoveSpaceControl {
 
     float TURN_DURATION = 1.5f;
 
+    private static final float DRIFT_SPEED = 0.5f;
+
 
     public MoveSpaceControl(PlayerHud ph, float r) {
         hud = ph;
@@ -47,11 +49,12 @@ public class MoveSpaceControl {
 
     }
 
-    private Vector2 decisionStartPlanchette = new Vector2();
+    public Vector2 decisionStartPlanchette = new Vector2();
 
     // In setCursor() (called at decision time):
     public void setCursor(Vector2 targetXY) {
-        decisionStartPlanchette.set(planchetteFromCenterVector);  // Save start position
+        decisionStartPlanchette.set(planchetteFromCenterVector);
+
         if (targetXY.len() > availableRadius) {
             cursorCoord.set(targetXY).setLength(availableRadius);
         } else {
@@ -59,15 +62,40 @@ public class MoveSpaceControl {
         }
     }
 
-    // In getLogicalPlanchettePosition():
+
+    /**
+     * Calculate precise planchette position for game logic.
+     * Models constant-speed travel toward cursor target.
+     * @param elapsedSinceDecision Seconds since DECISION phase started
+     * @return Position in normalized space (unit circle) for dot-product scoring
+     */
     public Vector2 getLogicalPlanchettePosition(float elapsedSinceDecision) {
-        float t = Math.min(1.0f, elapsedSinceDecision / TURN_DURATION);
-        float x = decisionStartPlanchette.x + (cursorCoord.x - decisionStartPlanchette.x) * t;
-        float y = decisionStartPlanchette.y + (cursorCoord.y - decisionStartPlanchette.y) * t;
+        // Vector from start position to cursor target
+        float deltaX = cursorCoord.x - decisionStartPlanchette.x;
+        float deltaY = cursorCoord.y - decisionStartPlanchette.y;
+
+        // Distance to travel
+        float distance = (float)Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        // If already at target (or very close), return cursor
+        if (distance < 0.001f) {
+            return cursorCoord.cpy();
+        }
+
+        // Unit direction vector toward cursor
+        float dirX = deltaX / distance;
+        float dirY = deltaY / distance;
+
+        // How far have we traveled at constant speed?
+        float traveled = Math.min(distance, DRIFT_SPEED * elapsedSinceDecision);
+
+        // Position = start + direction * traveled
+        float x = decisionStartPlanchette.x + dirX * traveled;
+        float y = decisionStartPlanchette.y + dirY * traveled;
+
         return new Vector2(x, y);
     }
 
-    // In MoveSpaceControl.java:
 
     /**
      * Update visual drift. Call every frame before drawing.
@@ -82,6 +110,8 @@ public class MoveSpaceControl {
 
         planchetteFromCenterVector.x += deltaX * driftSpeed * delta;
         planchetteFromCenterVector.y += deltaY * driftSpeed * delta;
+
+
     }
 
     /**
@@ -99,6 +129,7 @@ public class MoveSpaceControl {
         float scaledRadius = radius * scale;
         float scaledCursorRadius = cursorRadius * scale;
         float scaledPlanchetteRadius = planchetteRadius * scale;
+        float scaledActiveRadius = scaledRadius - scaledCursorRadius;
 
         // Background
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -114,26 +145,21 @@ public class MoveSpaceControl {
 
         // Cursor (outline)
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        hud.game.shapeRenderer.setColor(
-            cursorCoord.len() < aggressionRadius * scale ?
-                hud.game.foregroundColor : Color.RED
-        );
+        hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
+
         hud.game.shapeRenderer.circle(
-            drawX + cursorCoord.x * scale,
-            drawY + cursorCoord.y * scale,
+            drawX + cursorCoord.x * scaledActiveRadius,
+            drawY + cursorCoord.y * scaledActiveRadius,
             scaledCursorRadius
         );
         hud.game.shapeRenderer.end();
 
         // Planchette (filled)
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        hud.game.shapeRenderer.setColor(
-            planchetteFromCenterVector.len() < aggressionRadius * scale ?
-                hud.game.foregroundColor : Color.RED
-        );
+        hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
         hud.game.shapeRenderer.circle(
-            drawX + planchetteFromCenterVector.x * scale,
-            drawY + planchetteFromCenterVector.y * scale,
+            drawX + planchetteFromCenterVector.x * scaledActiveRadius,
+            drawY + planchetteFromCenterVector.y * scaledActiveRadius,
             scaledPlanchetteRadius
         );
         hud.game.shapeRenderer.end();

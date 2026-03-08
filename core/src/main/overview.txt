@@ -51,7 +51,7 @@ What's working:
     - gain and spend energy
     - select vertexes based on the planchette position
 
-    tournament behavior - I have the semirandom tournament basically working, although it is currently unwired and needs work. Mostly it needs to be adapted to handle training/evolution. it has some other quirks that will need to be eliminated or incorporated. I am proud of the player naming/id mechanism I came up with
+    tournament behavior - I have the semirandom tournament basically working, although model persistence is currently unwired and needs work. Mostly it needs to be adapted to handle training/evolution. it has some other quirks that will need to be eliminated or incorporated. I am proud of the player naming/id mechanism I came up with
 
     map generation - currently unwired, there's a map creation screen that let's users design custom parameters for procedural maps.
 
@@ -62,22 +62,25 @@ What's working:
 What's not working:
 
     the whole thing needs to be wired together and polished, but there are still some individual components that are far from done:
-
-    - AI learning - we want the training unit to be one game and the reward to be something like log vertexes claimed
-    - AI evolution - we need an elimination/breeding phase to the tournament, maybe a way a of tracking and saving the models between games
-    - Info extraction - what comes from the inspected hex? how to collect it and format it for the model
-    - human player swap in start. the idle screen should be a real tournament that the player can just hop into. maybe learning is suspended until they join
-    - resource bonus implementation. this is currently not implemented at all, but it is described above
-    - hud improvements - resource lead status, planchette movement, territory graph (line plot of who's currently winning). I did a lot of experiments with the hud, so there are a lot of useful little pieces as well as deprecated things
+    - pause menu
+    - human interface currently unwired, need to wire back up
+    - tournament with 0, 1, or 2 players
+    - persistent model pool for learning/evolution
+    - learning
+    - evolution
 
 What to do next:
-    - implement resource tracking and bonuses
-    - get the tournament up and running with some basic learning implemented (maybe just ~36 params extracted from a hex to start)
+    - get the tournament up and running with persistent models
+    - get the pause menu working
+    - get pausing working
+    - get restart new tournament working
+    - get 1 human player working
+    - get 2 human players working
 
 What to do after that:
-    - human player controls. let them swap in gracefully
-    - evolution
-    - more sophisticated learning experiments
+    - analyze current learning (dummy implementation)
+    - does it have a bias?
+    - will a bunch of one-hot inputs create a bias?
 
 
 

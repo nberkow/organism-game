@@ -54,7 +54,7 @@ public class Organism {
     public void updateIncome() {
         // Base income
         float baseIncome = 5f;
-        
+
         // Count how many resource types this player leads in
         int leadershipBonuses = 0;
         for (int i = 0; i < 3; i++) {
@@ -62,12 +62,12 @@ public class Organism {
                 leadershipBonuses++;
             }
         }
-        
+
         // Each leadership gives a bonus (you can adjust the bonus amount)
         float bonusPerLeadership = gameBoard.config.gameplaySettings.getOrDefault(
             "resource leadership bonus", 5f
         );
-        
+
         income = baseIncome + (leadershipBonuses * bonusPerLeadership);
     }
 
@@ -82,10 +82,10 @@ public class Organism {
         updateResources();
         gameBoard.updateResourceLeadership();
         updateIncome();
-        
+
         // Add energy based on calculated income
         energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
-        
+
         // Burn one resource after extracting (as per game rules)
         if (countResources() > 0) {
             burnResources();
@@ -156,17 +156,17 @@ public class Organism {
         }
     }
 
-
     public void expand(Vector2 planchetteFromCenter) {
-        
+
         // Update resources and income before expanding
         updateResources();
         gameBoard.updateResourceLeadership();
         updateIncome();
 
         // Only rebuild candidates if empty or planchette changed significantly
+        //FIXME implement "planchette changed significantly" test
         boolean needsRebuild = candidateVertices.isEmpty();
-        
+
         if (needsRebuild) {
             candidateVertices.clear();
             double scoreSum = 0d;
@@ -200,6 +200,7 @@ public class Organism {
             }
         }
 
+
         // Check if we have energy and candidates
         if (candidateVertices.isEmpty() || energy < gameBoard.config.gameplaySettings.get("energy to expand")) {
             return;
@@ -209,24 +210,25 @@ public class Organism {
         float energyBudget = Math.min(energy, energy * (0.5f + planchetteFromCenter.len() * 0.5f));
         int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
 
+
         int attemptedClaims = 0;
         int maxAttempts = verticesToClaim * 3; // Allow retries for invalid vertices
-        
+
         while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
             // Recalculate score sum from current candidates
             double scoreSum = 0d;
             for (float score : candidateVertices.values()) {
                 scoreSum += score;
             }
-            
+
             if (scoreSum <= 0) {
                 break;
             }
-            
+
             double r = gameBoard.rng.nextDouble() * scoreSum;
             double s = 0d;
             CandidateVertex selected = null;
-            
+
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 s += candidateVertices.get(cv);
                 if (s > r) {
@@ -234,7 +236,7 @@ public class Organism {
                     break;
                 }
             }
-            
+
             if (selected != null) {
                 // Check if vertex is still available at claim time
                 if (selected.target.getPlayer() == null && !selected.target.masked) {
@@ -245,8 +247,9 @@ public class Organism {
                 // Remove this candidate (claimed or invalid)
                 candidateVertices.remove(selected);
             }
-            
+
             attemptedClaims++;
+
         }
     }
 
@@ -277,12 +280,12 @@ public class Organism {
     }
 
     public void claimVertex(MapVertex v){
-        
+
         // Double-check vertex is available before claiming
         if (v.player != null) {
             return; // Already claimed by someone
         }
-        
+
         if (territoryVertex.contains_position(v.pos.i, v.pos.j, v.pos.k)) {
             return; // Already in our territory
         }

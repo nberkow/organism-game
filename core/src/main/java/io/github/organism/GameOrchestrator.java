@@ -1,6 +1,5 @@
 package io.github.organism;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
@@ -11,27 +10,27 @@ import io.github.organism.player.Player;
 
 public class GameOrchestrator {
 
+    private static final float VICTORY_MAP_FILL_THRESHOLD = .9f;
+
+    private static final float MAX_UNPLAYED_TURNS = 3;
+
+    final float VICTORY_THRESHOLD = 1/2f;
+
+    public void updateTerritory(Point tournamentId, float territory) {
+        playerTerritory.put(tournamentId, territory);
+    }
+
     public enum TurnPhase { DECISION, EXECUTION, BUFFER }
     private ArrayList<Point> playerTurnOrder;  // Set from gameBoard.allPlayerIds
-    final float VICTORY_THRESHOLD = 2/3f;
-    public boolean finished;
-    float frameMax;
 
-    int frame = 0;
+    public boolean finished;
     GameBoard gameBoard;
-    double baseActionTime = 1d;
-    double actionTime = baseActionTime;
-    double actionClock = 0d;
     boolean paused = true;
     HashMap<Point, Float> playerTerritory;
-    HashMap<Point, Integer> currentMoves;
     float totalTerritory;
     int resourceExhaustedCountdown = 36;
     boolean show_countdown;
-
-    int blinkingPlayerIdx = 0;
-    float blinkPeriod = 1f/3;
-    float blinkTime = 0;
+    float unplayedTurns = 0;
 
 
     private TurnPhase currentPhase = TurnPhase.DECISION;
@@ -47,27 +46,29 @@ public class GameOrchestrator {
 
     public GameOrchestrator(GameBoard gb) {
         gameBoard = gb;
+        finished = false;
+    }
+
+    public void initializeFromGameBoard() {
         playerTurnOrder = gameBoard.allPlayerIds;
+        System.out.println("[Orchestrator] playerTurnOrder=" + playerTurnOrder);
+
         totalTerritory = (float) gameBoard.universeMap.vertexGrid.getUnmaskedVertices();
-        frameMax = totalTerritory * 3;
         playerTerritory = new HashMap<>();
-        currentMoves = new HashMap<>();
-        for (Point p : gameBoard.players.keySet()) {
+        for (Point p : playerTurnOrder) {
             playerTerritory.put(p, (float) gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices());
         }
-        finished = false;
-
-
     }
+
 
     public void update(float delta) {
         phaseTimer += delta;
 
         Player currentPlayer = getCurrentPlayer();
 
-        System.out.println("[Orchestrator] phase=" + currentPhase +
-            " player=" + getCurrentPlayer().getPlayerName() +
-            " timer=" + phaseTimer);
+        //System.out.println("[Orchestrator] phase=" + currentPhase +
+        //    " player=" + getCurrentPlayer().getPlayerName() +
+        //    " timer=" + phaseTimer);
 
         switch (currentPhase) {
             case DECISION:
@@ -98,15 +99,12 @@ public class GameOrchestrator {
                 break;
 
             case EXECUTION:
-                // Calculate precise planchette position and execute
-                float elapsedSinceDecision = phaseTimer;  // Time since DECISION phase ended
+                // DECISION phase lasted TURN_DURATION seconds by design
                 Vector2 precisePlanchette = currentPlayer.getHud()
                     .getMoveSpaceControl()
-                    .getLogicalPlanchettePosition(elapsedSinceDecision);
+                    .getLogicalPlanchettePosition(TURN_DURATION);  // ← 1.5f, not phaseTimer
 
                 currentPlayer.executeMove(precisePlanchette);
-
-                // Immediately advance to BUFFER
                 currentPhase = TurnPhase.BUFFER;
                 phaseTimer = 0f;
                 break;
@@ -116,6 +114,14 @@ public class GameOrchestrator {
                 if (phaseTimer >= BUFFER_DURATION) {
                     // Advance to next player
                     currentPlayerIndex = (currentPlayerIndex + 1) % playerTurnOrder.size();
+
+                    if (currentPlayerIndex == 0){
+                        Point winner = testVictoryConditions();
+                        if (winner != null) {
+                            gameBoard.session.finishThisRound(winner);
+                        }
+                    }
+
                     currentPhase = TurnPhase.DECISION;
                     phaseTimer = 0f;
 
@@ -126,7 +132,7 @@ public class GameOrchestrator {
         }
     }
 
-    private Player getCurrentPlayer() {
+    Player getCurrentPlayer() {
         Point playerId = playerTurnOrder.get(currentPlayerIndex);
         return gameBoard.players.get(playerId);
     }
@@ -145,25 +151,6 @@ public class GameOrchestrator {
     public int getCurrentPlayerIndex() { return currentPlayerIndex; }
     public float getPhaseTimer() { return phaseTimer; }
 
-
-    public void updateSpeed(float speed){
-        actionTime = baseActionTime / speed;
-    }
-
-    public void updateTimersAndFlags() {
-
-        if (frame >= frameMax) {
-            return;
-        }
-
-        actionClock += Gdx.graphics.getDeltaTime();
-        if (actionClock > actionTime){
-            frame++;
-
-            actionClock = actionClock % actionTime;
-        }
-
-    }
 
     public void updatePlayers() {
         for (Point playerId : gameBoard.players.keySet()) {
@@ -191,24 +178,50 @@ public class GameOrchestrator {
             show_countdown = true;
         }
 
+        float claimedTerritory = 0;
         for (Point p : gameBoard.players.keySet()) {
-            float p_territory = gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices();
-            playerTerritory.put(p, p_territory);
-            if (p_territory > leader_territory) {
-                leader = p;
-                leader_territory = p_territory;
+
+            float lastTurnTerritory = playerTerritory.get(p);
+
+            float pTerritory = gameBoard.players.get(p).getOrganism().territoryVertex.getUnmaskedVertices();
+            claimedTerritory += pTerritory;
+
+            // if any player gained territory in the last round reset the counter
+            if (pTerritory > lastTurnTerritory) {
+                unplayedTurns = 0;
             }
 
-            if (p_territory / totalTerritory >= VICTORY_THRESHOLD) {
+            playerTerritory.put(p, pTerritory);
+
+            if (pTerritory > leader_territory) {
+                leader = p;
+                leader_territory = pTerritory;
+            }
+
+            if (pTerritory / totalTerritory >= VICTORY_THRESHOLD) {
                 return p;
             }
         }
 
-        if (resourceExhaustedCountdown <= 0) {
+        System.out.println("[VictoryCheck] claimedTerritory=" + claimedTerritory +
+            " fill_threshold=" + (totalTerritory * VICTORY_MAP_FILL_THRESHOLD) +
+            " leader=" + leader);
+
+        if (claimedTerritory > totalTerritory * VICTORY_MAP_FILL_THRESHOLD) {
+            System.out.println("[VictoryCheck] MAP FILL WINNER: " + leader);
             return leader;
         }
 
-        if (frame >= frameMax) {
+        if (claimedTerritory > totalTerritory * VICTORY_MAP_FILL_THRESHOLD) {
+            return leader;
+        }
+
+        if (unplayedTurns >= MAX_UNPLAYED_TURNS){
+            return leader;
+        }
+
+
+        if (resourceExhaustedCountdown <= 0) {
             return leader;
         }
 
@@ -226,11 +239,6 @@ public class GameOrchestrator {
 
 
     public void dispose() {
-    }
-
-    public Player getBlinkingPlayer() {
-        Point blinkingPlayerId = gameBoard.allPlayerIds.get(blinkingPlayerIdx);
-        return (gameBoard.players.get(blinkingPlayerId));
     }
 
     public void render() {

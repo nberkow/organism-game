@@ -65,16 +65,11 @@ public class MenuScreen implements Screen {
      */
     @Override
     public void render(float delta) {
-        input();
         logic();
         draw(delta);
     }
 
-    private void input() {
-        if (menu_simulation.currentGameOrchestrator != null) {
-            menu_simulation.currentGameOrchestrator.updateTimersAndFlags();
-        }
-    }
+
 
     private void logic() {
         if (menu_simulation.currentGameOrchestrator != null) {

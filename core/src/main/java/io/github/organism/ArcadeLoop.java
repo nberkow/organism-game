@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
 public class ArcadeLoop implements GameSession {
 
+    int POOL_SIZE = 20;
     float mapCenterX;
     float mapCenterY;
     GameConfig gameCfg;
@@ -65,27 +67,33 @@ public class ArcadeLoop implements GameSession {
         "Bondarzewia berkeleyi"
     };
 
-    HashMap<Point, Player> playerPool;
+    HashSet<Point> botPool;
     HashMap<Point, Point> winRecords;
     int currentIteration;
     OrganismGame game;
     GameBoard currentGame;
     GameOrchestrator currentGameOrchestrator;
-    RoundSummary round_summary;
-
+    RoundSummary roundSummary;
     Screen currentScreen;
 
     public ArcadeLoop(OrganismGame g) {
         game = g;
-        playerPool = new HashMap<>();
+
+        botPool = new HashSet<>();
+        for (int x = 0; x < POOL_SIZE; x++) {
+            botPool.add(new Point(x, 0));
+        }
+
         winRecords = new HashMap<>();
 
-        setup_overlays();
+        setupOverlays();
 
         availableColors = new ArrayList<>();
 
         tournamentPlayerColors = new HashMap<>();
         playerNames = new HashMap<>();
+
+        roundSummary = new RoundSummary(game, this);
 
         showSummaryScreen = false;
         nextRoundBegin = true;
@@ -95,7 +103,30 @@ public class ArcadeLoop implements GameSession {
 
     }
 
-    private void setup_overlays() {
+    public String getPlayerName(Point p){
+        return playerNames.get(p);
+    }
+
+    /**
+     * @param p
+     * @return
+     */
+    @Override
+    public Color getPlayerColor(Point p) {
+        return tournamentPlayerColors.get(p);
+    }
+
+    public HashMap<Point, String> getPlayerNames(){
+        return playerNames;
+    }
+
+    public Point getWinRecord(Point p){
+        return winRecords.get(p);
+    }
+
+
+
+    private void setupOverlays() {
 
         gameCfg = game.fileHandler.read_cfg("kingdoms", "map");
 
@@ -111,34 +142,14 @@ public class ArcadeLoop implements GameSession {
 
     }
 
-    private void spawnBotPlayers(int n) {
-        for (int i = 0; i < n; i++) {
-            // Generate a fresh tournament ID for this bot
-            Point player_id = new Point(playerPrimaryIndex, 0);
-            playerPrimaryIndex++;
 
-            // Generate name from your naming arrays
-            String name = playerNamesArray[player_id.x % playerNamesArray.length]
-                + " " + numerals[player_id.y % numerals.length];
+    public void setup(int n){
 
-            // Assign a color (reuse or pick new)
-            Color color;
-            if (tournamentPlayerColors.containsKey(player_id)) {
-                color = tournamentPlayerColors.get(player_id);
-            } else {
-                color = availableColors.remove(0);
-                tournamentPlayerColors.put(player_id, color);
-            }
-
-            // Create the actual BotPlayer via GameBoard (handles Organism + SlimeRLAgent wiring)
-            currentGame.createBotPlayer(name, player_id, color);
-
-            // Register in tracking maps for tournament scoring
-            playerNames.put(player_id, name);
-            winRecords.put(player_id, new Point(0, 0));  // init win/loss record
+        if (currentGame != null) {
+            currentGame.dispose();
+            currentGameOrchestrator.dispose();
         }
-    }
-    public void setup(int n) {
+
         game.gameScreen.ioPlayerNames = new ArrayList<>();
         game.gameScreen.ioPlayerIds = new ArrayList<>();
 
@@ -150,24 +161,25 @@ public class ArcadeLoop implements GameSession {
         playerPrimaryIndex = 0;
         currentScreen = game.gameScreen;
 
-        create_game_board();
+        createGameBoard();
 
-        spawnBotPlayers(gameCfg.botPlayers);
-        create_human_players();
+        createBotPlayers(gameCfg.botPlayers);
+        createHumanPlayers();
         createPlayerStarts();
+
+        currentGameOrchestrator = new GameOrchestrator(currentGame);
+        currentGame.setOrchestrator(currentGameOrchestrator);
 
         currentGame.createPlayerSummaryDisplays();
         currentGame.showPlayerSummary = true;
 
-        currentGame.showDiplomacy = true;
-
-        currentGameOrchestrator.updateSpeed(1);
+        currentGameOrchestrator.initializeFromGameBoard();
         currentGameOrchestrator.run();
         currentGameOrchestrator.startGame();
     }
 
 
-    public void create_game_board() {
+    public void createGameBoard() {
 
         if (availableColors.size() < 3){
             availableColors.addAll(Arrays.asList(game.playerColors).subList(2, game.playerColors.length));
@@ -176,9 +188,6 @@ public class ArcadeLoop implements GameSession {
         currentGame = new GameBoard(game, gameCfg, this);
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
-
-        currentGameOrchestrator = new GameOrchestrator(currentGame);
-        currentGame.setOrchestrator(currentGameOrchestrator);
 
         currentGame.centerX = mapCenterX;
         currentGame.centerY = mapCenterY;
@@ -217,19 +226,14 @@ public class ArcadeLoop implements GameSession {
         hud.setSpend(organism.spend);*/
     }
 
-    public void run_arcade_loop() {
-        System.out.println("first iteration");
-        currentGameOrchestrator.updateSpeed(gameCfg.gameplaySettings.get("speed"));
-        currentGameOrchestrator.run();
-    }
 
-    private void finish_this_round(Point winner_id) {
+    public void finishThisRound(Point winnerId) {
 
         System.out.println("iteration: " + currentIteration + "/" + iterations);
 
         for (Point p : currentGame.players.keySet()) {
             Point rec = winRecords.get(p);
-            if (p == winner_id){
+            if (p == winnerId){
                 rec.x += 1;
             }
             else {
@@ -238,27 +242,15 @@ public class ArcadeLoop implements GameSession {
             winRecords.put(p, rec);
         }
 
-        round_summary.set_winner(winner_id);
+        roundSummary.setWinner(winnerId);
         showSummaryScreen = true;
-
-    }
-
-    private void setup_next_round() {
-
-        currentGame.dispose();
-        currentGameOrchestrator.dispose();
-
-        create_game_board();
-        create_human_players();
-        create_bot_players();
-        createPlayerStarts();
-        currentGame.createPlayerSummaryDisplays();
-        currentGameOrchestrator.updateSpeed(gameCfg.gameplaySettings.get("speed"));
-        currentGameOrchestrator.run();
+        betweenRoundPauseTimer = betweenRoundPause;
     }
 
 
-    public void create_human_players(){
+
+
+    public void createHumanPlayers(){
 
         for (int p = 0; p< gameCfg.humanPlayers; p++){
             Point playerId = new Point(-1, p);
@@ -290,29 +282,38 @@ public class ArcadeLoop implements GameSession {
             currentGame.allPlayerIds.add(playerId);
         }
     }
-    private void create_bot_players() {
-        ArrayList<Point> player_ids = new ArrayList<>(playerPool.keySet());
-        Collections.shuffle(player_ids, game.rng);
 
-        for (int i=0; i<3; i++) {
-            Point player_id = player_ids.get(i);
-            // REMOVE: Model model = playerPool.get(player_id);
+    private void createBotPlayers(int n) {
 
-            String name = playerNamesArray[player_id.x % playerNamesArray.length] + " " + numerals[player_id.y % numerals.length];
+        ArrayList<Point> available = new ArrayList<>(botPool);
+        Collections.shuffle(available, game.rng);
 
+        for (int i = 0; i < n; i++) {
+
+            // Generate a fresh tournament ID for this bot
+            Point playerId = available.get(i);
+
+            // Generate name from your naming arrays
+            String name = playerNamesArray[playerId.x % playerNamesArray.length]
+                + " " + numerals[playerId.y % numerals.length];
+
+            // Assign a color (reuse or pick new)
             Color color;
-            if (tournamentPlayerColors.containsKey(player_id)){
-                color = tournamentPlayerColors.get(player_id);
+            if (tournamentPlayerColors.containsKey(playerId)) {
+                color = tournamentPlayerColors.get(playerId);
             } else {
                 color = availableColors.remove(0);
+                tournamentPlayerColors.put(playerId, color);
             }
 
-            currentGame.createBotPlayer(name, player_id, color);
-            playerNames.put(player_id, name);
-            tournamentPlayerColors.put(player_id, color);
+            // Create the actual BotPlayer via GameBoard (handles Organism + SlimeRLAgent wiring)
+            currentGame.createBotPlayer(name, playerId, color);
+
+            // Register in tracking maps for tournament scoring
+            playerNames.put(playerId, name);
+            winRecords.put(playerId, new Point(0, 0));  // init win/loss record
         }
     }
-
 
     public void logic(){
 
@@ -325,7 +326,7 @@ public class ArcadeLoop implements GameSession {
         currentGame.game.camera.update();
         currentGame.render(delta);
         if (showSummaryScreen & betweenRoundPause > 0 ) {
-            round_summary.render();
+            roundSummary.render();
         }
     }
 
@@ -337,13 +338,23 @@ public class ArcadeLoop implements GameSession {
         else {
             logic();
             draw(delta);
+
+            if (showSummaryScreen) {
+                betweenRoundPauseTimer -= delta;  // ← Decrement timer
+                if (betweenRoundPauseTimer <= 0) {  // ← Timer expired
+                    showSummaryScreen = false;
+                    setup(gameCfg.humanPlayers);  // ← Start next game
+                }
+            }
         }
     }
 
     public void dispose() {
-        playerPool.clear();
+        botPool.clear();
         winRecords.clear();
         currentGame.dispose();
+
+
     }
 
     /**

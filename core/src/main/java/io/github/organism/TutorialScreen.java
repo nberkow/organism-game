@@ -52,7 +52,7 @@ public class TutorialScreen  implements Screen {
         float sideLen = OrganismGame.VIRTUAL_WIDTH / 20f;
         float x = OrganismGame.VIRTUAL_WIDTH / 4f;
         float y = OrganismGame.VIRTUAL_HEIGHT - sideLen * 1.5f;
-        tutorial.globalResourceIndicator = new GlobalResourceIndicator(game, tutorial, x, y, sideLen);
+        //tutorial.globalResourceIndicator = new GlobalResourceIndicator(game, tutorial, x, y, sideLen);
     }
 
 

@@ -17,7 +17,7 @@ public class HudTestScreen implements Screen {
 
     public OrganismGame game;
 
-    private static class HudTester implements GameSession {
+    private static class HudTester { //} implements GameSession {
         HudTestScreen scr;
         public HudTester(HudTestScreen s){
             scr = s;
@@ -26,7 +26,7 @@ public class HudTestScreen implements Screen {
         /**
          * @return
          */
-        @Override
+        //@Override
         public InputProcessor getInputProcessor() {
             return scr.inputProcessor;
         }
@@ -38,7 +38,7 @@ public class HudTestScreen implements Screen {
         /**
          * @return
          */
-        @Override
+        //@Override
         public Screen getScreen() {
             return scr;
         }
@@ -47,16 +47,24 @@ public class HudTestScreen implements Screen {
          * @param p
          * @param organism
          */
-        @Override
+        //@Override
         public void updateHud(Point p, Organism organism) {
+
+        }
+
+        /**
+         * @param winner
+         */
+        //@Override
+        public void finish_this_round(Point winner) {
 
         }
     }
 
     public HudTestScreen(OrganismGame g) {
         game = g;
-        p1Hud = new PlayerHud(game, new HudTester(this), this, true, false);
-        p2Hud = new PlayerHud(game, new HudTester(this), this, false, true);
+        //p1Hud = new PlayerHud(game, new HudTester(this), this, true, false);
+        //p2Hud = new PlayerHud(game, new HudTester(this), this, false, true);
     }
 
 

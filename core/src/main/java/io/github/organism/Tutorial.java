@@ -14,7 +14,7 @@ import io.github.organism.player.DummyPlayer;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
-public class Tutorial implements GameSession {
+public class Tutorial { // implements GameSession
 
     public GlobalResourceIndicator globalResourceIndicator;
     OrganismGame game;
@@ -68,7 +68,7 @@ public class Tutorial implements GameSession {
     /**
      * @return
      */
-    @Override
+    //@Override
     public Screen getScreen() {
         return screen;
     }
@@ -77,7 +77,7 @@ public class Tutorial implements GameSession {
      * @param p
      * @param organism
      */
-    @Override
+    //@Override
     public void updateHud(Point p, Organism organism) {
         PlayerHud hud = playerIdToHud.get(p);
         hud.setEnergy(organism.energy / SettingsManager.MAX_ENERGY);
@@ -87,9 +87,17 @@ public class Tutorial implements GameSession {
         hud.setResources(organism.resources);
     }
 
+    /**
+     * @param winner
+     */
+    //@Override
+    public void finish_this_round(Point winner) {
+
+    }
+
     private void createBotPlayer() {
         Point playerId = new Point(-999, 0);
-        screen.player1Hud = new PlayerHud(game, this, screen, false, false);
+        screen.player1Hud = new PlayerHud(game, null, screen, false, false);
         playerIdToHud.put(playerId, screen.player1Hud);
 
         Color color = Color.RED;
@@ -112,7 +120,7 @@ public class Tutorial implements GameSession {
 
     private void createHumanPlayer() {
         Point playerId = new Point(-1, 0);
-        screen.player1Hud = new PlayerHud(game, this, screen, true, false);
+        screen.player1Hud = new PlayerHud(game, null, screen, true, false);
         playerIdToHud.put(playerId, screen.player1Hud);
 
         Color color = Color.RED;
@@ -143,7 +151,7 @@ public class Tutorial implements GameSession {
     }
 
     private void createGameBoard() {
-        currentGame = new GameBoard(game, currentConfig, this);
+        currentGame = new GameBoard(game, currentConfig, null);
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
 
@@ -160,7 +168,7 @@ public class Tutorial implements GameSession {
     /**
      * @return
      */
-    @Override
+    //@Override
     public InputProcessor getInputProcessor() {
         return screen.inputProcessor;
     }

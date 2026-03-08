@@ -196,21 +196,21 @@ public class GameBoard implements Disposable {
         updateResourceLeadership();
     }
 
-    public void renderSummaryDisplays() {
+    public void renderSummaryDisplays(float delta) {
         int i = 0;
         for (Point playerId : allPlayerIds) {
             Player player = players.get(playerId);
             if (player != null && player.getMoveSpaceControl() != null) {
                 // PlayerSummaryDisplay handles its own positioning
-                playerSummaryDisplays.get(i).render();
+                playerSummaryDisplays.get(i).render(delta);
             }
             i++;
         }
     }
 
-    public void render(float timeDelta) {
+    public void render(float delta) {
 
-        logic(timeDelta);
+        logic(delta);
 
         ScreenUtils.clear(game.backgroundColor);
 
@@ -223,13 +223,13 @@ public class GameBoard implements Disposable {
 
         if (showPlayerSummary) {
             for (PlayerSummaryDisplay p : playerSummaryDisplays) {
-                p.render();
+                p.render(delta);
             }
         }
 
         // Render candidate vertices for the current player whose turn it is
         if (orchestrator != null) {
-            Player currentPlayer = orchestrator.getBlinkingPlayer();
+            Player currentPlayer = orchestrator.getCurrentPlayer();
             if (currentPlayer != null) {
                 Organism o = currentPlayer.getOrganism();
                 if (o != null && o.candidateVertices != null && !o.candidateVertices.isEmpty()) {

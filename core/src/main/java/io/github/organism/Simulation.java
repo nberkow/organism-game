@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import io.github.organism.player.BotPlayer;
 
-public class Simulation implements GameSession {
+public class Simulation { // implements GameSession
 
 
     OrganismGame game;
@@ -130,7 +130,7 @@ public class Simulation implements GameSession {
         playerSpawner = new PlayerSpawner(0, currentGame);
 
         modelPoolDisplay = new ModelPoolDisplay(game, this);
-        roundSummary = new RoundSummary(game, this);
+        roundSummary = new RoundSummary(game, null);
         availableColors = new ArrayList<>();
         availableColors.addAll(Arrays.asList(game.playerColors));
 
@@ -195,7 +195,7 @@ public class Simulation implements GameSession {
             availableColors.addAll(Arrays.asList(game.playerColors));
         }
 
-        currentGame = new GameBoard(game, cfg, this);
+        currentGame = new GameBoard(game, cfg, null);
         currentGame.voidDistributor.distribute();
         currentGame.resourceDistributor.distribute();
 
@@ -257,7 +257,7 @@ public class Simulation implements GameSession {
     /**
      * @return
      */
-    @Override
+    //@Override
     public Screen getScreen() {
         return screen;
     }
@@ -266,13 +266,21 @@ public class Simulation implements GameSession {
      * @param p
      * @param organism
      */
-    @Override
+    //@Override
     public void updateHud(Point p, Organism organism) {
         /*FIXME
         PlayerHud hud = playerIdToHud.get(p);
         hud.setIncome(organism.income);
         hud.setEnergy(organism.energy);
         hud.setSpend(organism.spend);*/
+    }
+
+    /**
+     * @param winner
+     */
+    //@Override
+    public void finish_this_round(Point winner) {
+
     }
 
     public void runSimulation() {
@@ -285,7 +293,6 @@ public class Simulation implements GameSession {
         createPlayersFromModelPool();
         createPlayerStarts();
         currentGame.createPlayerSummaryDisplays();
-        currentGameOrchestrator.updateSpeed(cfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
 
     }
@@ -319,7 +326,7 @@ public class Simulation implements GameSession {
             System.out.println("Player " + p + " captured " + verticesCaptured + " vertices. Total: " + cumulativeScores.get(p));
         }
 
-        roundSummary.set_winner(winner_id);
+        roundSummary.setWinner(winner_id);
         show_summary_screen = true;
 
     }
@@ -335,7 +342,6 @@ public class Simulation implements GameSession {
         createPlayersFromModelPool();
         createPlayerStarts();
         currentGame.createPlayerSummaryDisplays();
-        currentGameOrchestrator.updateSpeed(cfg.gameplaySettings.get("speed"));
         currentGameOrchestrator.run();
     }
 
@@ -623,7 +629,7 @@ public class Simulation implements GameSession {
     /**
      * @return
      */
-    @Override
+    //@Override
     public InputProcessor getInputProcessor() {
         LabScreen lb = (LabScreen) screen;
         return lb.inputProcessor;

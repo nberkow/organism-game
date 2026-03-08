@@ -39,9 +39,9 @@ public class PlayerSummaryDisplay {
         font = gameBoard.game.fonts.get(16);
     }
 
-    public void render(){
+    public void render(float delta){
         drawName();
-        drawControlCircle();
+        drawControlCircle(delta);
         drawEnergyBar();
         drawResourceBars();
     }
@@ -61,16 +61,17 @@ public class PlayerSummaryDisplay {
     }
 // In PlayerSummaryDisplay.java, drawControlCircle():
 
-    public void drawControlCircle() {
+    public void drawControlCircle(float delta) {
         if (gameBoard.game.shapeRenderer == null) return;
 
         float circleX = x + CONTROL_CIRCLE_RADIUS + 5;
         float circleY = y + 15;
-        float summaryScale = 0.6f;
+        float summaryScale = 0.3f;
 
         // Delegate cursor/planchette to MoveSpaceControl
         MoveSpaceControl msc = player.getMoveSpaceControl();
         if (msc != null) {
+            msc.update(delta);
             msc.drawAt(circleX, circleY, summaryScale);  // No update() call here
         }
     }
