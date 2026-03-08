@@ -1,6 +1,7 @@
 package io.github.organism;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -55,13 +56,10 @@ public class GameScreen implements Screen {
         ioPlayerIds.add(player_id);
 
         if (!player2) {
-            //player1Hud = new PlayerHud(game, this, player, false);
+            player1Hud = player.getHud();
+        } else {
+            player2Hud = player.getHud();
         }
-
-        else {
-            //player2Hud = new PlayerHud(game, this, player, true);
-        }
-
     }
 
     private void setupOverlay(){
@@ -122,12 +120,14 @@ public class GameScreen implements Screen {
             arcadeLoop.render(delta);
         }
 
-        // Render full HUDs (human players)
-        if (player1Hud != null) {
-            player1Hud.render();
-        }
-        if (player2Hud != null) {
-            player2Hud.render();
+        // Render full HUDs (human players only)
+        if (arcadeLoop != null && arcadeLoop.gameCfg != null) {
+            if (arcadeLoop.gameCfg.humanPlayers >= 1 && player1Hud != null) {
+                player1Hud.render();
+            }
+            if (arcadeLoop.gameCfg.humanPlayers >= 2 && player2Hud != null) {
+                player2Hud.render();
+            }
         }
 
         // Render summary displays (all players, including bots)

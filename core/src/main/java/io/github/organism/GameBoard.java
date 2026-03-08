@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import io.github.organism.hud.PlayerHud;
+import io.github.organism.learning.SlimeRLAgent;
 import io.github.organism.map.UniverseMap;
 import io.github.organism.player.BotPlayer;
 import io.github.organism.player.Player;
@@ -117,7 +118,7 @@ public class GameBoard implements Disposable {
 
 
 
-    public void createBotPlayer(String name, Point playerId, Color color){
+    public void createBotPlayer(String name, Point playerId, Color color, SlimeRLAgent.GameRLInterface existingAgent){
 
         int index = allPlayerIds.size();
 
@@ -130,7 +131,8 @@ public class GameBoard implements Disposable {
             playerId,
             organism,
             botHud,
-            color
+            color,
+            existingAgent
         );
         botHud.setPlayer(player);
 

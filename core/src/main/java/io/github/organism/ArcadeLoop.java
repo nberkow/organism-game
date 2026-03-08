@@ -147,11 +147,15 @@ public class ArcadeLoop implements GameSession {
 
         if (currentGame != null) {
             currentGame.dispose();
+        }
+        if (currentGameOrchestrator != null) {
             currentGameOrchestrator.dispose();
         }
 
         game.gameScreen.ioPlayerNames = new ArrayList<>();
         game.gameScreen.ioPlayerIds = new ArrayList<>();
+        game.gameScreen.player1Hud = null;
+        game.gameScreen.player2Hud = null;
 
         betweenRoundPauseTimer = 2;
 
@@ -265,15 +269,17 @@ public class ArcadeLoop implements GameSession {
 
             String name = "Player " + (p + 1);
             Organism organism = new Organism(currentGame);
+            PlayerHud humanHud = new PlayerHud(game, this, currentScreen, p==1, true);
             Player player = new IO_Player(
                 currentGame,
                 name,
                 p,
                 playerId,
                 organism,
-                null,
+                humanHud,
                 color
             );
+            humanHud.setPlayer(player);
             organism.player = player;
             currentGame.players.put(playerId, player);
             game.gameScreen.add_player(player, p==1);
@@ -352,9 +358,19 @@ public class ArcadeLoop implements GameSession {
     public void dispose() {
         botPool.clear();
         winRecords.clear();
-        currentGame.dispose();
-
-
+        
+        // Dispose all agents in model pool
+        for (SlimeRLAgent.GameRLInterface agent : modelPool.values()) {
+            agent.dispose();
+        }
+        modelPool.clear();
+        
+        if (currentGame != null) {
+            currentGame.dispose();
+        }
+        if (currentGameOrchestrator != null) {
+            currentGameOrchestrator.dispose();
+        }
     }
 
     /**
