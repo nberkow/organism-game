@@ -18,6 +18,7 @@ public class GameScreen implements Screen {
 
     public SettingsManager settings_manager;
     public SettingsOverlay overlay;
+    public MenuOverlay menuOverlay;
 
     public ArcadeLoop arcadeLoop;
     OrganismGame game;
@@ -31,6 +32,8 @@ public class GameScreen implements Screen {
         game = g;
         setupOverlay();
         overlay.setupSliders();
+        
+        menuOverlay = new MenuOverlay(game, this);
 
         ioPlayerNames = new ArrayList<>();
         ioPlayerIds = new ArrayList<>();
@@ -138,6 +141,10 @@ public class GameScreen implements Screen {
 
         if (overlay.showControlOverlay) {
             overlay.render();
+        }
+        
+        if (menuOverlay.visible) {
+            menuOverlay.render();
         }
     }
 

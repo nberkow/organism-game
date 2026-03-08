@@ -37,7 +37,7 @@ public class BotPlayer implements Player {
     private boolean decisionReady;
     int currentTurn;
 
-    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, PlayerHud h, Color c){
+    public BotPlayer(GameBoard gb, String name, int idx, Point id, Organism org, PlayerHud h, Color c, SlimeRLAgent.GameRLInterface agent){
 
         gameBoard = gb;
         color = c;
@@ -45,7 +45,7 @@ public class BotPlayer implements Player {
         tournamentId = id;
         gameIndex = idx;
         organism = org;
-        modelInterface = new SlimeRLAgent.GameRLInterface(this,9);
+        modelInterface = agent;  // Use persistent agent
         hud = h;
         decisionReady = false;
 
@@ -155,7 +155,7 @@ public class BotPlayer implements Player {
     @Override
     public void dispose() {
         gameBoard = null;
-        modelInterface.dispose();
+        // Don't dispose modelInterface - it's persistent across games
         organism.dispose();
     }
 

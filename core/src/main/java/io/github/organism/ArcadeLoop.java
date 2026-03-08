@@ -12,12 +12,14 @@ import java.util.HashSet;
 
 import io.github.organism.hud.PlayerHud;
 import io.github.organism.learning.SlimeRLAgent;
+import io.github.organism.player.BotPlayer;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
 public class ArcadeLoop implements GameSession {
 
     int POOL_SIZE = 20;
+    HashMap<Point, SlimeRLAgent.GameRLInterface> modelPool;
     float mapCenterX;
     float mapCenterY;
     GameConfig gameCfg;
@@ -82,8 +84,14 @@ public class ArcadeLoop implements GameSession {
         game = g;
 
         botPool = new HashSet<>();
+        modelPool = new HashMap<>();
+        
+        // Initialize bot pool and model pool
         for (int x = 0; x < POOL_SIZE; x++) {
-            botPool.add(new Point(x, 0));
+            Point botId = new Point(x, 0);
+            botPool.add(botId);
+            // Create persistent agent for this bot
+            modelPool.put(botId, new SlimeRLAgent.GameRLInterface(null, 18));
         }
 
         winRecords = new HashMap<>();
@@ -314,12 +322,40 @@ public class ArcadeLoop implements GameSession {
                 tournamentPlayerColors.put(playerId, color);
             }
 
-            // Create the actual BotPlayer via GameBoard (handles Organism + SlimeRLAgent wiring)
-            currentGame.createBotPlayer(name, playerId, color);
+            // Get the persistent agent for this bot
+            SlimeRLAgent.GameRLInterface agent = modelPool.get(playerId);
+            
+            // Create organism and hud
+            Organism organism = new Organism(currentGame);
+            PlayerHud botHud = new PlayerHud(game, this, currentScreen, false, false);
+            
+            // Create BotPlayer with persistent agent
+            BotPlayer player = new BotPlayer(
+                currentGame,
+                name,
+                gameCfg.humanPlayers + i,  // gameIndex
+                playerId,
+                organism,
+                botHud,
+                color,
+                agent  // Pass persistent agent
+            );
+            
+            // Wire up references
+            botHud.setPlayer(player);
+            organism.player = player;
+            agent.player = player;
+            
+            // Register player
+            currentGame.players.put(playerId, player);
+            currentGame.botPlayerIds.add(playerId);
+            currentGame.allPlayerIds.add(playerId);
 
             // Register in tracking maps for tournament scoring
             playerNames.put(playerId, name);
-            winRecords.put(playerId, new Point(0, 0));  // init win/loss record
+            if (!winRecords.containsKey(playerId)) {
+                winRecords.put(playerId, new Point(0, 0));  // init win/loss record
+            }
         }
     }
 
@@ -362,10 +398,12 @@ public class ArcadeLoop implements GameSession {
         winRecords.clear();
         
         // Dispose all agents in model pool
-        for (SlimeRLAgent.GameRLInterface agent : modelPool.values()) {
-            agent.dispose();
+        if (modelPool != null) {
+            for (SlimeRLAgent.GameRLInterface agent : modelPool.values()) {
+                agent.dispose();
+            }
+            modelPool.clear();
         }
-        modelPool.clear();
         
         if (currentGame != null) {
             currentGame.dispose();

@@ -124,9 +124,9 @@ public class IO_Player  implements Player {
     public void makeDecision() {
         decisionReady = false;
 
-        // Capture current input state (cursor position at phase end)
+        // Capture current planchette position (not cursor)
         if (hud != null) {
-            lockedInput.set(hud.getMoveSpaceControl().getCursorCoord());
+            lockedInput.set(hud.getMoveSpaceControl().getPlanchetteFromCenterVector());
         }
 
         decisionReady = true;
@@ -134,8 +134,9 @@ public class IO_Player  implements Player {
 
     @Override
     public void executeMove(Vector2 precisePlanchette) {
-        organism.expand(precisePlanchette);
-        organism.extract(precisePlanchette);
+        // Use the locked input from decision phase
+        organism.expand(lockedInput);
+        organism.extract(lockedInput);
     }
 
     @Override

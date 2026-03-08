@@ -3,6 +3,7 @@ package io.github.organism;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -152,6 +153,13 @@ public class OrganismGame extends Game {
 
     @Override
     public void render() {
+        // Handle ESC key for menu
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (gameScreen != null && gameScreen.menuOverlay != null) {
+                gameScreen.menuOverlay.toggle();
+            }
+        }
+        
         super.render();
     }
 
