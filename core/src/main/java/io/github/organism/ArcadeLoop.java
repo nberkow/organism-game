@@ -242,7 +242,6 @@ public class ArcadeLoop implements GameSession {
             PlayerHud hud = player.getHud();
             hud.setIncome(organism.income);
             hud.setEnergy(organism.energy);
-            hud.setSpend(organism.spend);
             hud.setResources(organism.resources);
         }
     }
