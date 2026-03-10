@@ -240,8 +240,10 @@ public class ArcadeLoop implements GameSession {
         Player player = currentGame.players.get(p);
         if (player != null && player.getHud() != null) {
             PlayerHud hud = player.getHud();
-            hud.setIncome(organism.income);
-            hud.setEnergy(organism.energy);
+            // Normalize values to 0-1 range for display
+            float maxEnergy = 100f; // Adjust based on your game's max energy
+            hud.setIncome(organism.income / maxEnergy);
+            hud.setEnergy(organism.energy / maxEnergy);
             hud.setResources(organism.resources);
         }
     }
@@ -285,7 +287,7 @@ public class ArcadeLoop implements GameSession {
 
             String name = "Player " + (p + 1);
             Organism organism = new Organism(currentGame);
-            PlayerHud humanHud = new PlayerHud(game, this, currentScreen, p==1, true);
+            PlayerHud humanHud = new PlayerHud(game, this, currentScreen, p==0, p==1);
             Player player = new IO_Player(
                 currentGame,
                 name,

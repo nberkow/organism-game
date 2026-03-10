@@ -43,6 +43,9 @@ public class GameScreen implements Screen {
         // Set up input processor
         inputProcessor = new HudInputProcessor(this);
         inputProcessor.setMenuOverlay(menuOverlay);
+        
+        // Set this as the active input processor
+        com.badlogic.gdx.Gdx.input.setInputProcessor(inputProcessor);
     }
     public ArrayList<Player> getIoPlayers() {
         ArrayList<Player> players = new ArrayList<>();

@@ -28,49 +28,40 @@ public class EnergyBar {
         individualBarHeight = (barHeight - (gapWidth * 6))/3;
 
         this.y = y;
-        x = hud.x + hud.moveSpaceControl.radius * 1.7f;
-
-        if (hud.isPlayerTwo){
-            x = OrganismGame.VIRTUAL_WIDTH - x;
-        }
+        // Position is set dynamically in render based on hud.x
+        x = 0;
     }
 
 
     public void render(){
-
-        float shift = 0;
-        if (hud.isPlayerTwo) {
-            shift = -barWidth;
-        }
+        // Calculate x position based on hud.x (which is set for player positioning)
+        float renderX = hud.x + hud.moveSpaceControl.radius * 1.2f;
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         game.shapeRenderer.setColor(game.foregroundColor);
         game.shapeRenderer.rect(
-            x + shift,
+            renderX,
             y,
             barWidth,
             barHeight);
 
         game.shapeRenderer.setColor(game.backgroundColor);
         game.shapeRenderer.rect(
-            x + gapWidth + shift,
+            renderX + gapWidth,
             y + gapWidth,
             barWidth - (gapWidth * 2),
             barHeight - (gapWidth * 2));
 
-
+        // Energy bar (current energy level)
         fillWidth[1] = hud.energyBarValue * (barWidth - (gapWidth * 4));
+        // Income bar (energy + income projection)
         fillWidth[0] = fillWidth[1] + hud.incomeBarValue * (barWidth - (gapWidth * 4));
-        //fillWidth[2] = hud.spendBarValue * (barWidth - (gapWidth * 4));
 
+        // Draw income bar (green) first, then energy bar (red) on top
         for (int i=0; i<2; i++){
-            if (hud.isPlayerTwo) {
-                shift = -barWidth + (barWidth - fillWidth[i]);
-            }
-
             game.shapeRenderer.setColor(game.energyBarColors[i]);
             game.shapeRenderer.rect(
-                x + gapWidth * 2 + shift,
+                renderX + gapWidth * 2,
                 y + gapWidth * 2,
                 fillWidth[i],
                 barHeight - gapWidth * 4);

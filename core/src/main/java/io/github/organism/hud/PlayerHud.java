@@ -57,7 +57,14 @@ public class PlayerHud {
         setupResourceBar(barWidth, barHeight, barHeight/2 + barHeight);
         setupIncomeDisplay();
 
-        x = moveSpaceRadius * 1.5f;
+        // Position HUD - player 1 on left, player 2 on right
+        if (p1) {
+            x = moveSpaceRadius * 1.5f;
+        } else if (p2) {
+            x = OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius * 1.5f - barWidth - moveSpaceRadius * 1.2f;
+        } else {
+            x = moveSpaceRadius * 1.5f;
+        }
     }
 
 
@@ -119,9 +126,6 @@ public class PlayerHud {
 
     public void setEnergy(float e) {
         energyBarValue = e;
-    }
-    public void setSpend(float s) {
-        spendBarValue = s;
     }
 
     public void setResources(int[] resources) {

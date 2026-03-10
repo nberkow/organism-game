@@ -48,17 +48,16 @@ public class ResourceBar {
             dotHeights[i] = y + spacing * (i + 1);
         }
 
-        // x depends on the player's side
-        x = hud.x + hud.moveSpaceControl.radius * 1.7f + spacing * 2;
-        if (hud.isPlayerTwo){
-            x = OrganismGame.VIRTUAL_WIDTH - x;
-        }
+        // x will be set dynamically in render
+        x = 0;
 
         calculateResourceDisplayCoords();
     }
 
     public void calculateResourceDisplayCoords(){
-
+        // Calculate x position based on hud.x
+        float renderX = hud.x + hud.moveSpaceControl.radius * 1.2f;
+        
         int allCols = 0;
         trioCols = Integer.MAX_VALUE;
         coords = new ArrayList<>();
@@ -76,15 +75,12 @@ public class ResourceBar {
         // calculate column spacing
         int cols = Math.max(allCols, currentMaxCols);
         float spacing = barWidth / (cols + 1);
-        if (hud.isPlayerTwo){
-            spacing = -spacing;
-        }
 
         for (int i=0; i<3; i++) {
             ArrayList<FloatPair<Float>> row = new ArrayList<>();
             int dots = Math.max(currentMaxCols, hud.resourceCounts[i] + hud.allyResourceCounts[i]);
             for (int j=0; j<dots; j++){
-                float dotX = x + spacing * (j+1);
+                float dotX = renderX + spacing * (j+1);
                 row.add(new FloatPair<>(
                     dotX,
                     dotHeights[i]
