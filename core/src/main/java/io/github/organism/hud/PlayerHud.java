@@ -57,10 +57,7 @@ public class PlayerHud {
         setupResourceBar(barWidth, barHeight, barHeight/2 + barHeight);
         setupIncomeDisplay();
 
-        x = 0;
-        if (isPlayerTwo) {
-            x = OrganismGame.VIRTUAL_WIDTH;
-        }
+        x = moveSpaceRadius * 1.5f;
     }
 
 
@@ -161,10 +158,19 @@ public class PlayerHud {
 
     /** Render full-size HUD (for human players) */
     public void render() {
-        resourceBar.render();
+        float moveSpaceRadius = moveSpaceControl.radius;
+        float hudBaseY = OrganismGame.VIRTUAL_HEIGHT * 0.05f;
+        
+        // Calculate positions for HUD elements
+        float moveSpaceX = moveSpaceRadius * 1.5f;
+        float moveSpaceY = hudBaseY + moveSpaceRadius;
+        
+        // Draw move space control (the circular control area)
+        moveSpaceControl.drawAt(moveSpaceX, moveSpaceY, 1.0f);
+        
+        // Draw bars using their existing render methods
         energyBar.render();
-        // need to find these center coords once we do the human controls
-        moveSpaceControl.drawAt(x, HUD_HEIGHT * OrganismGame.VIRTUAL_HEIGHT, 1.0f);
+        resourceBar.render();
     }
 
     /** For human players: accumulate input every frame */
