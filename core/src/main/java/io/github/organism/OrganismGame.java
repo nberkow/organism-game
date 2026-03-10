@@ -3,7 +3,6 @@ package io.github.organism;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -28,6 +27,8 @@ public class OrganismGame extends Game {
     MenuScreen menuScreen;
     LabScreen labScreen;
 
+    MenuOverlay menuOverlay;
+
     TutorialScreen tutorialScreen;
 
     FileHandler fileHandler;
@@ -37,7 +38,7 @@ public class OrganismGame extends Game {
     GameBoard gameBoard;
     OrthographicCamera camera;
     FitViewport viewport;
-    Random rng;
+    public Random rng;
 
     // Game colors
     public Color backgroundColor = Color.BLACK;
@@ -145,21 +146,17 @@ public class OrganismGame extends Game {
 
         arcadeLoop = new ArcadeLoop(this);
         gameScreen = new GameScreen(this);
+        gameScreen.inputProcessor = new HudInputProcessor(gameScreen);
+        menuOverlay = new MenuOverlay(this, gameScreen);
         arcadeLoop.setup(0);
         this.setScreen(gameScreen);
-        gameScreen.overlay.input_processor = new SettingsOverlayInputProcessor(gameScreen.overlay);
+        Gdx.input.setInputProcessor(gameScreen.inputProcessor);
+        gameScreen.overlay.inputProcessor = new SettingsOverlayInputProcessor(gameScreen.overlay);
 
     }
 
     @Override
     public void render() {
-        // Handle ESC key for menu
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            if (gameScreen != null && gameScreen.menuOverlay != null) {
-                gameScreen.menuOverlay.toggle();
-            }
-        }
-        
         super.render();
     }
 

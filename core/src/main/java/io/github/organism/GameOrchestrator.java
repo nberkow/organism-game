@@ -62,6 +62,10 @@ public class GameOrchestrator {
 
 
     public void update(float delta) {
+        if (paused) {
+            return;
+        }
+
         phaseTimer += delta;
 
         Player currentPlayer = getCurrentPlayer();

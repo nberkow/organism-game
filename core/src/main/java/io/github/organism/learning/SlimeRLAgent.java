@@ -1,5 +1,6 @@
 package io.github.organism.learning;
 import io.github.organism.GameBoard;
+import io.github.organism.OrganismGame;
 import io.github.organism.Util;
 import com.badlogic.gdx.math.Vector2;
 
@@ -7,9 +8,6 @@ import java.util.*;
 import java.io.*;
 
 import io.github.organism.hud.PlayerHud;
-import io.github.organism.map.GridPosition;
-import io.github.organism.map.MapVertex;
-import io.github.organism.map.TriangularGrid;
 import io.github.organism.player.Player;
 
 public class SlimeRLAgent {
@@ -188,11 +186,11 @@ public class SlimeRLAgent {
     private float explorationNoise = 0.1f;
     private int batchSize = 32;
 
-    public SlimeRLAgent(Player p, int stateSize, int bufferSize) {
+    public SlimeRLAgent(Player p, int stateSize, int bufferSize, Random rng) {
         this.player = p;
         this.policy = new PolicyNetwork(stateSize, 64);
         this.buffer = new ExperienceBuffer(bufferSize);
-        this.random  = player.getGameboard().rng;
+        this.random  = rng;
     }
 
     // ========== CORE RL ALGORITHM: PPO ==========
@@ -561,8 +559,8 @@ public class SlimeRLAgent {
 
         public GameBoard gameBoard;
 
-        public GameRLInterface(Player p, int stateSize) {
-            this.agent = new SlimeRLAgent(p, stateSize, 10000);
+        public GameRLInterface(Player p, int stateSize, OrganismGame game) {
+            this.agent = new SlimeRLAgent(p, stateSize, 10000, game.rng);
             this.player = p;
         }
 

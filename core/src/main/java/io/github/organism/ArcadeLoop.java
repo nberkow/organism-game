@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
 import io.github.organism.learning.SlimeRLAgent;
 import io.github.organism.player.BotPlayer;
@@ -85,13 +86,13 @@ public class ArcadeLoop implements GameSession {
 
         botPool = new HashSet<>();
         modelPool = new HashMap<>();
-        
+
         // Initialize bot pool and model pool
         for (int x = 0; x < POOL_SIZE; x++) {
             Point botId = new Point(x, 0);
             botPool.add(botId);
             // Create persistent agent for this bot
-            modelPool.put(botId, new SlimeRLAgent.GameRLInterface(null, 18));
+            modelPool.put(botId, new SlimeRLAgent.GameRLInterface(null, 18, game));
         }
 
         winRecords = new HashMap<>();
@@ -118,7 +119,7 @@ public class ArcadeLoop implements GameSession {
     }
 
     /**
-     * @param p
+     * @param
      * @return
      */
     @Override
@@ -149,9 +150,7 @@ public class ArcadeLoop implements GameSession {
         gameOverlay.setupSliders();
         gameOverlay.setupButtons();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
-
     }
-
 
     public void setup(int n){
 
@@ -160,6 +159,11 @@ public class ArcadeLoop implements GameSession {
         }
         if (currentGameOrchestrator != null) {
             currentGameOrchestrator.dispose();
+        }
+
+        if (game.gameScreen.inputProcessor != null) {
+            HudInputProcessor hip = game.gameScreen.inputProcessor;
+            hip.setMenuOverlay(game.menuOverlay);
         }
 
         game.gameScreen.ioPlayerNames = new ArrayList<>();
@@ -324,11 +328,11 @@ public class ArcadeLoop implements GameSession {
 
             // Get the persistent agent for this bot
             SlimeRLAgent.GameRLInterface agent = modelPool.get(playerId);
-            
+
             // Create organism and hud
             Organism organism = new Organism(currentGame);
             PlayerHud botHud = new PlayerHud(game, this, currentScreen, false, false);
-            
+
             // Create BotPlayer with persistent agent
             BotPlayer player = new BotPlayer(
                 currentGame,
@@ -340,12 +344,12 @@ public class ArcadeLoop implements GameSession {
                 color,
                 agent  // Pass persistent agent
             );
-            
+
             // Wire up references
             botHud.setPlayer(player);
             organism.player = player;
             agent.player = player;
-            
+
             // Register player
             currentGame.players.put(playerId, player);
             currentGame.botPlayerIds.add(playerId);
@@ -372,7 +376,20 @@ public class ArcadeLoop implements GameSession {
         if (showSummaryScreen & betweenRoundPause > 0 ) {
             roundSummary.render();
         }
+        if (game.menuOverlay != null) {
+            game.menuOverlay.render();
+        }
     }
+
+    public void togglePause() {
+        if (currentGameOrchestrator.paused) {
+            currentGameOrchestrator.run();  // Unpause
+        } else {
+            currentGameOrchestrator.pause();  // Pause
+        }
+    }
+
+
 
     public void render(float delta){
 
@@ -380,6 +397,16 @@ public class ArcadeLoop implements GameSession {
             dispose();
         }
         else {
+            if (game.gameScreen.inputProcessor != null) {
+                HudInputProcessor hip = game.gameScreen.inputProcessor;
+                if (hip.consumeEscape()) {
+                    togglePause();
+                    game.menuOverlay.toggle();
+                }
+            }
+
+
+
             logic();
             draw(delta);
 
@@ -396,7 +423,7 @@ public class ArcadeLoop implements GameSession {
     public void dispose() {
         botPool.clear();
         winRecords.clear();
-        
+
         // Dispose all agents in model pool
         if (modelPool != null) {
             for (SlimeRLAgent.GameRLInterface agent : modelPool.values()) {
@@ -404,7 +431,7 @@ public class ArcadeLoop implements GameSession {
             }
             modelPool.clear();
         }
-        
+
         if (currentGame != null) {
             currentGame.dispose();
         }

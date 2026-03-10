@@ -13,7 +13,7 @@ import java.util.Objects;
 public class SettingsOverlay {
 
 
-    public InputProcessor input_processor;
+    public InputProcessor inputProcessor;
     float overlay_x;
     float overlay_y;
     float overlay_w;

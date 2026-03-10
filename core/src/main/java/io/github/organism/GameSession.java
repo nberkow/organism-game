@@ -25,4 +25,6 @@ public interface GameSession {
     HashMap<Point, String> getPlayerNames();
 
     Point getWinRecord(Point p);
+
+    void togglePause();
 }

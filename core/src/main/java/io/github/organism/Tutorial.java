@@ -110,7 +110,8 @@ public class Tutorial { // implements GameSession
             playerId,
             organism,
             screen.player1Hud,
-            color
+            color,
+            null
         );
         organism.player = player;
         currentGame.players.put(playerId, player);

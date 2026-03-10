@@ -29,7 +29,7 @@ public class PlayerSpawner {
         // If it doesn't, we'll fix that specific NPE when it occurs
         PlayerHud hud = null;
 
-        BotPlayer bot = new BotPlayer(gameBoard, name, gameIndex, playerId, organism, hud, color);
+        BotPlayer bot = new BotPlayer(gameBoard, name, gameIndex, playerId, organism, hud, color, null);
         System.out.println("Created: " + name + " (ID: " + playerId + ")");
         return bot;
     }

@@ -17,9 +17,9 @@ import io.github.organism.player.Player;
 public class GameScreen implements Screen {
 
     public SettingsManager settings_manager;
+
     public SettingsOverlay overlay;
     public MenuOverlay menuOverlay;
-
     public ArcadeLoop arcadeLoop;
     OrganismGame game;
     HudInputProcessor inputProcessor;
@@ -32,7 +32,7 @@ public class GameScreen implements Screen {
         game = g;
         setupOverlay();
         overlay.setupSliders();
-        
+
         menuOverlay = new MenuOverlay(game, this);
 
         ioPlayerNames = new ArrayList<>();
@@ -142,7 +142,7 @@ public class GameScreen implements Screen {
         if (overlay.showControlOverlay) {
             overlay.render();
         }
-        
+
         if (menuOverlay.visible) {
             menuOverlay.render();
         }
@@ -153,7 +153,7 @@ public class GameScreen implements Screen {
      */
     @Override
     public void pause() {
-
+        game.arcadeLoop.togglePause();
     }
 
     /**

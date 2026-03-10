@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.HashMap;
 
 import io.github.organism.DoublePair;
+import io.github.organism.MenuOverlay;
+import io.github.organism.OrganismGame;
 
 @SuppressWarnings("ALL")
 public class HudInputProcessor implements InputProcessor {
@@ -17,6 +19,8 @@ public class HudInputProcessor implements InputProcessor {
     public HashMap<Integer, Double> playerTwoKeyAngles;
 
     public Screen screen;
+
+    private MenuOverlay menuOverlay;
 
 
     public HudInputProcessor(Screen scr){
@@ -30,7 +34,7 @@ public class HudInputProcessor implements InputProcessor {
     public void setupKeys(){
 
         int [] p1Codes = {
-            Input.Keys.W, Input.Keys.D, Input.Keys.S, Input.Keys.A,
+            Input.Keys.W, Input.Keys.D, Input.Keys.S, Input.Keys.A
         };
 
         int [] p2Codes = {
@@ -38,8 +42,10 @@ public class HudInputProcessor implements InputProcessor {
         };
 
         float [] angles = {
-            .25f, 0f, .75f, .5f,
+            .25f, 0f, .75f, .5f
         };
+
+        keysDown.put(Input.Keys.ESCAPE, false);
 
         for (int k=0; k<4; k++) {
             keysDown.put(p1Codes[k], false);
@@ -49,6 +55,10 @@ public class HudInputProcessor implements InputProcessor {
         }
     }
 
+    public void setMenuOverlay(MenuOverlay overlay) {
+        System.out.println("setting menu overlay");
+        this.menuOverlay = overlay;
+    }
 
     public Vector2 getInputVectorFromKeys(boolean playerTwo){
 
@@ -84,7 +94,20 @@ public class HudInputProcessor implements InputProcessor {
      */
     @Override
     public boolean keyDown(int keycode) {
-        keysDown.put(keycode, true);
+        // ESC: toggle menu
+        if (keycode == Input.Keys.ESCAPE) {
+            if (menuOverlay != null) {
+                menuOverlay.toggle();
+                screen.pause();
+            }
+            return true;  // Consume
+        }
+
+        // Existing movement key handling
+        if (playerOneKeyAngles.containsKey(keycode) || playerTwoKeyAngles.containsKey(keycode)) {
+            keysDown.put(keycode, true);
+            return true;
+        }
         return false;
     }
 
@@ -116,6 +139,14 @@ public class HudInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (button == Input.Buttons.LEFT && menuOverlay != null) {
+            // Convert screen coords to virtual coords if needed
+            float virtualX = screenX;  // Adjust if your virtual viewport differs
+            float virtualY = OrganismGame.VIRTUAL_HEIGHT - screenY;  // LibGDX Y is bottom-up
+
+            menuOverlay.handleClick(virtualX, virtualY);
+            return true;  // Consume if menu handled it
+        }
         return false;
     }
 
@@ -173,4 +204,18 @@ public class HudInputProcessor implements InputProcessor {
     public boolean scrolled(float amountX, float amountY) {
         return false;
     }
+
+    /**
+     * Check if ESC was pressed since last call, and consume the event.
+     * @return true if ESC was pressed, false otherwise
+     */
+    public boolean consumeEscape() {
+        Boolean pressed = keysDown.get(Input.Keys.ESCAPE);
+        if (pressed != null && pressed) {
+            keysDown.put(Input.Keys.ESCAPE, false);  // Reset to avoid re-triggering
+            return true;
+        }
+        return false;
+    }
+
 }

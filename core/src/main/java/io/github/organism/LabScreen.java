@@ -122,7 +122,7 @@ public class LabScreen implements Screen {
 
         if (Objects.equals(button_clicked, "setup")) {
             overlay.showControlOverlay = true;
-            Gdx.input.setInputProcessor(overlay.input_processor);
+            Gdx.input.setInputProcessor(overlay.inputProcessor);
         }
 
         if (Objects.equals(button_clicked, "run")) {

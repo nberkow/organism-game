@@ -164,7 +164,7 @@ public class PlayerHud {
         resourceBar.render();
         energyBar.render();
         // need to find these center coords once we do the human controls
-        //moveSpaceControl.drawAt(centerCoord.x, centerCoord.y, 1.0f);
+        moveSpaceControl.drawAt(x, HUD_HEIGHT * OrganismGame.VIRTUAL_HEIGHT, 1.0f);
     }
 
     /** For human players: accumulate input every frame */
