@@ -117,12 +117,18 @@ public class GameScreen implements Screen {
                 Player player = game.gameBoard.players.get(playerId);
                 if (player != null && player.getHud() != null) {
                     player.getHud().updateVisuals(delta);
-
-                    // Human players: accumulate continuous input
-                    if (player instanceof IO_Player) {
-                        player.getHud().accumulateHumanInput();
-                    }
                 }
+            }
+        }
+
+        // Accumulate human input BEFORE rendering (only when not paused)
+        if (arcadeLoop != null && arcadeLoop.currentGameOrchestrator != null && 
+            !arcadeLoop.currentGameOrchestrator.paused) {
+            if (player1Hud != null) {
+                player1Hud.accumulateHumanInput();
+            }
+            if (player2Hud != null) {
+                player2Hud.accumulateHumanInput();
             }
         }
 

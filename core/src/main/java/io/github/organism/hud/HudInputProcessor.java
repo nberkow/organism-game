@@ -82,8 +82,11 @@ public class HudInputProcessor implements InputProcessor {
             }
         }
 
+        // Return normalized vector (length 0-1) for smooth movement
         Vector2 v = new Vector2((float) sumX, (float) sumY);
-        v.clamp(0f, 1f);
+        if (v.len() > 0) {
+            v.nor();  // Normalize to unit vector
+        }
         return v;
     }
 

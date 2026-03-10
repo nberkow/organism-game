@@ -266,12 +266,17 @@ public class MoveSpaceControl {
      * Call every frame while human is providing input.
      */
     public void accumulateInput(Vector2 inputDelta) {
-        // Scale input for responsiveness
-        float inputSpeed = 3.0f;
-        cursorCoord.add(inputDelta.cpy().scl(inputSpeed));
+        // Scale input for responsiveness (pixels per frame)
+        float inputSpeed = 2.5f;
         
-        if (cursorCoord.len() > availableRadius) {
-            cursorCoord.setLength(availableRadius);
+        // Only move if there's actual input
+        if (inputDelta.len() > 0.01f) {
+            cursorCoord.add(inputDelta.cpy().scl(inputSpeed));
+            
+            // Clamp to available radius
+            if (cursorCoord.len() > availableRadius) {
+                cursorCoord.setLength(availableRadius);
+            }
         }
     }
 

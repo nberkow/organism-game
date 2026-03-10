@@ -165,8 +165,16 @@ public class PlayerHud {
         float moveSpaceRadius = moveSpaceControl.radius;
         float hudBaseY = OrganismGame.VIRTUAL_HEIGHT * 0.05f;
         
-        // Calculate positions for HUD elements
-        float moveSpaceX = moveSpaceRadius * 1.5f;
+        // Calculate positions for HUD elements - player 1 on left, player 2 on right
+        float moveSpaceX;
+        if (isPlayerOne) {
+            moveSpaceX = moveSpaceRadius * 1.5f;
+        } else if (isPlayerTwo) {
+            moveSpaceX = OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius * 1.5f;
+        } else {
+            moveSpaceX = moveSpaceRadius * 1.5f;
+        }
+        
         float moveSpaceY = hudBaseY + moveSpaceRadius;
         
         // Draw move space control (the circular control area)
