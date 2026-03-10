@@ -160,8 +160,9 @@ public class MenuOverlay {
         // Draw title
         game.batch.begin();
         String title = "PAUSED";
-        float titleWidth = font.getRegion().getRegionWidth() * title.length() * 0.5f;
-        font.draw(game.batch, title, centerX - titleWidth / 2f, overlayY + overlayH - 40);
+        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+        layout.setText(font, title);
+        font.draw(game.batch, title, centerX - layout.width / 2f, overlayY + overlayH - 40);
         game.batch.end();
 
         // Draw buttons
@@ -176,8 +177,9 @@ public class MenuOverlay {
         // Draw title
         game.batch.begin();
         String title = "Select Player Count";
-        float titleWidth = font.getRegion().getRegionWidth() * title.length() * 0.4f;
-        font.draw(game.batch, title, centerX - titleWidth / 2f, overlayY + overlayH - 40);
+        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+        layout.setText(font, title);
+        font.draw(game.batch, title, centerX - layout.width / 2f, overlayY + overlayH - 40);
         game.batch.end();
 
         // Draw player count buttons
@@ -197,8 +199,9 @@ public class MenuOverlay {
 
         // Draw text
         game.batch.begin();
-        float textWidth = font.getRegion().getRegionWidth() * text.length() * 0.3f;
-        font.draw(game.batch, text, centerX - textWidth / 2f, y + buttonHeight - 10);
+        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+        layout.setText(font, text);
+        font.draw(game.batch, text, centerX - layout.width / 2f, y + buttonHeight / 2f + layout.height / 2f);
         game.batch.end();
     }
 
@@ -213,8 +216,9 @@ public class MenuOverlay {
 
         // Draw text
         game.batch.begin();
-        float textWidth = font.getRegion().getRegionWidth() * text.length() * 0.5f;
-        font.draw(game.batch, text, centerX - textWidth / 2f, y + size / 2f + 10);
+        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+        layout.setText(font, text);
+        font.draw(game.batch, text, centerX - layout.width / 2f, y + size / 2f + layout.height / 2f);
         game.batch.end();
     }
 }

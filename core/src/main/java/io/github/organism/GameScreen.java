@@ -39,6 +39,10 @@ public class GameScreen implements Screen {
         ioPlayerIds = new ArrayList<>();
 
         arcadeLoop = game.arcadeLoop;
+        
+        // Set up input processor
+        inputProcessor = new HudInputProcessor(this);
+        inputProcessor.setMenuOverlay(menuOverlay);
     }
     public ArrayList<Player> getIoPlayers() {
         ArrayList<Player> players = new ArrayList<>();

@@ -237,11 +237,14 @@ public class ArcadeLoop implements GameSession {
      */
     @Override
     public void updateHud(Point p, Organism organism) {
-        /*FIXME
-        PlayerHud hud = playerIdToHud.get(p);
-        hud.setIncome(organism.income);
-        hud.setEnergy(organism.energy);
-        hud.setSpend(organism.spend);*/
+        Player player = currentGame.players.get(p);
+        if (player != null && player.getHud() != null) {
+            PlayerHud hud = player.getHud();
+            hud.setIncome(organism.income);
+            hud.setEnergy(organism.energy);
+            hud.setSpend(organism.spend);
+            hud.setResources(organism.resources);
+        }
     }
 
 

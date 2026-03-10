@@ -38,10 +38,8 @@ public class MoveSpaceControl {
 
         availableRadius = radius - planchetteRadius;
 
+        // Center coord is now set dynamically in drawAt()
         centerCoord = new Vector2(radius, radius);
-        if (hud.isPlayerTwo) {
-            centerCoord.x = OrganismGame.VIRTUAL_WIDTH - radius;
-        }
 
         cursorCoord = new Vector2(0f, 0f);
         planchetteFromCenterVector = new Vector2(0f, 0f);
@@ -147,9 +145,14 @@ public class MoveSpaceControl {
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
 
+        // Normalize cursor position for rendering
+        float cursorLen = cursorCoord.len();
+        float normalizedCursorX = cursorLen > 0 ? cursorCoord.x / availableRadius : 0;
+        float normalizedCursorY = cursorLen > 0 ? cursorCoord.y / availableRadius : 0;
+
         hud.game.shapeRenderer.circle(
-            drawX + cursorCoord.x * scaledActiveRadius,
-            drawY + cursorCoord.y * scaledActiveRadius,
+            drawX + normalizedCursorX * scaledActiveRadius,
+            drawY + normalizedCursorY * scaledActiveRadius,
             scaledCursorRadius
         );
         hud.game.shapeRenderer.end();
@@ -157,9 +160,15 @@ public class MoveSpaceControl {
         // Planchette (filled)
         hud.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         hud.game.shapeRenderer.setColor(hud.game.foregroundColor);
+        
+        // Normalize planchette position for rendering
+        float planchetteLen = planchetteFromCenterVector.len();
+        float normalizedPlanchetteX = planchetteLen > 0 ? planchetteFromCenterVector.x / availableRadius : 0;
+        float normalizedPlanchetteY = planchetteLen > 0 ? planchetteFromCenterVector.y / availableRadius : 0;
+        
         hud.game.shapeRenderer.circle(
-            drawX + planchetteFromCenterVector.x * scaledActiveRadius,
-            drawY + planchetteFromCenterVector.y * scaledActiveRadius,
+            drawX + normalizedPlanchetteX * scaledActiveRadius,
+            drawY + normalizedPlanchetteY * scaledActiveRadius,
             scaledPlanchetteRadius
         );
         hud.game.shapeRenderer.end();
@@ -257,7 +266,10 @@ public class MoveSpaceControl {
      * Call every frame while human is providing input.
      */
     public void accumulateInput(Vector2 inputDelta) {
-        cursorCoord.add(inputDelta);
+        // Scale input for responsiveness
+        float inputSpeed = 3.0f;
+        cursorCoord.add(inputDelta.cpy().scl(inputSpeed));
+        
         if (cursorCoord.len() > availableRadius) {
             cursorCoord.setLength(availableRadius);
         }
