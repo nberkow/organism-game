@@ -255,6 +255,10 @@ public class ArcadeLoop implements GameSession {
 
         for (Point p : currentGame.players.keySet()) {
             Point rec = winRecords.get(p);
+            // Initialize record if it doesn't exist (e.g., for human players)
+            if (rec == null) {
+                rec = new Point(0, 0);
+            }
             if (p == winnerId){
                 rec.x += 1;
             }
@@ -286,6 +290,14 @@ public class ArcadeLoop implements GameSession {
             }
 
             String name = "Player " + (p + 1);
+            
+            // Initialize win record for human player
+            if (!winRecords.containsKey(playerId)) {
+                winRecords.put(playerId, new Point(0, 0));
+            }
+            
+            // Store player name for tournament tracking
+            playerNames.put(playerId, name);
             Organism organism = new Organism(currentGame);
             PlayerHud humanHud = new PlayerHud(game, this, currentScreen, p==0, p==1);
             Player player = new IO_Player(
