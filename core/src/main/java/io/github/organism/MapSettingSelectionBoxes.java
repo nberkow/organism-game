@@ -39,6 +39,7 @@ public class MapSettingSelectionBoxes {
         game_board = map_settings_screen.game_board;
         game = g;
         font = game.fonts.get(16);
+        font.setColor(Color.CYAN);
 
         selection_box_x = map_settings_screen.controls_x * 1.05f;
         selection_box_y = map_settings_screen.game_board.centerY * .45f;

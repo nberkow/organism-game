@@ -129,7 +129,14 @@ public class MapSettingsScreen implements Screen {
     }
 
     public GameConfig getCurrentConfig() {
+        // Always create fresh config from current UI state
         create_config();
+        
+        // Ensure seed is set
+        if (cfg.seed == 0) {
+            cfg.seed = System.currentTimeMillis();
+        }
+        
         return cfg;
     }
 

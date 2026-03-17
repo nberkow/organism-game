@@ -56,6 +56,7 @@ public class SliderGroup {
         slider_height = bar_height * 3;
 
         font = game.fonts.get(16);
+        font.setColor(Color.CYAN);
 
         bar_coords = new HashMap<>();
         label_coords = new HashMap<>();

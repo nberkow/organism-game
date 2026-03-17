@@ -31,6 +31,7 @@ public class MapSettingsButtons {
         game = map_settings_screen.game;
         game_board = map_settings_screen.game_board;
         font = game.fonts.get(16);
+        font.setColor(Color.CYAN);
 
         buttons = new HashMap<>();
         buttons_x = map_settings_screen.controls_x;

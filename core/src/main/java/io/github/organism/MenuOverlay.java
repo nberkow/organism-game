@@ -70,6 +70,7 @@ public class MenuOverlay {
         buttonSpacing = 60;
 
         font = game.fonts.get(16);
+        font.setColor(Color.CYAN);
 
         setupButtons();
     }
@@ -180,7 +181,16 @@ public class MenuOverlay {
         showNewTournamentMenu = false;
 
         if (game.arcadeLoop != null) {
-            game.arcadeLoop.setup(playerCount);
+            // Get the current config from MapSettingsScreen if it exists
+            if (game.mapSettingsScreen != null) {
+                GameConfig cfg = game.mapSettingsScreen.getCurrentConfig();
+                cfg.humanPlayers = playerCount;
+                cfg.botPlayers = Math.max(0, 3 - playerCount); // Ensure total of 3 players
+                game.arcadeLoop.setup(cfg);
+            } else {
+                // Fallback to simple setup
+                game.arcadeLoop.setup(playerCount);
+            }
         }
     }
 
@@ -238,10 +248,12 @@ public class MenuOverlay {
 
         // Draw title
         game.batch.begin();
+        font.setColor(Color.WHITE);
         String title = "MENU";
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, title);
         font.draw(game.batch, title, centerX - layout.width / 2f, overlayY + overlayH - 40);
+        font.setColor(Color.CYAN);
         game.batch.end();
 
         // Draw buttons
@@ -254,12 +266,14 @@ public class MenuOverlay {
 
         // Draw title
         game.batch.begin();
+        font.setColor(Color.WHITE);
         String title = "New Tournament";
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, title);
         font.draw(game.batch, title, centerX - layout.width / 2f, overlayY + overlayH - 40);
 
         // Draw "Human Players:" label
+        font.setColor(Color.CYAN);
         String label = "Human Players:";
         layout.setText(font, label);
         font.draw(game.batch, label, centerX - layout.width / 2f, playerButtonY + 90);
@@ -284,12 +298,13 @@ public class MenuOverlay {
 
         // Draw button box
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shapeRenderer.setColor(game.foregroundColor);
+        game.shapeRenderer.setColor(Color.CYAN);
         game.shapeRenderer.rect(buttonLeft, y, buttonWidth, buttonHeight);
         game.shapeRenderer.end();
 
         // Draw text
         game.batch.begin();
+        font.setColor(Color.CYAN);
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, text);
         font.draw(game.batch, text, centerX - layout.width / 2f, y + buttonHeight / 2f + layout.height / 2f);
@@ -302,13 +317,13 @@ public class MenuOverlay {
         // Draw button box (filled if selected)
         if (selected) {
             game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            game.shapeRenderer.setColor(game.foregroundColor);
+            game.shapeRenderer.setColor(Color.CYAN);
             game.shapeRenderer.rect(centerX - size / 2f, y, size, size);
             game.shapeRenderer.end();
         }
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shapeRenderer.setColor(game.foregroundColor);
+        game.shapeRenderer.setColor(Color.CYAN);
         game.shapeRenderer.rect(centerX - size / 2f, y, size, size);
         game.shapeRenderer.end();
 
@@ -317,12 +332,12 @@ public class MenuOverlay {
         if (selected) {
             font.setColor(Color.BLACK);
         } else {
-            font.setColor(game.backgroundColor);
+            font.setColor(Color.CYAN);
         }
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, text);
         font.draw(game.batch, text, centerX - layout.width / 2f, y + size / 2f + layout.height / 2f);
-        font.setColor(Color.WHITE); // Reset to default
+        font.setColor(Color.CYAN); // Reset to cyan
         game.batch.end();
     }
 
@@ -339,12 +354,13 @@ public class MenuOverlay {
         game.shapeRenderer.end();
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        game.shapeRenderer.setColor(game.foregroundColor);
+        game.shapeRenderer.setColor(Color.CYAN);
         game.shapeRenderer.rect(centerX - msgW / 2f, centerY - msgH / 2f, msgW, msgH);
         game.shapeRenderer.end();
 
         // Draw text
         game.batch.begin();
+        font.setColor(Color.CYAN);
         String msg = "Coming Soon";
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, msg);

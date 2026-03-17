@@ -40,6 +40,7 @@ public class MapSettingsSliders {
         map_settings_screen = msc;
         game_board = map_settings_screen.game_board;
         font = game.fonts.get(16);
+        font.setColor(Color.CYAN);
 
         slider_box_x = map_settings_screen.controls_x;
         slider_box_y = game_board.centerY;

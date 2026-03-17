@@ -40,6 +40,7 @@ public class SettingsOverlay {
         game = g;
         screen = scr;
         font = game.fonts.get(16);
+        font.setColor(Color.CYAN);
         overlay_x = x;
         overlay_y = y;
         overlay_h = h;
