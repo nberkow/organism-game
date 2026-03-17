@@ -14,6 +14,9 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     Float blinkCircleRadius;
     public float planchetteAgreement;
     public Vector2 planchetteFromCenter;
+    private float lastRenderedRadius = 0f;
+    private float renderPersistenceTimer = 0f;
+    private static final float MIN_RENDER_TIME = 0.3f; // Minimum time to show a circle
 
 
     public CandidateVertex(MapVertex s, MapVertex t) {
@@ -106,6 +109,20 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         
         // Clamp to reasonable min/max for visibility
         radius = Math.max(3f, Math.min(radius, 50f));
+        
+        // Persistence logic: keep showing circles for minimum time
+        if (radius > lastRenderedRadius * 0.9f) {
+            // Radius increased or stayed similar - reset timer
+            lastRenderedRadius = radius;
+            renderPersistenceTimer = MIN_RENDER_TIME;
+        } else if (renderPersistenceTimer > 0) {
+            // Use previous radius while timer is active
+            radius = lastRenderedRadius;
+            renderPersistenceTimer -= 0.016f; // Approximate frame time
+        } else {
+            // Timer expired, use new smaller radius
+            lastRenderedRadius = radius;
+        }
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
         float targetY = (target.y * gameBoard.hexSideLen) + gameBoard.centerY;

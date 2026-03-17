@@ -37,6 +37,7 @@ public class GameOrchestrator {
     private int currentPlayerIndex = 0;
     private float phaseTimer = 0f;
     private float decisionTimestamp = 0f;  // When current player's decision completed
+    private Vector2 capturedPlanchette = null;  // Planchette position when decision was made
 
     // Timing constants (eventually configurable)
     private static final float TURN_DURATION = 1.5f;    // Decision → Execution
@@ -78,9 +79,15 @@ public class GameOrchestrator {
             case DECISION:
                 // Trigger decision at phase start (handled elsewhere on entry)
                 // Check if decision is ready
-                if (currentPlayer.isDecisionReady()) {
+                if (currentPlayer.isDecisionReady() && capturedPlanchette == null) {
                     decisionTimestamp = phaseTimer;  // Record when decision completed
                     stallCycles = 0;
+                    
+                    // Capture planchette position at decision time
+                    if (currentPlayer.getMoveSpaceControl() != null) {
+                        capturedPlanchette = currentPlayer.getMoveSpaceControl()
+                            .getLogicalPlanchettePosition(phaseTimer);
+                    }
                 }
 
                 // Advance to EXECUTION when time is up AND decision is ready
@@ -103,14 +110,19 @@ public class GameOrchestrator {
                 break;
 
             case EXECUTION:
-                // DECISION phase lasted TURN_DURATION seconds by design
-                Vector2 precisePlanchette = currentPlayer.getHud()
-                    .getMoveSpaceControl()
-                    .getLogicalPlanchettePosition(TURN_DURATION);  // ← 1.5f, not phaseTimer
+                // Use the planchette position captured when decision was ready
+                Vector2 precisePlanchette = capturedPlanchette;
+                if (precisePlanchette == null) {
+                    // Fallback: use current position if capture failed
+                    precisePlanchette = currentPlayer.getHud()
+                        .getMoveSpaceControl()
+                        .getLogicalPlanchettePosition(TURN_DURATION);
+                }
 
                 currentPlayer.executeMove(precisePlanchette);
                 currentPhase = TurnPhase.BUFFER;
                 phaseTimer = 0f;
+                capturedPlanchette = null;  // Reset for next turn
                 break;
 
             case BUFFER:
@@ -128,6 +140,7 @@ public class GameOrchestrator {
 
                     currentPhase = TurnPhase.DECISION;
                     phaseTimer = 0f;
+                    capturedPlanchette = null;  // Reset for new turn
 
                     // Trigger next player's decision
                     getCurrentPlayer().makeDecision();

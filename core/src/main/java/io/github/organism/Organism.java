@@ -138,7 +138,8 @@ public class Organism {
                     done = true;
                     hex.resources[j] = 0;
                     hex.filledResourceSlots--;
-
+                    // Burning resources is just a cost of staying in the game, not an income source
+                    
                     // shift remaining resources up
                     for (int p = j; p < hex.filledResourceSlots - 1; p++) {
                         hex.resources[p] = hex.resources[p + 1];

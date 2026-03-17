@@ -196,9 +196,40 @@ Next priority tasks:
 3. ✅ DONE: Tuned TOTAL_AREA constant (reduced to 3000f for smaller circles)
 4. ✅ DONE: Set candidate circle alpha to 0.5
 5. ✅ DONE: Fixed candidate circle rendering to use current planchette position
-6. Add spend/income bars to mini-HUDs (PlayerSummaryDisplay)
-7. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
-8. Investigate what "speed boost" feature refers to
+6. ✅ DONE: Fixed resource burning - removed energy gain (it's just a cost, not income)
+7. ✅ DONE: Added persistence to candidate circles (MIN_RENDER_TIME = 0.3s)
+8. ✅ DONE: Fixed timing issue - planchette captured at decision time, not execution time
+9. Add spend/income bars to mini-HUDs (PlayerSummaryDisplay)
+10. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
+11. Investigate what "speed boost" feature refers to
+12. Implement expanded menu system
+
+Critical Bugs Fixed (Session 2):
+1. ✅ Resource burning was ADDING energy instead of just being a cost
+   - Removed energy gain from Organism.burnResources()
+   - Burning resources is now purely a cost of staying in the game
+   
+2. ✅ Candidate vertex circles visibility issues
+   - Added persistence timer (MIN_RENDER_TIME = 0.3s)
+   - Circles now stay visible for minimum time even if planchette moves
+   - Prevents flickering and makes high-priority vertices more visible
+   
+3. ✅ Vertex claiming delay issue
+   - Root cause: planchette position was captured at END of decision phase (1.5s later)
+   - Now captures planchette position when decision becomes ready
+   - executeMove() uses the captured position from decision time
+   - This fixes the multi-turn delay between planchette position and vertex claiming
+
+Turn Timing Flow (Now Correct):
+1. DECISION phase starts (1.5s duration)
+2. Player makes decision (AI or human moves cursor)
+3. When decision is ready, capture planchette position immediately
+4. Wait until TURN_DURATION expires
+5. EXECUTION phase: use the CAPTURED planchette position (not current)
+6. BUFFER phase (0.5s)
+7. Next player's turn
+
+This ensures that the vertex selection matches what the player saw when they made their decision, not what the planchette drifted to during the wait time.
 
 Summary:
 The main engineering project (center-of-mass based candidate vertex vectors) was already fully implemented in the codebase. The code correctly:
@@ -208,7 +239,9 @@ The main engineering project (center-of-mass based candidate vertex vectors) was
 - Renders circles with fixed total area
 - Implements king of the hill resource leadership
 
-The primary remaining work is adding visual indicators to the HUD and investigating the AI planchette animation issue.
+Session 2 fixed critical timing and income bugs that were affecting gameplay feel and balance.
+
+The primary remaining work is adding visual indicators to mini-HUDs, investigating AI planchette animation, and implementing the expanded menu system.
 # Aider Overview Document - Session 1
 Date: 2026-03-16
 
