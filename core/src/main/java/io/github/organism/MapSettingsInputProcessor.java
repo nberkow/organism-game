@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
@@ -22,6 +23,7 @@ public class MapSettingsInputProcessor implements InputProcessor {
         radio_press = new String [2];
 
         button_labels = new ArrayList<>();
+        button_labels.add("back");
         button_labels.add("preview");
         button_labels.add("save");
         button_labels.add("load");
@@ -104,6 +106,14 @@ public class MapSettingsInputProcessor implements InputProcessor {
      */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+        if (button_click_trackers.get("back")) {
+            // Return to game screen
+            map_screen.game.setScreen(map_screen.game.gameScreen);
+            Gdx.input.setInputProcessor(map_screen.game.gameScreen.inputProcessor);
+            button_click_trackers.put("back", false);
+            return false;
+        }
 
         if (button_click_trackers.get("preview")) {
             map_screen.update_map();
