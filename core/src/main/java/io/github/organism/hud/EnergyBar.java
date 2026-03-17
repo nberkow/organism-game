@@ -35,7 +35,7 @@ public class EnergyBar {
 
     public void render(){
         // Calculate x position based on hud.x (which is set for player positioning)
-        float renderX = hud.x + hud.moveSpaceControl.radius * 1.2f;
+        float renderX = hud.x/2 + hud.moveSpaceControl.radius;
 
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         game.shapeRenderer.setColor(game.foregroundColor);
