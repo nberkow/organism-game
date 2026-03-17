@@ -24,8 +24,6 @@ public class Organism {
     GameBoard gameBoard;
     Player player;
     ArrayList<MapHex> extractQueue;
-    float resourceUnitValue;
-    float resourceSetValue;
 
     public Organism(GameBoard gb) {
         gameBoard = gb;
@@ -139,7 +137,7 @@ public class Organism {
                     hex.resources[j] = 0;
                     hex.filledResourceSlots--;
                     // Burning resources is just a cost of staying in the game, not an income source
-                    
+
                     // shift remaining resources up
                     for (int p = j; p < hex.filledResourceSlots - 1; p++) {
                         hex.resources[p] = hex.resources[p + 1];
