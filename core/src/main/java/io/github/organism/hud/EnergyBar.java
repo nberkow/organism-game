@@ -56,14 +56,27 @@ public class EnergyBar {
         fillWidth[1] = hud.energyBarValue * (barWidth - (gapWidth * 4));
         // Income bar (energy + income projection)
         fillWidth[0] = fillWidth[1] + hud.incomeBarValue * (barWidth - (gapWidth * 4));
+        // Spend bar (energy that was just spent)
+        fillWidth[2] = hud.spendBarValue * (barWidth - (gapWidth * 4));
 
-        // Draw income bar (green) first, then energy bar (red) on top
+        // Draw income bar (green) first, then energy bar (yellow) on top
         for (int i=0; i<2; i++){
             game.shapeRenderer.setColor(game.energyBarColors[i]);
             game.shapeRenderer.rect(
                 renderX + gapWidth * 2,
                 y + gapWidth * 2,
                 fillWidth[i],
+                barHeight - gapWidth * 4);
+        }
+        
+        // Draw spend bar (red) on the right side to show what was spent
+        if (hud.spendBarValue > 0.001f) {
+            game.shapeRenderer.setColor(com.badlogic.gdx.graphics.Color.RED);
+            float spendBarX = renderX + barWidth - gapWidth * 2 - fillWidth[2];
+            game.shapeRenderer.rect(
+                spendBarX,
+                y + gapWidth * 2,
+                fillWidth[2],
                 barHeight - gapWidth * 4);
         }
         game.shapeRenderer.end();

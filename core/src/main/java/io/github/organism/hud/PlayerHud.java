@@ -29,6 +29,8 @@ public class PlayerHud {
     float energyBarValue;
     float incomeBarValue;
     float spendBarValue;
+    float lastEnergyValue;
+    float energySpentThisTurn;
     int [] resourceCounts;
     int [] allyResourceCounts;
     int maxResourceCount;
@@ -45,6 +47,8 @@ public class PlayerHud {
         incomeBarValue = 0f;
         spendBarValue = 0f;
         energyBarValue = 0f;
+        lastEnergyValue = 0f;
+        energySpentThisTurn = 0f;
 
         resourceCounts = new int[3];
         allyResourceCounts = new int[3];
@@ -127,7 +131,18 @@ public class PlayerHud {
     }
 
     public void setEnergy(float e) {
+        // Track spending by comparing to last value
+        if (e < lastEnergyValue) {
+            energySpentThisTurn = lastEnergyValue - e;
+        } else {
+            // Energy increased (income), reset spend tracking
+            energySpentThisTurn = 0f;
+        }
+        lastEnergyValue = e;
         energyBarValue = e;
+        
+        // Calculate spend bar value as fraction of max energy
+        spendBarValue = energySpentThisTurn / io.github.organism.SettingsManager.MAX_ENERGY;
     }
 
     public void setResources(int[] resources) {
