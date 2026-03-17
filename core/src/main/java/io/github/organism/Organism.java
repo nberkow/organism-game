@@ -12,7 +12,7 @@ import io.github.organism.player.Player;
 
 public class Organism {
 
-    private static final float BASE_INCOME_PERCENT_OF_MAX = .05f;
+    private static final float BASE_INCOME_PERCENT_OF_MAX = .1f;
     public float income;
     public float energy;
     TriangularGrid territoryHex;
@@ -138,8 +138,6 @@ public class Organism {
                     done = true;
                     hex.resources[j] = 0;
                     hex.filledResourceSlots--;
-                    Float burnValue = gameBoard.config.gameplaySettings.get("burn resource value");
-                    energy += (burnValue != null) ? burnValue : 6f;
 
                     // shift remaining resources up
                     for (int p = j; p < hex.filledResourceSlots - 1; p++) {
@@ -202,7 +200,7 @@ public class Organism {
             float p = cv.planchetteAgreement + baseP;
             candidateVertices.put(cv, p);
         }
-        
+
         // Store the planchette direction in each candidate for rendering
         for (CandidateVertex cv : candidateVertices.keySet()) {
             cv.planchetteFromCenter = planchetteDirection;
@@ -212,7 +210,7 @@ public class Organism {
         // Check if we have energy and candidates
         Float energyToExpand = gameBoard.config.gameplaySettings.get("energy to expand");
         float expandCost = (energyToExpand != null) ? energyToExpand : 6f;
-        
+
         if (candidateVertices.isEmpty() || energy < expandCost) {
             return;
         }
