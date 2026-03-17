@@ -174,11 +174,18 @@ public class Organism {
                     if (v.getPlayer() == null && !v.masked) {
                         CandidateVertex cv = new CandidateVertex(source, v);
                         cv.gameBoard = gameBoard;
-                        // Don't calculate agreement yet - will do it below
                         candidateVertices.put(cv, 0f);
                     }
                 }
             }
+        }
+
+        // Calculate centroid of all owned vertices
+        Vector2 centroid = calculateCentroid();
+
+        // Update all candidate vectors from centroid
+        for (CandidateVertex cv : candidateVertices.keySet()) {
+            cv.updateVectorFromCentroid(centroid);
         }
 
         // Always recalculate planchette agreement scores based on current planchette position
@@ -304,6 +311,29 @@ public class Organism {
                 claimHex(hex);
             }
         }
+    }
+
+    /**
+     * Calculate the centroid (average position) of all owned vertices.
+     * This represents the center of mass of the organism's territory.
+     */
+    private Vector2 calculateCentroid() {
+        if (territoryVertex.isEmpty()) {
+            return new Vector2(0, 0);
+        }
+
+        float sumX = 0;
+        float sumY = 0;
+        int count = 0;
+
+        for (GridPosition pos : territoryVertex) {
+            MapVertex v = (MapVertex) pos.content;
+            sumX += v.x;
+            sumY += v.y;
+            count++;
+        }
+
+        return new Vector2(sumX / count, sumY / count);
     }
 
     public void dispose() {

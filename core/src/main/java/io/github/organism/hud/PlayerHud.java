@@ -32,6 +32,7 @@ public class PlayerHud {
     int [] resourceCounts;
     int [] allyResourceCounts;
     int maxResourceCount;
+    boolean [] isResourceLeader;
 
     public PlayerHud(OrganismGame g, GameSession sec, Screen scr, boolean p1, boolean p2){
 
@@ -47,6 +48,7 @@ public class PlayerHud {
 
         resourceCounts = new int[3];
         allyResourceCounts = new int[3];
+        isResourceLeader = new boolean[3];
 
         float moveSpaceRadius = OrganismGame.VIRTUAL_WIDTH * 0.075f;
         float barWidth = (OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius)/2 * .7f;
@@ -145,6 +147,10 @@ public class PlayerHud {
             resourceBar.currentMaxCols = resourceBar.currentMaxCols / 2;
             resourceBar.calculateResourceDisplayCoords();
         }
+    }
+
+    public void setResourceLeadership(boolean[] leadership) {
+        isResourceLeader = leadership;
     }
 
     public void setBotInputVector(Vector2 vector) {

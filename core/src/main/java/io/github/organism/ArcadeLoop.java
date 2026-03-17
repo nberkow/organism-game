@@ -245,6 +245,13 @@ public class ArcadeLoop implements GameSession {
             hud.setIncome(organism.income / maxEnergy);
             hud.setEnergy(organism.energy / maxEnergy);
             hud.setResources(organism.resources);
+            
+            // Update resource leadership indicators
+            boolean[] leadership = new boolean[3];
+            for (int i = 0; i < 3; i++) {
+                leadership[i] = (currentGame.resourceLeaders[i] == player);
+            }
+            hud.setResourceLeadership(leadership);
         }
     }
 

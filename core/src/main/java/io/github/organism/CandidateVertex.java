@@ -19,9 +19,22 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     public CandidateVertex(MapVertex s, MapVertex t) {
         source = s;
         target = t;
-        vector = new Vector2(target.x - source.x, target.y - source.y);
+        // Vector will be calculated from centroid, not from source
+        vector = new Vector2(0, 0);
         gameBoard = target.pos.grid.gameBoard;
         blinkCircleRadius = OrganismGame.VIRTUAL_WIDTH * 0.005f;
+    }
+
+    /**
+     * Update the vector from the organism's centroid to this target vertex.
+     * Should be called each round to reflect the current territory shape.
+     */
+    public void updateVectorFromCentroid(Vector2 centroid) {
+        vector.set(target.x - centroid.x, target.y - centroid.y);
+        // Normalize the vector for direction calculation
+        if (vector.len() > 0.001f) {
+            vector.nor();
+        }
     }
 
     public void calculatePlanchetteAgreement(Vector2 planchetteFromCenter) {
@@ -63,15 +76,26 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
 
     }
 
-    public void render() {
-        if (gameBoard == null) {
+    /**
+     * Render this candidate vertex with a circle whose area is proportional to its probability.
+     * The totalProbability parameter ensures all circles sum to a fixed total area.
+     */
+    public void render(float probability, float totalProbability) {
+        if (gameBoard == null || totalProbability <= 0) {
             return;
         }
 
-        // Draw circle at target vertex with radius based on probability
-        // Normalize probability to reasonable radius range
-        float radius = planchetteAgreement * 50;
-
+        // Fixed total area for all candidate circles combined
+        float TOTAL_AREA = 5000f;
+        
+        // Calculate this circle's area as a fraction of total
+        float thisArea = TOTAL_AREA * (probability / totalProbability);
+        
+        // Convert area to radius: area = π * r²  =>  r = sqrt(area / π)
+        float radius = (float) Math.sqrt(thisArea / Math.PI);
+        
+        // Clamp to reasonable min/max for visibility
+        radius = Math.max(2f, Math.min(radius, 50f));
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
         float targetY = (target.y * gameBoard.hexSideLen) + gameBoard.centerY;
