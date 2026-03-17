@@ -95,7 +95,8 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         float radius = (float) Math.sqrt(thisArea / Math.PI);
         
         // Clamp to reasonable min/max for visibility
-        radius = Math.max(2f, Math.min(radius, 50f));
+        // Minimum of 3f ensures all candidates are visible
+        radius = Math.max(3f, Math.min(radius, 50f));
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
         float targetY = (target.y * gameBoard.hexSideLen) + gameBoard.centerY;

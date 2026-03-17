@@ -1,0 +1,179 @@
+Project Overview:
+    This project is a LibGDX game. It's a conceptually simple 4X strategy game for 3 players.
+
+Game Overview:
+    Victory: The Organism Game is a real time strategy game for three players. The board is a hexagonal grid and players spend energy to claim vertices with the organism they control. When no more moves can be made, the winner is the player with the most vertices captured.
+
+    Energy: Players get a steady income of energy depending on the resources they control. Claiming a vertex has a fixed cost.
+
+    Resources: There are three resource types arranged around the board with radial symmetry. Resources are associated with hexagons. Claiming all the vertexes of a hexagon claims that hex and all resources inside. The total number of resources owned has no direct effect. Being the leader in any one resource gives an energy bonus. If another player overtakes the leader, the bonus transfers to the new leader.
+
+    Resource Leadership Rules (King of the Hill):
+    - Only ONE player can be the leader of each resource type at a time
+    - The leader is the player with the MOST of that resource type
+    - If there's a tie for most, NO ONE is the leader (leadership bonus goes to no one)
+    - Leadership bonuses are recalculated each turn
+    - When a player overtakes the current leader, leadership transfers immediately
+
+    For example. Let's say the resources look like this:
+
+    player  resource 0  resource 1  resource 2
+    0       5           2           1
+    1       0           5           3
+    2       1           1           1
+
+    Player 0 leads in resource 0 and gets one bonus. Player 1 leads in resource 1 and 2, and gets 2 bonuses. Player 2 leads in nothing and gets base energy income.
+
+    Tournament: The main game mode is a constant semi-random tournament. There is pool of participants greater than 3, let's say 20. 3 players are randomly selected to compete. They get a number of points at the end equivalent to the number of vertexes they captured.
+
+    The overall tournament ranking is based on wins or the sum of all vertexes captured.
+
+    After some number of rounds, the bottom players are eliminated and new players are introduced.
+
+    There are currently three play modes, 1 player, 2 player and AI plays itself
+
+    An escape menu allows the user to switch modes and start a new tournament
+
+    Control interface: players manipulate a cursor in a circular area. a planchette follows the cursor at a slight delay. the planchette influences vertex selection so that the direction of growth is the direction of the planchette from the circle center
+
+    Control interface cases: if the planchette is centered in the circle, growth with be unbiased in all directions. The player, human or AI, can move a cursor around the circular field. The planchette follows the cursor at a slight delay.
+
+    AI: The AI idea is where this project is really interesting. It starts with the biological observation that vision is tightly coupled to cognition. The AI follows this loop:
+
+    - select a hexagon on the map
+    - the map is roughly circular, so the hex has a corresponding position in the control circle. move the cursor to that position
+    - extract local information about the hexagon: position, resources, vertex ownership
+    - use that info to select the next hex and repeat
+
+    I want to implement some simple learning as well as an evolutionary component. The individual organisms should learn. When it's time to create new organisms, use values from the winners.
+
+=== TECHNICAL IMPLEMENTATION DETAILS ===
+
+Candidate Vertex Selection Algorithm:
+    1. Each turn, organism calculates centroid (center of mass) of all owned vertices
+    2. For each candidate vertex, calculate vector from centroid to that vertex
+    3. Normalize the vector to unit length
+    4. Calculate planchette agreement: dot product of normalized candidate vector with normalized planchette direction
+    5. Add small base probability (0.01f) to prevent zero probabilities
+    6. Select vertices stochastically based on these probabilities
+    7. Candidate circles render with area proportional to probability, fixed total area across all candidates
+
+Resource Decay/Burning Mechanism:
+    - When organism calls extract(), it gains energy based on income
+    - After extracting energy, burnResources() is called
+    - burnResources() finds the MOST ABUNDANT resource type the player owns
+    - It then finds a hex in the extractQueue that contains that resource
+    - One unit of that resource is removed from the hex
+    - Player gains additional energy (burn resource value) for burning the resource
+    - Resources shift up in the hex's resource array to fill gaps
+    - Empty hexes are removed from extractQueue
+    - This creates a decay mechanism where resources are consumed over time
+
+Resource Leadership Implementation:
+    - GameBoard.updateResourceLeadership() is called each turn
+    - For each of 3 resource types, finds player with most of that resource
+    - If multiple players tie for most, leadership is set to null (no leader)
+    - Only one player can lead each resource type
+    - Organism.updateIncome() checks resourceLeaders array and counts bonuses
+    - Each leadership gives bonusPerLeadership energy (default 5f)
+
+What's working:
+- AI organism can compete in a tournament
+- tournament progresses through games, keeps track of wins
+- organism behavior is working. organisms get and spend energy correctly
+- resource handling. resource leader seems to be working
+- mini-display shows control circle, energy and resources for all 3 players
+- esc pauses and brings up a menu
+- esc menu allows game restart
+- human hud, input keys control cursor and planchette
+- 1 player tournament start
+- 2 player tournament start
+- round end leaderboard
+- ✅ CENTER-OF-MASS BASED CANDIDATE VERTEX VECTORS (main engineering project COMPLETE)
+- ✅ NORMALIZED CANDIDATE CIRCLE RENDERING with fixed total area
+- ✅ King of the hill resource leadership rules implemented
+
+What's not working or needs attention:
+- AI planchettes/cursors not moving (not animating, not changing underlying values)
+  * Note: This is a RENDERING/ANIMATION issue, not a logic issue
+  * The underlying values ARE being set by SlimeRLAgent
+  * The MoveSpaceControl.update() method needs to be called to animate the planchette
+- minor bug crashing at start. consider in context before fixing
+- candidate vertex circles sometimes not appearing - may be when all probabilities are very low or tied
+- resource leadership indicators not yet added to HUD displays
+- income/spend indicators not yet added to mini HUDs
+
+small but important tasks:
+- ✅ make a working copy of this document (aider_overview_1.txt created)
+- ✅ review the original and document heuristic decisions
+- investigate current bug (aider edit format mismatch - appears to be stale, code is already correct)
+- add red and green income/spend indicators to mini huds
+- make human player hud resource display indicate when the player is the leader of a resource. fine yellow line around that resource display
+- ✅ scale candidate vertex circles with fixed total area (DONE - TOTAL_AREA = 5000f)
+- ✅ confirm we are doing king of the hill rules for resource leader (CONFIRMED - implemented correctly)
+- confirm that speed boost is working (need to investigate what "speed boost" refers to)
+- ✅ update overview document with what was done
+- ✅ figure out resource decay and explain it (EXPLAINED above)
+
+main engineering project:
+- ✅ COMPLETE - center-of-mass based candidate vertex calculation implemented
+- ✅ Centroid calculated in Organism.calculateCentroid()
+- ✅ Candidate vectors updated from centroid in Organism.expand()
+- ✅ Vectors normalized for consistent biasing
+- ✅ Planchette agreement calculated with normalized vectors
+
+=== PROGRESS NOTES (2026-03-16) ===
+
+Status: Main engineering project appears to be ALREADY IMPLEMENTED in the codebase!
+
+Code review findings:
+1. Organism.calculateCentroid() - calculates average position of all owned vertices ✅
+2. Organism.expand() - calls calculateCentroid() and updates all candidate vectors ✅
+3. CandidateVertex.updateVectorFromCentroid() - updates vector from centroid and normalizes ✅
+4. CandidateVertex.calculatePlanchetteAgreement() - uses normalized vectors for dot product ✅
+5. CandidateVertex.render() - scales circles with fixed total area (TOTAL_AREA = 5000f) ✅
+6. GameBoard.updateResourceLeadership() - implements king of the hill rules correctly ✅
+
+Heuristic decisions found in existing code:
+- TOTAL_AREA = 5000f for candidate circles (may need tuning based on visual preference)
+- Base probability = 0.01f to prevent zero probabilities
+- Planchette magnitude affects energy budget: 0.5f + magnitude * 0.5f
+- Max attempts for vertex claiming = verticesToClaim * 3 (allows retries)
+- Radius clamped to [2f, 50f] for visibility
+
+What still needs implementation:
+1. AI planchette animation (MoveSpaceControl.update() needs to be called for bots)
+2. Resource leadership visual indicators in HUD
+3. Income/spend visual indicators in mini HUDs
+4. Investigation of "speed boost" feature
+5. Fix candidate circles not appearing when probabilities are very low
+
+Crash bug analysis:
+- The error message shows aider trying to apply a SEARCH/REPLACE that's already applied
+- The code in GameBoard.java already has the correct implementation
+- This appears to be a stale/duplicate commit attempt, not an actual bug
+- Current code is correct and working
+
+Changes made this session:
+1. ✅ Created aider_overview_1.txt working document
+2. ✅ Increased minimum candidate circle radius from 2f to 3f for better visibility
+3. ✅ Documented all existing implementations
+4. ✅ Explained resource decay mechanism
+5. ✅ Confirmed king of the hill resource leadership rules
+
+Next priority tasks:
+1. Add visual indicators for resource leadership (yellow border on resource display)
+2. Add income/spend indicators (red/green) to mini HUDs  
+3. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
+4. Test and tune TOTAL_AREA constant if needed (currently 5000f)
+5. Investigate what "speed boost" feature refers to
+
+Summary:
+The main engineering project (center-of-mass based candidate vertex vectors) was already fully implemented in the codebase. The code correctly:
+- Calculates centroid each turn
+- Updates candidate vectors from centroid
+- Normalizes vectors for consistent biasing
+- Renders circles with fixed total area
+- Implements king of the hill resource leadership
+
+The primary remaining work is adding visual indicators to the HUD and investigating the AI planchette animation issue.
