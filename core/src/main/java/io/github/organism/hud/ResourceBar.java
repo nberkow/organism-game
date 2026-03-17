@@ -123,5 +123,24 @@ public class ResourceBar {
         }
 
         game.shapeRenderer.end();
+
+        // Draw yellow outline for resource leadership
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        game.shapeRenderer.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
+        
+        for (int i=0; i < 3; i++) {
+            if (hud.isResourceLeader != null && hud.isResourceLeader[i]) {
+                ArrayList<FloatPair<Float>> row = coords.get(i);
+                for (int j=0; j<hud.allyResourceCounts[i] + hud.resourceCounts[i]; j++){
+                    FloatPair<Float> c = row.get(j);
+                    // Draw slightly larger circle for leadership indicator
+                    game.shapeRenderer.circle(
+                        c.a + hud.moveSpaceControl.radius * .75f, c.b, (BASE_DOT_RADIUS + 2) * dotScale
+                    );
+                }
+            }
+        }
+        
+        game.shapeRenderer.end();
     }
 }
