@@ -101,7 +101,9 @@ public class MapSettingsScreen implements Screen {
     }
 
     public void create_config() {
-        cfg = new GameConfig();
+        if (cfg == null) {
+            cfg = new GameConfig();
+        }
 
         cfg.radius = (int) Math.ceil(sliders.slider_selected_vals.get("radius"));
         cfg.resources = sliders.slider_selected_vals.get("resources");
@@ -112,8 +114,16 @@ public class MapSettingsScreen implements Screen {
         cfg.botPlayers = Integer.parseInt(selection_boxes.selected_vals.get("players")) - cfg.humanPlayers;
         cfg.layout = selection_boxes.selected_vals.get("layout");
         cfg.difficulty = selection_boxes.selected_vals.get("opponents");
-
-
+        
+        // Preserve or generate seed
+        if (cfg.seed == 0) {
+            cfg.seed = System.currentTimeMillis();
+        }
+    }
+    
+    public GameConfig getCurrentConfig() {
+        create_config();
+        return cfg;
     }
 
 
