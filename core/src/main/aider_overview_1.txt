@@ -160,13 +160,28 @@ Changes made this session:
 3. ✅ Documented all existing implementations
 4. ✅ Explained resource decay mechanism
 5. ✅ Confirmed king of the hill resource leadership rules
+6. ✅ Reduced candidate circle total area from 5000f to 3000f for smaller circles
+7. ✅ Set candidate circle alpha to 0.5 for better visibility of underlying map
+8. ✅ Resource leadership indicators ALREADY IMPLEMENTED (yellow border in ResourceBar.render())
+9. ✅ Implemented spend indicator (red bar) in EnergyBar
+10. ✅ Added spend tracking in PlayerHud.setEnergy()
+
+Energy Bar Implementation Details:
+- Green bar (fillWidth[0]): Shows current energy + projected income
+- Yellow bar (fillWidth[1]): Shows current energy level
+- Red bar (fillWidth[2]): Shows energy spent this turn (appears on right side)
+- Spend tracking: Compares current energy to last frame's energy
+- When energy decreases, the difference is shown as red spend bar
+- When energy increases (income), spend tracking resets
 
 Next priority tasks:
-1. Add visual indicators for resource leadership (yellow border on resource display)
-2. Add income/spend indicators (red/green) to mini HUDs  
-3. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
-4. Test and tune TOTAL_AREA constant if needed (currently 5000f)
-5. Investigate what "speed boost" feature refers to
+1. ✅ DONE: Resource leadership indicators (yellow border) - was already implemented!
+2. ✅ DONE: Spend indicator (red bar) now implemented and visible
+3. ✅ DONE: Tuned TOTAL_AREA constant (reduced to 3000f for smaller circles)
+4. ✅ DONE: Set candidate circle alpha to 0.5
+5. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
+6. Investigate what "speed boost" feature refers to
+7. Test spend/income balance - red bar should now show spending clearly
 
 Summary:
 The main engineering project (center-of-mass based candidate vertex vectors) was already fully implemented in the codebase. The code correctly:

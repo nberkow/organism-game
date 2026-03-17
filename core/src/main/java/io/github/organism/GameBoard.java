@@ -243,7 +243,7 @@ public class GameBoard implements Disposable {
 
                     game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
                     Color playerColor = currentPlayer.getColor();
-                    game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.6f);
+                    game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.5f);
 
                     // Render each candidate with its probability and the total
                     for (CandidateVertex cv : o.candidateVertices.keySet()) {

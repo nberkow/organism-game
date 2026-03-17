@@ -86,7 +86,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         }
 
         // Fixed total area for all candidate circles combined
-        float TOTAL_AREA = 5000f;
+        float TOTAL_AREA = 3000f;
         
         // Calculate this circle's area as a fraction of total
         float thisArea = TOTAL_AREA * (probability / totalProbability);
