@@ -165,6 +165,8 @@ Changes made this session:
 8. ✅ Resource leadership indicators ALREADY IMPLEMENTED (yellow border in ResourceBar.render())
 9. ✅ Implemented spend indicator (red bar) in EnergyBar
 10. ✅ Added spend tracking in PlayerHud.setEnergy()
+11. ✅ FIXED: Candidate circles now recalculate at render time based on CURRENT planchette position
+12. ✅ FIXED: Spend bar now more visible (semi-transparent red overlay, persists longer)
 
 Energy Bar Implementation Details:
 - Green bar (fillWidth[0]): Shows current energy + projected income
@@ -174,14 +176,29 @@ Energy Bar Implementation Details:
 - When energy decreases, the difference is shown as red spend bar
 - When energy increases (income), spend tracking resets
 
+Critical Bug Fixed:
+- Candidate vertex circles were calculating planchette agreement once during expand() and locking it in
+- This caused circles to not respond to planchette movement
+- NOW: Circles recalculate agreement at render time using CURRENT planchette position
+- Result: Circles should now dynamically resize as planchette moves
+- When planchette is centered: all 6 directions should show equal-sized circles
+- When planchette moves: circles in that direction should grow larger
+
+Spend Bar Improvements:
+- Changed from right-side bar to overlay on energy bar
+- Now semi-transparent red (0.7 alpha) for better visibility
+- Persists longer with gradual fade (95% per frame when not spending)
+- Shows spend amount extending from current energy level
+
 Next priority tasks:
 1. ✅ DONE: Resource leadership indicators (yellow border) - was already implemented!
-2. ✅ DONE: Spend indicator (red bar) now implemented and visible
+2. ✅ DONE: Spend indicator (red bar) now implemented and MORE visible
 3. ✅ DONE: Tuned TOTAL_AREA constant (reduced to 3000f for smaller circles)
 4. ✅ DONE: Set candidate circle alpha to 0.5
-5. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
-6. Investigate what "speed boost" feature refers to
-7. Test spend/income balance - red bar should now show spending clearly
+5. ✅ DONE: Fixed candidate circle rendering to use current planchette position
+6. Add spend/income bars to mini-HUDs (PlayerSummaryDisplay)
+7. Investigate AI planchette animation issue (likely MoveSpaceControl.update() not being called)
+8. Investigate what "speed boost" feature refers to
 
 Summary:
 The main engineering project (center-of-mass based candidate vertex vectors) was already fully implemented in the codebase. The code correctly:

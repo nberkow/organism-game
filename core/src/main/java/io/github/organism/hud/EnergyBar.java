@@ -69,10 +69,11 @@ public class EnergyBar {
                 barHeight - gapWidth * 4);
         }
         
-        // Draw spend bar (red) on the right side to show what was spent
+        // Draw spend bar (red) overlaid on the energy bar to show what was spent
         if (hud.spendBarValue > 0.001f) {
-            game.shapeRenderer.setColor(com.badlogic.gdx.graphics.Color.RED);
-            float spendBarX = renderX + barWidth - gapWidth * 2 - fillWidth[2];
+            game.shapeRenderer.setColor(1f, 0f, 0f, 0.7f); // Semi-transparent red
+            // Draw from the right edge of current energy, extending right by spend amount
+            float spendBarX = renderX + gapWidth * 2 + fillWidth[1];
             game.shapeRenderer.rect(
                 spendBarX,
                 y + gapWidth * 2,

@@ -78,24 +78,33 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
 
     /**
      * Render this candidate vertex with a circle whose area is proportional to its probability.
-     * The totalProbability parameter ensures all circles sum to a fixed total area.
+     * The currentPlanchette parameter is used to recalculate agreement at render time.
      */
-    public void render(float probability, float totalProbability) {
-        if (gameBoard == null || totalProbability <= 0) {
+    public void render(Vector2 currentPlanchette) {
+        if (gameBoard == null) {
             return;
         }
 
+        // Recalculate planchette agreement based on CURRENT planchette position
+        Vector2 planchetteDirection = currentPlanchette.cpy();
+        if (planchetteDirection.len() > 0.001f) {
+            planchetteDirection.nor();
+        }
+        
+        // Calculate agreement with current planchette
+        float agreement = Math.max(0.01f, planchetteDirection.dot(vector));
+        
         // Fixed total area for all candidate circles combined
         float TOTAL_AREA = 3000f;
         
-        // Calculate this circle's area as a fraction of total
-        float thisArea = TOTAL_AREA * (probability / totalProbability);
+        // Calculate this circle's area based on agreement
+        // Use a simple linear relationship for now
+        float thisArea = TOTAL_AREA * agreement / 6f; // Divide by ~6 for typical number of candidates
         
         // Convert area to radius: area = π * r²  =>  r = sqrt(area / π)
         float radius = (float) Math.sqrt(thisArea / Math.PI);
         
         // Clamp to reasonable min/max for visibility
-        // Minimum of 3f ensures all candidates are visible
         radius = Math.max(3f, Math.min(radius, 50f));
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;

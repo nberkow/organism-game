@@ -188,7 +188,7 @@ public class Organism {
             cv.updateVectorFromCentroid(centroid);
         }
 
-        // Always recalculate planchette agreement scores based on current planchette position
+        // Calculate planchette agreement scores for vertex selection
         // Normalize the planchette direction for agreement calculation
         Vector2 planchetteDirection = planchetteFromCenter.cpy();
         if (planchetteDirection.len() > 0.001f) {
@@ -200,6 +200,11 @@ public class Organism {
             cv.calculatePlanchetteAgreement(planchetteDirection);
             float p = cv.planchetteAgreement + baseP;
             candidateVertices.put(cv, p);
+        }
+        
+        // Store the planchette direction in each candidate for rendering
+        for (CandidateVertex cv : candidateVertices.keySet()) {
+            cv.planchetteFromCenter = planchetteDirection;
         }
 
 

@@ -235,20 +235,16 @@ public class GameBoard implements Disposable {
             if (currentPlayer != null) {
                 Organism o = currentPlayer.getOrganism();
                 if (o != null && o.candidateVertices != null && !o.candidateVertices.isEmpty()) {
-                    // Calculate total score for normalization
-                    float totalScore = 0f;
-                    for (float score : o.candidateVertices.values()) {
-                        totalScore += score;
-                    }
+                    // Get the CURRENT planchette position for rendering
+                    com.badlogic.gdx.math.Vector2 currentPlanchette = currentPlayer.getMoveSpaceControl().getPlanchetteFromCenterVector();
 
                     game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
                     Color playerColor = currentPlayer.getColor();
                     game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.5f);
 
-                    // Render each candidate with its probability and the total
+                    // Render each candidate with the current planchette position
                     for (CandidateVertex cv : o.candidateVertices.keySet()) {
-                        float probability = o.candidateVertices.get(cv);
-                        cv.render(probability, totalScore);
+                        cv.render(currentPlanchette);
                     }
 
                     game.shapeRenderer.end();
