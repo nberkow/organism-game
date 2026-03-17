@@ -53,8 +53,14 @@ public class FileHandler {
 
     public GameConfig read_cfg(String name, String extension) {
         String dir = "map_configs";
-
-        FileHandle handle = Gdx.files.local( dir + "/" +    name + "." + extension);
+        FileHandle handle = Gdx.files.local(dir + "/" + name + "." + extension);
+        
+        // If file doesn't exist, return default config
+        if (!handle.exists()) {
+            System.out.println("Config file not found: " + name + "." + extension + ", using defaults");
+            return new GameConfig();
+        }
+        
         GameConfig cfg = new GameConfig();
         HashMap<String, String> vals = new HashMap<>();
 
