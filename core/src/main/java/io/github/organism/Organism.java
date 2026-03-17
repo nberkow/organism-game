@@ -18,6 +18,8 @@ public class Organism {
     TriangularGrid territoryHex;
     TriangularGrid territoryVertex;
     HashMap<CandidateVertex, Float> candidateVertices;
+    // Separate list for rendering - persists to show animations
+    public ArrayList<CandidateVertex> candidatesForRendering;
 
     public int [] resources;
     Integer [] allyResources;
@@ -34,6 +36,7 @@ public class Organism {
         allyResources = new Integer[3];
         energy = SettingsManager.DEFAULT_STARTING_ENERGY;
         candidateVertices = new HashMap<>();
+        candidatesForRendering = new ArrayList<>();
     }
 
     public void updateResources(){
@@ -242,6 +245,10 @@ public class Organism {
             cv.planchetteFromCenter = planchetteDirection;
         }
 
+        // Copy candidates to rendering list BEFORE claiming any
+        // This preserves them for animation even after they're claimed
+        candidatesForRendering.clear();
+        candidatesForRendering.addAll(candidateVertices.keySet());
 
         // Check if we have energy and candidates
         Float energyToExpand = gameBoard.config.gameplaySettings.get("energy to expand");

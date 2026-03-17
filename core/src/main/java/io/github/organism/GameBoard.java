@@ -234,13 +234,14 @@ public class GameBoard implements Disposable {
             Player currentPlayer = orchestrator.getCurrentPlayer();
             if (currentPlayer != null) {
                 Organism o = currentPlayer.getOrganism();
-                if (o != null && o.candidateVertices != null && !o.candidateVertices.isEmpty()) {
+                // Use the rendering list instead of candidateVertices
+                if (o != null && o.candidatesForRendering != null && !o.candidatesForRendering.isEmpty()) {
                     // Get the CURRENT planchette position for rendering
                     com.badlogic.gdx.math.Vector2 currentPlanchette = currentPlayer.getMoveSpaceControl().getPlanchetteFromCenterVector();
 
                     // Debug output for first few turns
                     if (game.arcadeLoop != null && game.arcadeLoop.currentIteration <= 3) {
-                        System.out.println("GameBoard.render: Rendering " + o.candidateVertices.size() + 
+                        System.out.println("GameBoard.render: Rendering " + o.candidatesForRendering.size() + 
                             " candidates for " + currentPlayer.getPlayerName());
                     }
 
@@ -249,7 +250,7 @@ public class GameBoard implements Disposable {
                     game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.5f);
 
                     // Render each candidate with the current planchette position
-                    for (CandidateVertex cv : o.candidateVertices.keySet()) {
+                    for (CandidateVertex cv : o.candidatesForRendering) {
                         cv.render(currentPlanchette);
                     }
 

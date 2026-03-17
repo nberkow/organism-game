@@ -28,8 +28,8 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         blinkCircleRadius = OrganismGame.VIRTUAL_WIDTH * 0.005f;
         
         // Initialize with minimum render time so circles appear immediately
-        renderPersistenceTimer = MIN_RENDER_TIME;
-        lastRenderedRadius = 10f; // Start with a visible radius
+        renderPersistenceTimer = MIN_RENDER_TIME * 2; // Longer initial time
+        lastRenderedRadius = 15f; // Start with a more visible radius
     }
 
     /**
@@ -100,10 +100,9 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
             return;
         }
         
-        // Don't render if target has been claimed
-        if (target.getPlayer() != null) {
-            return;
-        }
+        // ALLOW rendering even if claimed - this is for animation!
+        // The vertex may have been claimed but we still want to show the circle
+        boolean wasClaimed = (target.getPlayer() != null);
 
         // Use the agreement that was calculated during expand()
         // This ensures rendering matches the selection logic
@@ -120,28 +119,40 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         float radius = (float) Math.sqrt(thisArea / Math.PI);
         
         // Clamp to reasonable min/max for visibility - increased minimum for early turns
-        radius = Math.max(8f, Math.min(radius, 50f));
+        radius = Math.max(10f, Math.min(radius, 50f));
+        
+        // If vertex was claimed, show it briefly then fade
+        if (wasClaimed) {
+            // Decay the persistence timer faster for claimed vertices
+            renderPersistenceTimer -= 0.05f;
+            if (renderPersistenceTimer <= 0) {
+                return; // Stop rendering claimed vertices after timer expires
+            }
+            // Use a bright radius for claimed vertices
+            radius = Math.max(radius, 15f);
+        } else {
+            // Persistence logic for unclaimed: keep showing circles for minimum time
+            if (radius > lastRenderedRadius * 0.9f) {
+                // Radius increased or stayed similar - reset timer
+                lastRenderedRadius = radius;
+                renderPersistenceTimer = MIN_RENDER_TIME;
+            } else if (renderPersistenceTimer > 0) {
+                // Use previous radius while timer is active
+                radius = lastRenderedRadius;
+                renderPersistenceTimer -= 0.016f; // Approximate frame time
+            } else {
+                // Timer expired, use new smaller radius
+                lastRenderedRadius = radius;
+            }
+        }
         
         // Debug output for first few turns
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 3) {
             System.out.println("  CandidateVertex render: agreement=" + 
                 String.format("%.3f", agreement) + 
                 ", radius=" + String.format("%.1f", radius) +
+                ", claimed=" + wasClaimed +
                 ", pos=(" + String.format("%.1f", target.x) + "," + String.format("%.1f", target.y) + ")");
-        }
-        
-        // Persistence logic: keep showing circles for minimum time
-        if (radius > lastRenderedRadius * 0.9f) {
-            // Radius increased or stayed similar - reset timer
-            lastRenderedRadius = radius;
-            renderPersistenceTimer = MIN_RENDER_TIME;
-        } else if (renderPersistenceTimer > 0) {
-            // Use previous radius while timer is active
-            radius = lastRenderedRadius;
-            renderPersistenceTimer -= 0.016f; // Approximate frame time
-        } else {
-            // Timer expired, use new smaller radius
-            lastRenderedRadius = radius;
         }
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
