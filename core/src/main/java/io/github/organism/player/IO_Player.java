@@ -138,7 +138,7 @@ public class IO_Player  implements Player {
     public void executeMove(Vector2 precisePlanchette) {
         // Use the locked input from decision phase
         organism.expand(lockedInput);
-        organism.extract(lockedInput);
+        organism.extract();
     }
 
     @Override
