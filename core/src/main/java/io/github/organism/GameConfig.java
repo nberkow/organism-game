@@ -16,6 +16,13 @@ public class GameConfig {
     int botPlayers = 2;
     float playerStartPositions = 0;
 
+    public GameConfig() {
+        // Initialize gameplay settings with default values
+        gameplaySettings = new HashMap<>();
+        gameplaySettings.put("burn resource value", 6f);
+        gameplaySettings.put("energy to expand", 6f);
+    }
+
 }
 
 
