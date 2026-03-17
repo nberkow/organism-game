@@ -33,10 +33,18 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
      * Should be called each round to reflect the current territory shape.
      */
     public void updateVectorFromCentroid(Vector2 centroid) {
-        vector.set(target.x - centroid.x, target.y - centroid.y);
+        // Calculate direction from centroid to target
+        float dx = target.x - centroid.x;
+        float dy = target.y - centroid.y;
+        vector.set(dx, dy);
+        
         // Normalize the vector for direction calculation
-        if (vector.len() > 0.001f) {
+        float len = vector.len();
+        if (len > 0.001f) {
             vector.nor();
+        } else {
+            // If at centroid, use a default direction
+            vector.set(1, 0);
         }
     }
 
@@ -81,21 +89,21 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
 
     /**
      * Render this candidate vertex with a circle whose area is proportional to its probability.
-     * The currentPlanchette parameter is used to recalculate agreement at render time.
+     * Uses the pre-calculated planchette agreement from the expand() method.
      */
     public void render(Vector2 currentPlanchette) {
         if (gameBoard == null) {
             return;
         }
-
-        // Recalculate planchette agreement based on CURRENT planchette position
-        Vector2 planchetteDirection = currentPlanchette.cpy();
-        if (planchetteDirection.len() > 0.001f) {
-            planchetteDirection.nor();
-        }
         
-        // Calculate agreement with current planchette
-        float agreement = Math.max(0.01f, planchetteDirection.dot(vector));
+        // Don't render if target has been claimed
+        if (target.getPlayer() != null) {
+            return;
+        }
+
+        // Use the agreement that was calculated during expand()
+        // This ensures rendering matches the selection logic
+        float agreement = Math.max(0.01f, planchetteAgreement);
         
         // Fixed total area for all candidate circles combined
         float TOTAL_AREA = 3000f;

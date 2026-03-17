@@ -161,29 +161,33 @@ public class Organism {
         gameBoard.updateResourceLeadership();
         updateIncome();
 
-        // Rebuild candidate list if empty
-        boolean needsRebuild = candidateVertices.isEmpty();
-
-        if (needsRebuild) {
-            // Build fresh candidate list
-            for (GridPosition pos : territoryVertex) {
-                MapVertex source = (MapVertex) pos.content;
-                for (MapVertex v : source.adjacentVertices) {
-                    if (v.getPlayer() == null && !v.masked) {
-                        CandidateVertex cv = new CandidateVertex(source, v);
-                        cv.gameBoard = gameBoard;
-                        candidateVertices.put(cv, 0f);
-                    }
-                }
-            }
-        }
-
-        // Calculate centroid of all owned vertices
+        // Calculate centroid FIRST (needed for vector calculations)
         Vector2 centroid = calculateCentroid();
 
-        // Update all candidate vectors from centroid
+        // Rebuild candidate list - check for new candidates and remove invalid ones
+        // Keep existing CandidateVertex objects to preserve animation state
+        HashMap<MapVertex, CandidateVertex> existingCandidates = new HashMap<>();
         for (CandidateVertex cv : candidateVertices.keySet()) {
-            cv.updateVectorFromCentroid(centroid);
+            existingCandidates.put(cv.target, cv);
+        }
+        
+        candidateVertices.clear();
+        
+        for (GridPosition pos : territoryVertex) {
+            MapVertex source = (MapVertex) pos.content;
+            for (MapVertex v : source.adjacentVertices) {
+                if (v.getPlayer() == null && !v.masked) {
+                    // Reuse existing candidate if available (preserves animation state)
+                    CandidateVertex cv = existingCandidates.get(v);
+                    if (cv == null) {
+                        cv = new CandidateVertex(source, v);
+                        cv.gameBoard = gameBoard;
+                    }
+                    // Update vector from current centroid
+                    cv.updateVectorFromCentroid(centroid);
+                    candidateVertices.put(cv, 0f);
+                }
+            }
         }
 
         // Calculate planchette agreement scores for vertex selection
@@ -194,10 +198,27 @@ public class Organism {
         }
 
         float baseP = 0.01f;
+        int candidateCount = 0;
+        float maxAgreement = Float.MIN_VALUE;
+        float minAgreement = Float.MAX_VALUE;
+        
         for (CandidateVertex cv : candidateVertices.keySet()) {
             cv.calculatePlanchetteAgreement(planchetteDirection);
             float p = cv.planchetteAgreement + baseP;
             candidateVertices.put(cv, p);
+            
+            candidateCount++;
+            maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
+            minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
+        }
+
+        // Debug output for first few turns
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 3) {
+            System.out.println("Player " + player.getPlayerName() + " expand: " + 
+                candidateCount + " candidates, agreement range [" + 
+                String.format("%.3f", minAgreement) + ", " + 
+                String.format("%.3f", maxAgreement) + "], planchette: " + 
+                String.format("(%.2f, %.2f)", planchetteDirection.x, planchetteDirection.y));
         }
 
         // Store the planchette direction in each candidate for rendering
