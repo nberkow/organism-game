@@ -125,8 +125,10 @@ public class IO_Player  implements Player {
         decisionReady = false;
 
         // Capture current planchette position (not cursor)
+        // Keep the magnitude for energy budget calculation
         if (hud != null) {
-            lockedInput.set(hud.getMoveSpaceControl().getPlanchetteFromCenterVector());
+            // Get the raw planchette position (not normalized)
+            lockedInput.set(hud.getMoveSpaceControl().planchetteFromCenterVector);
         }
 
         decisionReady = true;

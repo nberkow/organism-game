@@ -163,45 +163,36 @@ public class Organism {
         gameBoard.updateResourceLeadership();
         updateIncome();
 
-        // Only rebuild candidates if empty or planchette changed significantly
-        //FIXME implement "planchette changed significantly" test
+        // Rebuild candidate list if empty
         boolean needsRebuild = candidateVertices.isEmpty();
 
         if (needsRebuild) {
-            double scoreSum = 0d;
-            float baseP = 0.01f;
-
-            // Tally up all the scores and index them
+            // Build fresh candidate list
             for (GridPosition pos : territoryVertex) {
                 MapVertex source = (MapVertex) pos.content;
                 for (MapVertex v : source.adjacentVertices) {
-                    if (v.getPlayer() == null  && !v.masked) {
+                    if (v.getPlayer() == null && !v.masked) {
                         CandidateVertex cv = new CandidateVertex(source, v);
                         cv.gameBoard = gameBoard;
-                        cv.calculatePlanchetteAgreement(planchetteFromCenter);
-
-                        System.out.println("player " + player.getPlayerName() + " =======================");
-                        System.out.println("vertex " + cv.vector);
-                        System.out.println("planchette " + planchetteFromCenter);
-                        System.out.println("agreement " + cv.planchetteAgreement);
-
-                        float p = cv.planchetteAgreement + baseP;
-                        scoreSum += p;
-
-                        if (!candidateVertices.containsKey(cv)) {
-                            candidateVertices.put(cv, p);
-                        }
-                        else {
-                            candidateVertices.put(cv, candidateVertices.get(cv) + p);
-                        }
+                        // Don't calculate agreement yet - will do it below
+                        candidateVertices.put(cv, 0f);
                     }
                 }
             }
-        } else {
-            // Update planchette agreement for existing candidates
-            for (CandidateVertex cv : candidateVertices.keySet()) {
-                cv.calculatePlanchetteAgreement(planchetteFromCenter);
-            }
+        }
+
+        // Always recalculate planchette agreement scores based on current planchette position
+        // Normalize the planchette direction for agreement calculation
+        Vector2 planchetteDirection = planchetteFromCenter.cpy();
+        if (planchetteDirection.len() > 0.001f) {
+            planchetteDirection.nor();
+        }
+        
+        float baseP = 0.01f;
+        for (CandidateVertex cv : candidateVertices.keySet()) {
+            cv.calculatePlanchetteAgreement(planchetteDirection);
+            float p = cv.planchetteAgreement + baseP;
+            candidateVertices.put(cv, p);
         }
 
 
@@ -210,8 +201,9 @@ public class Organism {
             return;
         }
 
-        // budget depends on planchette magnitude
-        float energyBudget = Math.min(energy, energy * (0.5f + planchetteFromCenter.len() * 0.5f));
+        // Budget depends on planchette magnitude (how far from center)
+        float planchetteMagnitude = planchetteFromCenter.len();
+        float energyBudget = Math.min(energy, energy * (0.5f + planchetteMagnitude * 0.5f));
         int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
 
 
