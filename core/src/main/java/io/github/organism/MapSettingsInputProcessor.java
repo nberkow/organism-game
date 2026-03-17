@@ -43,6 +43,14 @@ public class MapSettingsInputProcessor implements InputProcessor {
      */
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == com.badlogic.gdx.Input.Keys.ESCAPE) {
+            // Return to game screen and show new tournament menu
+            map_screen.game.setScreen(map_screen.game.gameScreen);
+            com.badlogic.gdx.Gdx.input.setInputProcessor(map_screen.game.gameScreen.inputProcessor);
+            map_screen.game.menuOverlay.visible = true;
+            map_screen.game.menuOverlay.showNewTournamentMenu = true;
+            return true;
+        }
         return false;
     }
 
@@ -123,6 +131,11 @@ public class MapSettingsInputProcessor implements InputProcessor {
         }
 
         if (button_click_trackers.get("save")) {
+            // Ensure the map_configs directory exists
+            com.badlogic.gdx.files.FileHandle configDir = com.badlogic.gdx.Gdx.files.local("map_configs");
+            if (!configDir.exists()) {
+                configDir.mkdirs();
+            }
             map_screen.render_file_buttons = true;
             map_screen.game.fileHandler.write_mode = true;
             button_click_trackers.put("save",false);
@@ -138,15 +151,21 @@ public class MapSettingsInputProcessor implements InputProcessor {
             for (int i=3; i<6; i++){
                 String label = button_labels.get(i);
                 if (button_click_trackers.get(label)) {
-                    GameConfig config = map_screen.game.fileHandler.read_cfg(
-                        label, "map");
-                    if (!map_screen.game.fileHandler.write_mode) {
+                    if (map_screen.game.fileHandler.write_mode) {
+                        // Save current config
+                        map_screen.create_config();
+                        map_screen.game.fileHandler.write_cfg(map_screen.cfg, label, "map");
+                        System.out.println("Saved to " + label);
+                    } else {
+                        // Load config
+                        GameConfig config = map_screen.game.fileHandler.read_cfg(label, "map");
                         map_screen.set_new_game_board(config);
+                        System.out.println("Loaded from " + label);
                     }
 
-                    System.out.println(label);
                     button_click_trackers.put(label,false);
                     map_screen.render_file_buttons = false;
+                    map_screen.game.fileHandler.write_mode = false;
                 }
             }
         }
