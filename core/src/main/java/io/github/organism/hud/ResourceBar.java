@@ -57,7 +57,7 @@ public class ResourceBar {
     public void calculateResourceDisplayCoords(){
         // Calculate x position based on hud.x
         float renderX = hud.x + hud.moveSpaceControl.radius * 1.2f;
-        
+
         int allCols = 0;
         trioCols = Integer.MAX_VALUE;
         coords = new ArrayList<>();
@@ -101,7 +101,7 @@ public class ResourceBar {
             for (int j=0; j<hud.resourceCounts[i]; j++){
                 FloatPair<Float> c = row.get(j);
                 game.shapeRenderer.circle(
-                    c.a, c.b, BASE_DOT_RADIUS * dotScale
+                    c.a + hud.moveSpaceControl.radius * .75f, c.b, BASE_DOT_RADIUS * dotScale
                 );
             }
 
@@ -117,7 +117,7 @@ public class ResourceBar {
             for (int j=0; j<hud.allyResourceCounts[i] + hud.resourceCounts[i]; j++){
                 FloatPair<Float> c = row.get(j);
                 game.shapeRenderer.circle(
-                    c.a, c.b, BASE_DOT_RADIUS * dotScale
+                    c.a + hud.moveSpaceControl.radius * .75f, c.b, BASE_DOT_RADIUS * dotScale
                 );
             }
         }
