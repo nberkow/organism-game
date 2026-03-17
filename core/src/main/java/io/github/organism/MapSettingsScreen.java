@@ -121,13 +121,13 @@ public class MapSettingsScreen implements Screen {
         cfg.botPlayers = Integer.parseInt(selection_boxes.selected_vals.get("players")) - cfg.humanPlayers;
         cfg.layout = selection_boxes.selected_vals.get("layout");
         cfg.difficulty = selection_boxes.selected_vals.get("opponents");
-        
+
         // Preserve or generate seed
         if (cfg.seed == 0) {
             cfg.seed = System.currentTimeMillis();
         }
     }
-    
+
     public GameConfig getCurrentConfig() {
         create_config();
         return cfg;
@@ -136,20 +136,20 @@ public class MapSettingsScreen implements Screen {
 
     public void set_new_game_board(GameConfig config) {
         cfg = config;
-        
+
         // Update sliders to match loaded config
         sliders.slider_selected_vals.put("radius", (float) config.radius);
         sliders.slider_selected_vals.put("resources", config.resources);
         sliders.slider_selected_vals.put("density", config.vertex_density);
         sliders.slider_selected_vals.put("starts", config.playerStartPositions);
-        sliders.load_initial_positions();
-        
+        sliders.loadInitialPositions();
+
         // Update selection boxes to match loaded config
         selection_boxes.selected_vals.put("human players", String.valueOf(config.humanPlayers));
         selection_boxes.selected_vals.put("players", String.valueOf(config.humanPlayers + config.botPlayers));
         selection_boxes.selected_vals.put("layout", config.layout);
         selection_boxes.selected_vals.put("opponents", config.difficulty);
-        
+
         game_board = new GameBoard(this.game, config, null);
         game_board.voidDistributor.distribute();
         game_board.resourceDistributor.distribute();

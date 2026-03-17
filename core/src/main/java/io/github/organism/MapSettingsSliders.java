@@ -75,10 +75,10 @@ public class MapSettingsSliders {
 
 
 
-        load_initial_positions();
+        loadInitialPositions();
     }
 
-    private void load_initial_positions() {
+    void loadInitialPositions() {
         float y = slider_box_y + slider_box_h - bar_spacing;
         float slider_x;
         int ticks;

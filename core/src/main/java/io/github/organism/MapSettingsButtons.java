@@ -30,7 +30,7 @@ public class MapSettingsButtons {
         map_settings_screen = msc;
         game = map_settings_screen.game;
         game_board = map_settings_screen.game_board;
-        font = game.fonts.get(32);
+        font = game.fonts.get(16);
 
         buttons = new HashMap<>();
         buttons_x = map_settings_screen.controls_x;
