@@ -53,8 +53,23 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     }
 
     public void calculatePlanchetteAgreement(Vector2 planchetteFromCenter) {
-        planchetteAgreement = Math.max(Float.MIN_VALUE, planchetteFromCenter.dot(vector));
+        // Calculate dot product: positive = same direction, negative = opposite
+        float rawAgreement = planchetteFromCenter.dot(vector);
+        
+        // Store the raw agreement (can be negative)
+        planchetteAgreement = rawAgreement;
         this.planchetteFromCenter = planchetteFromCenter;
+        
+        // Debug output for first few turns
+        if (gameBoard != null && gameBoard.game.arcadeLoop != null && 
+            gameBoard.game.arcadeLoop.currentIteration <= 2) {
+            DebugLogger.getInstance().logf(
+                "    CandidateVertex.calculatePlanchetteAgreement: pos=(%.1f,%.1f), " +
+                "vector=(%.3f,%.3f), planchette=(%.3f,%.3f), agreement=%.3f",
+                target.x, target.y, vector.x, vector.y, 
+                planchetteFromCenter.x, planchetteFromCenter.y, rawAgreement
+            );
+        }
     }
 
     public double getPlanchetteAgreement() {
@@ -105,21 +120,24 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         boolean wasClaimed = (target.getPlayer() != null);
 
         // Use the agreement that was calculated during expand()
-        // This ensures rendering matches the selection logic
-        float agreement = Math.max(0.01f, planchetteAgreement);
+        // DO NOT recalculate - use the stored value from decision time
+        float agreement = planchetteAgreement;
         
-        // Fixed total area for all candidate circles combined
-        float TOTAL_AREA = 3000f;
+        // Don't render circles for vertices with very low agreement
+        // These are essentially random/unbiased and shouldn't show visual feedback
+        if (agreement < 0.05f && !wasClaimed) {
+            return; // Skip rendering for low-agreement unclaimed vertices
+        }
         
-        // Calculate this circle's area based on agreement
-        // Use a simple linear relationship for now
-        float thisArea = TOTAL_AREA * agreement / 6f; // Divide by ~6 for typical number of candidates
+        // Normalize agreement to 0-1 range for radius calculation
+        // Negative agreements become 0, positive scale up
+        float normalizedAgreement = Math.max(0f, agreement);
         
-        // Convert area to radius: area = π * r²  =>  r = sqrt(area / π)
-        float radius = (float) Math.sqrt(thisArea / Math.PI);
-        
-        // Clamp to reasonable min/max for visibility - increased minimum for early turns
-        radius = Math.max(10f, Math.min(radius, 50f));
+        // Base radius on normalized agreement
+        // Higher agreement = larger circle
+        float minRadius = 8f;
+        float maxRadius = 40f;
+        float radius = minRadius + (maxRadius - minRadius) * normalizedAgreement;
         
         // If vertex was claimed, show it briefly then fade
         if (wasClaimed) {
@@ -146,13 +164,12 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
             }
         }
         
-        // Debug output for first few turns
-        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 3) {
-            System.out.println("  CandidateVertex render: agreement=" + 
-                String.format("%.3f", agreement) + 
-                ", radius=" + String.format("%.1f", radius) +
-                ", claimed=" + wasClaimed +
-                ", pos=(" + String.format("%.1f", target.x) + "," + String.format("%.1f", target.y) + ")");
+        // Debug output for first few turns - only log if we're actually rendering
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
+            DebugLogger.getInstance().logf(
+                "  CandidateVertex render: agreement=%.3f, normalized=%.3f, radius=%.1f, claimed=%b, pos=(%.1f,%.1f)",
+                agreement, normalizedAgreement, radius, wasClaimed, target.x, target.y
+            );
         }
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;

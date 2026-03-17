@@ -216,25 +216,22 @@ public class Organism {
         }
 
         // Debug output for first few turns
-        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            System.out.println("Turn " + gameBoard.game.arcadeLoop.currentIteration + 
-                " Player " + player.getPlayerName() + " expand: " + 
-                candidateCount + " candidates, agreement range [" + 
-                String.format("%.3f", minAgreement) + ", " + 
-                String.format("%.3f", maxAgreement) + "], planchette: " + 
-                String.format("(%.2f, %.2f)", planchetteDirection.x, planchetteDirection.y) +
-                ", magnitude: " + String.format("%.2f", planchetteFromCenter.len()) +
-                ", energy: " + String.format("%.1f", energy) +
-                ", candidateVertices.size=" + candidateVertices.size());
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
+            DebugLogger logger = DebugLogger.getInstance();
+            logger.logf("Turn %d Player %s expand: %d candidates, agreement range [%.3f, %.3f], " +
+                "planchette: (%.2f, %.2f), magnitude: %.2f, energy: %.1f",
+                gameBoard.game.arcadeLoop.currentIteration, player.getPlayerName(),
+                candidateCount, minAgreement, maxAgreement,
+                planchetteDirection.x, planchetteDirection.y,
+                planchetteFromCenter.len(), energy);
             
-            // Show top 3 candidates
+            // Show top 3 candidates by agreement
             int shown = 0;
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 if (shown < 3) {
-                    System.out.println("    Candidate " + shown + ": agreement=" + 
-                        String.format("%.3f", cv.planchetteAgreement) +
-                        ", pos=(" + String.format("%.1f", cv.target.x) + "," + 
-                        String.format("%.1f", cv.target.y) + ")");
+                    logger.logf("    Candidate %d: agreement=%.3f, probability=%.3f, pos=(%.1f,%.1f)",
+                        shown, cv.planchetteAgreement, candidateVertices.get(cv),
+                        cv.target.x, cv.target.y);
                     shown++;
                 }
             }
@@ -299,16 +296,14 @@ public class Organism {
                     verticesToClaim--;
                     
                     // Debug output for first few turns
-                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-                        System.out.println("  -> Claimed vertex at (" + 
-                            String.format("%.1f", selected.target.x) + ", " + 
-                            String.format("%.1f", selected.target.y) + 
-                            "), agreement: " + String.format("%.3f", selected.planchetteAgreement));
+                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
+                        DebugLogger.getInstance().logf("  -> Claimed vertex at (%.1f, %.1f), agreement: %.3f",
+                            selected.target.x, selected.target.y, selected.planchetteAgreement);
                     }
                 } else {
                     // Debug: vertex was already claimed
-                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-                        System.out.println("  -> Skipped vertex (already claimed or masked)");
+                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
+                        DebugLogger.getInstance().log("  -> Skipped vertex (already claimed or masked)");
                     }
                 }
                 // Remove this candidate (claimed or invalid)
