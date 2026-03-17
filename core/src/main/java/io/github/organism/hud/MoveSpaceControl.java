@@ -54,6 +54,14 @@ public class MoveSpaceControl {
 
     // In setCursor() (called at decision time):
     public void setCursor(Vector2 targetXY) {
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("  MoveSpaceControl.setCursor: targetXY=(" + 
+                   String.format("%.3f", targetXY.x) + ", " + 
+                   String.format("%.3f", targetXY.y) + ")");
+        logger.log("    Before: planchette=(" + 
+                   String.format("%.3f", planchetteFromCenterVector.x) + ", " + 
+                   String.format("%.3f", planchetteFromCenterVector.y) + ")");
+        
         decisionStartPlanchette.set(planchetteFromCenterVector);
 
         if (targetXY.len() > availableRadius) {
@@ -61,6 +69,13 @@ public class MoveSpaceControl {
         } else {
             cursorCoord.set(targetXY);
         }
+        
+        logger.log("    After: cursor=(" + 
+                   String.format("%.3f", cursorCoord.x) + ", " + 
+                   String.format("%.3f", cursorCoord.y) + 
+                   "), decisionStart=(" + 
+                   String.format("%.3f", decisionStartPlanchette.x) + ", " + 
+                   String.format("%.3f", decisionStartPlanchette.y) + ")");
     }
 
 
@@ -80,7 +95,13 @@ public class MoveSpaceControl {
 
         // If already at target (or very close), return cursor
         if (distance < 0.001f) {
-            return cursorCoord.cpy();
+            Vector2 result = cursorCoord.cpy();
+            DebugLogger.getInstance().log("  MoveSpaceControl.getLogicalPlanchettePosition: elapsed=" + 
+                                          String.format("%.3f", elapsedSinceDecision) + 
+                                          ", at target, returning (" + 
+                                          String.format("%.3f", result.x) + ", " + 
+                                          String.format("%.3f", result.y) + ")");
+            return result;
         }
 
         // Unit direction vector toward cursor
@@ -94,7 +115,14 @@ public class MoveSpaceControl {
         float x = decisionStartPlanchette.x + dirX * traveled;
         float y = decisionStartPlanchette.y + dirY * traveled;
 
-        return new Vector2(x, y);
+        Vector2 result = new Vector2(x, y);
+        DebugLogger.getInstance().log("  MoveSpaceControl.getLogicalPlanchettePosition: elapsed=" + 
+                                      String.format("%.3f", elapsedSinceDecision) + 
+                                      ", distance=" + String.format("%.3f", distance) + 
+                                      ", traveled=" + String.format("%.3f", traveled) + 
+                                      ", result=(" + String.format("%.3f", result.x) + ", " + 
+                                      String.format("%.3f", result.y) + ")");
+        return result;
     }
 
 
@@ -229,7 +257,17 @@ public class MoveSpaceControl {
     }
 
     public Vector2 getPlanchetteFromCenterVector() {
-        return planchetteFromCenterVector.cpy().nor();
+        Vector2 result = planchetteFromCenterVector.cpy().nor();
+        // Only log occasionally to avoid spam
+        if (Math.random() < 0.01) { // 1% of calls
+            DebugLogger.getInstance().log("  MoveSpaceControl.getPlanchetteFromCenterVector: raw=(" + 
+                                          String.format("%.3f", planchetteFromCenterVector.x) + ", " + 
+                                          String.format("%.3f", planchetteFromCenterVector.y) + 
+                                          "), normalized=(" + 
+                                          String.format("%.3f", result.x) + ", " + 
+                                          String.format("%.3f", result.y) + ")");
+        }
+        return result;
     }
 
     public Vector2 getCursorAsVector() {
