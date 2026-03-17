@@ -13,6 +13,9 @@ public class MenuOverlay {
     GameScreen gameScreen;
 
     public boolean visible;
+    
+    // Deferred actions to avoid changing input processor during event handling
+    private Runnable deferredAction;
 
     float overlayX;
     float overlayY;
@@ -124,11 +127,13 @@ public class MenuOverlay {
 
             if (x >= buttonLeft && x <= buttonRight) {
                 if (y >= mapSettingsButtonY && y <= mapSettingsButtonY + buttonHeight) {
-                    // Go to map settings
-                    visible = false;
-                    showNewTournamentMenu = false;
-                    game.setScreen(game.mapSettingsScreen);
-                    Gdx.input.setInputProcessor(game.mapSettingsScreen.inputProcessor);
+                    // Go to map settings - defer to avoid input processor conflict
+                    deferredAction = () -> {
+                        visible = false;
+                        showNewTournamentMenu = false;
+                        game.setScreen(game.mapSettingsScreen);
+                        Gdx.input.setInputProcessor(game.mapSettingsScreen.inputProcessor);
+                    };
                 } else if (y >= labSettingsButtonY && y <= labSettingsButtonY + buttonHeight) {
                     // Lab settings - coming soon
                     // TODO: This will be re-implemented as AI controls
@@ -142,7 +147,11 @@ public class MenuOverlay {
             float startButtonY = overlayY + 60;
             if (x >= buttonLeft && x <= buttonRight) {
                 if (y >= startButtonY && y <= startButtonY + buttonHeight) {
-                    restartWithPlayers(selectedPlayerCount);
+                    // Defer tournament restart to avoid input processor conflict
+                    final int playerCount = selectedPlayerCount;
+                    deferredAction = () -> {
+                        restartWithPlayers(playerCount);
+                    };
                 }
             }
 
@@ -157,8 +166,10 @@ public class MenuOverlay {
                     // Show new tournament menu
                     showNewTournamentMenu = true;
                 } else if (y >= exitButtonY && y <= exitButtonY + buttonHeight) {
-                    // Exit to desktop
-                    Gdx.app.exit();
+                    // Exit to desktop - defer to be safe
+                    deferredAction = () -> {
+                        Gdx.app.exit();
+                    };
                 }
             }
         }
@@ -175,6 +186,14 @@ public class MenuOverlay {
 
     public void render() {
         if (!visible) return;
+        
+        // Execute deferred actions (after input event processing is complete)
+        if (deferredAction != null) {
+            Runnable action = deferredAction;
+            deferredAction = null;
+            action.run();
+            return; // Don't render this frame, we're transitioning
+        }
 
         // Update coming soon message timer
         if (showComingSoonMessage) {

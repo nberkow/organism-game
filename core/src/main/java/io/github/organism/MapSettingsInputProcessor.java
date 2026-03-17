@@ -16,6 +16,9 @@ public class MapSettingsInputProcessor implements InputProcessor {
     String [] radio_press;
     HashMap<String, Boolean> button_click_trackers;
     ArrayList<String> button_labels;
+    
+    // Deferred action to avoid changing input processor during event handling
+    Runnable deferredAction;
 
     public MapSettingsInputProcessor(MapSettingsScreen screen) {
         map_screen = screen;
@@ -44,11 +47,13 @@ public class MapSettingsInputProcessor implements InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == com.badlogic.gdx.Input.Keys.ESCAPE) {
-            // Return to game screen and show new tournament menu
-            map_screen.game.setScreen(map_screen.game.gameScreen);
-            com.badlogic.gdx.Gdx.input.setInputProcessor(map_screen.game.gameScreen.inputProcessor);
-            map_screen.game.menuOverlay.visible = true;
-            map_screen.game.menuOverlay.showNewTournamentMenu = true;
+            // Defer screen change to avoid input processor conflict
+            deferredAction = () -> {
+                map_screen.game.setScreen(map_screen.game.gameScreen);
+                com.badlogic.gdx.Gdx.input.setInputProcessor(map_screen.game.gameScreen.inputProcessor);
+                map_screen.game.menuOverlay.visible = true;
+                map_screen.game.menuOverlay.showNewTournamentMenu = true;
+            };
             return true;
         }
         return false;
@@ -116,11 +121,13 @@ public class MapSettingsInputProcessor implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
         if (button_click_trackers.get("back")) {
-            // Return to game screen and show menu overlay
-            map_screen.game.setScreen(map_screen.game.gameScreen);
-            Gdx.input.setInputProcessor(map_screen.game.gameScreen.inputProcessor);
-            map_screen.game.menuOverlay.visible = true;
-            map_screen.game.menuOverlay.showNewTournamentMenu = true;
+            // Defer screen change to avoid input processor conflict
+            deferredAction = () -> {
+                map_screen.game.setScreen(map_screen.game.gameScreen);
+                Gdx.input.setInputProcessor(map_screen.game.gameScreen.inputProcessor);
+                map_screen.game.menuOverlay.visible = true;
+                map_screen.game.menuOverlay.showNewTournamentMenu = true;
+            };
             button_click_trackers.put("back", false);
             return false;
         }

@@ -62,6 +62,13 @@ public class MapSettingsScreen implements Screen {
      */
     @Override
     public void render(float delta) {
+        // Execute deferred actions from input processor
+        if (inputProcessor != null && inputProcessor.deferredAction != null) {
+            Runnable action = inputProcessor.deferredAction;
+            inputProcessor.deferredAction = null;
+            action.run();
+            return; // Don't render this frame, we're transitioning
+        }
 
         ScreenUtils.clear(game_board.game.backgroundColor);
         game_board.game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
