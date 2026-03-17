@@ -3,6 +3,7 @@ package io.github.organism;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
@@ -37,10 +38,10 @@ public class MenuOverlay {
     float player1ButtonX;
     float player2ButtonX;
     float playerButtonY;
-    
+
     float mapSettingsButtonY;
     float labSettingsButtonY;
-    
+
     // Coming soon message
     boolean showComingSoonMessage;
     float comingSoonMessageTime;
@@ -57,7 +58,7 @@ public class MenuOverlay {
 
         // Center overlay
         overlayW = OrganismGame.VIRTUAL_WIDTH * 0.4f;
-        overlayH = OrganismGame.VIRTUAL_HEIGHT * 0.6f;
+        overlayH = OrganismGame.VIRTUAL_HEIGHT * 0.9f;
         overlayX = (OrganismGame.VIRTUAL_WIDTH - overlayW) / 2f;
         overlayY = (OrganismGame.VIRTUAL_HEIGHT - overlayH) / 2f;
 
@@ -65,7 +66,7 @@ public class MenuOverlay {
         buttonHeight = 40;
         buttonSpacing = 60;
 
-        font = game.fonts.get(32);
+        font = game.fonts.get(16);
 
         setupButtons();
     }
@@ -88,7 +89,7 @@ public class MenuOverlay {
         player0ButtonX = centerX - playerButtonSpacing;
         player1ButtonX = centerX;
         player2ButtonX = centerX + playerButtonSpacing;
-        
+
         // Settings buttons below player selection
         mapSettingsButtonY = playerButtonY - 120;
         labSettingsButtonY = mapSettingsButtonY - buttonSpacing;
@@ -115,12 +116,12 @@ public class MenuOverlay {
                     selectedPlayerCount = 2;
                 }
             }
-            
+
             // Check settings buttons
             float centerX = overlayX + overlayW / 2f;
             float buttonLeft = centerX - buttonWidth / 2f;
             float buttonRight = centerX + buttonWidth / 2f;
-            
+
             if (x >= buttonLeft && x <= buttonRight) {
                 if (y >= mapSettingsButtonY && y <= mapSettingsButtonY + buttonHeight) {
                     // Go to map settings
@@ -136,7 +137,7 @@ public class MenuOverlay {
                     comingSoonMessageTime = 0;
                 }
             }
-            
+
             // Check start tournament button (at bottom)
             float startButtonY = overlayY + 60;
             if (x >= buttonLeft && x <= buttonRight) {
@@ -144,7 +145,7 @@ public class MenuOverlay {
                     restartWithPlayers(selectedPlayerCount);
                 }
             }
-            
+
         } else {
             // Main menu
             float centerX = overlayX + overlayW / 2f;
@@ -174,7 +175,7 @@ public class MenuOverlay {
 
     public void render() {
         if (!visible) return;
-        
+
         // Update coming soon message timer
         if (showComingSoonMessage) {
             comingSoonMessageTime += Gdx.graphics.getDeltaTime();
@@ -184,7 +185,7 @@ public class MenuOverlay {
         }
 
         // Draw semi-transparent background
-        Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         game.shapeRenderer.setColor(0, 0, 0, 0.7f);
         game.shapeRenderer.rect(0, 0, OrganismGame.VIRTUAL_WIDTH, OrganismGame.VIRTUAL_HEIGHT);
@@ -206,7 +207,7 @@ public class MenuOverlay {
         } else {
             renderMainMenu();
         }
-        
+
         // Draw coming soon message if active
         if (showComingSoonMessage) {
             renderComingSoonMessage();
@@ -238,7 +239,7 @@ public class MenuOverlay {
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, title);
         font.draw(game.batch, title, centerX - layout.width / 2f, overlayY + overlayH - 40);
-        
+
         // Draw "Human Players:" label
         String label = "Human Players:";
         layout.setText(font, label);
@@ -249,11 +250,11 @@ public class MenuOverlay {
         drawRadioButton("0", player0ButtonX, playerButtonY, selectedPlayerCount == 0);
         drawRadioButton("1", player1ButtonX, playerButtonY, selectedPlayerCount == 1);
         drawRadioButton("2", player2ButtonX, playerButtonY, selectedPlayerCount == 2);
-        
+
         // Draw settings buttons
         drawButton("Map Settings", centerX, mapSettingsButtonY);
         drawButton("Lab Settings", centerX, labSettingsButtonY);
-        
+
         // Draw start button at bottom
         float startButtonY = overlayY + 60;
         drawButton("Start Tournament", centerX, startButtonY);
@@ -286,7 +287,7 @@ public class MenuOverlay {
             game.shapeRenderer.rect(centerX - size / 2f, y, size, size);
             game.shapeRenderer.end();
         }
-        
+
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         game.shapeRenderer.setColor(game.foregroundColor);
         game.shapeRenderer.rect(centerX - size / 2f, y, size, size);
@@ -297,7 +298,7 @@ public class MenuOverlay {
         if (selected) {
             font.setColor(Color.BLACK);
         } else {
-            font.setColor(game.foregroundColor);
+            font.setColor(game.backgroundColor);
         }
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         layout.setText(font, text);
@@ -305,24 +306,24 @@ public class MenuOverlay {
         font.setColor(Color.WHITE); // Reset to default
         game.batch.end();
     }
-    
+
     private void renderComingSoonMessage() {
         float centerX = OrganismGame.VIRTUAL_WIDTH / 2f;
         float centerY = OrganismGame.VIRTUAL_HEIGHT / 2f;
         float msgW = 300;
         float msgH = 100;
-        
+
         // Draw message box
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         game.shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 0.95f);
         game.shapeRenderer.rect(centerX - msgW / 2f, centerY - msgH / 2f, msgW, msgH);
         game.shapeRenderer.end();
-        
+
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         game.shapeRenderer.setColor(game.foregroundColor);
         game.shapeRenderer.rect(centerX - msgW / 2f, centerY - msgH / 2f, msgW, msgH);
         game.shapeRenderer.end();
-        
+
         // Draw text
         game.batch.begin();
         String msg = "Coming Soon";
