@@ -46,7 +46,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
          */
 
         //FIXME randomness turned off (does this need randomness or is it shuffled elsewhere?)
-        float scale =  0; //(float) ((this.planchetteAgreement + candidateVertex.planchetteAgreement)/2);
+        float scale =  (float) ((this.planchetteAgreement + candidateVertex.planchetteAgreement)/2);
 
         float r1 = com.badlogic.gdx.math.MathUtils.random() * scale;
         float r2 = com.badlogic.gdx.math.MathUtils.random() * scale;
@@ -63,15 +63,15 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
 
     }
 
-    public void render(float probability) {
+    public void render() {
         if (gameBoard == null) {
             return;
         }
 
         // Draw circle at target vertex with radius based on probability
         // Normalize probability to reasonable radius range
-        float normalizedProb = Math.max(0.1f, Math.min(1.0f, probability));
-        float radius = blinkCircleRadius * (0.5f + normalizedProb * 1.5f);
+        float radius = planchetteAgreement * 50;
+
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
         float targetY = (target.y * gameBoard.hexSideLen) + gameBoard.centerY;

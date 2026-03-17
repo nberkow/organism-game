@@ -53,15 +53,15 @@ public class PlayerHud {
         float barHeight = moveSpaceRadius/1.5f;
 
         setupMoveSpaceDisplay(moveSpaceRadius);
-        setupEnergyBar(barWidth, barHeight, barHeight/2);
+        setupEnergyBar(barWidth, barHeight, 0);
         setupResourceBar(barWidth, barHeight, barHeight/2 + barHeight);
         setupIncomeDisplay();
 
         // Position HUD - player 1 on left, player 2 on right
         if (p1) {
-            x = moveSpaceRadius * 1.5f;
+            x = moveSpaceRadius;
         } else if (p2) {
-            x = OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius * 1.5f - barWidth - moveSpaceRadius * 1.2f;
+            x = OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius - barWidth - moveSpaceRadius * 1.2f;
         } else {
             x = moveSpaceRadius * 1.5f;
         }
@@ -163,26 +163,24 @@ public class PlayerHud {
     /** Render full-size HUD (for human players) */
     public void render() {
         float moveSpaceRadius = moveSpaceControl.radius;
-        float hudBaseY = OrganismGame.VIRTUAL_HEIGHT * 0.05f;
-        
+        float hudBaseY = 0;
+
         // Calculate positions for HUD elements - player 1 on left, player 2 on right
         float moveSpaceX;
         if (isPlayerOne) {
-            moveSpaceX = moveSpaceRadius * 1.5f;
+            moveSpaceX = moveSpaceRadius;
         } else if (isPlayerTwo) {
-            moveSpaceX = OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius * 1.5f;
+            moveSpaceX = OrganismGame.VIRTUAL_WIDTH - moveSpaceRadius;
         } else {
-            moveSpaceX = moveSpaceRadius * 1.5f;
+            moveSpaceX = moveSpaceRadius;
         }
-        
+
         float moveSpaceY = hudBaseY + moveSpaceRadius;
-        
-        // Draw move space control (the circular control area)
-        moveSpaceControl.drawAt(moveSpaceX, moveSpaceY, 1.0f);
-        
+
         // Draw bars using their existing render methods
         energyBar.render();
         resourceBar.render();
+        moveSpaceControl.drawAt(moveSpaceX, moveSpaceY, 1.0f);
     }
 
     /** For human players: accumulate input every frame */
