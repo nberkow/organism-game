@@ -21,6 +21,7 @@ public class GameConfig {
         gameplaySettings = new HashMap<>();
         gameplaySettings.put("burn resource value", 6f);
         gameplaySettings.put("energy to expand", 6f);
+        gameplaySettings.put("resource leadership bonus", 2f);
     }
 
 }

@@ -242,11 +242,16 @@ Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.l
 
 ## Progress Log
 - Created aider_overview_1.txt for session tracking
-- **FIXED CRASH**: Added GameConfig constructor to initialize gameplaySettings HashMap
+- **FIXED CRASH (ATTEMPT 1)**: Added GameConfig constructor to initialize gameplaySettings HashMap
   - Committed with hash 09a74fa
+- **Git issues encountered** - some progress may have been lost
+- **CRASH REAPPEARED**: NullPointerException still occurring
+- **FIXED CRASH (ATTEMPT 2)**: Added missing "resource leadership bonus" key to gameplaySettings
+  - This key is referenced in Organism.updateIncome() (commented out but may be used)
+  - Added with default value of 2f
 
 ## Next Steps
-1. ✅ Fixed the null pointer crash
+1. ✅ Fixed the null pointer crash (second attempt with additional key)
 2. Test the game to confirm crash is resolved
 3. Add income/spend indicators to mini huds
 4. Make human player hud resource display indicate resource leadership
