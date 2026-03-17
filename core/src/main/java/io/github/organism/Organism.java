@@ -168,7 +168,6 @@ public class Organism {
         boolean needsRebuild = candidateVertices.isEmpty();
 
         if (needsRebuild) {
-            candidateVertices.clear();
             double scoreSum = 0d;
             float baseP = 0.01f;
 
@@ -180,6 +179,11 @@ public class Organism {
                         CandidateVertex cv = new CandidateVertex(source, v);
                         cv.gameBoard = gameBoard;
                         cv.calculatePlanchetteAgreement(planchetteFromCenter);
+
+                        System.out.println("player " + player.getPlayerName() + " =======================");
+                        System.out.println("vertex " + cv.vector);
+                        System.out.println("planchette " + planchetteFromCenter);
+                        System.out.println("agreement " + cv.planchetteAgreement);
 
                         float p = cv.planchetteAgreement + baseP;
                         scoreSum += p;
