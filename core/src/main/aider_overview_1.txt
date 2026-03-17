@@ -209,3 +209,61 @@ The main engineering project (center-of-mass based candidate vertex vectors) was
 - Implements king of the hill resource leadership
 
 The primary remaining work is adding visual indicators to the HUD and investigating the AI planchette animation issue.
+# Aider Overview Document - Session 1
+Date: 2026-03-16
+
+## Session Goals
+1. Create this overview document for tracking progress
+2. Investigate and fix the NullPointerException crash
+3. Add income/spend indicators to mini huds
+4. Make human player hud resource display indicate resource leadership
+5. Scale candidate vertex circles to fixed total radius
+6. Confirm king of the hill rules for resource leader
+7. Confirm speed boost is working
+8. Figure out resource decay behavior
+9. Tackle backlog: planchette math issues
+10. Tackle optimistic goal: expanded menu implementation
+
+## Current Status - Crash Investigation
+
+### The Crash (FIXED)
+```
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Float.floatValue()" because the return value of "java.util.HashMap.get(Object)" is null
+	at io.github.organism.Organism.burnResources(Organism.java:141)
+	at io.github.organism.Organism.extract(Organism.java:91)
+	at io.github.organism.player.BotPlayer.executeMove(BotPlayer.java:195)
+```
+
+**Root Cause**: GameConfig.gameplaySettings HashMap was declared but never initialized.
+
+**Fix Applied**: Added constructor to GameConfig that initializes the HashMap with default values:
+- "burn resource value" = 6f (from SettingsManager.RESOURCE_UNIT_VALUE)
+- "energy to expand" = 6f (from SettingsManager.ENERGY_TO_EXPAND)
+
+## Progress Log
+- Created aider_overview_1.txt for session tracking
+- **FIXED CRASH**: Added GameConfig constructor to initialize gameplaySettings HashMap
+  - Committed with hash 09a74fa
+
+## Next Steps
+1. ✅ Fixed the null pointer crash
+2. Test the game to confirm crash is resolved
+3. Add income/spend indicators to mini huds
+4. Make human player hud resource display indicate resource leadership
+5. Scale candidate vertex circles to fixed total radius
+6. Confirm king of the hill rules for resource leader
+7. Confirm speed boost is working
+8. Figure out resource decay behavior
+9. Tackle backlog: planchette math issues
+10. Tackle optimistic goal: expanded menu implementation
+
+## Notes & Heuristics
+- The crash was indeed a settings initialization issue as mentioned in overview.txt
+- Used values from SettingsManager constants for defaults to maintain consistency
+- These settings appear to be configurable gameplay parameters that should have sensible defaults
+
+## Doubts & Questions
+- ✅ Resolved: gameplaySettings needed initialization in constructor
+- Should there be more gameplay settings keys? Currently only added the two that were causing crashes
+- Is there a settings loading mechanism that should populate these from a file?
+- Need to run the game to verify the fix works and observe other behaviors
