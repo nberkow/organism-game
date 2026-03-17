@@ -213,12 +213,15 @@ public class Organism {
         }
 
         // Debug output for first few turns
-        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 3) {
-            System.out.println("Player " + player.getPlayerName() + " expand: " + 
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            System.out.println("Turn " + gameBoard.game.arcadeLoop.currentIteration + 
+                " Player " + player.getPlayerName() + " expand: " + 
                 candidateCount + " candidates, agreement range [" + 
                 String.format("%.3f", minAgreement) + ", " + 
                 String.format("%.3f", maxAgreement) + "], planchette: " + 
-                String.format("(%.2f, %.2f)", planchetteDirection.x, planchetteDirection.y));
+                String.format("(%.2f, %.2f)", planchetteDirection.x, planchetteDirection.y) +
+                ", magnitude: " + String.format("%.2f", planchetteFromCenter.len()) +
+                ", energy: " + String.format("%.1f", energy));
         }
 
         // Store the planchette direction in each candidate for rendering
@@ -274,6 +277,19 @@ public class Organism {
                     claimVertex(selected.target);
                     energy -= expandCost;
                     verticesToClaim--;
+                    
+                    // Debug output for first few turns
+                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                        System.out.println("  -> Claimed vertex at (" + 
+                            String.format("%.1f", selected.target.x) + ", " + 
+                            String.format("%.1f", selected.target.y) + 
+                            "), agreement: " + String.format("%.3f", selected.planchetteAgreement));
+                    }
+                } else {
+                    // Debug: vertex was already claimed
+                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                        System.out.println("  -> Skipped vertex (already claimed or masked)");
+                    }
                 }
                 // Remove this candidate (claimed or invalid)
                 candidateVertices.remove(selected);

@@ -41,10 +41,13 @@ public class MoveSpaceControl {
         // Center coord is now set dynamically in drawAt()
         centerCoord = new Vector2(radius, radius);
 
+        // Initialize cursor and planchette at center (0, 0)
         cursorCoord = new Vector2(0f, 0f);
         planchetteFromCenterVector = new Vector2(0f, 0f);
         planchetteMovementVector = new Vector2(0f, 0f);
-
+        
+        // Initialize decision start position
+        decisionStartPlanchette = new Vector2(0f, 0f);
     }
 
     public Vector2 decisionStartPlanchette = new Vector2();

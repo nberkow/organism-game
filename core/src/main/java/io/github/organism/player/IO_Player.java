@@ -124,19 +124,20 @@ public class IO_Player  implements Player {
     public void makeDecision() {
         decisionReady = false;
 
-        // Capture current planchette position (not cursor)
-        // Keep the magnitude for energy budget calculation
-        if (hud != null) {
-            // Get the raw planchette position (not normalized)
-            lockedInput.set(hud.getMoveSpaceControl().planchetteFromCenterVector);
-        }
-
+        // For human players, the planchette position will be read during executeMove
+        // This allows the player to continue adjusting during the decision phase
+        
         decisionReady = true;
     }
 
     @Override
     public void executeMove(Vector2 precisePlanchette) {
-        // Use the locked input from decision phase
+        // For human players, use the current planchette position
+        // This has been accumulated throughout the decision phase
+        if (hud != null && hud.getMoveSpaceControl() != null) {
+            lockedInput.set(hud.getMoveSpaceControl().planchetteFromCenterVector);
+        }
+        
         organism.expand(lockedInput);
         organism.extract();
     }

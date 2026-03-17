@@ -84,6 +84,7 @@ public class GameScreen implements Screen {
 
     private void input() {
         if (arcadeLoop != null && arcadeLoop.currentGameOrchestrator != null && !arcadeLoop.currentGameOrchestrator.paused) {
+            // Human input has already been accumulated before this is called
             arcadeLoop.currentGameOrchestrator.update(Gdx.graphics.getDeltaTime());
             arcadeLoop.currentGameOrchestrator.updatePlayers();
         }
@@ -107,21 +108,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        input();
-
         ScreenUtils.clear(game.backgroundColor);
 
-        // Update ALL planchettes (visual drift, regardless of turn)
-        if (game.gameBoard != null && game.gameBoard.allPlayerIds != null) {
-            for (Point playerId : game.gameBoard.allPlayerIds) {
-                Player player = game.gameBoard.players.get(playerId);
-                if (player != null && player.getHud() != null) {
-                    player.getHud().updateVisuals(delta);
-                }
-            }
-        }
-
-        // Accumulate human input BEFORE rendering (only when not paused)
+        // Accumulate human input FIRST (before game logic)
         if (arcadeLoop != null && arcadeLoop.currentGameOrchestrator != null && 
             !arcadeLoop.currentGameOrchestrator.paused) {
             if (player1Hud != null) {
@@ -129,6 +118,19 @@ public class GameScreen implements Screen {
             }
             if (player2Hud != null) {
                 player2Hud.accumulateHumanInput();
+            }
+        }
+
+        // Update game logic (this calls makeDecision/executeMove)
+        input();
+
+        // Update ALL planchettes (visual drift) AFTER game logic
+        if (game.gameBoard != null && game.gameBoard.allPlayerIds != null) {
+            for (Point playerId : game.gameBoard.allPlayerIds) {
+                Player player = game.gameBoard.players.get(playerId);
+                if (player != null && player.getHud() != null) {
+                    player.getHud().updateVisuals(delta);
+                }
             }
         }
 
