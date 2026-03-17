@@ -238,6 +238,12 @@ public class GameBoard implements Disposable {
                     // Get the CURRENT planchette position for rendering
                     com.badlogic.gdx.math.Vector2 currentPlanchette = currentPlayer.getMoveSpaceControl().getPlanchetteFromCenterVector();
 
+                    // Debug output for first few turns
+                    if (game.arcadeLoop != null && game.arcadeLoop.currentIteration <= 3) {
+                        System.out.println("GameBoard.render: Rendering " + o.candidateVertices.size() + 
+                            " candidates for " + currentPlayer.getPlayerName());
+                    }
+
                     game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
                     Color playerColor = currentPlayer.getColor();
                     game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.5f);

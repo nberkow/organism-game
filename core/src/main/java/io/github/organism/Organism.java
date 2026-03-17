@@ -221,7 +221,20 @@ public class Organism {
                 String.format("%.3f", maxAgreement) + "], planchette: " + 
                 String.format("(%.2f, %.2f)", planchetteDirection.x, planchetteDirection.y) +
                 ", magnitude: " + String.format("%.2f", planchetteFromCenter.len()) +
-                ", energy: " + String.format("%.1f", energy));
+                ", energy: " + String.format("%.1f", energy) +
+                ", candidateVertices.size=" + candidateVertices.size());
+            
+            // Show top 3 candidates
+            int shown = 0;
+            for (CandidateVertex cv : candidateVertices.keySet()) {
+                if (shown < 3) {
+                    System.out.println("    Candidate " + shown + ": agreement=" + 
+                        String.format("%.3f", cv.planchetteAgreement) +
+                        ", pos=(" + String.format("%.1f", cv.target.x) + "," + 
+                        String.format("%.1f", cv.target.y) + ")");
+                    shown++;
+                }
+            }
         }
 
         // Store the planchette direction in each candidate for rendering

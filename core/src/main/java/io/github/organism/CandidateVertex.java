@@ -26,6 +26,10 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         vector = new Vector2(0, 0);
         gameBoard = target.pos.grid.gameBoard;
         blinkCircleRadius = OrganismGame.VIRTUAL_WIDTH * 0.005f;
+        
+        // Initialize with minimum render time so circles appear immediately
+        renderPersistenceTimer = MIN_RENDER_TIME;
+        lastRenderedRadius = 10f; // Start with a visible radius
     }
 
     /**
@@ -115,8 +119,16 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         // Convert area to radius: area = π * r²  =>  r = sqrt(area / π)
         float radius = (float) Math.sqrt(thisArea / Math.PI);
         
-        // Clamp to reasonable min/max for visibility
-        radius = Math.max(3f, Math.min(radius, 50f));
+        // Clamp to reasonable min/max for visibility - increased minimum for early turns
+        radius = Math.max(8f, Math.min(radius, 50f));
+        
+        // Debug output for first few turns
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 3) {
+            System.out.println("  CandidateVertex render: agreement=" + 
+                String.format("%.3f", agreement) + 
+                ", radius=" + String.format("%.1f", radius) +
+                ", pos=(" + String.format("%.1f", target.x) + "," + String.format("%.1f", target.y) + ")");
+        }
         
         // Persistence logic: keep showing circles for minimum time
         if (radius > lastRenderedRadius * 0.9f) {
