@@ -1,4 +1,6 @@
 package io.github.organism;
+import static io.github.organism.SettingsManager.MAX_ENERGY;
+
 import com.badlogic.gdx.math.Vector2;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,9 +12,9 @@ import io.github.organism.player.Player;
 
 public class Organism {
 
+    private static final float BASE_INCOME_PERCENT_OF_MAX = .05f;
     public float income;
     public float energy;
-    public float expandRate;
     TriangularGrid territoryHex;
     TriangularGrid territoryVertex;
     HashMap<CandidateVertex, Float> candidateVertices;
@@ -34,8 +36,6 @@ public class Organism {
         allyResources = new Integer[3];
         energy = SettingsManager.DEFAULT_STARTING_ENERGY;
         candidateVertices = new HashMap<>();
-        resourceSetValue = gameBoard.config.gameplaySettings.get("resource set value");
-        resourceUnitValue = gameBoard.config.gameplaySettings.get("resource unit value");
     }
 
     public void updateResources(){
@@ -53,7 +53,7 @@ public class Organism {
 
     public void updateIncome() {
         // Base income
-        float baseIncome = 5f;
+        float baseIncome = BASE_INCOME_PERCENT_OF_MAX * MAX_ENERGY;
 
         // Count how many resource types this player leads in
         int leadershipBonuses = 0;
@@ -64,14 +64,14 @@ public class Organism {
         }
 
         // Each leadership gives a bonus (you can adjust the bonus amount)
-        float bonusPerLeadership = gameBoard.config.gameplaySettings.getOrDefault(
-            "resource leadership bonus", 5f
-        );
+        //float bonusPerLeadership = gameBoard.config.gameplaySettings.getOrDefault(
+        //    "resource leadership bonus", 2f
+        //);
 
-        income = baseIncome + (leadershipBonuses * bonusPerLeadership);
+        income = (float) (baseIncome * Math.pow(2, leadershipBonuses));
     }
 
-    public void extract(Vector2 planchetteFromCenter) {
+    public void extract() {
         /*
         get income based on resources
 
@@ -84,7 +84,7 @@ public class Organism {
         updateIncome();
 
         // Add energy based on calculated income
-        energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
+        energy = Math.min(energy + income, MAX_ENERGY);
 
         // Burn one resource after extracting (as per game rules)
         if (countResources() > 0) {
@@ -194,7 +194,7 @@ public class Organism {
         if (planchetteDirection.len() > 0.001f) {
             planchetteDirection.nor();
         }
-        
+
         float baseP = 0.01f;
         for (CandidateVertex cv : candidateVertices.keySet()) {
             cv.calculatePlanchetteAgreement(planchetteDirection);
@@ -227,6 +227,7 @@ public class Organism {
             if (scoreSum <= 0) {
                 break;
             }
+
 
             double r = gameBoard.rng.nextDouble() * scoreSum;
             double s = 0d;
