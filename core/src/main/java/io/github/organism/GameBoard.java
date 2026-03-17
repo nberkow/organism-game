@@ -245,8 +245,10 @@ public class GameBoard implements Disposable {
                     Color playerColor = currentPlayer.getColor();
                     game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.6f);
 
+                    // Render each candidate with its probability and the total
                     for (CandidateVertex cv : o.candidateVertices.keySet()) {
-                        cv.render();
+                        float probability = o.candidateVertices.get(cv);
+                        cv.render(probability, totalScore);
                     }
 
                     game.shapeRenderer.end();
