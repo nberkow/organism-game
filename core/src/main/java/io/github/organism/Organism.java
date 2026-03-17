@@ -138,7 +138,8 @@ public class Organism {
                     done = true;
                     hex.resources[j] = 0;
                     hex.filledResourceSlots--;
-                    energy += gameBoard.config.gameplaySettings.get("burn resource value");
+                    Float burnValue = gameBoard.config.gameplaySettings.get("burn resource value");
+                    energy += (burnValue != null) ? burnValue : 6f;
 
                     // shift remaining resources up
                     for (int p = j; p < hex.filledResourceSlots - 1; p++) {
@@ -209,14 +210,17 @@ public class Organism {
 
 
         // Check if we have energy and candidates
-        if (candidateVertices.isEmpty() || energy < gameBoard.config.gameplaySettings.get("energy to expand")) {
+        Float energyToExpand = gameBoard.config.gameplaySettings.get("energy to expand");
+        float expandCost = (energyToExpand != null) ? energyToExpand : 6f;
+        
+        if (candidateVertices.isEmpty() || energy < expandCost) {
             return;
         }
 
         // Budget depends on planchette magnitude (how far from center)
         float planchetteMagnitude = planchetteFromCenter.len();
         float energyBudget = Math.min(energy, energy * (0.5f + planchetteMagnitude * 0.5f));
-        int verticesToClaim = (int) (energyBudget / gameBoard.config.gameplaySettings.get("energy to expand"));
+        int verticesToClaim = (int) (energyBudget / expandCost);
 
 
         int attemptedClaims = 0;
@@ -250,7 +254,7 @@ public class Organism {
                 // Check if vertex is still available at claim time
                 if (selected.target.getPlayer() == null && !selected.target.masked) {
                     claimVertex(selected.target);
-                    energy -= gameBoard.config.gameplaySettings.get("energy to expand");
+                    energy -= expandCost;
                     verticesToClaim--;
                 }
                 // Remove this candidate (claimed or invalid)
