@@ -151,16 +151,29 @@ public class MapSettingsInputProcessor implements InputProcessor {
             for (int i=3; i<6; i++){
                 String label = button_labels.get(i);
                 if (button_click_trackers.get(label)) {
-                    if (map_screen.game.fileHandler.write_mode) {
-                        // Save current config
-                        map_screen.create_config();
-                        map_screen.game.fileHandler.write_cfg(map_screen.cfg, label, "map");
-                        System.out.println("Saved to " + label);
-                    } else {
-                        // Load config
-                        GameConfig config = map_screen.game.fileHandler.read_cfg(label, "map");
-                        map_screen.set_new_game_board(config);
-                        System.out.println("Loaded from " + label);
+                    try {
+                        if (map_screen.game.fileHandler.write_mode) {
+                            // Save current config
+                            map_screen.create_config();
+                            if (map_screen.cfg != null) {
+                                map_screen.game.fileHandler.write_cfg(map_screen.cfg, label, "map");
+                                System.out.println("Saved to " + label);
+                            } else {
+                                System.out.println("Error: Config is null, cannot save");
+                            }
+                        } else {
+                            // Load config
+                            GameConfig config = map_screen.game.fileHandler.read_cfg(label, "map");
+                            if (config != null) {
+                                map_screen.set_new_game_board(config);
+                                System.out.println("Loaded from " + label);
+                            } else {
+                                System.out.println("Error: Could not load config from " + label);
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error handling file button " + label + ": " + e.getMessage());
+                        e.printStackTrace();
                     }
 
                     button_click_trackers.put(label,false);
