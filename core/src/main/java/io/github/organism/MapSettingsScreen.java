@@ -118,11 +118,26 @@ public class MapSettingsScreen implements Screen {
 
 
     public void set_new_game_board(GameConfig config) {
+        cfg = config;
+        
+        // Update sliders to match loaded config
+        sliders.slider_selected_vals.put("radius", (float) config.radius);
+        sliders.slider_selected_vals.put("resources", config.resources);
+        sliders.slider_selected_vals.put("density", config.vertex_density);
+        sliders.slider_selected_vals.put("starts", config.playerStartPositions);
+        sliders.load_initial_positions();
+        
+        // Update selection boxes to match loaded config
+        selection_boxes.selected_vals.put("human players", String.valueOf(config.humanPlayers));
+        selection_boxes.selected_vals.put("players", String.valueOf(config.humanPlayers + config.botPlayers));
+        selection_boxes.selected_vals.put("layout", config.layout);
+        selection_boxes.selected_vals.put("opponents", config.difficulty);
+        
         game_board = new GameBoard(this.game, config, null);
         game_board.voidDistributor.distribute();
         game_board.resourceDistributor.distribute();
 
-        int sc = (int) Math.floor(Math.pow(cfg.radius, cfg.playerStartPositions));
+        int sc = (int) Math.floor(Math.pow(config.radius, config.playerStartPositions));
         for (int i=0; i<sc; i++) {
             ArrayList<int[]> starting_coords = game_board.playerStartAssigner.randomizeStartingCoords();
             game_board.playerStartAssigner.assignStartingHexes(starting_coords);

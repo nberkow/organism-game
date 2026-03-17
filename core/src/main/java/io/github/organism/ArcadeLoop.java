@@ -153,6 +153,14 @@ public class ArcadeLoop implements GameSession {
     }
 
     public void setup(int n){
+        // Load default config and set player count
+        GameConfig cfg = game.fileHandler.read_cfg("kingdoms", "map");
+        cfg.humanPlayers = n;
+        cfg.botPlayers = 3 - n;
+        setup(cfg);
+    }
+
+    public void setup(GameConfig cfg){
 
         if (currentGame != null) {
             currentGame.dispose();
@@ -173,8 +181,10 @@ public class ArcadeLoop implements GameSession {
 
         betweenRoundPauseTimer = 2;
 
-        gameCfg.humanPlayers = n;
-        gameCfg.botPlayers = 3 - n;
+        // Use the provided config
+        gameCfg = cfg;
+        gameCfg.gameplaySettings = gameOverlay.savedSettings;
+        
         currentIteration = 1;
         playerPrimaryIndex = 0;
         currentScreen = game.gameScreen;

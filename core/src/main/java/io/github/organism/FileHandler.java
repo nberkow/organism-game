@@ -21,7 +21,19 @@ public class FileHandler {
     }
 
     public void write_cfg(GameConfig cfg, String name, String extension) {
-        FileHandle handle = Gdx.files.local( name + "." + extension);
+        // Ensure the directory exists
+        String dir = "map_configs";
+        FileHandle dirHandle = Gdx.files.local(dir);
+        if (!dirHandle.exists()) {
+            dirHandle.mkdirs();
+        }
+        
+        // Use forward slashes for cross-platform compatibility
+        FileHandle handle = Gdx.files.local(dir + "/" + name + "." + extension);
+        
+        if (rng == null) {
+            rng = new Random();
+        }
         rng.setSeed(cfg.seed);
         int seed = rng.nextInt();
 
@@ -37,7 +49,6 @@ public class FileHandler {
             "bot_players:" + cfg.botPlayers;
 
         handle.writeString(file_content, false);
-
     }
 
     public GameConfig read_cfg(String name, String extension) {
