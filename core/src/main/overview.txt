@@ -40,11 +40,14 @@ Game Overview:
 
     I want to implement some simple learning as well as an evolutionary component. The individual organisms should learn. When it's time to create new organisms, use values from the winners.
 
+Constant Hazards! READ:
+- this game uses both polar and cartesian coordinates correctly, however incorrectly mixing them is a common source of bugs
+
 What's working:
 - AI organism can compete in a tournament
 - tournament progresses through games, keeps track of wins
 - organism behavior is working. organisms get and spend energy correctly
-- resource handling. resource leader seems to be working, may need some polish
+- resource handling. resource leader seems to be working, may continue to tweak behavior
 - mini-display shows control circle, energy and resources for all 3 players
 - esc pauses and brings up a menu
 - esc menu allows game restart
@@ -55,16 +58,15 @@ What's working:
 
 What's not working:
 - AI planchettes/cursors not moving (not animating, not changing underlying values)
-- minor bug crashing at start. consider in context before fixing
+- minor bug crashing at start. consider in context before fixing. issue is tweaking of settings handling. see main engineering project below for instructions on fixing this.
 - candidate vertex circles scaling animation. all candidate vertex circle should sum to a fixed area (10 small circles, 2 big cirles, etc.)
 - these are sometimes not appearing at all. maybe a case when all are tied? see if you can explain
-- planchette does not bias growth enough. see the main engineering project below for instructions on fixing this
-- resource decay seems wonky. explain how that works in the document you prepare. see instructions on document preparation in 'small but important tasks' as well as 'main priority'
+- resource decay seems wonky. sometimes two resources appear to disappear at once. resources should not be spent during enemy turns. check other explanations
 
 small but important tasks:
-- make a working copy of this document that you can edit: /core/src/main/aider_overview_N.txt (use N for versioning)
-- do not edit the original
-- review the original and the new ones. make the user aware of any heuristic deciscions
+- read previous overveiw_* files. keep an eye out for heuristic decisions from the past
+- make a new overview file for yourself that you can edit: /core/src/main/aider_overview_<N>.txt (use N for versioning)
+- do not edit the original files
 - investigate current bug
 - add red and green income/spend indicators to mini huds
 - make human player hud resource display indicate when the player is the leader of a resource. fine yellow line around that resource display
@@ -74,54 +76,55 @@ small but important tasks:
 - update your overview document with what was done. include any doubts and heuristic judgement calls. include notes for yourself, but beware a human will edit the document. update all sections including what to do next.
 - figure out resource decay and explain it to the user
 
-main engineering project:
-- the planchette is not causing biased enough growth
-- the problem is how the candidate vertex vectors are calculated
-- they are currently calculated based on the vectors of the hex side lengths
-- we should be calculating them from the "center" of the colony
-- here the center is the average position of all the the vertices
-- this will need to be recalculated whenever a vertex is captured
+backlog engineering project:
+- the planchette math is currently broken
+- under normal conditions (infinite hex grid without gaps) this should happen with the starting hex
+ - planchette in center. equal bias in all directions. six equal sized circles just outside the starting hex. up to six of these are claimed depending on energy. choice is random
+ - planchette at edge. max bias in one directions. 1 or 2 of the six reachable circles are large. other vertexes have small circles. opposite the planchette it could be near zero. up to six of these are claimed depending on energy. the vertexes with the largest circles are prioritized.
+- this could be a coordinate scramble.
 
-main priority:
+optimisitic engineering project:
+- expanded menu implementation!
+- the escape menu currently has a button to go back. this is wasted real estate
+- I wrote a map editor screen, which is currently unwired. this should be reachable from the ESC menu. and it should take you back to the tournament
+- I wrote a setting editor screen, which is currently unwired. this should be reachable from the ESC menu. and it should take you back to the tournament
+- it should be something like ESC:
+ - new tournament
+  - players (radio buttons for 0, 1, 2)
+  - setting screen button (that navigates back to the open esc menu on esc)
+  - map screen button (that navigates back to the open esc menu on esc)
+ - exit program
+
+main priorities:
 - produce a truthful document of this run's progress
-- it should be readable by an LLM and a human.
-- LLM private info (eg bytecode, integers) is allowed
+ - it should be readable by an LLM and a human (LLM private info (eg bytecode, integers) is allowed)
+ - the purpose is to prepare some human readable notes in addition to your internal summary. use them however you like
+- fix bugs
+- tackle the backlog
+- tackle the optimistic goal
+- go back and check everything over
+- re-read your notes
+- run through the list again, see what else you can realistically
+- picture yourself self playing the game and (without implementing it) suggest something fun. argue for it in the doc
 
 current crashing bug with some aider output:
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
 
-Commit 7f7cfad refactor: simplify HUD positioning and candidate vertex rendering
-The LLM did not conform to the edit format.
-https://aider.chat/docs/troubleshooting/edit-errors.html
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 
-# 1 SEARCH/REPLACE block failed to match!
+For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-## SearchReplaceNoExactMatch: This SEARCH block failed to exactly match lines in core/src/main/java/io/github/organism/GameBoard.java
-<<<<<<< SEARCH
-                    for (CandidateVertex cv : o.candidateVertices.keySet()) {
-                        cv.render();
-                    }
-=======
-                    // Render each candidate with its probability and the total
-                    for (CandidateVertex cv : o.candidateVertices.keySet()) {
-                        float probability = o.candidateVertices.get(cv);
-                        cv.render(probability, totalScore);
-                    }
->>>>>>> REPLACE
-
-Are you sure you need this SEARCH/REPLACE block?
-The REPLACE lines are already in core/src/main/java/io/github/organism/GameBoard.java!
-
-The SEARCH section must exactly match an existing block of lines including all white space, comments, indentation, docstrings, etc
-
-# The other 8 SEARCH/REPLACE blocks were applied successfully.
-Don't re-send them.
-Just reply with fixed versions of the block above that failed to match.
-
-Commit 2fef4bf feat: add resource leadership indicators and improve candidate vertex rendering
-Only 3 reflections allowed, stopping.
-You can use /undo to undo and discard each aider commit.
-
-
+BUILD SUCCESSFUL in 4s
+5 actionable tasks: 5 executed
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Float.floatValue()" because the return value of "java.util.HashMap.get(Object)" is null
+	at io.github.organism.Organism.burnResources(Organism.java:141)
+	at io.github.organism.Organism.extract(Organism.java:91)
+	at io.github.organism.player.BotPlayer.executeMove(BotPlayer.java:195)
+	at io.github.organism.GameOrchestrator.update(GameOrchestrator.java:111)
+	at io.github.organism.GameBoard.logic(GameBoard.java:196)
+	at io.github.organism.GameBoard.render(GameBoard.java:215)
+	at io.github.organism.ArcadeLoop.draw(ArcadeLoop.java:398)
+	at io.github.organism.ArcadeLoop.render(ArcadeLoop.java:434)
 
 Project Tree:
 
