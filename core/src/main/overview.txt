@@ -54,44 +54,77 @@ What's working:
 - round end leaderboard
 
 What's not working:
-- player 1 planchette is not controlling growth
-- starting hex resources are not always radially symmetrical. loose test code?
 - AI planchettes/cursors not moving (not animating, not changing underlying values)
-- 1 player game crashes near board fill (observed once)
+- minor bug crashing at start. consider in context before fixing
 - candidate vertex circles scaling animation. all candidate vertex circle should sum to a fixed area (10 small circles, 2 big cirles, etc.)
+- these are sometimes not appearing at all. maybe a case when all are tied? see if you can explain
+- planchette does not bias growth enough. see the main engineering project below for instructions on fixing this
+- resource decay seems wonky. explain how that works in the document you prepare. see instructions on document preparation in 'small but important tasks' as well as 'main priority'
 
-
-what to do next:
-- make a working copy of this document that you can edit: /core/src/main/aider_overview.txt
-- investigate current bugs
-- investigate growth issue
-- possible coordinate scramble
-- check coord consistency everywhere. the program contains correct usage of polar and cartersian, but their may be incorrect mixtures
+small but important tasks:
+- make a working copy of this document that you can edit: /core/src/main/aider_overview_N.txt (use N for versioning)
+- do not edit the original
+- review the original and the new ones. make the user aware of any heuristic deciscions
+- investigate current bug
 - add red and green income/spend indicators to mini huds
 - make human player hud resource display indicate when the player is the leader of a resource. fine yellow line around that resource display
-- scale vertices
-- king of the hill rules for resource leader
-- update your document with what was done. include any doubts and heuristic judgement calls. include notes for yourself, but beware a human will edit the document. update all sections including what to do next.
+- scale candidate vertex circles. let's try a fixed total radius
+- make sure we are doing king of the hill rules for resource leader
+- confirm that speed boost is working
+- update your overview document with what was done. include any doubts and heuristic judgement calls. include notes for yourself, but beware a human will edit the document. update all sections including what to do next.
+- figure out resource decay and explain it to the user
+
+main engineering project:
+- the planchette is not causing biased enough growth
+- the problem is how the candidate vertex vectors are calculated
+- they are currently calculated based on the vectors of the hex side lengths
+- we should be calculating them from the "center" of the colony
+- here the center is the average position of all the the vertices
+- this will need to be recalculated whenever a vertex is captured
 
 main priority:
 - produce a truthful document of this run's progress
 - it should be readable by an LLM and a human.
 - LLM private info (eg bytecode, integers) is allowed
 
-current crshing bug:
+current crashing bug with some aider output:
 
-Exception in thread "main" java.lang.NullPointerException: Cannot read field "x" because "rec" is null
-	at io.github.organism.ArcadeLoop.finishThisRound(ArcadeLoop.java:259)
-	at io.github.organism.GameOrchestrator.update(GameOrchestrator.java:125)
-	at io.github.organism.GameBoard.logic(GameBoard.java:196)
-	at io.github.organism.GameBoard.render(GameBoard.java:215)
-	at io.github.organism.ArcadeLoop.draw(ArcadeLoop.java:379)
-	at io.github.organism.ArcadeLoop.render(ArcadeLoop.java:415)
-	at io.github.organism.GameScreen.render(GameScreen.java:136)
-	at com.badlogic.gdx.Game.render(Game.java:48)
+Commit 7f7cfad refactor: simplify HUD positioning and candidate vertex rendering
+The LLM did not conform to the edit format.
+https://aider.chat/docs/troubleshooting/edit-errors.html
+
+# 1 SEARCH/REPLACE block failed to match!
+
+## SearchReplaceNoExactMatch: This SEARCH block failed to exactly match lines in core/src/main/java/io/github/organism/GameBoard.java
+<<<<<<< SEARCH
+                    for (CandidateVertex cv : o.candidateVertices.keySet()) {
+                        cv.render();
+                    }
+=======
+                    // Render each candidate with its probability and the total
+                    for (CandidateVertex cv : o.candidateVertices.keySet()) {
+                        float probability = o.candidateVertices.get(cv);
+                        cv.render(probability, totalScore);
+                    }
+>>>>>>> REPLACE
+
+Are you sure you need this SEARCH/REPLACE block?
+The REPLACE lines are already in core/src/main/java/io/github/organism/GameBoard.java!
+
+The SEARCH section must exactly match an existing block of lines including all white space, comments, indentation, docstrings, etc
+
+# The other 8 SEARCH/REPLACE blocks were applied successfully.
+Don't re-send them.
+Just reply with fixed versions of the block above that failed to match.
+
+Commit 2fef4bf feat: add resource leadership indicators and improve candidate vertex rendering
+Only 3 reflections allowed, stopping.
+You can use /undo to undo and discard each aider commit.
+
 
 
 Project Tree:
+
 core/
 ├── build
 │   ├── classes
