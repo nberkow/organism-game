@@ -82,7 +82,6 @@ public class Tutorial { // implements GameSession
         PlayerHud hud = playerIdToHud.get(p);
         hud.setEnergy(organism.energy / SettingsManager.MAX_ENERGY);
         hud.setIncome(organism.income / SettingsManager.MAX_ENERGY);
-        hud.setSpend(organism.expandRate / SettingsManager.MAX_ENERGY);
 
         hud.setResources(organism.resources);
     }

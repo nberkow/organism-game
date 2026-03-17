@@ -148,7 +148,7 @@ public class OrganismGame extends Game {
         gameScreen = new GameScreen(this);
         gameScreen.inputProcessor = new HudInputProcessor(gameScreen);
         menuOverlay = new MenuOverlay(this, gameScreen);
-        arcadeLoop.setup(0);
+        arcadeLoop.setup(1);
         this.setScreen(gameScreen);
         Gdx.input.setInputProcessor(gameScreen.inputProcessor);
         gameScreen.overlay.inputProcessor = new SettingsOverlayInputProcessor(gameScreen.overlay);
