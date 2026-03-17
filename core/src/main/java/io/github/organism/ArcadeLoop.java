@@ -153,8 +153,14 @@ public class ArcadeLoop implements GameSession {
     }
 
     public void setup(int n){
-        // Load default config and set player count
-        GameConfig cfg = game.fileHandler.read_cfg("kingdoms", "map");
+        // Try to load default config, or create new one if it doesn't exist
+        GameConfig cfg;
+        try {
+            cfg = game.fileHandler.read_cfg("kingdoms", "map");
+        } catch (Exception e) {
+            System.out.println("Could not load kingdoms config, using defaults: " + e.getMessage());
+            cfg = new GameConfig();
+        }
         cfg.humanPlayers = n;
         cfg.botPlayers = 3 - n;
         setup(cfg);

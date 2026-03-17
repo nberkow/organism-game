@@ -61,26 +61,35 @@ public class FileHandler {
             return new GameConfig();
         }
         
-        GameConfig cfg = new GameConfig();
-        HashMap<String, String> vals = new HashMap<>();
+        try {
+            GameConfig cfg = new GameConfig();
+            HashMap<String, String> vals = new HashMap<>();
 
-        String [] lines = handle.readString().split("\n");
-        for (String line : lines){
-            String [] fields = line.split(":");
-            vals.put(fields[0], fields[1]);
+            String [] lines = handle.readString().split("\n");
+            for (String line : lines){
+                if (line.trim().isEmpty()) continue;
+                String [] fields = line.split(":", 2);
+                if (fields.length == 2) {
+                    vals.put(fields[0].trim(), fields[1].trim());
+                }
+            }
+
+            // Parse with defaults if values are missing
+            cfg.radius = vals.containsKey("radius") ? Integer.parseInt(vals.get("radius")) : 7;
+            cfg.seed = vals.containsKey("seed") ? Long.parseLong(vals.get("seed")) : System.currentTimeMillis();
+            cfg.map_view_size_param = vals.containsKey("map_view_size_param") ? Float.parseFloat(vals.get("map_view_size_param")) : 130f;
+            cfg.resources = vals.containsKey("resources") ? Float.parseFloat(vals.get("resources")) : 1f;
+            cfg.vertex_density = vals.containsKey("vertex_density") ? Float.parseFloat(vals.get("vertex_density")) : 4f;
+            cfg.layout = vals.getOrDefault("layout", "radial");
+            cfg.difficulty = vals.getOrDefault("difficulty", "easy");
+            cfg.humanPlayers = vals.containsKey("human_players") ? Integer.parseInt(vals.get("human_players")) : 1;
+            cfg.botPlayers = vals.containsKey("bot_players") ? Integer.parseInt(vals.get("bot_players")) : 2;
+
+            return cfg;
+        } catch (Exception e) {
+            System.out.println("Error reading config file: " + e.getMessage());
+            return new GameConfig();
         }
-
-        cfg.radius = Integer.parseInt(vals.get("radius"));
-        cfg.seed = Long.parseLong(vals.get("seed"));
-        cfg.map_view_size_param = Float.parseFloat(vals.get("map_view_size_param"));
-        cfg.resources = Float.parseFloat(vals.get("resources"));
-        cfg.vertex_density = Float.parseFloat(vals.get("vertex_density"));
-        cfg.layout = vals.get("layout");
-        cfg.difficulty = vals.get("difficulty");
-        cfg.humanPlayers = Integer.parseInt(vals.get("human_players"));
-        cfg.botPlayers = Integer.parseInt(vals.get("bot_players"));
-
-        return cfg;
     }
 
 }
