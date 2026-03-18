@@ -60,17 +60,17 @@ public class MapSettingsSliders {
         slider_parameters.put("resources", new float[]{0f, 3, 1/3f, 1});
         slider_parameters.put("density", new float[]{1, 6, 1, 3f});
         slider_parameters.put("starts", new float[]{0, 1.2f, .2f, 0f});
-        
+
         // Gameplay settings - using log scales where appropriate
         // Max energy: 10^1, 10^2, 10^3 (10, 100, 1000)
         slider_parameters.put("max energy", new float[]{1f, 3f, 1f, (float)Math.log10(SettingsManager.MAX_ENERGY)});
-        
+
         // Starting energy: 0-100% in 5% increments
         slider_parameters.put("starting energy %", new float[]{0f, 100f, 5f, SettingsManager.DEFAULT_STARTING_ENERGY});
-        
+
         // Base income: 2^-3 to 2^2 (0.125%, 0.25%, 0.5%, 1%, 2%, 4%)
-        slider_parameters.put("base income %", new float[]{-3f, 2f, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2))});
-        
+        slider_parameters.put("base income %", new float[]{-1f, 4f, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2))});
+
         // Vertex energy cost: 1-10 in 0.5 increments
         slider_parameters.put("vertex energy cost", new float[]{1f, 10f, 0.5f, SettingsManager.VERTEX_ENERGY_COST});
 
@@ -80,7 +80,7 @@ public class MapSettingsSliders {
         slider_label_order.add("resources");
         slider_label_order.add("density");
         slider_label_order.add("starts");
-        
+
         // Gameplay settings after
         slider_label_order.add("max energy");
         slider_label_order.add("starting energy %");
@@ -233,7 +233,7 @@ public class MapSettingsSliders {
         game.batch.end();
     }
 
-    public void update_on_single_click(float x, float y) {
+    public void updateOnSingleClick(float x, float y) {
 
         for (String n : bar_coords.keySet()){
 
@@ -264,13 +264,13 @@ public class MapSettingsSliders {
                 float [] s_coord = slider_coords.get(n);
                 s_coord[0] = best_dist_pos - slider_width/2;
                 slider_coords.put(n, s_coord);
-                
+
                 // Update SettingsManager when gameplay settings change
                 updateSettingsManager(n, best_dist_val);
             }
         }
     }
-    
+
     /**
      * Update SettingsManager static values when gameplay sliders change
      */
