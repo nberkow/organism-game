@@ -157,6 +157,14 @@ public class PlayerHud {
         lastEnergyValue = e;
         // Normalize energy to 0-1 range based on MAX_ENERGY
         energyBarValue = e / io.github.organism.SettingsManager.MAX_ENERGY;
+        
+        // Debug: Log first few updates to verify settings are being used
+        if (Math.random() < 0.01) {
+            io.github.organism.hud.DebugLogger.getInstance().logf(
+                "PlayerHud.setEnergy: raw energy=%.1f, MAX_ENERGY=%.1f, normalized bar=%.3f",
+                e, io.github.organism.SettingsManager.MAX_ENERGY, energyBarValue
+            );
+        }
     }
 
     public void setResources(int[] resources) {
