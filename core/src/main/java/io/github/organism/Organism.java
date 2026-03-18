@@ -232,10 +232,23 @@ public class Organism {
         }
 
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            DebugLogger.getInstance().logf("  Candidate filtering: total adjacent=%d, filtered (claimed)=%d, filtered (masked)=%d, valid candidates=%d",
+            DebugLogger logger = DebugLogger.getInstance();
+            logger.logf("  Candidate filtering: total adjacent=%d, filtered (claimed)=%d, filtered (masked)=%d, valid candidates=%d",
                 totalAdjacent, filteredClaimed, filteredMasked, candidateVertices.size());
-            DebugLogger.getInstance().logf("  Planchette magnitude: %.3f, in neutral zone: %b",
+            logger.logf("  Planchette magnitude: %.3f, in neutral zone: %b",
                 planchetteFromCenter.len(), planchetteFromCenter.len() < 0.05f);
+            
+            // Log details about territory vertices
+            logger.logf("  Territory has %d vertices", territoryVertex.size());
+            int firstFew = 0;
+            for (GridPosition pos : territoryVertex) {
+                if (firstFew < 3) {
+                    MapVertex v = (MapVertex) pos.content;
+                    logger.logf("    Territory vertex %d: pos=(%.1f,%.1f), adjacentVertices=%d",
+                        firstFew, v.x, v.y, v.adjacentVertices.size());
+                    firstFew++;
+                }
+            }
         }
 
         // Calculate planchette agreement scores for vertex selection
@@ -265,6 +278,20 @@ public class Organism {
             candidateCount++;
             maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
+        }
+        
+        // Debug: verify all candidates have proper agreement values
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5 && inNeutralZone) {
+            DebugLogger logger = DebugLogger.getInstance();
+            logger.logf("  In neutral zone - all %d candidates should have agreement=0.5:", candidateVertices.size());
+            int shown = 0;
+            for (CandidateVertex cv : candidateVertices.keySet()) {
+                if (shown < 10) {
+                    logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f",
+                        shown, cv.target.x, cv.target.y, cv.planchetteAgreement);
+                    shown++;
+                }
+            }
         }
 
         // Transform agreements to positive probabilities
@@ -304,6 +331,11 @@ public class Organism {
         // This preserves them for animation even after they're claimed
         candidatesForRendering.clear();
         candidatesForRendering.addAll(candidateVertices.keySet());
+        
+        // Debug: verify rendering list
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            DebugLogger.getInstance().logf("  Copied %d candidates to rendering list", candidatesForRendering.size());
+        }
 
         // Check if we have energy and candidates
         // Use vertex energy cost from settings

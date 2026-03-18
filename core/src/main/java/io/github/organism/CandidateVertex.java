@@ -119,7 +119,17 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         // In neutral zone, render all vertices equally
         // Otherwise, don't render circles for vertices with very low agreement
         if (!inNeutralZone && agreement < 0.05f && !wasClaimed) {
+            if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                DebugLogger.getInstance().logf("    Skipping render for low agreement: pos=(%.1f,%.1f), agreement=%.3f",
+                    target.x, target.y, agreement);
+            }
             return; // Skip rendering for low-agreement unclaimed vertices
+        }
+        
+        // Debug: log what we're actually rendering
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5 && inNeutralZone) {
+            DebugLogger.getInstance().logf("    Rendering neutral zone vertex: pos=(%.1f,%.1f), agreement=%.3f, normalizedAgreement=%.3f",
+                target.x, target.y, agreement, inNeutralZone ? 0.5f : Math.max(0f, agreement));
         }
 
         // Normalize agreement to 0-1 range for radius calculation
