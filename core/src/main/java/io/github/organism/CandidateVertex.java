@@ -15,6 +15,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     Float blinkCircleRadius;
     public float planchetteAgreement;
     public Vector2 planchetteFromCenter;
+    public boolean inNeutralZone = false;
     private float lastRenderedRadius = 0f;
     private float renderPersistenceTimer = 0f;
     private static final float MIN_RENDER_TIME = 0.3f; // Minimum time to show a circle
@@ -115,15 +116,21 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         // DO NOT recalculate - use the stored value from decision time
         float agreement = planchetteAgreement;
 
-        // Don't render circles for vertices with very low agreement
-        // These are essentially random/unbiased and shouldn't show visual feedback
-        if (agreement < 0.05f && !wasClaimed) {
+        // In neutral zone, render all vertices equally
+        // Otherwise, don't render circles for vertices with very low agreement
+        if (!inNeutralZone && agreement < 0.05f && !wasClaimed) {
             return; // Skip rendering for low-agreement unclaimed vertices
         }
 
         // Normalize agreement to 0-1 range for radius calculation
-        // Negative agreements become 0, positive scale up
-        float normalizedAgreement = Math.max(0f, agreement);
+        float normalizedAgreement;
+        if (inNeutralZone) {
+            // In neutral zone: all vertices get equal moderate size
+            normalizedAgreement = 0.5f;
+        } else {
+            // Outside neutral zone: negative agreements become 0, positive scale up
+            normalizedAgreement = Math.max(0f, agreement);
+        }
 
         // Base radius on normalized agreement
         // Higher agreement = larger circle

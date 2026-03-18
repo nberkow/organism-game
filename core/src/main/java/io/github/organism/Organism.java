@@ -289,9 +289,10 @@ public class Organism {
 
         // Suppress detailed candidate debug output - too verbose
 
-        // Store the planchette direction in each candidate for rendering
+        // Store the planchette direction and neutral zone status in each candidate for rendering
         for (CandidateVertex cv : candidateVertices.keySet()) {
             cv.planchetteFromCenter = planchetteDirection;
+            cv.inNeutralZone = inNeutralZone;
         }
 
         // Copy candidates to rendering list BEFORE claiming any
