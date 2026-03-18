@@ -3,18 +3,20 @@ package io.github.organism;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
 import io.github.organism.player.IO_Player;
 import io.github.organism.player.Player;
 
-public class GameScreen implements Screen {
+public class GameScreen implements Screen, GameSession {
 
     public SettingsManager settings_manager;
 
@@ -64,6 +66,76 @@ public class GameScreen implements Screen {
             return arcadeLoop.currentGame;
         }
         return null;
+    }
+
+    @Override
+    public com.badlogic.gdx.InputProcessor getInputProcessor() {
+        return inputProcessor;
+    }
+
+    @Override
+    public void advanceFrameCount() {
+        if (arcadeLoop != null) {
+            arcadeLoop.advanceFrameCount();
+        }
+    }
+
+    @Override
+    public com.badlogic.gdx.Screen getScreen() {
+        return this;
+    }
+
+    @Override
+    public void updateHud(Point p, Organism organism) {
+        if (arcadeLoop != null) {
+            arcadeLoop.updateHud(p, organism);
+        }
+    }
+
+    @Override
+    public void finishThisRound(Point winner) {
+        if (arcadeLoop != null) {
+            arcadeLoop.finishThisRound(winner);
+        }
+    }
+
+    @Override
+    public String getPlayerName(Point p) {
+        if (arcadeLoop != null) {
+            return arcadeLoop.getPlayerName(p);
+        }
+        return null;
+    }
+
+    @Override
+    public Color getPlayerColor(Point p) {
+        if (arcadeLoop != null) {
+            return arcadeLoop.getPlayerColor(p);
+        }
+        return null;
+    }
+
+    @Override
+    public HashMap<Point, String> getPlayerNames() {
+        if (arcadeLoop != null) {
+            return arcadeLoop.getPlayerNames();
+        }
+        return new HashMap<>();
+    }
+
+    @Override
+    public Point getWinRecord(Point p) {
+        if (arcadeLoop != null) {
+            return arcadeLoop.getWinRecord(p);
+        }
+        return new Point(0, 0);
+    }
+
+    @Override
+    public void togglePause() {
+        if (arcadeLoop != null) {
+            arcadeLoop.togglePause();
+        }
     }
 
     public void add_player(Player player, boolean player2){

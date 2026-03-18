@@ -2,11 +2,16 @@ package io.github.organism;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.awt.Point;
+import java.util.HashMap;
 import java.util.Objects;
 
-public class LabScreen implements Screen {
+import io.github.organism.player.Player;
+
+public class LabScreen implements Screen, GameSession {
     Simulation current_sim;
 
     float buttonsBoxW;
@@ -177,6 +182,74 @@ public class LabScreen implements Screen {
             return current_sim.currentGame;
         }
         return null;
+    }
+
+    @Override
+    public com.badlogic.gdx.InputProcessor getInputProcessor() {
+        return inputProcessor;
+    }
+
+    @Override
+    public void advanceFrameCount() {
+        // Not used in LabScreen
+    }
+
+    @Override
+    public com.badlogic.gdx.Screen getScreen() {
+        return this;
+    }
+
+    @Override
+    public void updateHud(Point p, Organism organism) {
+        // Not used in LabScreen
+    }
+
+    @Override
+    public void finishThisRound(Point winner) {
+        // Not used in LabScreen
+    }
+
+    @Override
+    public String getPlayerName(Point p) {
+        if (current_sim != null && current_sim.currentGame != null) {
+            Player player = current_sim.currentGame.players.get(p);
+            return player != null ? player.getPlayerName() : null;
+        }
+        return null;
+    }
+
+    @Override
+    public Color getPlayerColor(Point p) {
+        if (current_sim != null && current_sim.currentGame != null) {
+            Player player = current_sim.currentGame.players.get(p);
+            return player != null ? player.getColor() : null;
+        }
+        return null;
+    }
+
+    @Override
+    public HashMap<Point, String> getPlayerNames() {
+        HashMap<Point, String> names = new HashMap<>();
+        if (current_sim != null && current_sim.currentGame != null) {
+            for (Point p : current_sim.currentGame.players.keySet()) {
+                Player player = current_sim.currentGame.players.get(p);
+                if (player != null) {
+                    names.put(p, player.getPlayerName());
+                }
+            }
+        }
+        return names;
+    }
+
+    @Override
+    public Point getWinRecord(Point p) {
+        // Not used in LabScreen
+        return new Point(0, 0);
+    }
+
+    @Override
+    public void togglePause() {
+        // Not used in LabScreen
     }
 
     /**
