@@ -93,5 +93,17 @@ public class EnergyBar {
                 barHeight - gapWidth * 4);
         }
         game.shapeRenderer.end();
+        
+        // Draw max energy text
+        game.batch.begin();
+        game.fonts.get(12).setColor(game.foregroundColor);
+        String maxEnergyText = String.format("%.0f", io.github.organism.SettingsManager.MAX_ENERGY);
+        game.fonts.get(12).draw(
+            game.batch,
+            maxEnergyText,
+            renderX + barWidth - 30,
+            y - 5
+        );
+        game.batch.end();
     }
 }

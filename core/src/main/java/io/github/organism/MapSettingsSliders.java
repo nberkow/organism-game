@@ -71,7 +71,11 @@ public class MapSettingsSliders {
         slider_parameters.put("starting energy %", new float[]{0f, 100f, 5f, SettingsManager.DEFAULT_STARTING_ENERGY});
 
         // Base income: 2^-3 to 2^2 (0.125%, 0.25%, 0.5%, 1%, 2%, 4%)
-        slider_parameters.put("base income %", new float[]{1f, 6f, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2))});
+        // Base income: 2^1 to 2^6 (2%, 4%, 8%, 16%, 32%, 64%)
+        float currentBaseIncomeLog = (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2));
+        // Clamp to valid range
+        currentBaseIncomeLog = Math.max(1f, Math.min(6f, currentBaseIncomeLog));
+        slider_parameters.put("base income %", new float[]{1f, 6f, 1f, currentBaseIncomeLog});
 
         // Vertex energy cost: 1-10 in 0.5 increments
         slider_parameters.put("vertex energy cost", new float[]{1f, 10f, 0.5f, SettingsManager.VERTEX_ENERGY_COST});

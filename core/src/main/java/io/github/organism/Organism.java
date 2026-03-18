@@ -199,17 +199,22 @@ public class Organism {
                 } else if (v.masked) {
                     filteredMasked++;
                 } else {
-                    // Additional check: ensure vertex is not across a gap
-                    // A vertex is valid only if at least one of its adjacent hexes is not masked
-                    boolean hasValidHex = false;
-                    for (io.github.organism.map.MapHex hex : v.adjacentHexes) {
-                        if (!hex.masked) {
-                            hasValidHex = true;
-                            break;
+                    // Additional check: ensure vertex is truly adjacent (shares a non-masked hex with source)
+                    // This prevents claiming across gaps
+                    boolean sharesValidHex = false;
+                    for (io.github.organism.map.MapHex sourceHex : source.adjacentHexes) {
+                        if (!sourceHex.masked) {
+                            for (io.github.organism.map.MapHex targetHex : v.adjacentHexes) {
+                                if (sourceHex == targetHex && !targetHex.masked) {
+                                    sharesValidHex = true;
+                                    break;
+                                }
+                            }
                         }
+                        if (sharesValidHex) break;
                     }
                     
-                    if (!hasValidHex) {
+                    if (!sharesValidHex) {
                         filteredMasked++;
                     } else {
                         // Reuse existing candidate if available (preserves animation state)

@@ -152,10 +152,42 @@ public class ArcadeLoop implements GameSession {
         gameOverlay.setupButtons();
 
         // Initialize SettingsManager from overlay defaults
-        gameOverlay.save_slider_settings();
+        applySliderSettingsToManager();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
 
         DebugLogger.getInstance().log("=== ArcadeLoop.setupOverlays() - Settings initialized ===");
+    }
+    
+    /**
+     * Apply current slider values to SettingsManager.
+     * This ensures settings are used when creating new organisms.
+     */
+    private void applySliderSettingsToManager() {
+        // Read current slider values and apply transformations
+        for (String key : gameOverlay.sliders.slider_label_order) {
+            float val = gameOverlay.sliders.slider_selected_values.get(key);
+            
+            // Apply exponential transformations
+            if (key.equals("max energy")) {
+                SettingsManager.MAX_ENERGY = (float) Math.pow(10, val);
+            } else if (key.equals("starting energy %")) {
+                SettingsManager.DEFAULT_STARTING_ENERGY = val;
+            } else if (key.equals("base income %")) {
+                SettingsManager.BASE_INCOME_PERCENT = (float) Math.pow(2, val);
+            } else if (key.equals("vertex energy cost")) {
+                SettingsManager.VERTEX_ENERGY_COST = val;
+            }
+        }
+        
+        // Also save to the settings map
+        gameOverlay.save_slider_settings();
+        
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("=== Applied slider settings to SettingsManager ===");
+        logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
+        logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        logger.log("  BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
+        logger.log("  VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
     }
 
     public void setup(int n){
@@ -196,8 +228,9 @@ public class ArcadeLoop implements GameSession {
         // Use the provided config
         gameCfg = cfg;
 
-        // Ensure SettingsManager is updated from overlay before creating organisms
-        gameOverlay.save_slider_settings();
+        // CRITICAL: Apply current slider values to SettingsManager before creating organisms
+        // This ensures new tournaments use the current slider settings
+        applySliderSettingsToManager();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
 
         DebugLogger logger = DebugLogger.getInstance();
