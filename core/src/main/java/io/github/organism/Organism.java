@@ -199,15 +199,29 @@ public class Organism {
                 } else if (v.masked) {
                     filteredMasked++;
                 } else {
-                    // Reuse existing candidate if available (preserves animation state)
-                    CandidateVertex cv = existingCandidates.get(v);
-                    if (cv == null) {
-                        cv = new CandidateVertex(source, v);
-                        cv.gameBoard = gameBoard;
+                    // Additional check: ensure vertex is not across a gap
+                    // A vertex is valid only if at least one of its adjacent hexes is not masked
+                    boolean hasValidHex = false;
+                    for (io.github.organism.map.MapHex hex : v.adjacentHexes) {
+                        if (!hex.masked) {
+                            hasValidHex = true;
+                            break;
+                        }
                     }
-                    // Update vector from current centroid
-                    cv.updateVectorFromCentroid(centroid);
-                    candidateVertices.put(cv, 0f);
+                    
+                    if (!hasValidHex) {
+                        filteredMasked++;
+                    } else {
+                        // Reuse existing candidate if available (preserves animation state)
+                        CandidateVertex cv = existingCandidates.get(v);
+                        if (cv == null) {
+                            cv = new CandidateVertex(source, v);
+                            cv.gameBoard = gameBoard;
+                        }
+                        // Update vector from current centroid
+                        cv.updateVectorFromCentroid(centroid);
+                        candidateVertices.put(cv, 0f);
+                    }
                 }
             }
         }
@@ -237,13 +251,23 @@ public class Organism {
         
         // Transform agreements to positive probabilities
         // Agreement ranges from -1 (opposite direction) to +1 (same direction)
-        // We want to heavily favor positive agreements while still allowing some chance for negative ones
-        float minProbability = 0.01f; // Minimum probability for any vertex
+        // Negative agreements should have near-zero probability
         for (CandidateVertex cv : candidateVertices.keySet()) {
-            // Transform agreement (-1 to +1) to probability (minProbability to much higher)
-            // Use exponential scaling: e^(agreement) gives range from ~0.37 to ~2.72
-            float probability = (float) Math.exp(cv.planchetteAgreement * 2.0); // Scale factor of 2 for more dramatic difference
-            probability = Math.max(minProbability, probability); // Ensure minimum
+            float agreement = cv.planchetteAgreement;
+            float probability;
+            
+            if (agreement <= 0) {
+                // Opposite or perpendicular to planchette: very low probability
+                // Use small exponential: e^(agreement) for agreement in [-1, 0]
+                // This gives range from ~0.37 (at -1) to 1.0 (at 0)
+                probability = (float) Math.exp(agreement) * 0.01f; // Scale down to 0.0037 to 0.01
+            } else {
+                // Aligned with planchette: exponentially increasing probability
+                // e^(agreement * 3) for agreement in [0, 1]
+                // This gives range from 1.0 (at 0) to ~20 (at 1)
+                probability = (float) Math.exp(agreement * 3.0);
+            }
+            
             candidateVertices.put(cv, probability);
         }
 
@@ -271,18 +295,17 @@ public class Organism {
             return;
         }
 
-        // Budget calculation: spend a significant portion of available energy
-        // The planchette magnitude (0 to 1) controls aggression:
-        // - At center (0): spend 30% of energy
-        // - At edge (1): spend 80% of energy
+        // Budget calculation: base budget is 50% of (income + energy)
+        // Planchette magnitude provides a modest multiplier (1.0x to 1.25x)
         float planchetteMagnitude = planchetteFromCenter.len();
-        float spendFraction = 0.3f + (planchetteMagnitude * 0.5f); // 0.3 to 0.8
-        float energyBudget = energy * spendFraction;
+        float aggressionMultiplier = 1.0f + (planchetteMagnitude * 0.25f); // 1.0 to 1.25
+        float baseBudget = 0.5f * (income + energy);
+        float energyBudget = Math.min(energy, baseBudget * aggressionMultiplier);
         int verticesToClaim = (int) (energyBudget / expandCost);
         
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            DebugLogger.getInstance().logf("  Budget calculation: energy=%.1f, planchetteMag=%.3f, spendFraction=%.3f, budget=%.1f, verticesToClaim=%d",
-                energy, planchetteMagnitude, spendFraction, energyBudget, verticesToClaim);
+            DebugLogger.getInstance().logf("  Budget calculation: energy=%.1f, income=%.1f, planchetteMag=%.3f, aggressionMult=%.3f, baseBudget=%.1f, finalBudget=%.1f, verticesToClaim=%d",
+                energy, income, planchetteMagnitude, aggressionMultiplier, baseBudget, energyBudget, verticesToClaim);
         }
 
 

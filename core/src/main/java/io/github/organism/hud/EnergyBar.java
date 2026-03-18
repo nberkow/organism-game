@@ -52,30 +52,42 @@ public class EnergyBar {
             barWidth - (gapWidth * 2),
             barHeight - (gapWidth * 2));
 
-        // Energy bar (current energy level)
-        fillWidth[1] = hud.energyBarValue * (barWidth - (gapWidth * 4));
-        // Income bar (energy + income projection)
-        fillWidth[0] = fillWidth[1] + hud.incomeBarValue * (barWidth - (gapWidth * 4));
-        // Spend bar (energy that was just spent)
-        fillWidth[2] = hud.spendBarValue * (barWidth - (gapWidth * 4));
+        // Calculate bar widths
+        float maxBarWidth = barWidth - (gapWidth * 4);
+        
+        // Energy bar (current energy level) - yellow
+        fillWidth[1] = hud.energyBarValue * maxBarWidth;
+        
+        // Income bar (energy + income projection) - green, extends beyond energy
+        fillWidth[0] = (hud.energyBarValue + hud.incomeBarValue) * maxBarWidth;
+        
+        // Spend bar (energy that was just spent) - red
+        fillWidth[2] = hud.spendBarValue * maxBarWidth;
 
-        // Draw income bar (green) first, then energy bar (yellow) on top
-        for (int i=0; i<2; i++){
-            game.shapeRenderer.setColor(game.energyBarColors[i]);
+        // Draw income bar (green) first - shows energy + income
+        if (fillWidth[0] > fillWidth[1]) {
+            game.shapeRenderer.setColor(game.energyBarColors[0]); // Green
             game.shapeRenderer.rect(
                 renderX + gapWidth * 2,
                 y + gapWidth * 2,
-                fillWidth[i],
+                fillWidth[0],
                 barHeight - gapWidth * 4);
         }
         
-        // Draw spend bar (red) overlaid on the energy bar to show what was spent
+        // Draw energy bar (yellow) on top
+        game.shapeRenderer.setColor(game.energyBarColors[1]); // Yellow
+        game.shapeRenderer.rect(
+            renderX + gapWidth * 2,
+            y + gapWidth * 2,
+            fillWidth[1],
+            barHeight - gapWidth * 4);
+        
+        // Draw spend bar (red) - shows what was just spent
+        // Position it at the current energy level, extending right
         if (hud.spendBarValue > 0.001f) {
-            game.shapeRenderer.setColor(1f, 0f, 0f, 0.7f); // Semi-transparent red
-            // Draw from the right edge of current energy, extending right by spend amount
-            float spendBarX = renderX + gapWidth * 2 + fillWidth[1];
+            game.shapeRenderer.setColor(1f, 0f, 0f, 0.8f); // Red
             game.shapeRenderer.rect(
-                spendBarX,
+                renderX + gapWidth * 2 + fillWidth[1],
                 y + gapWidth * 2,
                 fillWidth[2],
                 barHeight - gapWidth * 4);

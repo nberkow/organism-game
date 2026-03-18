@@ -144,13 +144,12 @@ public class PlayerHud {
         // Track spending by comparing to last value
         if (e < lastEnergyValue) {
             energySpentThisTurn = lastEnergyValue - e;
-            // Keep spend bar visible for a bit longer
+            // Normalize spend to 0-1 range
             spendBarValue = energySpentThisTurn / io.github.organism.SettingsManager.MAX_ENERGY;
         } else if (e > lastEnergyValue) {
-            // Energy increased (income), but keep showing spend for a moment
-            // Gradually fade the spend indicator
-            spendBarValue *= 0.95f;
-            if (spendBarValue < 0.01f) {
+            // Energy increased (income), gradually fade the spend indicator
+            spendBarValue *= 0.9f;
+            if (spendBarValue < 0.005f) {
                 spendBarValue = 0f;
                 energySpentThisTurn = 0f;
             }
