@@ -496,15 +496,20 @@ public class Organism {
      * Called when settings are changed mid-game to ensure organisms respect new values.
      */
     public void applyCurrentSettings() {
+        DebugLogger logger = DebugLogger.getInstance();
+        
+        float oldEnergy = energy;
+        float oldIncome = income;
+        
         // Cap energy at new maximum if it was lowered
         energy = Math.min(energy, SettingsManager.MAX_ENERGY);
 
         // Recalculate income based on current settings
         updateIncome();
 
-        DebugLogger.getInstance().logf("Applied settings to %s: energy=%.1f (max=%.1f), income=%.1f",
-            player != null ? player.getPlayerName() : "unknown",
-            energy, SettingsManager.MAX_ENERGY, income);
+        logger.log("  Applied settings to " + (player != null ? player.getPlayerName() : "unknown") + 
+                  ": energy " + oldEnergy + " -> " + energy + 
+                  " (max=" + SettingsManager.MAX_ENERGY + "), income " + oldIncome + " -> " + income);
     }
 
     public Player getPlayer() {

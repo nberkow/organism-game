@@ -220,9 +220,19 @@ public class SettingsOverlay {
      */
     private void applySettingsToActiveGames() {
         DebugLogger logger = DebugLogger.getInstance();
-        logger.log("=== Applying settings to active games ===");
+        logger.log("=== SettingsOverlay.applySettingsToActiveGames() called ===");
         
-        // Use the GameSession interface to get the game board
+        // If we're in a GameScreen with an ArcadeLoop, use its apply method
+        if (screen instanceof GameScreen) {
+            GameScreen gameScreen = (GameScreen) screen;
+            if (game.arcadeLoop != null) {
+                logger.log("  Applying via ArcadeLoop.applyCurrentSettings()");
+                game.arcadeLoop.applyCurrentSettings();
+                return;
+            }
+        }
+        
+        // Fallback: Use the GameSession interface to get the game board
         if (screen instanceof GameSession) {
             GameSession session = (GameSession) screen;
             GameBoard gameBoard = session.getGameBoard();
@@ -240,9 +250,17 @@ public class SettingsOverlay {
      */
     private void applySettingsToGameBoard(GameBoard gameBoard) {
         if (gameBoard.players != null) {
+            DebugLogger logger = DebugLogger.getInstance();
+            logger.log("  Applying settings to " + gameBoard.players.size() + " players");
+            
             for (Player player : gameBoard.players.values()) {
                 if (player != null && player.getOrganism() != null) {
-                    player.getOrganism().applyCurrentSettings();
+                    Organism organism = player.getOrganism();
+                    float oldEnergy = organism.energy;
+                    
+                    organism.applyCurrentSettings();
+                    
+                    logger.log("    " + player.getPlayerName() + ": energy " + oldEnergy + " -> " + organism.energy);
                 }
             }
         }
