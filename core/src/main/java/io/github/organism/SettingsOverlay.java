@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.HashMap;
 import java.util.Objects;
 
+import io.github.organism.hud.DebugLogger;
+
 public class SettingsOverlay {
 
 
@@ -61,20 +63,20 @@ public class SettingsOverlay {
         // Energy settings - using log scales where appropriate
         // Max energy: 10^1, 10^2, 10^3 (10, 100, 1000)
         sliders.add_slider("max energy", 1, 3, 1f, (float)Math.log10(SettingsManager.MAX_ENERGY));
-        
+
         // Starting energy: 0-100% in 5% increments
         sliders.add_slider("starting energy %", 0, 100, 5f, SettingsManager.DEFAULT_STARTING_ENERGY);
-        
+
         // Base income: 2^-3 to 2^2 (0.125%, 0.25%, 0.5%, 1%, 2%, 4%)
         sliders.add_slider("base income %", -3, 2, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2)));
-        
+
         // Vertex energy cost: 1-10 in 0.5 increments
         sliders.add_slider("vertex energy cost", 1, 10, 0.5f, SettingsManager.VERTEX_ENERGY_COST);
-        
+
         // Game speed settings
         sliders.add_slider("speed", 1, 7, 1, 7f);
         sliders.add_slider("iterations", 1, 9, 1, 1f);
-        
+
         sliders.load_initial_positions();
         save_slider_settings(); // populates the data structure with defaults
     }
@@ -133,10 +135,10 @@ public class SettingsOverlay {
 
     public void save_slider_settings(){
         DebugLogger.getInstance().log("=== SettingsOverlay.save_slider_settings() called ===");
-        
+
         for (String p : sliders.slider_label_order){
             float val = sliders.slider_selected_values.get(p);
-            
+
             // Apply transformations for exponential/log sliders
             if (Objects.equals(p, "iterations")) {
                 val = (float) Math.pow(10, val);
@@ -150,9 +152,9 @@ public class SettingsOverlay {
             if (Objects.equals(p, "base income %")) {
                 val = (float) Math.pow(2, val);
             }
-            
+
             savedSettings.put(p, val);
-            
+
             // Update SettingsManager static values when saved
             if (Objects.equals(p, "max energy")) {
                 SettingsManager.MAX_ENERGY = val;
@@ -171,7 +173,7 @@ public class SettingsOverlay {
                 DebugLogger.getInstance().log("  Updated VERTEX_ENERGY_COST to: " + val);
             }
         }
-        
+
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== Settings saved. Current SettingsManager values: ===");
         logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
