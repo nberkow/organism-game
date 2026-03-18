@@ -45,7 +45,7 @@ public class MapSettingsSliders {
         slider_box_x = map_settings_screen.controls_x;
         slider_box_y = game_board.centerY;
         slider_box_w = map_settings_screen.controls_w;
-        slider_box_h = this.game.VIRTUAL_HEIGHT / 1.8f;
+        slider_box_h = this.game.VIRTUAL_HEIGHT / 1.4f; // Increased height for more sliders
 
         bar_width = slider_box_w * .9f;
         bar_height = 4;
@@ -55,16 +55,30 @@ public class MapSettingsSliders {
         slider_height = bar_height * 3;
 
         slider_parameters = new HashMap<>();
+        // Map settings
         slider_parameters.put("radius", new float[]{4f, 30f, 1f, map_settings_screen.DEFAULT_SIZE});
         slider_parameters.put("resources", new float[]{0f, 3, 1/3f, 1});
         slider_parameters.put("density", new float[]{1, 6, 1, 3f});
         slider_parameters.put("starts", new float[]{0, 1.2f, .2f, 0f});
+        
+        // Gameplay settings
+        slider_parameters.put("max energy", new float[]{10f, 1000f, 10f, SettingsManager.MAX_ENERGY});
+        slider_parameters.put("starting energy %", new float[]{0f, 100f, 5f, SettingsManager.DEFAULT_STARTING_ENERGY});
+        slider_parameters.put("base income %", new float[]{0f, 5f, 0.1f, SettingsManager.BASE_INCOME_PERCENT});
+        slider_parameters.put("vertex energy cost", new float[]{1f, 10f, 0.5f, SettingsManager.VERTEX_ENERGY_COST});
 
         slider_label_order = new ArrayList<>();
+        // Map settings first
         slider_label_order.add("radius");
         slider_label_order.add("resources");
         slider_label_order.add("density");
         slider_label_order.add("starts");
+        
+        // Gameplay settings after
+        slider_label_order.add("max energy");
+        slider_label_order.add("starting energy %");
+        slider_label_order.add("base income %");
+        slider_label_order.add("vertex energy cost");
 
         bar_spacing = slider_box_h / (.7f + slider_parameters.size());
         bar_coords = new HashMap<>();
@@ -243,7 +257,30 @@ public class MapSettingsSliders {
                 float [] s_coord = slider_coords.get(n);
                 s_coord[0] = best_dist_pos - slider_width/2;
                 slider_coords.put(n, s_coord);
+                
+                // Update SettingsManager when gameplay settings change
+                updateSettingsManager(n, best_dist_val);
             }
+        }
+    }
+    
+    /**
+     * Update SettingsManager static values when gameplay sliders change
+     */
+    private void updateSettingsManager(String sliderName, float value) {
+        switch (sliderName) {
+            case "max energy":
+                SettingsManager.MAX_ENERGY = value;
+                break;
+            case "starting energy %":
+                SettingsManager.DEFAULT_STARTING_ENERGY = value;
+                break;
+            case "base income %":
+                SettingsManager.BASE_INCOME_PERCENT = value;
+                break;
+            case "vertex energy cost":
+                SettingsManager.VERTEX_ENERGY_COST = value;
+                break;
         }
     }
 }
