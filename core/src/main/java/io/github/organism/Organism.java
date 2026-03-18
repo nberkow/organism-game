@@ -256,7 +256,12 @@ public class Organism {
         float minAgreement = Float.MAX_VALUE;
 
         for (CandidateVertex cv : candidateVertices.keySet()) {
-            cv.calculatePlanchetteAgreement(planchetteDirection);
+            if (inNeutralZone) {
+                // In neutral zone: set agreement to neutral value for all
+                cv.planchetteAgreement = 0.5f;
+            } else {
+                cv.calculatePlanchetteAgreement(planchetteDirection);
+            }
             candidateCount++;
             maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
