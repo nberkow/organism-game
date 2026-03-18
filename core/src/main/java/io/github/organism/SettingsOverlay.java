@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import io.github.organism.hud.DebugLogger;
+import io.github.organism.player.Player;
 
 public class SettingsOverlay {
 
@@ -180,6 +181,7 @@ public class SettingsOverlay {
         logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
         logger.log("  BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
         logger.log("  VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
+        logger.log("  (These values will be used for new organisms and applied to existing ones)");
     }
 
     public void handle_button_click(String button_clicked) {
@@ -198,12 +200,51 @@ public class SettingsOverlay {
         }
         if (Objects.equals(button_clicked, "save")) {
             save_slider_settings();
+            
+            // Apply settings to active game sessions
+            applySettingsToActiveGames();
+            
             showControlOverlay = false;
             if (screen instanceof LabScreen){
                 Gdx.input.setInputProcessor(((LabScreen) screen).inputProcessor);
             }
             if (screen instanceof GameScreen){
                 Gdx.input.setInputProcessor(((GameScreen) screen).inputProcessor);
+            }
+        }
+    }
+    
+    /**
+     * Apply the saved settings to any active game sessions.
+     * This ensures organisms in ongoing games respect the new settings.
+     */
+    private void applySettingsToActiveGames() {
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("=== Applying settings to active games ===");
+        
+        // Apply to LabScreen if that's the current screen
+        if (screen instanceof LabScreen) {
+            LabScreen labScreen = (LabScreen) screen;
+            if (labScreen.gameBoard != null) {
+                logger.log("  Applying to LabScreen game");
+                applySettingsToGameBoard(labScreen.gameBoard);
+            }
+        }
+        
+        // Apply to GameScreen if that's the current screen
+        if (screen instanceof GameScreen) {
+            GameScreen gameScreen = (GameScreen) screen;
+            if (gameScreen.gameBoard != null) {
+                logger.log("  Applying to GameScreen game");
+                applySettingsToGameBoard(gameScreen.gameBoard);
+            }
+        }
+        
+        // Apply to arcade loop games if accessible through OrganismGame
+        if (game.arcadeLoop != null && game.arcadeLoop.gameScreen != null) {
+            if (game.arcadeLoop.gameScreen.gameBoard != null) {
+                logger.log("  Applying to ArcadeLoop game");
+                applySettingsToGameBoard(game.arcadeLoop.gameScreen.gameBoard);
             }
         }
     }

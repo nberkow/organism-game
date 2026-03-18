@@ -95,7 +95,11 @@ public class Organism {
         updateIncome();
 
         // Add energy based on calculated income
+        // Always cap at current MAX_ENERGY setting
         energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
+        
+        // Also ensure energy doesn't exceed max if max was lowered
+        energy = Math.min(energy, SettingsManager.MAX_ENERGY);
 
         // Burn one resource after extracting (as per game rules)
         if (countResources() > 0) {
@@ -173,6 +177,9 @@ public class Organism {
         updateResources();
         gameBoard.updateResourceLeadership();
         updateIncome();
+        
+        // Ensure energy doesn't exceed current max (in case max was lowered)
+        energy = Math.min(energy, SettingsManager.MAX_ENERGY);
 
         // Calculate centroid FIRST (needed for vector calculations)
         Vector2 centroid = calculateCentroid();
@@ -566,6 +573,22 @@ public class Organism {
     public void dispose() {
         territoryVertex = null;
         territoryHex = null;
+    }
+
+    /**
+     * Apply current settings to this organism.
+     * Called when settings are changed mid-game to ensure organisms respect new values.
+     */
+    public void applyCurrentSettings() {
+        // Cap energy at new maximum if it was lowered
+        energy = Math.min(energy, SettingsManager.MAX_ENERGY);
+        
+        // Recalculate income based on current settings
+        updateIncome();
+        
+        DebugLogger.getInstance().logf("Applied settings to %s: energy=%.1f (max=%.1f), income=%.1f",
+            player != null ? player.getPlayerName() : "unknown",
+            energy, SettingsManager.MAX_ENERGY, income);
     }
 
     public Player getPlayer() {
