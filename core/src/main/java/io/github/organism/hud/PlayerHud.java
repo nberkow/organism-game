@@ -127,8 +127,17 @@ public class PlayerHud {
     }
 
     public void setIncome(float i) {
-        // Normalize income to 0-1 range based on MAX_ENERGY
+        // Income is already a small value (absolute energy per turn)
+        // Normalize it to 0-1 range for display
         incomeBarValue = i / io.github.organism.SettingsManager.MAX_ENERGY;
+        
+        // Debug output occasionally
+        if (Math.random() < 0.01) {
+            io.github.organism.hud.DebugLogger.getInstance().logf(
+                "PlayerHud.setIncome: raw income=%.3f, MAX_ENERGY=%.1f, normalized=%.3f",
+                i, io.github.organism.SettingsManager.MAX_ENERGY, incomeBarValue
+            );
+        }
     }
 
     public void setEnergy(float e) {

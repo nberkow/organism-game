@@ -61,16 +61,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         planchetteAgreement = rawAgreement;
         this.planchetteFromCenter = planchetteFromCenter;
 
-        // Debug output for first few turns
-        if (gameBoard != null && gameBoard.game.arcadeLoop != null &&
-            gameBoard.game.arcadeLoop.currentIteration <= 2) {
-            DebugLogger.getInstance().logf(
-                "    CandidateVertex.calculatePlanchetteAgreement: pos=(%.1f,%.1f), " +
-                "vector=(%.3f,%.3f), planchette=(%.3f,%.3f), agreement=%.3f",
-                target.x, target.y, vector.x, vector.y,
-                planchetteFromCenter.x, planchetteFromCenter.y, rawAgreement
-            );
-        }
+        // Suppress planchette agreement debug - too verbose
     }
 
     public double getPlanchetteAgreement() {
@@ -165,13 +156,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
             }
         }
 
-        // Debug output for first few turns - only log if we're actually rendering
-        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
-            DebugLogger.getInstance().logf(
-                "  CandidateVertex render: agreement=%.3f, normalized=%.3f, radius=%.1f, claimed=%b, pos=(%.1f,%.1f)",
-                agreement, normalizedAgreement, radius, wasClaimed, target.x, target.y
-            );
-        }
+        // Suppress render debug - too verbose
 
         float targetX = (target.x * gameBoard.hexSideLen) + gameBoard.centerX;
         float targetY = (target.y * gameBoard.hexSideLen) + gameBoard.centerY;

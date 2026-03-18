@@ -70,14 +70,15 @@ public class Organism {
         // Each leadership doubles the income (exponential bonus)
         income = (float) (baseIncome * Math.pow(2, leadershipBonuses));
         
-        // Debug output for first few turns
-        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
-            DebugLogger.getInstance().logf(
-                "  Organism.updateIncome: player=%s, BASE_INCOME_PERCENT=%.3f, MAX_ENERGY=%.1f, " +
-                "baseIncome=%.3f, leadershipBonuses=%d, finalIncome=%.3f",
-                player.getPlayerName(), SettingsManager.BASE_INCOME_PERCENT, SettingsManager.MAX_ENERGY,
-                baseIncome, leadershipBonuses, income
-            );
+        // Debug output - always show for first 5 turns to verify settings
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            System.out.println(String.format(
+                "Turn %d - %s: BASE_INCOME_PERCENT=%.3f%%, MAX_ENERGY=%.1f, baseIncome=%.3f, " +
+                "leadership=%d, finalIncome=%.3f, energy=%.1f",
+                gameBoard.game.arcadeLoop.currentIteration, player.getPlayerName(),
+                SettingsManager.BASE_INCOME_PERCENT, SettingsManager.MAX_ENERGY,
+                baseIncome, leadershipBonuses, income, energy
+            ));
         }
     }
 
@@ -224,27 +225,7 @@ public class Organism {
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
         }
 
-        // Debug output for first few turns
-        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
-            DebugLogger logger = DebugLogger.getInstance();
-            logger.logf("Turn %d Player %s expand: %d candidates, agreement range [%.3f, %.3f], " +
-                "planchette: (%.2f, %.2f), magnitude: %.2f, energy: %.1f",
-                gameBoard.game.arcadeLoop.currentIteration, player.getPlayerName(),
-                candidateCount, minAgreement, maxAgreement,
-                planchetteDirection.x, planchetteDirection.y,
-                planchetteFromCenter.len(), energy);
-
-            // Show top 3 candidates by agreement
-            int shown = 0;
-            for (CandidateVertex cv : candidateVertices.keySet()) {
-                if (shown < 3) {
-                    logger.logf("    Candidate %d: agreement=%.3f, probability=%.3f, pos=(%.1f,%.1f)",
-                        shown, cv.planchetteAgreement, candidateVertices.get(cv),
-                        cv.target.x, cv.target.y);
-                    shown++;
-                }
-            }
-        }
+        // Suppress detailed candidate debug output - too verbose
 
         // Store the planchette direction in each candidate for rendering
         for (CandidateVertex cv : candidateVertices.keySet()) {
@@ -304,16 +285,7 @@ public class Organism {
                     energy -= expandCost;
                     verticesToClaim--;
 
-                    // Debug output for first few turns
-                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
-                        DebugLogger.getInstance().logf("  -> Claimed vertex at (%.1f, %.1f), agreement: %.3f",
-                            selected.target.x, selected.target.y, selected.planchetteAgreement);
-                    }
-                } else {
-                    // Debug: vertex was already claimed
-                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
-                        DebugLogger.getInstance().log("  -> Skipped vertex (already claimed or masked)");
-                    }
+                    // Suppress vertex claim debug - too verbose
                 }
                 // Remove this candidate (claimed or invalid)
                 candidateVertices.remove(selected);
