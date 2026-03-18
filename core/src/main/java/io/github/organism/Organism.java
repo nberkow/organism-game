@@ -67,8 +67,11 @@ public class Organism {
             }
         }
 
+        // income can't be higher than the missing part of the energy bar
+        float energyHeadspace = MAX_ENERGY - energy;
+
         // Each leadership doubles the income (exponential bonus)
-        income = (float) (baseIncome * Math.pow(2, leadershipBonuses));
+        income = (float) (Math.min(energyHeadspace, (baseIncome * Math.pow(2, leadershipBonuses))));
 
         // Debug output - always show for first 5 turns to verify settings
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
@@ -97,7 +100,7 @@ public class Organism {
         // Add energy based on calculated income
         // Always cap at current MAX_ENERGY setting
         energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
-        
+
         // Also ensure energy doesn't exceed max if max was lowered
         energy = Math.min(energy, SettingsManager.MAX_ENERGY);
 
@@ -177,7 +180,7 @@ public class Organism {
         updateResources();
         gameBoard.updateResourceLeadership();
         updateIncome();
-        
+
         // Ensure energy doesn't exceed current max (in case max was lowered)
         energy = Math.min(energy, SettingsManager.MAX_ENERGY);
 
@@ -244,7 +247,7 @@ public class Organism {
                 totalAdjacent, filteredClaimed, filteredMasked, candidateVertices.size());
             logger.logf("  Planchette magnitude: %.3f, in neutral zone: %b",
                 planchetteFromCenter.len(), planchetteFromCenter.len() < 0.05f);
-            
+
             // Log details about territory vertices
             logger.logf("  Territory has %d vertices", territoryVertex.size());
             int firstFew = 0;
@@ -286,7 +289,7 @@ public class Organism {
             maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
         }
-        
+
         // Debug: verify all candidates have proper agreement values
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5 && inNeutralZone) {
             DebugLogger logger = DebugLogger.getInstance();
@@ -338,7 +341,7 @@ public class Organism {
         // This preserves them for animation even after they're claimed
         candidatesForRendering.clear();
         candidatesForRendering.addAll(candidateVertices.keySet());
-        
+
         // Debug: verify rendering list
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             DebugLogger.getInstance().logf("  Copied %d candidates to rendering list", candidatesForRendering.size());
@@ -582,10 +585,10 @@ public class Organism {
     public void applyCurrentSettings() {
         // Cap energy at new maximum if it was lowered
         energy = Math.min(energy, SettingsManager.MAX_ENERGY);
-        
+
         // Recalculate income based on current settings
         updateIncome();
-        
+
         DebugLogger.getInstance().logf("Applied settings to %s: energy=%.1f (max=%.1f), income=%.1f",
             player != null ? player.getPlayerName() : "unknown",
             energy, SettingsManager.MAX_ENERGY, income);
