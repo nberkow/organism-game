@@ -36,16 +36,15 @@ public class Organism {
         extractQueue = new ArrayList<>();
         resources = new int[3];
         allyResources = new Integer[3];
-        // Starting energy is a percentage of max energy
-        energy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
-        candidateVertices = new HashMap<>();
-        candidatesForRendering = new ArrayList<>();
-        
         // Debug: Log organism creation with current settings - ALWAYS log this
         DebugLogger logger = DebugLogger.getInstance();
         logger.log(">>> Organism constructor called <<<");
         logger.log("  SettingsManager.MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("  SettingsManager.DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        
+        // Starting energy is a percentage of max energy
+        energy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
+        
         logger.log("  Calculation: (" + SettingsManager.DEFAULT_STARTING_ENERGY + " / 100) * " + SettingsManager.MAX_ENERGY);
         logger.log("  Result - organism.energy: " + energy);
         if (gameBoard != null && gameBoard.game != null) {

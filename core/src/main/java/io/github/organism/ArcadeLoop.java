@@ -247,14 +247,12 @@ public class ArcadeLoop implements GameSession {
         // Use the provided config
         gameCfg = cfg;
 
-        // CRITICAL: Apply current slider values to SettingsManager before creating organisms
-        // This ensures new tournaments use the current slider settings
-        applySliderSettingsToManager();
+        // Use the saved settings from the overlay
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
 
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== ArcadeLoop.setup() - Starting new game/tournament ===");
-        logger.log("  SettingsManager values AFTER applying:");
+        logger.log("  SettingsManager values (from overlay save):");
         logger.log("    MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
         logger.log("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");

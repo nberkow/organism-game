@@ -135,10 +135,13 @@ public class SettingsOverlay {
     }
 
     public void save_slider_settings(){
-        DebugLogger.getInstance().log("=== SettingsOverlay.save_slider_settings() called ===");
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("=== SettingsOverlay.save_slider_settings() called ===");
+        logger.log("  Reading from sliders.slider_selected_values:");
 
         for (String p : sliders.slider_label_order){
             float val = sliders.slider_selected_values.get(p);
+            logger.log("    '" + p + "' raw slider value: " + val);
 
             // Apply transformations for exponential/log sliders
             if (Objects.equals(p, "iterations")) {
@@ -155,6 +158,7 @@ public class SettingsOverlay {
             }
 
             savedSettings.put(p, val);
+            logger.log("    '" + p + "' transformed value: " + val + " (saved to savedSettings)");
 
             // Update SettingsManager static values when saved
             if (Objects.equals(p, "max energy")) {
