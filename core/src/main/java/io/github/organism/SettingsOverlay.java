@@ -132,6 +132,8 @@ public class SettingsOverlay {
     }
 
     public void save_slider_settings(){
+        DebugLogger.getInstance().log("=== SettingsOverlay.save_slider_settings() called ===");
+        
         for (String p : sliders.slider_label_order){
             float val = sliders.slider_selected_values.get(p);
             
@@ -154,17 +156,28 @@ public class SettingsOverlay {
             // Update SettingsManager static values when saved
             if (Objects.equals(p, "max energy")) {
                 SettingsManager.MAX_ENERGY = val;
+                DebugLogger.getInstance().log("  Updated MAX_ENERGY to: " + val);
             }
             if (Objects.equals(p, "starting energy %")) {
                 SettingsManager.DEFAULT_STARTING_ENERGY = val;
+                DebugLogger.getInstance().log("  Updated DEFAULT_STARTING_ENERGY to: " + val + "%");
             }
             if (Objects.equals(p, "base income %")) {
                 SettingsManager.BASE_INCOME_PERCENT = val;
+                DebugLogger.getInstance().log("  Updated BASE_INCOME_PERCENT to: " + val + "%");
             }
             if (Objects.equals(p, "vertex energy cost")) {
                 SettingsManager.VERTEX_ENERGY_COST = val;
+                DebugLogger.getInstance().log("  Updated VERTEX_ENERGY_COST to: " + val);
             }
         }
+        
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("=== Settings saved. Current SettingsManager values: ===");
+        logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
+        logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        logger.log("  BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
+        logger.log("  VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
     }
 
     public void handle_button_click(String button_clicked) {
