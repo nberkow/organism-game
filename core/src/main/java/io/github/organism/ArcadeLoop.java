@@ -157,7 +157,7 @@ public class ArcadeLoop implements GameSession {
 
         DebugLogger.getInstance().log("=== ArcadeLoop.setupOverlays() - Settings initialized ===");
     }
-    
+
     /**
      * Apply current slider values to SettingsManager.
      * This ensures settings are used when creating new organisms.
@@ -165,18 +165,18 @@ public class ArcadeLoop implements GameSession {
     private void applySliderSettingsToManager() {
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== applySliderSettingsToManager() called ===");
-        
+
         // Read current slider values and apply transformations
         for (String key : gameOverlay.sliders.slider_label_order) {
             Float val = gameOverlay.sliders.slider_selected_values.get(key);
-            
+
             if (val == null) {
                 logger.log("  WARNING: Slider '" + key + "' has null value!");
                 continue;
             }
-            
+
             logger.log("  Reading slider '" + key + "': raw value = " + val);
-            
+
             // Apply exponential transformations
             if (key.equals("max energy")) {
                 SettingsManager.MAX_ENERGY = (float) Math.pow(10, val);
@@ -193,17 +193,17 @@ public class ArcadeLoop implements GameSession {
                 logger.log("    -> Set VERTEX_ENERGY_COST = " + SettingsManager.VERTEX_ENERGY_COST);
             }
         }
-        
+
         // Also save to the settings map
         gameOverlay.save_slider_settings();
-        
-        DebugLogger logger = DebugLogger.getInstance();
+
+        logger = DebugLogger.getInstance();
         logger.log("=== Applied slider settings to SettingsManager ===");
         logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "% (raw slider value)");
         logger.log("  BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
         logger.log("  VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
-        
+
         // Calculate what the actual starting energy will be for new organisms
         float actualStartingEnergy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
         logger.log("  Calculated starting energy for new organisms: " + actualStartingEnergy);
@@ -259,7 +259,7 @@ public class ArcadeLoop implements GameSession {
         logger.log("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
         logger.log("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
         logger.log("    VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
-        
+
         // Calculate what organisms will actually get
         float calculatedStartingEnergy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
         logger.log("  Organisms will be created with energy: " + calculatedStartingEnergy);
