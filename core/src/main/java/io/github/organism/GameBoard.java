@@ -229,6 +229,40 @@ public class GameBoard implements Disposable {
             }
         }
 
+        // Render colony center indicators for all players
+        game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
+        for (Point playerId : allPlayerIds) {
+            Player player = players.get(playerId);
+            if (player != null) {
+                Organism organism = player.getOrganism();
+                if (organism != null && !organism.getTerritoryVertex().isEmpty()) {
+                    // Calculate centroid
+                    float sumX = 0;
+                    float sumY = 0;
+                    int count = 0;
+                    
+                    for (io.github.organism.map.GridPosition pos : organism.getTerritoryVertex()) {
+                        io.github.organism.map.MapVertex v = (io.github.organism.map.MapVertex) pos.content;
+                        sumX += v.x;
+                        sumY += v.y;
+                        count++;
+                    }
+                    
+                    if (count > 0) {
+                        float centroidX = (sumX / count) * hexSideLen + centerX;
+                        float centroidY = (sumY / count) * hexSideLen + centerY;
+                        
+                        // Draw large transparent circle (2.5 hex radius)
+                        float colonyIndicatorRadius = hexSideLen * 2.5f;
+                        Color playerColor = player.getColor();
+                        game.shapeRenderer.setColor(playerColor.r, playerColor.g, playerColor.b, 0.15f);
+                        game.shapeRenderer.circle(centroidX, centroidY, colonyIndicatorRadius, 32);
+                    }
+                }
+            }
+        }
+        game.shapeRenderer.end();
+
         // Render candidate vertices for the current player whose turn it is
         if (orchestrator != null) {
             Player currentPlayer = orchestrator.getCurrentPlayer();

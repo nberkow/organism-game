@@ -234,12 +234,20 @@ public class Organism {
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             DebugLogger.getInstance().logf("  Candidate filtering: total adjacent=%d, filtered (claimed)=%d, filtered (masked)=%d, valid candidates=%d",
                 totalAdjacent, filteredClaimed, filteredMasked, candidateVertices.size());
+            DebugLogger.getInstance().logf("  Planchette magnitude: %.3f, in neutral zone: %b", 
+                planchetteFromCenter.len(), planchetteFromCenter.len() < 0.05f);
         }
 
         // Calculate planchette agreement scores for vertex selection
         // Normalize the planchette direction for agreement calculation
         Vector2 planchetteDirection = planchetteFromCenter.cpy();
-        if (planchetteDirection.len() > 0.001f) {
+        float planchetteMagnitude = planchetteDirection.len();
+        
+        // Define neutral zone: within 5% of available radius, all vertices are equal
+        float neutralZoneThreshold = 0.05f;
+        boolean inNeutralZone = (planchetteMagnitude < neutralZoneThreshold);
+        
+        if (planchetteMagnitude > 0.001f) {
             planchetteDirection.nor();
         }
 
@@ -261,7 +269,10 @@ public class Organism {
             float agreement = cv.planchetteAgreement;
             float probability;
             
-            if (agreement <= 0) {
+            if (inNeutralZone) {
+                // In neutral zone: all vertices get equal probability
+                probability = 1.0f;
+            } else if (agreement <= 0) {
                 // Opposite or perpendicular to planchette: very low probability
                 // Use small exponential: e^(agreement) for agreement in [-1, 0]
                 // This gives range from ~0.37 (at -1) to 1.0 (at 0)
