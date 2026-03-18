@@ -1,6 +1,8 @@
 package io.github.organism;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Disposable;
 
@@ -231,8 +233,8 @@ public class GameBoard implements Disposable {
 
         // Render colony center indicators for all players
         // Enable blending for transparency
-        com.badlogic.gdx.Gdx.gl.glEnable(com.badlogic.gdx.GL20.GL_BLEND);
-        com.badlogic.gdx.Gdx.gl.glBlendFunc(com.badlogic.gdx.GL20.GL_SRC_ALPHA, com.badlogic.gdx.GL20.GL_ONE_MINUS_SRC_ALPHA);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         
         game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
         for (Point playerId : allPlayerIds) {
@@ -268,7 +270,7 @@ public class GameBoard implements Disposable {
         game.shapeRenderer.end();
         
         // Disable blending after drawing transparent shapes
-        com.badlogic.gdx.Gdx.gl.glDisable(com.badlogic.gdx.GL20.GL_BLEND);
+        Gdx.gl.glDisable(GL20.GL_BLEND);
 
         // Render candidate vertices for the current player whose turn it is
         if (orchestrator != null) {
