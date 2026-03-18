@@ -127,7 +127,8 @@ public class PlayerHud {
     }
 
     public void setIncome(float i) {
-        incomeBarValue = i;
+        // Normalize income to 0-1 range based on MAX_ENERGY
+        incomeBarValue = i / io.github.organism.SettingsManager.MAX_ENERGY;
     }
 
     public void setEnergy(float e) {
@@ -146,7 +147,8 @@ public class PlayerHud {
             }
         }
         lastEnergyValue = e;
-        energyBarValue = e;
+        // Normalize energy to 0-1 range based on MAX_ENERGY
+        energyBarValue = e / io.github.organism.SettingsManager.MAX_ENERGY;
     }
 
     public void setResources(int[] resources) {

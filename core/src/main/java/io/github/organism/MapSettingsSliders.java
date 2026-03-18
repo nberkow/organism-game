@@ -279,16 +279,22 @@ public class MapSettingsSliders {
             case "max energy":
                 // Convert from log scale: 10^value
                 SettingsManager.MAX_ENERGY = (float) Math.pow(10, value);
+                DebugLogger.getInstance().logf("MapSettingsSliders: Updated MAX_ENERGY to %.1f (from slider value %.1f)", 
+                    SettingsManager.MAX_ENERGY, value);
                 break;
             case "starting energy %":
                 SettingsManager.DEFAULT_STARTING_ENERGY = value;
+                DebugLogger.getInstance().logf("MapSettingsSliders: Updated DEFAULT_STARTING_ENERGY to %.1f%%", value);
                 break;
             case "base income %":
                 // Convert from log scale: 2^value
                 SettingsManager.BASE_INCOME_PERCENT = (float) Math.pow(2, value);
+                DebugLogger.getInstance().logf("MapSettingsSliders: Updated BASE_INCOME_PERCENT to %.3f%% (from slider value %.1f)", 
+                    SettingsManager.BASE_INCOME_PERCENT, value);
                 break;
             case "vertex energy cost":
                 SettingsManager.VERTEX_ENERGY_COST = value;
+                DebugLogger.getInstance().logf("MapSettingsSliders: Updated VERTEX_ENERGY_COST to %.1f", value);
                 break;
         }
     }

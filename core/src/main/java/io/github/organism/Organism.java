@@ -69,6 +69,16 @@ public class Organism {
 
         // Each leadership doubles the income (exponential bonus)
         income = (float) (baseIncome * Math.pow(2, leadershipBonuses));
+        
+        // Debug output for first few turns
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
+            DebugLogger.getInstance().logf(
+                "  Organism.updateIncome: player=%s, BASE_INCOME_PERCENT=%.3f, MAX_ENERGY=%.1f, " +
+                "baseIncome=%.3f, leadershipBonuses=%d, finalIncome=%.3f",
+                player.getPlayerName(), SettingsManager.BASE_INCOME_PERCENT, SettingsManager.MAX_ENERGY,
+                baseIncome, leadershipBonuses, income
+            );
+        }
     }
 
     public void extract() {
