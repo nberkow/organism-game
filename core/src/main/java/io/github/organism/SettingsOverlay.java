@@ -248,4 +248,17 @@ public class SettingsOverlay {
             }
         }
     }
+    
+    /**
+     * Apply settings to all organisms in a game board.
+     */
+    private void applySettingsToGameBoard(GameBoard gameBoard) {
+        if (gameBoard.players != null) {
+            for (Player player : gameBoard.players.values()) {
+                if (player != null && player.getOrganism() != null) {
+                    player.getOrganism().applyCurrentSettings();
+                }
+            }
+        }
+    }
 }
