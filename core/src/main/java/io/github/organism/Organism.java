@@ -41,12 +41,17 @@ public class Organism {
         candidateVertices = new HashMap<>();
         candidatesForRendering = new ArrayList<>();
         
-        // Debug: Log organism creation with current settings
-        if (gameBoard != null && gameBoard.game != null && gameBoard.game.arcadeLoop != null) {
-            DebugLogger.getInstance().logf(
-                "Organism created: MAX_ENERGY=%.1f, DEFAULT_STARTING_ENERGY=%.1f%%, calculated energy=%.1f",
-                SettingsManager.MAX_ENERGY, SettingsManager.DEFAULT_STARTING_ENERGY, energy
-            );
+        // Debug: Log organism creation with current settings - ALWAYS log this
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log(">>> Organism constructor called <<<");
+        logger.log("  SettingsManager.MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
+        logger.log("  SettingsManager.DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        logger.log("  Calculation: (" + SettingsManager.DEFAULT_STARTING_ENERGY + " / 100) * " + SettingsManager.MAX_ENERGY);
+        logger.log("  Result - organism.energy: " + energy);
+        if (gameBoard != null && gameBoard.game != null) {
+            logger.log("  GameBoard exists: yes");
+        } else {
+            logger.log("  GameBoard exists: no");
         }
     }
 
@@ -83,13 +88,14 @@ public class Organism {
 
         // Debug output - always show for first 5 turns to verify settings
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            DebugLogger.getInstance().logf(
-                "Turn %d - %s: BASE_INCOME_PERCENT=%.3f%%, MAX_ENERGY=%.1f, baseIncome=%.3f, " +
-                "leadership=%d, finalIncome=%.3f, energy=%.1f",
-                gameBoard.game.arcadeLoop.currentIteration, player.getPlayerName(),
-                SettingsManager.BASE_INCOME_PERCENT, SettingsManager.MAX_ENERGY,
-                baseIncome, leadershipBonuses, income, energy
-            );
+            DebugLogger logger = DebugLogger.getInstance();
+            logger.log("Turn " + gameBoard.game.arcadeLoop.currentIteration + " - " + player.getPlayerName() + ":");
+            logger.log("  BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
+            logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
+            logger.log("  baseIncome: " + baseIncome);
+            logger.log("  leadership bonuses: " + leadershipBonuses);
+            logger.log("  final income: " + income);
+            logger.log("  current energy: " + energy);
         }
     }
 
@@ -251,19 +257,21 @@ public class Organism {
 
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             DebugLogger logger = DebugLogger.getInstance();
-            logger.logf("  Candidate filtering: total adjacent=%d, filtered (claimed)=%d, filtered (masked)=%d, valid candidates=%d",
-                totalAdjacent, filteredClaimed, filteredMasked, candidateVertices.size());
-            logger.logf("  Planchette magnitude: %.3f, in neutral zone: %b",
-                planchetteFromCenter.len(), planchetteFromCenter.len() < 0.05f);
+            logger.log("  Candidate filtering: total adjacent=" + totalAdjacent + 
+                      ", filtered (claimed)=" + filteredClaimed + 
+                      ", filtered (masked)=" + filteredMasked + 
+                      ", valid candidates=" + candidateVertices.size());
+            logger.log("  Planchette magnitude: " + planchetteFromCenter.len() + 
+                      ", in neutral zone: " + (planchetteFromCenter.len() < 0.05f));
 
             // Log details about territory vertices
-            logger.logf("  Territory has %d vertices", territoryVertex.size());
+            logger.log("  Territory has " + territoryVertex.size() + " vertices");
             int firstFew = 0;
             for (GridPosition pos : territoryVertex) {
                 if (firstFew < 3) {
                     MapVertex v = (MapVertex) pos.content;
-                    logger.logf("    Territory vertex %d: pos=(%.1f,%.1f), adjacentVertices=%d",
-                        firstFew, v.x, v.y, v.adjacentVertices.size());
+                    logger.log("    Territory vertex " + firstFew + ": pos=(" + v.x + "," + v.y + 
+                              "), adjacentVertices=" + v.adjacentVertices.size());
                     firstFew++;
                 }
             }
@@ -301,12 +309,12 @@ public class Organism {
         // Debug: verify all candidates have proper agreement values
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5 && inNeutralZone) {
             DebugLogger logger = DebugLogger.getInstance();
-            logger.logf("  In neutral zone - all %d candidates should have agreement=0.5:", candidateVertices.size());
+            logger.log("  In neutral zone - all " + candidateVertices.size() + " candidates should have agreement=0.5:");
             int shown = 0;
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 if (shown < 10) {
-                    logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f",
-                        shown, cv.target.x, cv.target.y, cv.planchetteAgreement);
+                    logger.log("    Candidate " + shown + ": pos=(" + cv.target.x + "," + cv.target.y + 
+                              "), agreement=" + cv.planchetteAgreement);
                     shown++;
                 }
             }
@@ -352,7 +360,7 @@ public class Organism {
 
         // Debug: verify rendering list
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            DebugLogger.getInstance().logf("  Copied %d candidates to rendering list", candidatesForRendering.size());
+            DebugLogger.getInstance().log("  Copied " + candidatesForRendering.size() + " candidates to rendering list");
         }
 
         // Check if we have energy and candidates
@@ -361,8 +369,8 @@ public class Organism {
 
         if (candidateVertices.isEmpty() || energy < expandCost) {
             if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-                DebugLogger.getInstance().logf("  Cannot expand: candidates=%d, energy=%.1f, cost=%.1f",
-                    candidateVertices.size(), energy, expandCost);
+                DebugLogger.getInstance().log("  Cannot expand: candidates=" + candidateVertices.size() + 
+                                             ", energy=" + energy + ", cost=" + expandCost);
             }
             return;
         }
@@ -376,8 +384,13 @@ public class Organism {
         int verticesToClaim = (int) (energyBudget / expandCost);
 
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            DebugLogger.getInstance().logf("  Budget calculation: energy=%.1f, income=%.1f, planchetteMag=%.3f, aggressionMult=%.3f, baseBudget=%.1f, finalBudget=%.1f, verticesToClaim=%d",
-                energy, income, planchetteMagnitude, aggressionMultiplier, baseBudget, energyBudget, verticesToClaim);
+            DebugLogger.getInstance().log("  Budget calculation: energy=" + energy + 
+                                         ", income=" + income + 
+                                         ", planchetteMag=" + planchetteMagnitude + 
+                                         ", aggressionMult=" + aggressionMultiplier + 
+                                         ", baseBudget=" + baseBudget + 
+                                         ", finalBudget=" + energyBudget + 
+                                         ", verticesToClaim=" + verticesToClaim);
         }
 
 
@@ -406,13 +419,15 @@ public class Organism {
                 if (candidateNum < 5) { // Show first 5 candidates
                     float prob = candidateVertices.get(cv);
                     float probPercent = (float)(prob / totalProb * 100.0);
-                    logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f, probability=%.3f (%.1f%%), masked=%b, claimed=%b",
-                        candidateNum, cv.target.x, cv.target.y, cv.planchetteAgreement,
-                        prob, probPercent, cv.target.masked, cv.target.getPlayer() != null);
+                    logger.log("    Candidate " + candidateNum + ": pos=(" + cv.target.x + "," + cv.target.y + 
+                              "), agreement=" + cv.planchetteAgreement +
+                              ", probability=" + prob + " (" + probPercent + "%)" +
+                              ", masked=" + cv.target.masked + 
+                              ", claimed=" + (cv.target.getPlayer() != null));
                 }
                 candidateNum++;
             }
-            logger.logf("  Total probability sum: %.3f", totalProb);
+            logger.log("  Total probability sum: " + totalProb);
         }
 
         while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
@@ -447,9 +462,10 @@ public class Organism {
 
                 // Debug output for first few turns
                 if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-                    logger.logf("  Attempt %d: Selected vertex at (%.1f, %.1f), agreement=%.3f, masked=%b, claimed=%b",
-                        attemptedClaims + 1, selected.target.x, selected.target.y,
-                        selected.planchetteAgreement, isMasked, isClaimed);
+                    logger.log("  Attempt " + (attemptedClaims + 1) + ": Selected vertex at (" + 
+                              selected.target.x + ", " + selected.target.y + 
+                              "), agreement=" + selected.planchetteAgreement + 
+                              ", masked=" + isMasked + ", claimed=" + isClaimed);
                 }
 
                 // Check if vertex is still available at claim time
@@ -460,8 +476,8 @@ public class Organism {
                     successfulClaims++;
 
                     if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-                        logger.logf("    -> CLAIMED! Remaining energy: %.1f, vertices left to claim: %d",
-                            energy, verticesToClaim);
+                        logger.log("    -> CLAIMED! Remaining energy: " + energy + 
+                                  ", vertices left to claim: " + verticesToClaim);
                     }
                 } else {
                     if (isMasked) skippedMasked++;
@@ -480,17 +496,17 @@ public class Organism {
         }
 
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            logger.logf("=== %s expand() complete ===", player.getPlayerName());
-            logger.logf("  Attempted: %d, Successful: %d, Skipped (masked): %d, Skipped (claimed): %d",
-                attemptedClaims, successfulClaims, skippedMasked, skippedClaimed);
-            logger.logf("  Final energy: %.1f (spent: %.1f)", energy,
-                successfulClaims * expandCost);
-            logger.logf("  Candidates remaining: %d", candidateVertices.size());
+            logger.log("=== " + player.getPlayerName() + " expand() complete ===");
+            logger.log("  Attempted: " + attemptedClaims + 
+                      ", Successful: " + successfulClaims + 
+                      ", Skipped (masked): " + skippedMasked + 
+                      ", Skipped (claimed): " + skippedClaimed);
+            logger.log("  Final energy: " + energy + " (spent: " + (successfulClaims * expandCost) + ")");
+            logger.log("  Candidates remaining: " + candidateVertices.size());
 
             // If we didn't claim as many as budgeted, explain why
             if (successfulClaims < verticesToClaim) {
-                logger.logf("  WARNING: Only claimed %d of %d budgeted vertices!",
-                    successfulClaims, verticesToClaim);
+                logger.log("  WARNING: Only claimed " + successfulClaims + " of " + verticesToClaim + " budgeted vertices!");
                 if (skippedMasked > 0 || skippedClaimed > 0) {
                     logger.log("    Reason: Selected vertices were already masked/claimed");
                 }

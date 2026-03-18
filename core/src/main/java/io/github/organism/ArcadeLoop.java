@@ -240,11 +240,20 @@ public class ArcadeLoop implements GameSession {
 
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== ArcadeLoop.setup() - Starting new game/tournament ===");
-        logger.log("  Current SettingsManager values:");
+        logger.log("  Slider values BEFORE applying:");
+        for (String key : gameOverlay.sliders.slider_label_order) {
+            float val = gameOverlay.sliders.slider_selected_values.get(key);
+            logger.log("    Slider '" + key + "': " + val);
+        }
+        logger.log("  SettingsManager values AFTER applying:");
         logger.log("    MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
         logger.log("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
         logger.log("    VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
+        
+        // Calculate what organisms will actually get
+        float calculatedStartingEnergy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
+        logger.log("  Organisms will be created with energy: " + calculatedStartingEnergy);
 
         currentIteration = 1;
         playerPrimaryIndex = 0;
