@@ -222,29 +222,15 @@ public class SettingsOverlay {
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== Applying settings to active games ===");
         
-        // Apply to LabScreen if that's the current screen
-        if (screen instanceof LabScreen) {
-            LabScreen labScreen = (LabScreen) screen;
-            if (labScreen.gameBoard != null) {
-                logger.log("  Applying to LabScreen game");
-                applySettingsToGameBoard(labScreen.gameBoard);
-            }
-        }
-        
-        // Apply to GameScreen if that's the current screen
-        if (screen instanceof GameScreen) {
-            GameScreen gameScreen = (GameScreen) screen;
-            if (gameScreen.gameBoard != null) {
-                logger.log("  Applying to GameScreen game");
-                applySettingsToGameBoard(gameScreen.gameBoard);
-            }
-        }
-        
-        // Apply to arcade loop games if accessible through OrganismGame
-        if (game.arcadeLoop != null && game.arcadeLoop.gameScreen != null) {
-            if (game.arcadeLoop.gameScreen.gameBoard != null) {
-                logger.log("  Applying to ArcadeLoop game");
-                applySettingsToGameBoard(game.arcadeLoop.gameScreen.gameBoard);
+        // Use the GameSession interface to get the game board
+        if (screen instanceof GameSession) {
+            GameSession session = (GameSession) screen;
+            GameBoard gameBoard = session.getGameBoard();
+            if (gameBoard != null) {
+                logger.log("  Applying to " + screen.getClass().getSimpleName() + " game");
+                applySettingsToGameBoard(gameBoard);
+            } else {
+                logger.log("  No active game board in " + screen.getClass().getSimpleName());
             }
         }
     }

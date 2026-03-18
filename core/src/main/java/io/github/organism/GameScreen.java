@@ -58,6 +58,13 @@ public class GameScreen implements Screen {
         return players;
     }
 
+    @Override
+    public GameBoard getGameBoard() {
+        if (arcadeLoop != null && arcadeLoop.currentGame != null) {
+            return arcadeLoop.currentGame;
+        }
+        return null;
+    }
 
     public void add_player(Player player, boolean player2){
 

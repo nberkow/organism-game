@@ -171,6 +171,14 @@ public class LabScreen implements Screen {
         return writeFiles;
     }
 
+    @Override
+    public GameBoard getGameBoard() {
+        if (current_sim != null && current_sim.currentGame != null) {
+            return current_sim.currentGame;
+        }
+        return null;
+    }
+
     /**
      *
      */
