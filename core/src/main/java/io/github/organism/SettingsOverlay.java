@@ -51,23 +51,25 @@ public class SettingsOverlay {
     public void setupSliders() {
 
         slider_box_w = overlay_w * .75f;
-        slider_box_h = overlay_h * .65f; // Increased height for more sliders
+        slider_box_h = overlay_h * .70f; // More height for better spacing
 
         slider_box_x = (OrganismGame.VIRTUAL_WIDTH - slider_box_w) / 2f;
-        slider_box_y = (OrganismGame.VIRTUAL_HEIGHT - slider_box_h) / 2f + OrganismGame.VIRTUAL_HEIGHT / 8f;
+        slider_box_y = (OrganismGame.VIRTUAL_HEIGHT - slider_box_h) / 2f + OrganismGame.VIRTUAL_HEIGHT / 12f; // Shifted down
 
         sliders = new SliderGroup(game, screen, slider_box_x, slider_box_y, slider_box_w, slider_box_h);
 
-        // Energy settings
-        sliders.add_slider("max energy", 10, 1000, 10f, SettingsManager.MAX_ENERGY);
-        sliders.add_slider("starting energy %", 0, 100, 5f, SettingsManager.DEFAULT_STARTING_ENERGY);
-        sliders.add_slider("base income %", 0, 5, 0.1f, SettingsManager.BASE_INCOME_PERCENT);
-        sliders.add_slider("vertex energy cost", 1, 10, 0.5f, SettingsManager.VERTEX_ENERGY_COST);
+        // Energy settings - using log scales where appropriate
+        // Max energy: 10^1, 10^2, 10^3 (10, 100, 1000)
+        sliders.add_slider("max energy", 1, 3, 1f, (float)Math.log10(SettingsManager.MAX_ENERGY));
         
-        // Legacy settings (keeping for compatibility)
-        sliders.add_slider("resource unit value", 1, 6, 0.1f, SettingsManager.RESOURCE_UNIT_VALUE);
-        sliders.add_slider("energy to expand", 1, 6, 0.1f, SettingsManager.ENERGY_TO_EXPAND);
-        sliders.add_slider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
+        // Starting energy: 0-100% in 5% increments
+        sliders.add_slider("starting energy %", 0, 100, 5f, SettingsManager.DEFAULT_STARTING_ENERGY);
+        
+        // Base income: 2^-3 to 2^2 (0.125%, 0.25%, 0.5%, 1%, 2%, 4%)
+        sliders.add_slider("base income %", -3, 2, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2)));
+        
+        // Vertex energy cost: 1-10 in 0.5 increments
+        sliders.add_slider("vertex energy cost", 1, 10, 0.5f, SettingsManager.VERTEX_ENERGY_COST);
         
         // Game speed settings
         sliders.add_slider("speed", 1, 7, 1, 7f);
@@ -85,10 +87,10 @@ public class SettingsOverlay {
         };
 
         buttons_box_w = slider_box_w;
-        buttons_box_h = overlay_h * .20f;
+        buttons_box_h = overlay_h * .15f;
 
         buttons_box_x = slider_box_x;
-        buttons_box_y = (game.VIRTUAL_HEIGHT - slider_box_h) / 2f - game.VIRTUAL_HEIGHT / 10f;
+        buttons_box_y = slider_box_y - game.VIRTUAL_HEIGHT / 8f; // More space below sliders
 
         float combined_button_width = buttons.base_button_width * button_names.length;
         float spacing = (buttons_box_w - combined_button_width) / (button_names.length + 1);
@@ -133,11 +135,17 @@ public class SettingsOverlay {
         for (String p : sliders.slider_label_order){
             float val = sliders.slider_selected_values.get(p);
             
-            // Apply transformations for exponential sliders
+            // Apply transformations for exponential/log sliders
             if (Objects.equals(p, "iterations")) {
                 val = (float) Math.pow(10, val);
             }
             if (Objects.equals(p, "speed")) {
+                val = (float) Math.pow(2, val);
+            }
+            if (Objects.equals(p, "max energy")) {
+                val = (float) Math.pow(10, val);
+            }
+            if (Objects.equals(p, "base income %")) {
                 val = (float) Math.pow(2, val);
             }
             

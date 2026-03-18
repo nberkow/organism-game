@@ -61,10 +61,17 @@ public class MapSettingsSliders {
         slider_parameters.put("density", new float[]{1, 6, 1, 3f});
         slider_parameters.put("starts", new float[]{0, 1.2f, .2f, 0f});
         
-        // Gameplay settings
-        slider_parameters.put("max energy", new float[]{10f, 1000f, 10f, SettingsManager.MAX_ENERGY});
+        // Gameplay settings - using log scales where appropriate
+        // Max energy: 10^1, 10^2, 10^3 (10, 100, 1000)
+        slider_parameters.put("max energy", new float[]{1f, 3f, 1f, (float)Math.log10(SettingsManager.MAX_ENERGY)});
+        
+        // Starting energy: 0-100% in 5% increments
         slider_parameters.put("starting energy %", new float[]{0f, 100f, 5f, SettingsManager.DEFAULT_STARTING_ENERGY});
-        slider_parameters.put("base income %", new float[]{0f, 5f, 0.1f, SettingsManager.BASE_INCOME_PERCENT});
+        
+        // Base income: 2^-3 to 2^2 (0.125%, 0.25%, 0.5%, 1%, 2%, 4%)
+        slider_parameters.put("base income %", new float[]{-3f, 2f, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2))});
+        
+        // Vertex energy cost: 1-10 in 0.5 increments
         slider_parameters.put("vertex energy cost", new float[]{1f, 10f, 0.5f, SettingsManager.VERTEX_ENERGY_COST});
 
         slider_label_order = new ArrayList<>();
@@ -270,13 +277,15 @@ public class MapSettingsSliders {
     private void updateSettingsManager(String sliderName, float value) {
         switch (sliderName) {
             case "max energy":
-                SettingsManager.MAX_ENERGY = value;
+                // Convert from log scale: 10^value
+                SettingsManager.MAX_ENERGY = (float) Math.pow(10, value);
                 break;
             case "starting energy %":
                 SettingsManager.DEFAULT_STARTING_ENERGY = value;
                 break;
             case "base income %":
-                SettingsManager.BASE_INCOME_PERCENT = value;
+                // Convert from log scale: 2^value
+                SettingsManager.BASE_INCOME_PERCENT = (float) Math.pow(2, value);
                 break;
             case "vertex energy cost":
                 SettingsManager.VERTEX_ENERGY_COST = value;

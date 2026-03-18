@@ -262,12 +262,21 @@ public class SliderGroup {
         for (String p : slider_label_order){
             float[] value_coord = value_coords.get(p);
             float val = slider_selected_values.get(p);
+            
+            // Apply transformations for display
             if (Objects.equals(p, "iterations")) {
                 val = (float) Math.pow(10, val);
             }
             if (Objects.equals(p, "speed")) {
                 val = (float) Math.pow(2, val);
             }
+            if (Objects.equals(p, "max energy")) {
+                val = (float) Math.pow(10, val);
+            }
+            if (Objects.equals(p, "base income %")) {
+                val = (float) Math.pow(2, val);
+            }
+            
             GlyphLayout g = new GlyphLayout(font, String.format(Locale.US,"%.2f", val));
             font.draw(
                 game.batch,
