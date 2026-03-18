@@ -3,6 +3,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
+import io.github.organism.hud.DebugLogger;
 import io.github.organism.map.MapVertex;
 
 public class CandidateVertex implements Comparable<CandidateVertex>{
@@ -26,7 +27,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         vector = new Vector2(0, 0);
         gameBoard = target.pos.grid.gameBoard;
         blinkCircleRadius = OrganismGame.VIRTUAL_WIDTH * 0.005f;
-        
+
         // Initialize with minimum render time so circles appear immediately
         renderPersistenceTimer = MIN_RENDER_TIME * 2; // Longer initial time
         lastRenderedRadius = 15f; // Start with a more visible radius
@@ -41,7 +42,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         float dx = target.x - centroid.x;
         float dy = target.y - centroid.y;
         vector.set(dx, dy);
-        
+
         // Normalize the vector for direction calculation
         float len = vector.len();
         if (len > 0.001f) {
@@ -55,18 +56,18 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
     public void calculatePlanchetteAgreement(Vector2 planchetteFromCenter) {
         // Calculate dot product: positive = same direction, negative = opposite
         float rawAgreement = planchetteFromCenter.dot(vector);
-        
+
         // Store the raw agreement (can be negative)
         planchetteAgreement = rawAgreement;
         this.planchetteFromCenter = planchetteFromCenter;
-        
+
         // Debug output for first few turns
-        if (gameBoard != null && gameBoard.game.arcadeLoop != null && 
+        if (gameBoard != null && gameBoard.game.arcadeLoop != null &&
             gameBoard.game.arcadeLoop.currentIteration <= 2) {
             DebugLogger.getInstance().logf(
                 "    CandidateVertex.calculatePlanchetteAgreement: pos=(%.1f,%.1f), " +
                 "vector=(%.3f,%.3f), planchette=(%.3f,%.3f), agreement=%.3f",
-                target.x, target.y, vector.x, vector.y, 
+                target.x, target.y, vector.x, vector.y,
                 planchetteFromCenter.x, planchetteFromCenter.y, rawAgreement
             );
         }
@@ -114,7 +115,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         if (gameBoard == null) {
             return;
         }
-        
+
         // ALLOW rendering even if claimed - this is for animation!
         // The vertex may have been claimed but we still want to show the circle
         boolean wasClaimed = (target.getPlayer() != null);
@@ -122,23 +123,23 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
         // Use the agreement that was calculated during expand()
         // DO NOT recalculate - use the stored value from decision time
         float agreement = planchetteAgreement;
-        
+
         // Don't render circles for vertices with very low agreement
         // These are essentially random/unbiased and shouldn't show visual feedback
         if (agreement < 0.05f && !wasClaimed) {
             return; // Skip rendering for low-agreement unclaimed vertices
         }
-        
+
         // Normalize agreement to 0-1 range for radius calculation
         // Negative agreements become 0, positive scale up
         float normalizedAgreement = Math.max(0f, agreement);
-        
+
         // Base radius on normalized agreement
         // Higher agreement = larger circle
-        float minRadius = 8f;
-        float maxRadius = 40f;
+        float minRadius = gameBoard.hexSideLen / 10;
+        float maxRadius = gameBoard.hexSideLen;
         float radius = minRadius + (maxRadius - minRadius) * normalizedAgreement;
-        
+
         // If vertex was claimed, show it briefly then fade
         if (wasClaimed) {
             // Decay the persistence timer faster for claimed vertices
@@ -163,7 +164,7 @@ public class CandidateVertex implements Comparable<CandidateVertex>{
                 lastRenderedRadius = radius;
             }
         }
-        
+
         // Debug output for first few turns - only log if we're actually rendering
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
             DebugLogger.getInstance().logf(

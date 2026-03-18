@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import io.github.organism.hud.DebugLogger;
+
 public class MapSettingsSliders {
 
     final float TICK_WIDTH = 2f;
@@ -69,7 +71,7 @@ public class MapSettingsSliders {
         slider_parameters.put("starting energy %", new float[]{0f, 100f, 5f, SettingsManager.DEFAULT_STARTING_ENERGY});
 
         // Base income: 2^-3 to 2^2 (0.125%, 0.25%, 0.5%, 1%, 2%, 4%)
-        slider_parameters.put("base income %", new float[]{-1f, 4f, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2))});
+        slider_parameters.put("base income %", new float[]{1f, 6f, 1f, (float)(Math.log(SettingsManager.BASE_INCOME_PERCENT) / Math.log(2))});
 
         // Vertex energy cost: 1-10 in 0.5 increments
         slider_parameters.put("vertex energy cost", new float[]{1f, 10f, 0.5f, SettingsManager.VERTEX_ENERGY_COST});
@@ -279,7 +281,7 @@ public class MapSettingsSliders {
             case "max energy":
                 // Convert from log scale: 10^value
                 SettingsManager.MAX_ENERGY = (float) Math.pow(10, value);
-                DebugLogger.getInstance().logf("MapSettingsSliders: Updated MAX_ENERGY to %.1f (from slider value %.1f)", 
+                DebugLogger.getInstance().logf("MapSettingsSliders: Updated MAX_ENERGY to %.1f (from slider value %.1f)",
                     SettingsManager.MAX_ENERGY, value);
                 break;
             case "starting energy %":
@@ -289,7 +291,7 @@ public class MapSettingsSliders {
             case "base income %":
                 // Convert from log scale: 2^value
                 SettingsManager.BASE_INCOME_PERCENT = (float) Math.pow(2, value);
-                DebugLogger.getInstance().logf("MapSettingsSliders: Updated BASE_INCOME_PERCENT to %.3f%% (from slider value %.1f)", 
+                DebugLogger.getInstance().logf("MapSettingsSliders: Updated BASE_INCOME_PERCENT to %.3f%% (from slider value %.1f)",
                     SettingsManager.BASE_INCOME_PERCENT, value);
                 break;
             case "vertex energy cost":
