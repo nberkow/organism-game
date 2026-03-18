@@ -168,7 +168,7 @@ public class SettingsOverlay {
     }
 
     public void handle_button_click(String button_clicked) {
-        System.out.println(button_clicked);
+        DebugLogger.getInstance().log("Button clicked: " + button_clicked);
         if (Objects.equals(button_clicked, "back")) {
             showControlOverlay = false;
             if (screen instanceof LabScreen){

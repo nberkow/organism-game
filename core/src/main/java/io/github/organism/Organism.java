@@ -72,13 +72,13 @@ public class Organism {
         
         // Debug output - always show for first 5 turns to verify settings
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-            System.out.println(String.format(
+            DebugLogger.getInstance().logf(
                 "Turn %d - %s: BASE_INCOME_PERCENT=%.3f%%, MAX_ENERGY=%.1f, baseIncome=%.3f, " +
                 "leadership=%d, finalIncome=%.3f, energy=%.1f",
                 gameBoard.game.arcadeLoop.currentIteration, player.getPlayerName(),
                 SettingsManager.BASE_INCOME_PERCENT, SettingsManager.MAX_ENERGY,
                 baseIncome, leadershipBonuses, income, energy
-            ));
+            );
         }
     }
 
@@ -253,6 +253,17 @@ public class Organism {
 
         int attemptedClaims = 0;
         int maxAttempts = verticesToClaim * 3; // Allow retries for invalid vertices
+        int successfulClaims = 0;
+        int skippedMasked = 0;
+        int skippedClaimed = 0;
+
+        DebugLogger logger = DebugLogger.getInstance();
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            logger.logf("=== %s expand() - Starting vertex claiming ===", player.getPlayerName());
+            logger.logf("  Energy: %.1f, Cost per vertex: %.1f, Budget allows: %d vertices", 
+                energy, expandCost, verticesToClaim);
+            logger.logf("  Candidates available: %d", candidateVertices.size());
+        }
 
         while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
             // Recalculate score sum from current candidates
@@ -262,9 +273,11 @@ public class Organism {
             }
 
             if (scoreSum <= 0) {
+                if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                    logger.log("  Breaking: scoreSum <= 0");
+                }
                 break;
             }
-
 
             double r = gameBoard.rng.nextDouble() * scoreSum;
             double s = 0d;
@@ -279,20 +292,48 @@ public class Organism {
             }
 
             if (selected != null) {
+                boolean isMasked = selected.target.masked;
+                boolean isClaimed = (selected.target.getPlayer() != null);
+                
+                // Debug output for first few turns
+                if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                    logger.logf("  Attempt %d: Selected vertex at (%.1f, %.1f), agreement=%.3f, masked=%b, claimed=%b",
+                        attemptedClaims + 1, selected.target.x, selected.target.y, 
+                        selected.planchetteAgreement, isMasked, isClaimed);
+                }
+                
                 // Check if vertex is still available at claim time
-                if (selected.target.getPlayer() == null && !selected.target.masked) {
+                if (!isMasked && !isClaimed) {
                     claimVertex(selected.target);
                     energy -= expandCost;
                     verticesToClaim--;
-
-                    // Suppress vertex claim debug - too verbose
+                    successfulClaims++;
+                    
+                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                        logger.logf("    -> CLAIMED! Remaining energy: %.1f, vertices left to claim: %d", 
+                            energy, verticesToClaim);
+                    }
+                } else {
+                    if (isMasked) skippedMasked++;
+                    if (isClaimed) skippedClaimed++;
+                    
+                    if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                        logger.log("    -> SKIPPED (masked or claimed)");
+                    }
                 }
+                
                 // Remove this candidate (claimed or invalid)
                 candidateVertices.remove(selected);
             }
 
             attemptedClaims++;
-
+        }
+        
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            logger.logf("=== %s expand() complete ===", player.getPlayerName());
+            logger.logf("  Successful claims: %d, Skipped (masked): %d, Skipped (claimed): %d", 
+                successfulClaims, skippedMasked, skippedClaimed);
+            logger.logf("  Final energy: %.1f", energy);
         }
     }
 

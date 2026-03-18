@@ -154,7 +154,7 @@ public class ArcadeLoop implements GameSession {
         gameOverlay.save_slider_settings();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
         
-        System.out.println("=== ArcadeLoop.setupOverlays() - Settings initialized ===");
+        DebugLogger.getInstance().log("=== ArcadeLoop.setupOverlays() - Settings initialized ===");
     }
 
     public void setup(int n){
@@ -199,12 +199,13 @@ public class ArcadeLoop implements GameSession {
         gameOverlay.save_slider_settings();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
         
-        System.out.println("=== ArcadeLoop.setup() - Starting new game/tournament ===");
-        System.out.println("  Current SettingsManager values:");
-        System.out.println("    MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
-        System.out.println("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
-        System.out.println("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
-        System.out.println("    VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("=== ArcadeLoop.setup() - Starting new game/tournament ===");
+        logger.log("  Current SettingsManager values:");
+        logger.log("    MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
+        logger.log("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        logger.log("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
+        logger.log("    VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
         
         currentIteration = 1;
         playerPrimaryIndex = 0;
@@ -288,7 +289,7 @@ public class ArcadeLoop implements GameSession {
 
     public void finishThisRound(Point winnerId) {
 
-        System.out.println("iteration: " + currentIteration + "/" + iterations);
+        DebugLogger.getInstance().log("iteration: " + currentIteration + "/" + iterations);
 
         for (Point p : currentGame.players.keySet()) {
             Point rec = winRecords.get(p);
