@@ -192,7 +192,7 @@ public class BotPlayer implements Player {
     public void executeMove(Vector2 precisePlanchette) {
         // Use precise position for game logic
         organism.expand(precisePlanchette);
-        organism.extract(precisePlanchette);
+        organism.extract();
         gameBoard.orchestrator.updateTerritory(tournamentId, organism.getTerritoryVertex().getUnmaskedVertices());
 
         // Calculate reward (uses stored state from decision time)
