@@ -69,7 +69,7 @@ public class Organism {
 
         // Each leadership doubles the income (exponential bonus)
         income = (float) (baseIncome * Math.pow(2, leadershipBonuses));
-        
+
         // Debug output - always show for first 5 turns to verify settings
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             DebugLogger.getInstance().logf(
@@ -185,7 +185,7 @@ public class Organism {
         }
 
         candidateVertices.clear();
-        
+
         int totalAdjacent = 0;
         int filteredMasked = 0;
         int filteredClaimed = 0;
@@ -213,7 +213,7 @@ public class Organism {
                         }
                         if (sharesValidHex) break;
                     }
-                    
+
                     if (!sharesValidHex) {
                         filteredMasked++;
                     } else {
@@ -230,11 +230,11 @@ public class Organism {
                 }
             }
         }
-        
+
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             DebugLogger.getInstance().logf("  Candidate filtering: total adjacent=%d, filtered (claimed)=%d, filtered (masked)=%d, valid candidates=%d",
                 totalAdjacent, filteredClaimed, filteredMasked, candidateVertices.size());
-            DebugLogger.getInstance().logf("  Planchette magnitude: %.3f, in neutral zone: %b", 
+            DebugLogger.getInstance().logf("  Planchette magnitude: %.3f, in neutral zone: %b",
                 planchetteFromCenter.len(), planchetteFromCenter.len() < 0.05f);
         }
 
@@ -242,11 +242,11 @@ public class Organism {
         // Normalize the planchette direction for agreement calculation
         Vector2 planchetteDirection = planchetteFromCenter.cpy();
         float planchetteMagnitude = planchetteDirection.len();
-        
+
         // Define neutral zone: within 5% of available radius, all vertices are equal
         float neutralZoneThreshold = 0.05f;
         boolean inNeutralZone = (planchetteMagnitude < neutralZoneThreshold);
-        
+
         if (planchetteMagnitude > 0.001f) {
             planchetteDirection.nor();
         }
@@ -261,14 +261,14 @@ public class Organism {
             maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
         }
-        
+
         // Transform agreements to positive probabilities
         // Agreement ranges from -1 (opposite direction) to +1 (same direction)
         // Negative agreements should have near-zero probability
         for (CandidateVertex cv : candidateVertices.keySet()) {
             float agreement = cv.planchetteAgreement;
             float probability;
-            
+
             if (inNeutralZone) {
                 // In neutral zone: all vertices get equal probability
                 probability = 1.0f;
@@ -283,7 +283,7 @@ public class Organism {
                 // This gives range from 1.0 (at 0) to ~20 (at 1)
                 probability = (float) Math.exp(agreement * 3.0);
             }
-            
+
             candidateVertices.put(cv, probability);
         }
 
@@ -313,12 +313,12 @@ public class Organism {
 
         // Budget calculation: base budget is 50% of (income + energy)
         // Planchette magnitude provides a modest multiplier (1.0x to 1.25x)
-        float planchetteMagnitude = planchetteFromCenter.len();
+        planchetteMagnitude = planchetteFromCenter.len();
         float aggressionMultiplier = 1.0f + (planchetteMagnitude * 0.25f); // 1.0 to 1.25
         float baseBudget = 0.5f * (income + energy);
         float energyBudget = Math.min(energy, baseBudget * aggressionMultiplier);
         int verticesToClaim = (int) (energyBudget / expandCost);
-        
+
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             DebugLogger.getInstance().logf("  Budget calculation: energy=%.1f, income=%.1f, planchetteMag=%.3f, aggressionMult=%.3f, baseBudget=%.1f, finalBudget=%.1f, verticesToClaim=%d",
                 energy, income, planchetteMagnitude, aggressionMultiplier, baseBudget, energyBudget, verticesToClaim);
@@ -334,24 +334,24 @@ public class Organism {
         DebugLogger logger = DebugLogger.getInstance();
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             logger.logf("=== %s expand() - Starting vertex claiming ===", player.getPlayerName());
-            logger.logf("  Energy: %.1f, Income: %.1f, Cost per vertex: %.1f", 
+            logger.logf("  Energy: %.1f, Income: %.1f, Cost per vertex: %.1f",
                 energy, income, expandCost);
-            logger.logf("  Budget allows: %d vertices, Candidates available: %d", 
+            logger.logf("  Budget allows: %d vertices, Candidates available: %d",
                 verticesToClaim, candidateVertices.size());
-            
+
             // Log candidate details - show top candidates by probability
             int candidateNum = 0;
             double totalProb = 0;
             for (float prob : candidateVertices.values()) {
                 totalProb += prob;
             }
-            
+
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 if (candidateNum < 5) { // Show first 5 candidates
                     float prob = candidateVertices.get(cv);
                     float probPercent = (float)(prob / totalProb * 100.0);
                     logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f, probability=%.3f (%.1f%%), masked=%b, claimed=%b",
-                        candidateNum, cv.target.x, cv.target.y, cv.planchetteAgreement, 
+                        candidateNum, cv.target.x, cv.target.y, cv.planchetteAgreement,
                         prob, probPercent, cv.target.masked, cv.target.getPlayer() != null);
                 }
                 candidateNum++;
@@ -388,52 +388,52 @@ public class Organism {
             if (selected != null) {
                 boolean isMasked = selected.target.masked;
                 boolean isClaimed = (selected.target.getPlayer() != null);
-                
+
                 // Debug output for first few turns
                 if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
                     logger.logf("  Attempt %d: Selected vertex at (%.1f, %.1f), agreement=%.3f, masked=%b, claimed=%b",
-                        attemptedClaims + 1, selected.target.x, selected.target.y, 
+                        attemptedClaims + 1, selected.target.x, selected.target.y,
                         selected.planchetteAgreement, isMasked, isClaimed);
                 }
-                
+
                 // Check if vertex is still available at claim time
                 if (!isMasked && !isClaimed) {
                     claimVertex(selected.target);
                     energy -= expandCost;
                     verticesToClaim--;
                     successfulClaims++;
-                    
+
                     if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
-                        logger.logf("    -> CLAIMED! Remaining energy: %.1f, vertices left to claim: %d", 
+                        logger.logf("    -> CLAIMED! Remaining energy: %.1f, vertices left to claim: %d",
                             energy, verticesToClaim);
                     }
                 } else {
                     if (isMasked) skippedMasked++;
                     if (isClaimed) skippedClaimed++;
-                    
+
                     if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
                         logger.log("    -> SKIPPED (masked or claimed)");
                     }
                 }
-                
+
                 // Remove this candidate (claimed or invalid)
                 candidateVertices.remove(selected);
             }
 
             attemptedClaims++;
         }
-        
+
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             logger.logf("=== %s expand() complete ===", player.getPlayerName());
-            logger.logf("  Attempted: %d, Successful: %d, Skipped (masked): %d, Skipped (claimed): %d", 
+            logger.logf("  Attempted: %d, Successful: %d, Skipped (masked): %d, Skipped (claimed): %d",
                 attemptedClaims, successfulClaims, skippedMasked, skippedClaimed);
-            logger.logf("  Final energy: %.1f (spent: %.1f)", energy, 
+            logger.logf("  Final energy: %.1f (spent: %.1f)", energy,
                 successfulClaims * expandCost);
             logger.logf("  Candidates remaining: %d", candidateVertices.size());
-            
+
             // If we didn't claim as many as budgeted, explain why
             if (successfulClaims < verticesToClaim) {
-                logger.logf("  WARNING: Only claimed %d of %d budgeted vertices!", 
+                logger.logf("  WARNING: Only claimed %d of %d budgeted vertices!",
                     successfulClaims, verticesToClaim);
                 if (skippedMasked > 0 || skippedClaimed > 0) {
                     logger.log("    Reason: Selected vertices were already masked/claimed");
