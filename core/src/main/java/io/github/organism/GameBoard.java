@@ -230,6 +230,10 @@ public class GameBoard implements Disposable {
         }
 
         // Render colony center indicators for all players
+        // Enable blending for transparency
+        com.badlogic.gdx.Gdx.gl.glEnable(com.badlogic.gdx.GL20.GL_BLEND);
+        com.badlogic.gdx.Gdx.gl.glBlendFunc(com.badlogic.gdx.GL20.GL_SRC_ALPHA, com.badlogic.gdx.GL20.GL_ONE_MINUS_SRC_ALPHA);
+        
         game.shapeRenderer.begin(com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled);
         for (Point playerId : allPlayerIds) {
             Player player = players.get(playerId);
@@ -262,6 +266,9 @@ public class GameBoard implements Disposable {
             }
         }
         game.shapeRenderer.end();
+        
+        // Disable blending after drawing transparent shapes
+        com.badlogic.gdx.Gdx.gl.glDisable(com.badlogic.gdx.GL20.GL_BLEND);
 
         // Render candidate vertices for the current player whose turn it is
         if (orchestrator != null) {
