@@ -536,4 +536,9 @@ public class ArcadeLoop implements GameSession {
         GameScreen g = (GameScreen) currentScreen;
         return g.inputProcessor;
     }
+
+    @Override
+    public GameBoard getGameBoard() {
+        return currentGame;
+    }
 }
