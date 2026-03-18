@@ -36,6 +36,9 @@ public class Organism {
         extractQueue = new ArrayList<>();
         resources = new int[3];
         allyResources = new Integer[3];
+        candidateVertices = new HashMap<>();
+        candidatesForRendering = new ArrayList<>();
+        
         // Debug: Log organism creation with current settings - ALWAYS log this
         DebugLogger logger = DebugLogger.getInstance();
         logger.log(">>> Organism constructor called <<<");

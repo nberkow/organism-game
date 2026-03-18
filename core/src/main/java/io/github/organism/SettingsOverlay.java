@@ -179,7 +179,7 @@ public class SettingsOverlay {
             }
         }
 
-        ddlogger = DebugLogger.getInstance();
+        logger = DebugLogger.getInstance();
         logger.log("=== Settings saved. Current SettingsManager values: ===");
         logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
