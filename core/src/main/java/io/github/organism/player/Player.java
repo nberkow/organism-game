@@ -30,7 +30,7 @@ public interface Player {
 
     public float [] gatherInputs();
 
-    default MoveSpaceControl getMoveSpaceControl() { return null; }
+    MoveSpaceControl getMoveSpaceControl();
 
     void dispose();
 
@@ -58,5 +58,5 @@ public interface Player {
     boolean isDecisionReady();
     PlayerHud getHud();
 
-    GameBoard getGameboard();
+    GameBoard getGameBoard();
 }

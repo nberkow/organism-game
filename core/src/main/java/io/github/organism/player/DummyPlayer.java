@@ -12,113 +12,68 @@ import io.github.organism.hud.PlayerHud;
 
 public class DummyPlayer implements Player {
 
-    /**
-     * @return
-     */
     @Override
     public Color getColor() {
         return null;
     }
 
-    /**
-     * @return
-     */
     @Override
     public int getIndex() {
         return 0;
     }
 
-    /**
-     * @return
-     */
-
-    /**
-     * @return
-     */
     @Override
     public String getPlayerName() {
         return "";
     }
 
-    /**
-     * @return
-     */
     @Override
     public Organism getOrganism() {
         return null;
     }
 
-    /**
-     * @return
-     */
     @Override
     public float[] gatherInputs() {
         return new float[0];
     }
 
-
-    /**
-     *
-     */
     @Override
     public void dispose() {
-
+        // Stub implementation
     }
 
-    /**
-     * @return
-     */
     @Override
     public Point getTournamentId() {
         return null;
     }
 
-    /**
-     *
-     */
     @Override
     public void makeDecision() {
-
+        // Stub implementation
     }
 
-    /**
-     * @param precisePlanchette Normalized vector from MoveSpaceControl
-     */
     @Override
     public void executeMove(Vector2 precisePlanchette) {
-
+        // Stub implementation
     }
 
-    /**
-     * @return
-     */
     @Override
     public boolean isDecisionReady() {
         return false;
     }
 
-
-    /**
-     *
-     */
-
-    public void makeMove() {
-
-    }
-
-    /**
-     * @return
-     */
     @Override
     public PlayerHud getHud() {
         return null;
     }
 
-    /**
-     * @return
-     */
     @Override
-    public GameBoard getGameboard() {
+    public GameBoard getGameBoard() {
+        return null;
+    }
+
+    @Override
+    public MoveSpaceControl getMoveSpaceControl() {
         return null;
     }
 }

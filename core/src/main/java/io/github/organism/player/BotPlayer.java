@@ -119,11 +119,8 @@ public class BotPlayer implements Player {
         return hud;
     }
 
-    /**
-     * @return
-     */
     @Override
-    public GameBoard getGameboard() {
+    public GameBoard getGameBoard() {
         return gameBoard;
     }
 
@@ -201,7 +198,7 @@ public class BotPlayer implements Player {
 
     @Override
     public MoveSpaceControl getMoveSpaceControl() {
-        return hud != null ? hud.moveSpaceControl : null;
+        return hud != null ? hud.getMoveSpaceControl() : null;
     }
 
     @Override

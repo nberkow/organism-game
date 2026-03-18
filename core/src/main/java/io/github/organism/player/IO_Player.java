@@ -51,35 +51,20 @@ public class IO_Player  implements Player {
         return hud;
     }
 
-    /**
-     * @return
-     */
     @Override
-    public GameBoard getGameboard() {
+    public GameBoard getGameBoard() {
         return gameBoard;
     }
 
-    /**
-     * @return
-     */
     @Override
     public Color getColor() {
         return color;
     }
 
-    /**
-     * @return
-     */
     @Override
     public int getIndex() {
         return gameIndex;
     }
-
-    /**
-     * @return
-     */
-
-
 
     @Override
     public String getPlayerName() {
@@ -101,9 +86,6 @@ public class IO_Player  implements Player {
     }
 
 
-    /**
-     *
-     */
     @Override
     public void dispose() {
         organism.dispose();
@@ -149,7 +131,7 @@ public class IO_Player  implements Player {
 
     @Override
     public MoveSpaceControl getMoveSpaceControl() {
-        return hud != null ? hud.moveSpaceControl : null;
+        return hud != null ? hud.getMoveSpaceControl() : null;
     }
 
 }
