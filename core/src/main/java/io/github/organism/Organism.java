@@ -185,11 +185,20 @@ public class Organism {
         }
 
         candidateVertices.clear();
+        
+        int totalAdjacent = 0;
+        int filteredMasked = 0;
+        int filteredClaimed = 0;
 
         for (GridPosition pos : territoryVertex) {
             MapVertex source = (MapVertex) pos.content;
             for (MapVertex v : source.adjacentVertices) {
-                if (v.getPlayer() == null && !v.masked) {
+                totalAdjacent++;
+                if (v.getPlayer() != null) {
+                    filteredClaimed++;
+                } else if (v.masked) {
+                    filteredMasked++;
+                } else {
                     // Reuse existing candidate if available (preserves animation state)
                     CandidateVertex cv = existingCandidates.get(v);
                     if (cv == null) {
@@ -201,6 +210,11 @@ public class Organism {
                     candidateVertices.put(cv, 0f);
                 }
             }
+        }
+        
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            DebugLogger.getInstance().logf("  Candidate filtering: total adjacent=%d, filtered (claimed)=%d, filtered (masked)=%d, valid candidates=%d",
+                totalAdjacent, filteredClaimed, filteredMasked, candidateVertices.size());
         }
 
         // Calculate planchette agreement scores for vertex selection
@@ -242,13 +256,26 @@ public class Organism {
         float expandCost = SettingsManager.VERTEX_ENERGY_COST;
 
         if (candidateVertices.isEmpty() || energy < expandCost) {
+            if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+                DebugLogger.getInstance().logf("  Cannot expand: candidates=%d, energy=%.1f, cost=%.1f",
+                    candidateVertices.size(), energy, expandCost);
+            }
             return;
         }
 
-        // Budget depends on planchette magnitude (how far from center)
+        // Budget calculation: spend a significant portion of available energy
+        // The planchette magnitude (0 to 1) controls aggression:
+        // - At center (0): spend 30% of energy
+        // - At edge (1): spend 80% of energy
         float planchetteMagnitude = planchetteFromCenter.len();
-        float energyBudget = Math.min(energy, energy * (0.5f + planchetteMagnitude * 0.5f));
+        float spendFraction = 0.3f + (planchetteMagnitude * 0.5f); // 0.3 to 0.8
+        float energyBudget = energy * spendFraction;
         int verticesToClaim = (int) (energyBudget / expandCost);
+        
+        if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
+            DebugLogger.getInstance().logf("  Budget calculation: energy=%.1f, planchetteMag=%.3f, spendFraction=%.3f, budget=%.1f, verticesToClaim=%d",
+                energy, planchetteMagnitude, spendFraction, energyBudget, verticesToClaim);
+        }
 
 
         int attemptedClaims = 0;
@@ -260,9 +287,21 @@ public class Organism {
         DebugLogger logger = DebugLogger.getInstance();
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             logger.logf("=== %s expand() - Starting vertex claiming ===", player.getPlayerName());
-            logger.logf("  Energy: %.1f, Cost per vertex: %.1f, Budget allows: %d vertices", 
-                energy, expandCost, verticesToClaim);
-            logger.logf("  Candidates available: %d", candidateVertices.size());
+            logger.logf("  Energy: %.1f, Income: %.1f, Cost per vertex: %.1f", 
+                energy, income, expandCost);
+            logger.logf("  Budget allows: %d vertices, Candidates available: %d", 
+                verticesToClaim, candidateVertices.size());
+            
+            // Log candidate details
+            int candidateNum = 0;
+            for (CandidateVertex cv : candidateVertices.keySet()) {
+                if (candidateNum < 5) { // Show first 5 candidates
+                    logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f, probability=%.3f, masked=%b, claimed=%b",
+                        candidateNum, cv.target.x, cv.target.y, cv.planchetteAgreement, 
+                        candidateVertices.get(cv), cv.target.masked, cv.target.getPlayer() != null);
+                }
+                candidateNum++;
+            }
         }
 
         while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
@@ -331,9 +370,23 @@ public class Organism {
         
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 5) {
             logger.logf("=== %s expand() complete ===", player.getPlayerName());
-            logger.logf("  Successful claims: %d, Skipped (masked): %d, Skipped (claimed): %d", 
-                successfulClaims, skippedMasked, skippedClaimed);
-            logger.logf("  Final energy: %.1f", energy);
+            logger.logf("  Attempted: %d, Successful: %d, Skipped (masked): %d, Skipped (claimed): %d", 
+                attemptedClaims, successfulClaims, skippedMasked, skippedClaimed);
+            logger.logf("  Final energy: %.1f (spent: %.1f)", energy, 
+                successfulClaims * expandCost);
+            logger.logf("  Candidates remaining: %d", candidateVertices.size());
+            
+            // If we didn't claim as many as budgeted, explain why
+            if (successfulClaims < verticesToClaim) {
+                logger.logf("  WARNING: Only claimed %d of %d budgeted vertices!", 
+                    successfulClaims, verticesToClaim);
+                if (skippedMasked > 0 || skippedClaimed > 0) {
+                    logger.log("    Reason: Selected vertices were already masked/claimed");
+                }
+                if (candidateVertices.isEmpty() && attemptedClaims < maxAttempts) {
+                    logger.log("    Reason: Ran out of candidates");
+                }
+            }
         }
     }
 

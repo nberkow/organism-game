@@ -220,12 +220,14 @@ public class GameOrchestrator {
             }
         }
 
-        System.out.println("[VictoryCheck] claimedTerritory=" + claimedTerritory +
-            " fill_threshold=" + (totalTerritory * VICTORY_MAP_FILL_THRESHOLD) +
-            " leader=" + leader);
+        // Suppress verbose victory check logging
+        // System.out.println("[VictoryCheck] claimedTerritory=" + claimedTerritory +
+        //     " fill_threshold=" + (totalTerritory * VICTORY_MAP_FILL_THRESHOLD) +
+        //     " leader=" + leader);
 
         if (claimedTerritory > totalTerritory * VICTORY_MAP_FILL_THRESHOLD) {
-            System.out.println("[VictoryCheck] MAP FILL WINNER: " + leader);
+            // Suppress verbose victory logging
+            // System.out.println("[VictoryCheck] MAP FILL WINNER: " + leader);
             return leader;
         }
 
