@@ -171,6 +171,7 @@ public class ArcadeLoop implements GameSession {
             if (key.equals("max energy")) {
                 SettingsManager.MAX_ENERGY = (float) Math.pow(10, val);
             } else if (key.equals("starting energy %")) {
+                // Slider provides value in 0-100 range, store as-is (it's already a percentage)
                 SettingsManager.DEFAULT_STARTING_ENERGY = val;
             } else if (key.equals("base income %")) {
                 SettingsManager.BASE_INCOME_PERCENT = (float) Math.pow(2, val);
@@ -185,9 +186,13 @@ public class ArcadeLoop implements GameSession {
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== Applied slider settings to SettingsManager ===");
         logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
-        logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "% (raw slider value)");
         logger.log("  BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
         logger.log("  VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
+        
+        // Calculate what the actual starting energy will be for new organisms
+        float actualStartingEnergy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
+        logger.log("  Calculated starting energy for new organisms: " + actualStartingEnergy);
     }
 
     public void setup(int n){

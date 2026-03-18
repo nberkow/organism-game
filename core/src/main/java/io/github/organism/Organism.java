@@ -40,6 +40,14 @@ public class Organism {
         energy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
         candidateVertices = new HashMap<>();
         candidatesForRendering = new ArrayList<>();
+        
+        // Debug: Log organism creation with current settings
+        if (gameBoard != null && gameBoard.game != null && gameBoard.game.arcadeLoop != null) {
+            DebugLogger.getInstance().logf(
+                "Organism created: MAX_ENERGY=%.1f, DEFAULT_STARTING_ENERGY=%.1f%%, calculated energy=%.1f",
+                SettingsManager.MAX_ENERGY, SettingsManager.DEFAULT_STARTING_ENERGY, energy
+            );
+        }
     }
 
     public void updateResources(){
