@@ -4,6 +4,8 @@ import static io.github.organism.SettingsManager.MAX_ENERGY;
 import com.badlogic.gdx.math.Vector2;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import io.github.organism.hud.DebugLogger;
 import io.github.organism.map.GridPosition;
 import io.github.organism.map.MapHex;
 import io.github.organism.map.MapVertex;
@@ -12,7 +14,7 @@ import io.github.organism.player.Player;
 
 public class Organism {
 
-    private static final float BASE_INCOME_PERCENT_OF_MAX = .1f;
+    private static final float BASE_INCOME_PERCENT_OF_MAX = .05f;
     public float income;
     public float energy;
     TriangularGrid territoryHex;
@@ -173,9 +175,9 @@ public class Organism {
         for (CandidateVertex cv : candidateVertices.keySet()) {
             existingCandidates.put(cv.target, cv);
         }
-        
+
         candidateVertices.clear();
-        
+
         for (GridPosition pos : territoryVertex) {
             MapVertex source = (MapVertex) pos.content;
             for (MapVertex v : source.adjacentVertices) {
@@ -204,12 +206,12 @@ public class Organism {
         int candidateCount = 0;
         float maxAgreement = Float.MIN_VALUE;
         float minAgreement = Float.MAX_VALUE;
-        
+
         for (CandidateVertex cv : candidateVertices.keySet()) {
             cv.calculatePlanchetteAgreement(planchetteDirection);
             float p = cv.planchetteAgreement + baseP;
             candidateVertices.put(cv, p);
-            
+
             candidateCount++;
             maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
@@ -224,7 +226,7 @@ public class Organism {
                 candidateCount, minAgreement, maxAgreement,
                 planchetteDirection.x, planchetteDirection.y,
                 planchetteFromCenter.len(), energy);
-            
+
             // Show top 3 candidates by agreement
             int shown = 0;
             for (CandidateVertex cv : candidateVertices.keySet()) {
@@ -294,7 +296,7 @@ public class Organism {
                     claimVertex(selected.target);
                     energy -= expandCost;
                     verticesToClaim--;
-                    
+
                     // Debug output for first few turns
                     if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration <= 2) {
                         DebugLogger.getInstance().logf("  -> Claimed vertex at (%.1f, %.1f), agreement: %.3f",
