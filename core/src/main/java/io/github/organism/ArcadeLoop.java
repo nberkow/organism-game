@@ -149,7 +149,12 @@ public class ArcadeLoop implements GameSession {
         gameOverlay = new SettingsOverlay(game, game.gameScreen, overlay_x, overlay_y, overlay_w, overlay_h);
         gameOverlay.setupSliders();
         gameOverlay.setupButtons();
+        
+        // Initialize SettingsManager from overlay defaults
+        gameOverlay.save_slider_settings();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
+        
+        System.out.println("=== ArcadeLoop.setupOverlays() - Settings initialized ===");
     }
 
     public void setup(int n){
@@ -189,7 +194,17 @@ public class ArcadeLoop implements GameSession {
 
         // Use the provided config
         gameCfg = cfg;
+        
+        // Ensure SettingsManager is updated from overlay before creating organisms
+        gameOverlay.save_slider_settings();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
+        
+        System.out.println("=== ArcadeLoop.setup() - Starting new game/tournament ===");
+        System.out.println("  Current SettingsManager values:");
+        System.out.println("    MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
+        System.out.println("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
+        System.out.println("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
+        System.out.println("    VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
         
         currentIteration = 1;
         playerPrimaryIndex = 0;
@@ -256,10 +271,9 @@ public class ArcadeLoop implements GameSession {
         Player player = currentGame.players.get(p);
         if (player != null && player.getHud() != null) {
             PlayerHud hud = player.getHud();
-            // Normalize values to 0-1 range for display
-            float maxEnergy = 100f; // Adjust based on your game's max energy
-            hud.setIncome(organism.income / maxEnergy);
-            hud.setEnergy(organism.energy / maxEnergy);
+            // Pass raw values - PlayerHud will normalize them
+            hud.setIncome(organism.income);
+            hud.setEnergy(organism.energy);
             hud.setResources(organism.resources);
             
             // Update resource leadership indicators
