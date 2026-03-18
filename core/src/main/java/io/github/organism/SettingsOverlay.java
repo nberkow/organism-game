@@ -179,7 +179,7 @@ public class SettingsOverlay {
             }
         }
 
-        DebugLogger logger = DebugLogger.getInstance();
+        ddlogger = DebugLogger.getInstance();
         logger.log("=== Settings saved. Current SettingsManager values: ===");
         logger.log("  MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("  DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
@@ -204,10 +204,10 @@ public class SettingsOverlay {
         }
         if (Objects.equals(button_clicked, "save")) {
             save_slider_settings();
-            
+
             // Settings are now saved to SettingsManager
             // They will be used when the next game/tournament starts
-            
+
             showControlOverlay = false;
             if (screen instanceof LabScreen){
                 Gdx.input.setInputProcessor(((LabScreen) screen).inputProcessor);
@@ -217,5 +217,5 @@ public class SettingsOverlay {
             }
         }
     }
-    
+
 }
