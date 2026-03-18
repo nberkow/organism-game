@@ -163,20 +163,34 @@ public class ArcadeLoop implements GameSession {
      * This ensures settings are used when creating new organisms.
      */
     private void applySliderSettingsToManager() {
+        DebugLogger logger = DebugLogger.getInstance();
+        logger.log("=== applySliderSettingsToManager() called ===");
+        
         // Read current slider values and apply transformations
         for (String key : gameOverlay.sliders.slider_label_order) {
-            float val = gameOverlay.sliders.slider_selected_values.get(key);
+            Float val = gameOverlay.sliders.slider_selected_values.get(key);
+            
+            if (val == null) {
+                logger.log("  WARNING: Slider '" + key + "' has null value!");
+                continue;
+            }
+            
+            logger.log("  Reading slider '" + key + "': raw value = " + val);
             
             // Apply exponential transformations
             if (key.equals("max energy")) {
                 SettingsManager.MAX_ENERGY = (float) Math.pow(10, val);
+                logger.log("    -> Set MAX_ENERGY = " + SettingsManager.MAX_ENERGY);
             } else if (key.equals("starting energy %")) {
                 // Slider provides value in 0-100 range, store as-is (it's already a percentage)
                 SettingsManager.DEFAULT_STARTING_ENERGY = val;
+                logger.log("    -> Set DEFAULT_STARTING_ENERGY = " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
             } else if (key.equals("base income %")) {
                 SettingsManager.BASE_INCOME_PERCENT = (float) Math.pow(2, val);
+                logger.log("    -> Set BASE_INCOME_PERCENT = " + SettingsManager.BASE_INCOME_PERCENT + "%");
             } else if (key.equals("vertex energy cost")) {
                 SettingsManager.VERTEX_ENERGY_COST = val;
+                logger.log("    -> Set VERTEX_ENERGY_COST = " + SettingsManager.VERTEX_ENERGY_COST);
             }
         }
         
@@ -240,11 +254,6 @@ public class ArcadeLoop implements GameSession {
 
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== ArcadeLoop.setup() - Starting new game/tournament ===");
-        logger.log("  Slider values BEFORE applying:");
-        for (String key : gameOverlay.sliders.slider_label_order) {
-            float val = gameOverlay.sliders.slider_selected_values.get(key);
-            logger.log("    Slider '" + key + "': " + val);
-        }
         logger.log("  SettingsManager values AFTER applying:");
         logger.log("    MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
