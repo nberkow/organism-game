@@ -14,7 +14,7 @@ import io.github.organism.player.Player;
 
 public class Organism {
 
-    private static final float BASE_INCOME_PERCENT_OF_MAX = .05f;
+    // BASE_INCOME_PERCENT is now in SettingsManager
     public float income;
     public float energy;
     TriangularGrid territoryHex;
@@ -36,7 +36,8 @@ public class Organism {
         extractQueue = new ArrayList<>();
         resources = new int[3];
         allyResources = new Integer[3];
-        energy = SettingsManager.DEFAULT_STARTING_ENERGY;
+        // Starting energy is a percentage of max energy
+        energy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
         candidateVertices = new HashMap<>();
         candidatesForRendering = new ArrayList<>();
     }
@@ -55,8 +56,8 @@ public class Organism {
     }
 
     public void updateIncome() {
-        // Base income
-        float baseIncome = BASE_INCOME_PERCENT_OF_MAX * MAX_ENERGY;
+        // Base income from settings (as percentage of max energy)
+        float baseIncome = (SettingsManager.BASE_INCOME_PERCENT / 100f) * SettingsManager.MAX_ENERGY;
 
         // Count how many resource types this player leads in
         int leadershipBonuses = 0;
@@ -66,11 +67,7 @@ public class Organism {
             }
         }
 
-        // Each leadership gives a bonus (you can adjust the bonus amount)
-        //float bonusPerLeadership = gameBoard.config.gameplaySettings.getOrDefault(
-        //    "resource leadership bonus", 2f
-        //);
-
+        // Each leadership doubles the income (exponential bonus)
         income = (float) (baseIncome * Math.pow(2, leadershipBonuses));
     }
 
@@ -87,7 +84,7 @@ public class Organism {
         updateIncome();
 
         // Add energy based on calculated income
-        energy = Math.min(energy + income, MAX_ENERGY);
+        energy = Math.min(energy + income, SettingsManager.MAX_ENERGY);
 
         // Burn one resource after extracting (as per game rules)
         if (countResources() > 0) {
@@ -250,8 +247,8 @@ public class Organism {
         candidatesForRendering.addAll(candidateVertices.keySet());
 
         // Check if we have energy and candidates
-        Float energyToExpand = gameBoard.config.gameplaySettings.get("energy to expand");
-        float expandCost = (energyToExpand != null) ? energyToExpand : 6f;
+        // Use vertex energy cost from settings
+        float expandCost = SettingsManager.VERTEX_ENERGY_COST;
 
         if (candidateVertices.isEmpty() || energy < expandCost) {
             return;

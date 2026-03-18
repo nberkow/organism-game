@@ -51,18 +51,28 @@ public class SettingsOverlay {
     public void setupSliders() {
 
         slider_box_w = overlay_w * .75f;
-        slider_box_h = overlay_h * .55f;
+        slider_box_h = overlay_h * .65f; // Increased height for more sliders
 
         slider_box_x = (OrganismGame.VIRTUAL_WIDTH - slider_box_w) / 2f;
         slider_box_y = (OrganismGame.VIRTUAL_HEIGHT - slider_box_h) / 2f + OrganismGame.VIRTUAL_HEIGHT / 8f;
 
         sliders = new SliderGroup(game, screen, slider_box_x, slider_box_y, slider_box_w, slider_box_h);
 
+        // Energy settings
+        sliders.add_slider("max energy", 10, 1000, 10f, SettingsManager.MAX_ENERGY);
+        sliders.add_slider("starting energy %", 0, 100, 5f, SettingsManager.DEFAULT_STARTING_ENERGY);
+        sliders.add_slider("base income %", 0, 5, 0.1f, SettingsManager.BASE_INCOME_PERCENT);
+        sliders.add_slider("vertex energy cost", 1, 10, 0.5f, SettingsManager.VERTEX_ENERGY_COST);
+        
+        // Legacy settings (keeping for compatibility)
         sliders.add_slider("resource unit value", 1, 6, 0.1f, SettingsManager.RESOURCE_UNIT_VALUE);
         sliders.add_slider("energy to expand", 1, 6, 0.1f, SettingsManager.ENERGY_TO_EXPAND);
         sliders.add_slider("claim vertex cost", 0, 24, .2f, SettingsManager.VERTEX_COST_TAKE_VERTEX);
+        
+        // Game speed settings
         sliders.add_slider("speed", 1, 7, 1, 7f);
         sliders.add_slider("iterations", 1, 9, 1, 1f);
+        
         sliders.load_initial_positions();
         save_slider_settings(); // populates the data structure with defaults
     }
@@ -122,13 +132,30 @@ public class SettingsOverlay {
     public void save_slider_settings(){
         for (String p : sliders.slider_label_order){
             float val = sliders.slider_selected_values.get(p);
+            
+            // Apply transformations for exponential sliders
             if (Objects.equals(p, "iterations")) {
                 val = (float) Math.pow(10, val);
             }
             if (Objects.equals(p, "speed")) {
                 val = (float) Math.pow(2, val);
             }
+            
             savedSettings.put(p, val);
+            
+            // Update SettingsManager static values when saved
+            if (Objects.equals(p, "max energy")) {
+                SettingsManager.MAX_ENERGY = val;
+            }
+            if (Objects.equals(p, "starting energy %")) {
+                SettingsManager.DEFAULT_STARTING_ENERGY = val;
+            }
+            if (Objects.equals(p, "base income %")) {
+                SettingsManager.BASE_INCOME_PERCENT = val;
+            }
+            if (Objects.equals(p, "vertex energy cost")) {
+                SettingsManager.VERTEX_ENERGY_COST = val;
+            }
         }
     }
 
