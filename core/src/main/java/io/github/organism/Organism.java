@@ -224,19 +224,27 @@ public class Organism {
             planchetteDirection.nor();
         }
 
-        float baseP = 0.01f;
         int candidateCount = 0;
         float maxAgreement = Float.MIN_VALUE;
         float minAgreement = Float.MAX_VALUE;
 
         for (CandidateVertex cv : candidateVertices.keySet()) {
             cv.calculatePlanchetteAgreement(planchetteDirection);
-            float p = cv.planchetteAgreement + baseP;
-            candidateVertices.put(cv, p);
-
             candidateCount++;
             maxAgreement = Math.max(maxAgreement, cv.planchetteAgreement);
             minAgreement = Math.min(minAgreement, cv.planchetteAgreement);
+        }
+        
+        // Transform agreements to positive probabilities
+        // Agreement ranges from -1 (opposite direction) to +1 (same direction)
+        // We want to heavily favor positive agreements while still allowing some chance for negative ones
+        float minProbability = 0.01f; // Minimum probability for any vertex
+        for (CandidateVertex cv : candidateVertices.keySet()) {
+            // Transform agreement (-1 to +1) to probability (minProbability to much higher)
+            // Use exponential scaling: e^(agreement) gives range from ~0.37 to ~2.72
+            float probability = (float) Math.exp(cv.planchetteAgreement * 2.0); // Scale factor of 2 for more dramatic difference
+            probability = Math.max(minProbability, probability); // Ensure minimum
+            candidateVertices.put(cv, probability);
         }
 
         // Suppress detailed candidate debug output - too verbose
@@ -292,16 +300,24 @@ public class Organism {
             logger.logf("  Budget allows: %d vertices, Candidates available: %d", 
                 verticesToClaim, candidateVertices.size());
             
-            // Log candidate details
+            // Log candidate details - show top candidates by probability
             int candidateNum = 0;
+            double totalProb = 0;
+            for (float prob : candidateVertices.values()) {
+                totalProb += prob;
+            }
+            
             for (CandidateVertex cv : candidateVertices.keySet()) {
                 if (candidateNum < 5) { // Show first 5 candidates
-                    logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f, probability=%.3f, masked=%b, claimed=%b",
+                    float prob = candidateVertices.get(cv);
+                    float probPercent = (float)(prob / totalProb * 100.0);
+                    logger.logf("    Candidate %d: pos=(%.1f,%.1f), agreement=%.3f, probability=%.3f (%.1f%%), masked=%b, claimed=%b",
                         candidateNum, cv.target.x, cv.target.y, cv.planchetteAgreement, 
-                        candidateVertices.get(cv), cv.target.masked, cv.target.getPlayer() != null);
+                        prob, probPercent, cv.target.masked, cv.target.getPlayer() != null);
                 }
                 candidateNum++;
             }
+            logger.logf("  Total probability sum: %.3f", totalProb);
         }
 
         while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
