@@ -491,27 +491,6 @@ public class Organism {
         territoryHex = null;
     }
 
-    /**
-     * Apply current settings to this organism.
-     * Called when settings are changed mid-game to ensure organisms respect new values.
-     */
-    public void applyCurrentSettings() {
-        DebugLogger logger = DebugLogger.getInstance();
-        
-        float oldEnergy = energy;
-        float oldIncome = income;
-        
-        // Cap energy at new maximum if it was lowered
-        energy = Math.min(energy, SettingsManager.MAX_ENERGY);
-
-        // Recalculate income based on current settings
-        updateIncome();
-
-        logger.log("  Applied settings to " + (player != null ? player.getPlayerName() : "unknown") + 
-                  ": energy " + oldEnergy + " -> " + energy + 
-                  " (max=" + SettingsManager.MAX_ENERGY + "), income " + oldIncome + " -> " + income);
-    }
-
     public Player getPlayer() {
         return player;
     }
