@@ -27,4 +27,6 @@ public interface GameSession {
     Point getWinRecord(Point p);
 
     void togglePause();
+
+    GameBoard getGameBoard();
 }
