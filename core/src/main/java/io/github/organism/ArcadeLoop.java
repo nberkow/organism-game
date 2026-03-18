@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import io.github.organism.hud.DebugLogger;
 import io.github.organism.hud.HudInputProcessor;
 import io.github.organism.hud.PlayerHud;
 import io.github.organism.learning.SlimeRLAgent;
@@ -149,11 +150,11 @@ public class ArcadeLoop implements GameSession {
         gameOverlay = new SettingsOverlay(game, game.gameScreen, overlay_x, overlay_y, overlay_w, overlay_h);
         gameOverlay.setupSliders();
         gameOverlay.setupButtons();
-        
+
         // Initialize SettingsManager from overlay defaults
         gameOverlay.save_slider_settings();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
-        
+
         DebugLogger.getInstance().log("=== ArcadeLoop.setupOverlays() - Settings initialized ===");
     }
 
@@ -194,11 +195,11 @@ public class ArcadeLoop implements GameSession {
 
         // Use the provided config
         gameCfg = cfg;
-        
+
         // Ensure SettingsManager is updated from overlay before creating organisms
         gameOverlay.save_slider_settings();
         gameCfg.gameplaySettings = gameOverlay.savedSettings;
-        
+
         DebugLogger logger = DebugLogger.getInstance();
         logger.log("=== ArcadeLoop.setup() - Starting new game/tournament ===");
         logger.log("  Current SettingsManager values:");
@@ -206,7 +207,7 @@ public class ArcadeLoop implements GameSession {
         logger.log("    DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
         logger.log("    BASE_INCOME_PERCENT: " + SettingsManager.BASE_INCOME_PERCENT + "%");
         logger.log("    VERTEX_ENERGY_COST: " + SettingsManager.VERTEX_ENERGY_COST);
-        
+
         currentIteration = 1;
         playerPrimaryIndex = 0;
         currentScreen = game.gameScreen;
@@ -276,7 +277,7 @@ public class ArcadeLoop implements GameSession {
             hud.setIncome(organism.income);
             hud.setEnergy(organism.energy);
             hud.setResources(organism.resources);
-            
+
             // Update resource leadership indicators
             boolean[] leadership = new boolean[3];
             for (int i = 0; i < 3; i++) {
@@ -328,12 +329,12 @@ public class ArcadeLoop implements GameSession {
             }
 
             String name = "Player " + (p + 1);
-            
+
             // Initialize win record for human player
             if (!winRecords.containsKey(playerId)) {
                 winRecords.put(playerId, new Point(0, 0));
             }
-            
+
             // Store player name for tournament tracking
             playerNames.put(playerId, name);
             Organism organism = new Organism(currentGame);
