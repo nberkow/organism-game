@@ -54,13 +54,13 @@ public class EnergyBar {
 
         // Calculate bar widths
         float maxBarWidth = barWidth - (gapWidth * 4);
-        
+
         // Energy bar (current energy level) - yellow
         fillWidth[1] = hud.energyBarValue * maxBarWidth;
-        
+
         // Income bar (energy + income projection) - green, extends beyond energy
         fillWidth[0] = (hud.energyBarValue + hud.incomeBarValue) * maxBarWidth;
-        
+
         // Spend bar (energy that was just spent) - red
         fillWidth[2] = hud.spendBarValue * maxBarWidth;
 
@@ -73,7 +73,7 @@ public class EnergyBar {
                 fillWidth[0],
                 barHeight - gapWidth * 4);
         }
-        
+
         // Draw energy bar (yellow) on top
         game.shapeRenderer.setColor(game.energyBarColors[1]); // Yellow
         game.shapeRenderer.rect(
@@ -81,7 +81,7 @@ public class EnergyBar {
             y + gapWidth * 2,
             fillWidth[1],
             barHeight - gapWidth * 4);
-        
+
         // Draw spend bar (red) - shows what was just spent
         // Position it at the current energy level, extending right
         if (hud.spendBarValue > 0.001f) {
@@ -93,12 +93,12 @@ public class EnergyBar {
                 barHeight - gapWidth * 4);
         }
         game.shapeRenderer.end();
-        
+
         // Draw max energy text
         game.batch.begin();
-        game.fonts.get(12).setColor(game.foregroundColor);
+        game.fonts.get(8).setColor(game.foregroundColor);
         String maxEnergyText = String.format("%.0f", io.github.organism.SettingsManager.MAX_ENERGY);
-        game.fonts.get(12).draw(
+        game.fonts.get(8).draw(
             game.batch,
             maxEnergyText,
             renderX + barWidth - 30,

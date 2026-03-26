@@ -16,7 +16,7 @@ public class MapSettingsInputProcessor implements InputProcessor {
     String [] radio_press;
     HashMap<String, Boolean> button_click_trackers;
     ArrayList<String> button_labels;
-    
+
     // Deferred action to avoid changing input processor during event handling
     Runnable deferredAction;
 
@@ -91,7 +91,7 @@ public class MapSettingsInputProcessor implements InputProcessor {
         map_screen.game_board.game.viewport.unproject(touchPos);
         dragging_slider = map_screen.sliders.poll_sliders(touchPos.x, touchPos.y);
         if (dragging_slider == null) {
-            map_screen.sliders.update_on_single_click(touchPos.x, touchPos.y);
+            map_screen.sliders.updateOnSingleClick(touchPos.x, touchPos.y);
         }
 
         String button_press = map_screen.buttons.poll_buttons(touchPos.x, touchPos.y);

@@ -1,6 +1,3 @@
-Major Update:
-    This game is now playable and has all of the original core features implemented! We will be working on it's capabilities as an AI lab next.
-
 Project Overview:
     This project is a LibGDX game. It's a conceptually simple 4X strategy game for 3 players.
 
@@ -41,57 +38,13 @@ Game Overview:
     - extract local information about the hexagon: position, resources, vertex ownership
     - use that info to select the next hex and repeat
 
-    This is all currently implemented but not really working. The extraction function might be the place to start.
-
-    Lab Mode (not yet implemented): The user should be able to set up AI matches with a lot of control
-
-    - select a stable of bots for the round. this should include options like
-     - new normal learner bot - new convolution and set of heritable weights
-     - duplicate an existing bot
-     - reproduce a bot - same convolution new weights
-     - add a bot that behaves randomly
-     - add a bot that never moves the cursor
-
-    - select the conditions of the tournament
-     - number of rounds
-     - victory conditions
-     - how many losses before elimination
-     - how are new bots added
-      - reproduction rules. Top 3 bots have their weights averaged/shuffled. Convolution comes from top bot
-      - all of this can be stochastic based on leads (e.g. third place sometimes contributes the convolution, just less often)
-      - new random bot once in a while
-      - new novice learning bot once in a while
-      - controls for all of this
-     - all of the sliders from the esc menu are now ranges. e.g. "this tournament can have maps from size 9-11"
-     - basic game properties can be changed here
-      - how many turns before a resource expires (currently one)
-      - how many turns before a vertex expires (currently never)
-      - how many turns until a resource refreshes (currently never)
-
-    - Tournament data science
-     - lab mode should collect some data and allow file export
-     - the main thing is a turn by turn graph
-      - each resource
-      - each player's vertex count
-     - this should display on the screen
-     - we will eventually want to report stuff about how the bots work. we may need to do this to develop the bots, but let's leave it back burner for now
-
-    - Speed control
-     - the user should be able to fast forward tournaments if performance allows
-     - this should also be possible in the main game
-     - I'm thinking of the mechanic from the game defcon where users vote on speed and the fastest consensus wins
-
-    - Simultaneous tournaments
-     - a user should be able to set up a few tournaments at once
-     - keep it reasonable for performance
-     - there is some existing code that mentions "silent mode." this was an original incarnation of the idea and could be useful
-     - hidden tournaments should go at the maximum game speed. We'll chose this based on performance. All of the same gameplay calculations will happen under the hood.
+    I want to implement some simple learning as well as an evolutionary component. The individual organisms should learn. When it's time to create new organisms, use values from the winners.
 
 Constant Hazards! READ:
-- this game uses both polar and cartesian coordinates correctly, however incorrectly mixing them is a common source of bugs for human and AI alike!
+- this game uses both polar and cartesian coordinates correctly, however incorrectly mixing them is a common source of bugs
 
 What's working:
-- The game is playable!
+- AI organism can compete in a tournament
 - tournament progresses through games, keeps track of wins
 - organism behavior is working. organisms get and spend energy correctly
 - resource handling. resource leader seems to be working, may continue to tweak behavior
@@ -105,52 +58,52 @@ What's working:
 - human player hud resource display indicates when the player is the leader of a resource
 
 What's not working:
-- when the planchette is centered in the circle, all vertexes should have equal weight and equal animation.
- - the animation is currently not correct. I can't tell if the underlying logic is right, it's subtle
- - we could skip planchette calculation completely when it's in the neutral zone
- - let's also mark the neutral zone with a green line circle and turn the planchette green to make it visually obvious
-- extract data from hex function
- - this function needs a re-write
- - when the bot views a hex, it should see a compact summary of
-  - who owns each vertex
-  - what resources are present
-  - the hex coordinates
-  - the colony center of mass coordinates
-  - a local territory summary: percent ownership of all vertexes in a radius of 2 hexes
-  - a local resource summary: percent ownership of all vertexes in a radius of 2 hexes
-- TIME FOR NEW FEATURES
- - Let's get the lab screen up and running. It doesn't need to be perfect. Ultimately we should be able to
-  - set up a tournament
-  - select bot types from a list
-  - add bots to a stable
-  - flip to the map setting screen to adjust those settings
-  - load a setting
-  - set bot properties (e.g. number of layers, we may add a lot here later)
-  - save the current tournament in progress with setting, move summary, bot weights. enough to resume
-  - create a new tournament with a tournament running in the background
-  - click between running tournaments
-  - pause/save tournaments
-  - view tournament graph
-  - view individual game graphs. superimpose multiple. select which players to show with check boxes
-  - export graphs
-  - save bots
-  - there is a limit to how much memory a LibGDX game can use (in a web browser for example). Let's be reckless for now. I am running it on my home PC. assume we will nerf for performance later.
- - for now let's start with basic layout. pick bots. set up one tournament
+- vertex selection
+ - when the planchette is centered in the circle, or within the neutral area
+  - all adjacent vertexes should light up. the size of the circle should just be proportional to the number of edges adjacent to a player vertex
+  - no adjacent vertex should have a probability of zero or a circle too small to see
+  - the neutral area around the center of the circle is considered centered. maybe the middle 5%
+ - when the planchette is near the edge
+  - max bias
+  - max energy expenditure
+ - when the planchette is intermediate
+  - some bias.
+  - vertexes on opposite side have zero probability
+  - vertexes with a small alignment still have a small chance
+ - EVERY ADJACENT VERTEX SHOULD HIGHLIGHT WHEN THE PLANCHETTE IS NEUTRAL
+- menu setting sliders
+ - the ESC menu has sliders for
+  - max energy
+  - starting energy
+  - base income
+ - none of these affect the tournament
+ - they seem to be setting the correct variables but the change is not propagating
+  - some object being re-made or re-set?
+  - organism using bad hard coded values?
+  - the default values seem to be respected. altering those alters the behavior
+  - moving the sliders at run time does nothing
+- Hud energy bar. Red spend should be left aligned and on top of yellow
 
-
-Optimistic session goals:
- - Mock up the lab screen with minimal functionality
- - Make the proposed changes to the AI and test them out
+Optimistic project goals:
+ - create a speed control for the game. let it run faster if the AI can keep up
+ - add a speed setting to the menu
 
 Minor fixes:
-- Player two hud needs to be aligned symmetrically with player one. the bars need to extend from the right.
-- Esc menu bars are too high. Map size is off the top and the next one is cut in half. there is room above the buttons.
+ - organisms shouldn't be able to claim vertexes across a gap
+ - vertexes within a gap should be masked and should never animate
+ - starting hex resources should be radially symmetrical, but this is sometimes not true.
+  - if the starting hex is being specially handled fix it.
+  - if the issue is that one resource is overwriting another and order matters, make the order symmetry safe
+   - the exact bookkeeping strategy is up to you
+   - try to use a safe procedure rather than checking after
+
 
 small but important tasks:
 - read previous overview_* files. keep an eye out for heuristic decisions from the past
 - make a new overview file for yourself that you can edit: /core/src/main/aider_overview_<N>.txt (use N for versioning)
 - do not edit the original files
 - update your overview document with what was done. include any doubts and heuristic judgement calls. include notes for yourself, but beware a human will edit the document. update all sections including what to do next.
+- expanded menu implementation
 
 main priorities:
 - produce a truthful document of this run's progress
@@ -163,7 +116,7 @@ main priorities:
 - go back and check everything over
 - re-read your notes
 - run through the list again, see what else you can realistically
-- picture yourself self playing the game and (without implementing it) suggest something fun. argue for it in the doc you write. 
+- picture yourself self playing the game and (without implementing it) suggest something fun. argue for it in the doc
 
 Project Tree:
 

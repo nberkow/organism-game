@@ -4,10 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 import java.awt.Point;
-import java.util.LinkedList;
 
 import io.github.organism.GameBoard;
 import io.github.organism.Organism;
+import io.github.organism.hud.MoveSpaceControl;
 import io.github.organism.hud.PlayerHud;
 
 public class DummyPlayer implements Player {

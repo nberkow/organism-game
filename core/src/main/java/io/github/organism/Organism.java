@@ -38,16 +38,16 @@ public class Organism {
         allyResources = new Integer[3];
         candidateVertices = new HashMap<>();
         candidatesForRendering = new ArrayList<>();
-        
+
         // Debug: Log organism creation with current settings - ALWAYS log this
         DebugLogger logger = DebugLogger.getInstance();
         logger.log(">>> Organism constructor called <<<");
         logger.log("  SettingsManager.MAX_ENERGY: " + SettingsManager.MAX_ENERGY);
         logger.log("  SettingsManager.DEFAULT_STARTING_ENERGY: " + SettingsManager.DEFAULT_STARTING_ENERGY + "%");
-        
+
         // Starting energy is a percentage of max energy
         energy = (SettingsManager.DEFAULT_STARTING_ENERGY / 100f) * SettingsManager.MAX_ENERGY;
-        
+
         logger.log("  Calculation: (" + SettingsManager.DEFAULT_STARTING_ENERGY + " / 100) * " + SettingsManager.MAX_ENERGY);
         logger.log("  Result - organism.energy: " + energy);
         if (gameBoard != null && gameBoard.game != null) {
@@ -260,7 +260,7 @@ public class Organism {
         // Reduced verbosity - only log on turn 1
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration == 1) {
             DebugLogger logger = DebugLogger.getInstance();
-            logger.log("  " + player.getPlayerName() + " - Candidate filtering: valid=" + candidateVertices.size() + 
+            logger.log("  " + player.getPlayerName() + " - Candidate filtering: valid=" + candidateVertices.size() +
                       ", filtered_claimed=" + filteredClaimed + ", filtered_masked=" + filteredMasked);
         }
 
@@ -346,14 +346,16 @@ public class Organism {
         planchetteMagnitude = planchetteFromCenter.len();
         float aggressionMultiplier = 1.0f + (planchetteMagnitude * 0.25f); // 1.0 to 1.25
         float baseBudget = 0.5f * (income + energy);
-        float energyBudget = Math.min(energy, baseBudget * aggressionMultiplier);
+
+        float budgetCeil = Math.min(energy, SettingsManager.MAX_ENERGY - energy);
+        baseBudget = Math.min(baseBudget, budgetCeil);
+
+        float energyBudget = (Math.min(energy, baseBudget * aggressionMultiplier));
         int verticesToClaim = (int) (energyBudget / expandCost);
 
         int attemptedClaims = 0;
         int maxAttempts = verticesToClaim * 3; // Allow retries for invalid vertices
         int successfulClaims = 0;
-        int skippedMasked = 0;
-        int skippedClaimed = 0;
 
         while (attemptedClaims < maxAttempts && verticesToClaim > 0 && !candidateVertices.isEmpty()) {
             // Recalculate score sum from current candidates
@@ -388,9 +390,6 @@ public class Organism {
                     energy -= expandCost;
                     verticesToClaim--;
                     successfulClaims++;
-                } else {
-                    if (isMasked) skippedMasked++;
-                    if (isClaimed) skippedClaimed++;
                 }
 
                 // Remove this candidate (claimed or invalid)
@@ -403,7 +402,7 @@ public class Organism {
         // Only log expansion summary on turn 1
         if (gameBoard.game.arcadeLoop != null && gameBoard.game.arcadeLoop.currentIteration == 1) {
             DebugLogger logger = DebugLogger.getInstance();
-            logger.log("  " + player.getPlayerName() + " expand: claimed=" + successfulClaims + 
+            logger.log("  " + player.getPlayerName() + " expand: claimed=" + successfulClaims +
                       ", energy_spent=" + (successfulClaims * expandCost));
         }
     }

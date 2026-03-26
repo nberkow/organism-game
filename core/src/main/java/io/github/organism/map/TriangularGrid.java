@@ -186,4 +186,11 @@ public class TriangularGrid implements Iterable<GridPosition> {
     public int getRadius() {
         return radius;
     }
+
+    public boolean isEmpty() {
+        if (size == 0) {
+            return true;
+        }
+        return false;
+    }
 }

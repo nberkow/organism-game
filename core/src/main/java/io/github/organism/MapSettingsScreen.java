@@ -117,8 +117,6 @@ public class MapSettingsScreen implements Screen {
         cfg.vertex_density = sliders.slider_selected_vals.get("density");
         cfg.playerStartPositions = sliders.slider_selected_vals.get("starts");
 
-        cfg.humanPlayers = Integer.parseInt(selection_boxes.selected_vals.get("human players"));
-        cfg.botPlayers = Integer.parseInt(selection_boxes.selected_vals.get("players")) - cfg.humanPlayers;
         cfg.layout = selection_boxes.selected_vals.get("layout");
         cfg.difficulty = selection_boxes.selected_vals.get("opponents");
 
@@ -131,12 +129,12 @@ public class MapSettingsScreen implements Screen {
     public GameConfig getCurrentConfig() {
         // Always create fresh config from current UI state
         create_config();
-        
+
         // Ensure seed is set
         if (cfg.seed == 0) {
             cfg.seed = System.currentTimeMillis();
         }
-        
+
         return cfg;
     }
 

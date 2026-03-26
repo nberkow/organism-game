@@ -111,8 +111,7 @@ public class OrganismGame extends Game {
         gameScreen.inputProcessor = new GameInputProcessor(gameScreen);
         gameScreen.overlay.input_processor = new SettingsOverlayInputProcessor(gameScreen.overlay);
 
-        mapSettingsScreen = new MapSettingsScreen(this);
-        mapSettingsScreen.inputProcessor = new MapSettingsInputProcessor(mapSettingsScreen);
+
 
         labScreen = new LabScreen(this);
         labScreen.inputProcessor = new LabScreenInputProcessor(labScreen);
@@ -143,6 +142,8 @@ public class OrganismGame extends Game {
         this.setScreen(tutorialScreen);
         */
 
+        mapSettingsScreen = new MapSettingsScreen(this);
+        mapSettingsScreen.inputProcessor = new MapSettingsInputProcessor(mapSettingsScreen);
 
         arcadeLoop = new ArcadeLoop(this);
         gameScreen = new GameScreen(this);

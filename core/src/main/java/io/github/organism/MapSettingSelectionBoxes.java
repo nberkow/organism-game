@@ -1,5 +1,6 @@
 package io.github.organism;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -39,7 +40,7 @@ public class MapSettingSelectionBoxes {
         game_board = map_settings_screen.game_board;
         game = g;
         font = game.fonts.get(16);
-        font.setColor(Color.CYAN);
+        font.setColor(game.foregroundColor);
 
         selection_box_x = map_settings_screen.controls_x * 1.05f;
         selection_box_y = map_settings_screen.game_board.centerY * .45f;
@@ -49,19 +50,14 @@ public class MapSettingSelectionBoxes {
         columns_x = new float [] {selection_box_x, selection_box_x + selection_box_w/2};
 
         radio_buttons = new HashMap<>();
-        radio_buttons.put("human players", new ArrayList<>(Arrays.asList("0", "1", "2")));
-        radio_buttons.put("players", new ArrayList<>(Arrays.asList("3", "6")));
         radio_buttons.put("layout", new ArrayList<>(Arrays.asList("radial", "random")));
         radio_buttons.put("opponents", new ArrayList<>(Arrays.asList("easy", "medium", "hard")));
 
         selected_vals = new HashMap<>();
-        selected_vals.put("human players", "1");
-        selected_vals.put("players", "3");
-        selected_vals.put("player layout", "radial");
         selected_vals.put("layout", "radial");
         selected_vals.put("opponents", "medium");
 
-        ordered_keys = new ArrayList<>(Arrays.asList("human players", "players", "layout", "opponents"));
+        ordered_keys = new ArrayList<>(Arrays.asList("layout", "opponents"));
         layouts = new HashMap<>();
 
         max_width = 0;
